@@ -205,7 +205,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        "C:\\Users\\pwipo\\Documents\\dev\\soft\\smc\\app\\WebServer\\old\\keys"
+                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
                 ),
                 new Server()
         );
@@ -274,7 +274,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        "C:\\Users\\pwipo\\Documents\\dev\\soft\\smc\\app\\WebServer\\old\\keys"
+                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
                 ),
                 new Server()
         );
@@ -375,7 +375,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        "C:\\Users\\pwipo\\Documents\\dev\\soft\\smc\\app\\WebServer\\old\\keys"
+                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
                 ),
                 new Server()
         );
@@ -507,7 +507,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        "C:\\Users\\pwipo\\Documents\\dev\\soft\\smc\\app\\WebServer\\old\\keys"
+                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
                 ),
                 new Server()
         );

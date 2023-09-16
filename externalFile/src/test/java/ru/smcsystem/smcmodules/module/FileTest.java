@@ -146,8 +146,8 @@ public class FileTest {
                 List.of(
                         new Action(
                                 List.of(
-                                        new Message(MessageType.DATA, new Date(), new Value(ValueType.STRING, "C:\\Users\\pwipo\\Documents\\info\\main.txt")),
-                                        new Message(MessageType.DATA, new Date(), new Value(ValueType.STRING, "C:\\Users\\pwipo\\Documents\\Business\\puskarev.txt"))
+                                        new Message(MessageType.DATA, new Date(), new Value(ValueType.STRING, "C:\\Users\\user\\Documents\\tmp\\main.txt")),
+                                        new Message(MessageType.DATA, new Date(), new Value(ValueType.STRING, "C:\\Users\\user\\Documents\\tmp\\main2.txt"))
                                 ),
                                 ActionType.EXECUTE
                         ))),

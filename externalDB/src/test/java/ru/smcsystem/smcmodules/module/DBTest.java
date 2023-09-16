@@ -30,7 +30,7 @@ public class DBTest {
                                 "resultFormat", new Value("OBJECT_SERIALIZATION")
                         ),
                         null,
-                        "C:\\Users\\pwipo\\Documents\\dev\\soft\\tmp\\5"
+                        "C:\\Users\\user\\Documents\\tmp\\5"
                 ),
                 new DB()
         );
@@ -250,7 +250,7 @@ public class DBTest {
                                 "resultFormat", new Value("OBJECT_SERIALIZATION")
                         ),
                         null,
-                        "C:\\Users\\pwipo\\Documents\\dev\\soft\\tmp\\6"
+                        "C:\\Users\\user\\Documents\\tmp\\6"
                 ),
                 new DB()
         );
@@ -325,7 +325,7 @@ public class DBTest {
                                 "resultFormat", new Value("OBJECT")
                         ),
                         null,
-                        "C:\\Users\\pwipo\\Documents\\dev\\soft\\tmp\\12"
+                        "C:\\Users\\user\\Documents\\tmp\\12"
                 ),
                 new DB()
         );

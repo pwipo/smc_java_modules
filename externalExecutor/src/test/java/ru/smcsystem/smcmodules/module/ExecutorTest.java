@@ -19,7 +19,7 @@ public class ExecutorTest {
                         "test",
                         null,
                         Map.of(
-                                "commandPath", new Value("C:\\Users\\pwipo\\Documents\\dev\\soft\\tmp\\test.bat"),
+                                "commandPath", new Value("C:\\Users\\user\\Documents\\tmp\\test.bat"),
                                 "workDirectory", new Value(" "),
                                 "args", new Value("test1::test2::test3"),
                                 "encoding", new Value("cp866")
@@ -78,7 +78,7 @@ public class ExecutorTest {
                         List.of(
                                 new Action(
                                         List.of(
-                                                new Message(MessageType.DATA, new Date(), new Value("C:\\Users\\pwipo\\Documents\\dev\\soft\\tmp\\test.bat")),
+                                                new Message(MessageType.DATA, new Date(), new Value("C:\\Users\\user\\Documents\\tmp\\test.bat")),
                                                 new Message(MessageType.DATA, new Date(), new Value("test4")),
                                                 new Message(MessageType.DATA, new Date(), new Value("test5")),
                                                 new Message(MessageType.DATA, new Date(), new Value("test6"))

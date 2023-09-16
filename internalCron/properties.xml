@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Cron</uuid>
+    <provider>javaFlowController</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Time</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.modules.flowControllerCron.Cron</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>time</name>
+            <type>STRING</type>
+            <value>* * * * *</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>cron is a similar rule: second minute hour day day_of_week.
+Each part may contain several values, example: 1;2;4-6;8-16/2 will return - 1,2,4,5,6,8,10,12,14,16.
+may contain several rules, separated by a newline character (\ n).
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>представляет собой cron подобное правило: секунда минута час день день_недели.
+каждая часть может содержать несколько значений, пример: 1;2;4-6;8-16/2 вернет - 1,2,4,5,6,8,10,12,14,16.
+может содержать несколько правил, разделенных символом новой строки (\n).
+                    </value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>0</maxCountSources>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <typeResult>
+        <ValueType>INTEGER</ValueType>
+    </typeResult>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module is a cron implementation.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль представляет собой реализацию cron.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module is a cron implementation.
+if it does, it returns a number - 1. otherwise it returns nothing.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль представляет собой реализацию cron.
+если рабатывает, возвращает число - 1. иначе ничего не возвращает.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. </value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>If</uuid>
+    <provider>javaFlowController</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, FlowController</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.modules.flowControllerIfInteger.IfInteger</className>
+    <ver>1.1.1</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>number</name>
+            <type>DOUBLE</type>
+            <value>0</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Number to compare.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Число для сравнения.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <validValues>
+                <value>EXIST</value>
+                <value>NOT_EXIST</value>
+                <value>EXIST_ANY</value>
+                <value>NOT_EXIST_ANY</value>
+                <value>NUMBER_EQUAL</value>
+                <value>NUMBER_MORE_THEN</value>
+                <value>NUMBER_MORE_THEN_OR_EQUAL</value>
+                <value>NUMBER_LESS_THEN</value>
+                <value>NUMBER_LESS_THEN_OR_EQUAL</value>
+                <value>EQUAL</value>
+                <value>NOT_EQUAL</value>
+                <value>HAS_ERROR</value>
+                <value>NO_ERROR</value>
+                <value>HAS_STRING</value>
+                <value>HAS_NUMBER</value>
+                <value>HAS_BYTES</value>
+                <value>HAS_OBJECT_ARRAY</value>
+            </validValues>
+            <value>NUMBER_EQUAL</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Type of comparison:
+EXIST - true if there is data in the sources (in all).
+NOT_EXIST - true if there is no data in the sources (in all).
+EXIST_ANY - similar to EXIST, but if there is at least 1.
+NOT_EXIST - similar to NOT_EXIST, but if there is not at least 1.
+NUMBER_EQUAL - compares the number from the source with the number contained in the number field. true if they are equal.
+NUMBER_MORE_THEN - compares the number from the source with the number contained in the number field. however, the input number is larger.
+NUMBER_MORE_THEN_OR_EQUAL - compares the number from the source with the number contained in the number field. however, the input number is greater or equal.
+NUMBER_LESS_THEN - compares the number from the source with the number contained in the number field. however, the input number is less.
+NUMBER_LESS_THEN_OR_EQUAL - compares the number from the source with the number contained in the number field. however, the input number is less than or equal.
+EQUAL - compares the values in the first two sources. true if they are equal.
+NOT_EQUAL - similar to EQUAL, but if they are not equal.
+HAS_ERROR - true if there are errors (in all).
+NO_ERROR - true if there are no errors (in all).
+HAS_STRING - true if there is at least one message of type STRING.
+HAS_NUMBER - true if there is at least one number message.
+HAS_BYTES - true if there is at least one message of type BYTES.
+HAS_OBJECT_ARRAY True if there is at least one message of type OBJECT_ARRAY.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Типы сравнения:
+EXIST - правда, если есть данные в источниках (во всех).
+NOT_EXIST - правда, если есть нет данных в источниках (во всех).
+EXIST_ANY - аналогичен EXIST, правда если есть хотя бы 1.
+NOT_EXIST - аналогичен NOT_EXIST, правда если нет хотя бы 1.
+NUMBER_EQUAL - сравнивает числом из источника с числом, содержащемся в поле number. правда, если они равны.
+NUMBER_MORE_THEN - сравнивает числом из источника с числом, содержащемся в поле number. правда, входящее число больше.
+NUMBER_MORE_THEN_OR_EQUAL - сравнивает числом из источника с числом, содержащемся в поле number. правда, входящее число больше или равно.
+NUMBER_LESS_THEN - сравнивает числом из источника с числом, содержащемся в поле number. правда, входящее число меньше.
+NUMBER_LESS_THEN_OR_EQUAL - сравнивает числом из источника с числом, содержащемся в поле number. правда, входящее число меньше или равно.
+EQUAL - сравнивает значения в первых двух источниках. правда, если они равны.
+NOT_EQUAL - аналогичен EQUAL, правда, если они не равны.
+HAS_ERROR - правда, если есть ошибки (во всех).
+NO_ERROR - правда, если нет ошибок (во всех).
+HAS_STRING - правда, если есть хотя бы одно сообщение типа STRING.
+HAS_NUMBER - правда, если есть хотя бы одно сообщение типа число.
+HAS_BYTES - правда, если есть хотя бы одно сообщение типа BYTES.
+HAS_OBJECT_ARRAY - правда, если есть хотя бы одно сообщение типа OBJECT_ARRAY.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>hasElse</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Whether to use an if-else construct. in this case, you need 2 managed contexts.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Использовать ли конструкцию if-else. в этом случае понадобятся 2 управляемых контекста.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>isNeedReturnDataFromLast</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>If set, then when triggered, returns data from the last managed context.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Если установлен, то при срабатывании, возвращает данные из последнего управляемого контекста.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>isNeedInsertSourceDataToExecutionContexts</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>If set, passes input to called contexts.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Если установлен, передает входные данные вызываемым контекстам.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>paths</name>
+            <type>STRING</type>
+            <value></value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Paths to fields of incoming objects. If the input value is an ObjectArray containing objects, and if this field is not empty, then the values of the corresponding fields are taken. a dot separates the path. multiple paths are separated by the :: symbol.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Пути до полей входящих объектов. Если входящим значением является ObjectArray содержащем объекты, и если это поле не пусто, то беруться значения соответствующих полей. точкой разделяется путь. несколько путей разделяются символом :: .</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <minManagedExecutionContexts>1</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>-1</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <typeSource/>
+
+    <typeResult/>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module works like an if.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль работает подобно if.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module works like an if.
+compares (the type of comparison is determined by the type setting) the input values.
+if the comparison is positive:
+    if hasElse is true - starts the first context
+    if hasElse is false - runs all managed elements
+if the comparison is negative:
+    if hasElse is true - it starts the second context.
+    if hasElse is false - it will not launch anything.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль работает подобно if.
+сравнивает (тип сравнения определяеся настройкой type) входящие значения.
+если сравнение положительно:
+    если hasElse равно true - запускает первый конетекст
+    если hasElse равно false - запускает все управляемые элементы
+если сравнение отрицательно:
+    если hasElse равно true - запускает второй конетекст.
+    если hasElse равно false - ничего не запускает.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example. simple if else. launches the first managed execution context (if another number came, it would launch the second).</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. простой if else. запускает первый управляемый контекст исполнения (если бы пришло другое число, запустил бы второй).</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>0</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output/>
+            <countManagedExecutionContexts>2</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>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</icon>
+
+</properties>

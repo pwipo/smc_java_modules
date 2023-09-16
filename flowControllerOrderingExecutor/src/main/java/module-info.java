@@ -1,0 +1,3 @@
+module ru.smcsystem.modules.flowControllerOrderingExecutor {
+    requires ru.smcsystem.api;
+}

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>PrintSettings</uuid>
+    <provider>javaConfigurationController</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Configuration, Settings</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.modules.configurationControllerPrintSettings.PrintSettings</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>0</maxCountSources>
+
+    <typeResult>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BYTES</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>1</minManagedConfigurations>
+    <maxManagedConfigurations>-1</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module displays all the settings.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль выводит все настройки.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module displays all the settings. The data goes in order: The sequence number of the managed configuration, and in order the parameter name, the parameter value.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль выводит все настройки. данные идут в порядке: порядковый номер управляемой конфигурации, и по порядку имя параметра, значение параметра.</value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The managed configuration has two settings: "setting1" = "value1", "setting2" = "value2".</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Управляемая конфигурация имеет две настройки: "setting1"="value1", "setting2"="value2".</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>setting1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>setting2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value2</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>1</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

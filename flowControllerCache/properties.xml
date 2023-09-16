@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Cache</uuid>
+    <provider>java</provider>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <className>ru.smcsystem.modules.module.Cache</className>
+    <categories>Java, Cache</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>cacheSize</name>
+            <type>INTEGER</type>
+            <value>0</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>размер кэша. если 0 то ограничение отключается.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>cache size. if 0 then the limitation is disabled.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>expireTime</name>
+            <type>INTEGER</type>
+            <value>0</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>время жизни элементов в секундах. если 0 то ограничение отключается.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>lifetime of elements in seconds. if 0 then the limitation is disabled.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>cacheNull</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Whether to cache null values.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Кешировать ли нулевые значения.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>maxValueSize</name>
+            <type>INTEGER</type>
+            <value>0</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Максимальный размер одного значения в кеше. Только для строк и байтового массива. В байтах и символах соответственно. Если установлен то фильтрует значения. Если 0 то ограничение отключается.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>The maximum size of a single value in the cache. Only for strings and byte array. In bytes and characters, respectively. If set, it filters the values. If 0 then the restriction is disabled.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeSource>
+
+    <typeResult>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>1</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <useStorage>false</useStorage>
+
+    <threadSafe>true</threadSafe>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module provides a caching function.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль предостувляет функцию кэширования.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module provides a caching function.
+Stores pairs: key and list of values.
+Works in two modes: as a normal cache and as a caching proxy for another module. these two modes can be used simultaneously.
+To work as a caching proxy, you need to connect 1 managed execution context (cached object).
+The algorithm is as follows - for an incoming data set from each source (each action), a match is sought in the cache, then:
+    if found, the result is returned from it,
+    if not, then the first managed execution context is called, after execution, its results are cached and returned as a response.
+If there are no managed contexts, then it works as a regular cache.
+all incoming values ​​are treated as commands for managing the cache:
+    returns the amount of data in the cache.
+        Parameters:
+            digit 1
+    deletes the cache.
+        Parameters:
+            digit 2
+        Returns:
+            old size.
+            new size (0).
+    Get the value of an item.
+        Parameters:
+            digit 3
+            string - key
+        Returns:
+            meaning
+    Set the value of the element.
+        Parameters:
+            digit 4
+            string - key
+            the rest of the action values ​​are treated as the element value
+    Remove item.
+        Parameters:
+            digit 5
+            string - key
+    Get all the keys.
+        Parameters:
+            digit 6
+        Returns (for each item in the cache):
+            string key.
+
+if the items in the cache become more cacheSize, then the oldest are deleted (as a rule).
+if expireTime is greater than zero, then the expiration time limit is used. old items are removed.
+The age of elements is determined by the time when they were last accessed.
+if cacheNull is set, then null (empty) values ​​are also saved.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль предостувляет собой кеш.
+Хранит пары: ключ и список значений.
+Работает в двух режимах: как обычный кеш и как кеширующий прокси для другого модуля. эти два режима можно использовать одновременно.
+Для работы в качестве кеширующего прокси необходимо подключить 1 управляемый контекст исполнения (кешируемый объект).
+Алгоритм следующий - для поступающего набора данных от каждого источника (каждого действия) ищется соответствие в кэше, далее:
+    если находится, возвращается результат из него,
+    если нет, то вызывается первый управляемый контекст исполнения, после исполнения, его результаты заносятся в кэш и возвращаются в виде ответа.
+Если нет управляемых контекстов то работает в качестве обычного кеша.
+все поступающие значения воспринимает как команды для управления кэшем:
+    возвращает количество данных в кэше.
+        Параметры:
+            цифра 1
+    удаляет кэш.
+        Параметры:
+            цифра 2
+        Возвращает:
+            старый размер.
+            новый размер (0).
+    Получить значение элемента.
+        Параметры:
+            цифра 3
+            строка - ключ
+        Возвращает:
+            значения
+    Установить значение элемента.
+        Параметры:
+            цифра 4
+            строка - ключ
+            остальные значения действия рассматриваются как значение элемента
+    Удалить элемент.
+        Параметры:
+            цифра 5
+            строка - ключ
+    Получить все ключи.
+        Параметры:
+            цифра 6
+        Возвращает (для каждого елемента в кэше):
+            строка ключ.
+
+если элементов в кэше становится больше cacheSize то удаляются самые старые (как правило).
+если expireTime больше нуля то используется ограничение по времени жизни. старые элементы удаляются.
+Старость элементов определяются по тому когда последний раз к ним обращались.
+если установлен cacheNull, то нулевые (пустые) значения так же сохраняются.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example. caches the result of multiplying the incoming digits. as a controlled context, the Math module producing multiplication is connected. in the first example, the cache is empty. therefore, a context call and cache popup occurs.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. кэширует результат умножения поступающих цифр. в качестве управляемого контекста подключен модуль Math производящий умнодение. в первом примере кэш пуст. поэтому происходит вызов контекста и заполнение кэша.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>6</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>1</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. continues the first. This time the data is returned from the cache, the context call does not occur.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. продолжает первый. в этот раз данные возвращаются из кэша, вызова контекста не происходит.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>6</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>1</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. continues the first. This time the data is returned from the cache, the context call does not occur.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Третий пример. продолжает предыдущие. в этот раз запрашивает количество данных в кэше, а затем обнуляет его (2 команды).</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>0</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Fourth example. Adds a new element (if the element exists, replaces the value).</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Четвертый пример. Добавляет новый элемент (если элемент существует, заменяет значение).</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output/>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Fifth example. continues the previous one. Queries the value of an item.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Пятый пример. продолжает предыдущий. Запрашивает значение элемента.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Sixth example. Continues the previous one. Requests all key names in the cache.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Шестой пример. Продолжает предыдущий. Запрашивает все имена ключей в кеше.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>6</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>test</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

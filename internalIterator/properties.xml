@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Iterator</uuid>
+    <provider>javaInternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Utils</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.Iterator</className>
+    <ver>1.0.2</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>updateCacheStrategy</name>
+            <type>STRING</type>
+            <value>FORCE</value>
+            <validValues>
+                <value>FORCE</value>
+                <value>ONY_EXIST</value>
+                <value>ADD</value>
+                <value>ADD_CLEAN_ON_GET</value>
+            </validValues>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>defines the cache adjustment strategy:
+    FORCE - completely updates the cache with new data. if there is no new data, the cache becomes empty.
+    ONY_EXIST - if there is new data, completely updates the cache. if there is no new data, it leaves the old cache.
+    ADD - always adds data to the cache.
+    ADD_CLEAN_ON_GET - always adds data to the cache. upon receipt of data - the cache is reset.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>определяет стратегию оюновления кеша:
+    FORCE - полностью обновляет кеш новыми данными. если новых данных нет - кеш становится пустым.
+    ONY_EXIST - если есть новые данные, полностью обновляет кеш. если новых данных нет - оставляет старый кеш.
+    ADD - всегда добавляет данные в кеш.
+    ADD_CLEAN_ON_GET - всегда добавляет данные в кеш. при получении данных - кеш обнуляется.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>maxCacheSize</name>
+            <type>INTEGER</type>
+            <value>0</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>max cache size. if 0 - not use.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>максимальный размер кеша. если 0 не используется.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>incrementValue</name>
+            <type>INTEGER</type>
+            <value>1</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>increment.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>инкрименент.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>outputSize</name>
+            <type>INTEGER</type>
+            <value>1</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>count output values. if less than 0 - returns everything (starting from the current position).</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>количество отдаваемых данных. если меньше 0 - выдает все (начиная с текущей позиции).</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource/>
+
+    <typeResult>
+        <ValueType>STRING</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <useStorage>false</useStorage>
+
+    <threadSafe>false</threadSafe>
+
+    <defaultExecutionContext/>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>It is an iterator.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Представляет собой итератор.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>It is an iterator. if there are sources, updates the cache. otherwise returns data.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Представляет собой итератор. если есть источники - обновляет кеш. иначе отдает данные.</value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>outputSize</name>
+                    <value>2</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>5</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>6</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>7</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>8</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>9</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>10</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>10</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. continuation of the first.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. продолжение первого.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>outputSize</name>
+                    <value>2</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

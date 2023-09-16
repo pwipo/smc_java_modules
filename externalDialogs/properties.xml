@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Dialogs</uuid>
+    <provider>java</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Gui, Window</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.Dialogs</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <validValues>
+                <value>INPUT</value>
+                <value>TWO_INPUT</value>
+                <value>CONFIRM_OK_CANCEL</value>
+                <value>CONFIRM_YES_NO</value>
+                <value>CONFIRM_YES_NO_CANCEL</value>
+                <value>MESSAGE</value>
+                <value>FILE_READ</value>
+                <value>FILE_SAVE</value>
+                <value>SELECT</value>
+            </validValues>
+            <value>INPUT</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>
+dialog box type:
+    INPUT - a dialog box with a single input field. returns text from a field if press button.
+    TWO_INPUT - a dialog box with two input fields. returns text from fields if press button.
+    CONFIRM_OK_CANCEL - dialog box with OK and CANCEL buttons. if OK is pressed returns 0, if CANCEL is 2, if the window is closed otherwise -1.
+    CONFIRM_YES_NO - a dialog box with the YES and NO buttons. if YES is pressed returns 0, if NO - 1, if the window is closed otherwise -1.
+    CONFIRM_YES_NO_CANCEL - a dialog box with the YES, NO and CANCEL buttons. if YES is pressed returns 0, if NO - 1, if CANCEL - 2, if the window is closed otherwise -1.
+    MESSAGE - a dialog box with text. returns nothing.
+    FILE_READ - a dialog box for selecting a file to read. returns the absolute path to the file (if selected).
+    FILE_SAVE - dialog box for selecting a file for recording. returns the absolute path to the file (if selected).
+    SELECT - a dialog box for selecting an option from a list. returns selected value. Incoming messages are used as options.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>
+тип диалогового окна:
+    INPUT - диалоговое окно с одинм полем ввода. возвращает текст из поля если нажата кнопка.
+    TWO_INPUT - диалоговое окно с двумя полями ввода. возвращает текст из полей если нажата кнопка.
+    CONFIRM_OK_CANCEL - диалоговое окно с кнопками OK и CANCEL. если нажата OK возвращает 0, если CANCEL - 2, если закрыто окно иначе - -1.
+    CONFIRM_YES_NO - диалоговое окно с кнопками YES и NO. если нажата YES возвращает 0, если NO - 1, если закрыто окно иначе - -1.
+    CONFIRM_YES_NO_CANCEL - диалоговое окно с кнопками YES, NO и CANCEL. если нажата YES возвращает 0, если NO - 1, если CANCEL - 2, если закрыто окно иначе - -1.
+    MESSAGE - диалоговое окно с текстом. ничего не возвращает.
+    FILE_READ - диалоговое окно выбора файла для чтения. возвращает абсолютный путь к файлу (если выбран).
+    FILE_SAVE - диалоговое окно выбора файла для записи. возвращает абсолютный путь к файлу (если выбран).
+    SELECT - диалоговое окно выбора варианта из списка. возвращает выбранное значение. В качестве вариантов используются входящие сообщения.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>title</name>
+            <type>STRING</type>
+            <value>[[title]]!</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>title.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>заголовок.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>message</name>
+            <type>STRING</type>
+            <value>[[message]]!</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>message.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>текст.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>lang</name>
+            <type>STRING</type>
+            <value>title::en::Title::ru::Заголовок;;
+message::en::Message::ru::Текст;;
+            </value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Массив строка для интернационализации. формат: имя_переменной::имя_языка_1::текст::имя_языка_2::текст_2::...</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Array string for internationalization. format: variable_name::language_name_1::text::language_2_name::text_2::...</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource/>
+
+    <typeResult>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>STRING</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <threadSafe>true</threadSafe>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module is a set of dialog boxes.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль предсталяет собой набор диалоговых окон.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module is a set of dialog boxes.
+Each time it starts, it displays the selected dialog box and expects it to close. when closing the window, returns data corresponding to the type of window.
+There is an opportunity to internationalize the text. To do this, use the lang setting. In the text, the variable name is surrounded by double quotes: [[message]].
+The title and message settings contain values that will be displayed in dialog boxes in the corresponding positions. Not used in all types of windows, for example, the FILE_READ type.
+If there are incoming messages, they are concatenated together into one line, if necessary, translated and displayed instead of the message setting (except FILE_READ, FILE_SAVE, SELECT).
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль предсталяет собой набор диалоговых окон.
+При каждом запуске показывает выбранное диалоговое окно и ожидает его закрытия. при закрытии окна, возвращает данные, соответствующие типу окна.
+Есть возможность по интернационализации текста. Для этого используется настройка lang. В тексте имя переменной обрамляется двойными кавыйчками: [[message]].
+Настройки title и message содержат значения которые будут выводится в диалоговых окнах в соответствующих позициях. Используются не во всех типах оконо, например тип FILE_READ.
+Если есть входящие сообщения, они объединяются вместе в одну строку, при необходимости, переводятся и выводятся в замен настройки message (кроме FILE_READ, FILE_SAVE, SELECT).
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>First example. dialog box to select a file to read.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. диалоговое окно выбора файла для чтения.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>FILE_READ</value>
+                </setting>
+                <setting>
+                    <name>title</name>
+                    <value>Test</value>
+                </setting>
+                <setting>
+                    <name>message</name>
+                    <value>msg</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>C:\Recovery.txt</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. dialog box to text input.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. диалоговое окно тестового ввода.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>INPUT</value>
+                </setting>
+                <setting>
+                    <name>title</name>
+                    <value>Test</value>
+                </setting>
+                <setting>
+                    <name>message</name>
+                    <value>msg</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>test</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Third example. option selection dialog box. We choose the second option.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Третий пример. диалоговое окно выбора варианта. Выбираем второй вариант.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>SELECT</value>
+                </setting>
+                <setting>
+                    <name>title</name>
+                    <value>Test</value>
+                </setting>
+                <setting>
+                    <name>message</name>
+                    <value>msg</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value 1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value 2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value 3</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>value 2</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAA8klEQVRoge3ZUQrCMBAE0FGkd1LPp9VzVRHvYXsM9SfVgjUbsd1OwzwI7UeiOyRQkgAiIkKiAHAE0AB4kLUaQBlqNB0ICrbaPiVIHTqvUzo72+A9M6Y2NQCcAVTGu7dufS9LY9C9M+jbO63exER661sZA2bDWlqzEZuRhVsVv+ldKdnMiIKw8QhyBXBx+J8PQ39HXH5PS4uNgrBREDZDBKkQ35a2Yn3+3qSxzMgoWwZ9EKekIGwUhE02QWKHD0M5YaKjpVke0GWztLIO0oTnxrOQRNvwTLpWKDH9RY7VdilBihCmvfBharcQIunqTURERvcEEvreQMbAaWoAAAAASUVORK5CYII=</icon>
+
+</properties>

@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>HttpServer</uuid>
+    <provider>javaExternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Net, Http, Server</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.Server</className>
+    <ver>1.1.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>port</name>
+            <type>INTEGER</type>
+            <value>8080</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Порт.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Port.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>requestTimeout</name>
+            <type>INTEGER</type>
+            <value>20000</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Таймаут ожидания обработки запроса в милисекундах.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Request timeout in milliseconds.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>countThreads</name>
+            <type>INTEGER</type>
+            <value>100</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Количество потоков.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Count threads.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>backlog</name>
+            <type>INTEGER</type>
+            <value>0</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Кэш новых подключений в очерди (с которыми еще не работают). Если это значение меньше или равно нулю, используется системное значение по умолчанию.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>The socket backlog. If this value is less than or equal to zero, then a system default value is used.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>protocol</name>
+            <type>STRING</type>
+            <validValues>
+                <value>HTTP</value>
+                <value>HTTPS</value>
+                <value>VIRTUAL</value>
+            </validValues>
+            <value>HTTP</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>protocol. if VIRTUAL is selected, then you can use virtual servers with different sets of settings, see setting virtualServerSettings.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>протокол. если выбран VIRTUAL, то можно использовать виртуальные сервера с разными наборами настроек, смотри настройку virtualServerSettings.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>availablePaths</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>defines a list of available addresses. only they are answered, otherwise it returns 404. if empty, then all sites are accepted.
+if VIRTUAL is selected, protocol, host, and port must be specified for each path, for example: http://localhost:8080/.* . if they are not specified, then this path will be applied to the first server.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>определяет список доступных адресов. только на них происходит ответ, иначе возвращает 404. если пуст - то принимаются все сайты.
+если выбран VIRTUAL, для каждого пути надо указывать протокол, хост и порт, например: http://localhost:8080/.* . если они не указаны, то этот путь будет применен к первому серверу.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>keyStoreFileName</name>
+            <type>STRING</type>
+            <value></value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>fil name - key store.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>имя файла - хранилеща ключей.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>keyStorePass</name>
+            <type>STRING</type>
+            <value></value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>password to the certificate store and the key for the HTTPS protocol.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>пароль к хранилищу сертификатов и ключу для протокола HTTPS.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>keyPass</name>
+            <type>STRING</type>
+            <value></value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>the password to the key certificate (keyAlias) from the repository for the HTTPS protocol.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>пароль к сертификату ключа (keyAlias) из хранилища для протокола HTTPS.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>keyAlias</name>
+            <type>STRING</type>
+            <value></value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>key name in key store.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>название искомого ключа в хранилище сертификатов.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>bindAddress</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>IP or DNS name, for binding server only to this IP address.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>IP или DNS имя, для привязки сервера только к этому ип адресу.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>sessionTimeout</name>
+            <type>INTEGER</type>
+            <value>10</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Время жизни неактивной сессии (в минутах).</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Inactive session lifetime (in minutes)</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>maxPostSize</name>
+            <type>INTEGER</type>
+            <value>1048576</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Максимальный размер Post запроса в байтах.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>The maximum size of a Post request in bytes.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>allowMultipartParsing</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Позволять ли multipart запросы (загрузка файлов и тп).</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Whether to allow multipart requests (file uploads, etc.).</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>virtualServerSettings</name>
+            <type>OBJECT_ARRAY</type>
+            <value>[]</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Набор параметров для виртуальных серверов. Используется только для режима VIRTUAL.
+Каждый объект представляет собой отдельный виртуальный сервре. Поля объекта соответствуют именам настроек, при этом если какое-то поле отсутствует, то берется соответсвующее значение из настройки. пример:
+[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false"}]
+                    </value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>A set of parameters for virtual servers. Used only for VIRTUAL mode.
+Each object is a separate virtual server. The fields of the object correspond to the names of the settings, and if a field is missing, then the corresponding value is taken from the settings. example:
+[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false"}]
+                    </value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeSource>
+
+    <typeResult>
+        <ValueType>STRING</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>-1</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <useStorage>true</useStorage>
+
+    <threadSafe>true</threadSafe>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module provides the functionality of a web server.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль предоставляет функцилональность веб сервера.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module provides the functionality of a web server.
+if there are execution contexts, it starts. listens on the specified connection. upon receipt of the request,
+sequentially runs execution contexts with the request data as a shell last set of data from the server. therefore, run
+the source must be configured on the server. (analogue to calling a function). after execution, data from all contexts are combined and used as an answer
+(the format is similar to the previous one, except for 1).
+if there are no sources. regarded as a stop command.
+if the HTTPS protocol is used, it is necessary to load the key (RSA) into the working directory of the configuration.
+you can also use the virtual servers mode (VIRTUAL). in this case, you can set your own settings for each server loco.
+command to generate: keytool -genkeypair -keyalg RSA -alias self_signed -keypass simulator -keystore lic.key -storepass pass
+    response format:
+        1 - number - message response code,
+        the rest except the last - strings - headers in the format key = value,
+        the last is a byte array or string is the response body.
+    request format:
+        1 - string - method
+        2 - string - URL
+        3 - string - customer address
+        4 - string - session id
+        5 - number - number of parameters (get and post)
+        6 and further parameters (key = value format)
+        number - number of headers
+        strings - headers (key = value format),
+        Further
+            for a multipart request (only for a post request):
+                number - the count of parts
+                further in iteration:
+                    number - the number of headers of the data piece
+                    chunk headers (format key = value)
+                    byte array - the data itself.
+                else - byte array - request body.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль предоставляет функцилональность веб сервера.
+если есть контексты исполнения, запускается. прослушавает указанное соединение. при поступлении запроса,
+если список разрешенных адресов не пуст и если указаннй путь находится в списке разрешенных, то запускается только контекст находящийся на тойжке позиции в списке.
+если список разрешенных адресов пуст, последовательно запускает все контексты исполнения.
+контексты запускаются с данными запроса в качестве подставного последнего набора данных от сервера. поэтому у запускаемых должен быть настроен источник на сервер
+(аналог вызова функции). после исполнения, данные от последнего исполненго контекста (если запускалось несколько) используются в качестве ответа.
+если нет источников. рассматривается как команду на остановку.
+если используется протокол HTTPS, необходимо в рабочую директорию конфигурации загрузить ключ (RSA).
+так же можно использовать режимвиртуальных серверов (VIRTUAL). в этом случае для каждлоко сервера можно выставить свои настройки.
+команда для генерации: keytool -genkeypair -keyalg RSA -alias self_signed -keypass simulator -keystore lic.key -storepass simulator
+    формат ответа:
+        1 - число - сообщение код ответа,
+        остальные кроме последнего - строки - заголовки в формате ключ=значение,
+        последнее - байтовоый массив или строка - тело ответа.
+    формат запроса:
+        1 - строка - метод
+        2 - строка - URL адрес
+        3 - строка - адрес клиента
+        4 - строка - ид сессии
+        5 - число - количество параметров (get и post)
+        6 и далее параметры (формат ключ=значение)
+        число - количестово заголовков
+        строки - заголовки (формат ключ=значение),
+        далее
+            для multipart запроса (только для post запроса):
+                число - количестово частей
+                далее в итерации:
+                    число - количестово заголовков куска данных
+                    заголовки куска данных (формат ключ=значение)
+                    байтовый массив - сами данные.
+            иначе - байтовый массив - тело запроса.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>First example. a simple web server is used by one processing execution context (it receives a request and issues a response) all requests.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. используется простой веб сервер одним управляемым контекстом исполнения обрабатывающим (принимает запрос и выдает ответ) все запросы.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>availablePaths</name>
+                    <value>.*</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output/>
+            <countManagedExecutionContexts>1</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. used by a web server using the HTTPS protocol.
+in the working directory of the configuration should be a file with the keys lig.keystore.
+with one managed execution context processing (accepts the request and issues a response) all requests.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. используется веб сервер использующим протокол HTTPS.
+в рабочей директории конфигурации должен находится файл с ключами lig.keystore.
+c одним управляемым контекстом исполнения обрабатывающим (принимает запрос и выдает ответ) все запросы.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>protocol</name>
+                    <value>HTTPS</value>
+                </setting>
+                <setting>
+                    <name>availablePaths</name>
+                    <value>.*</value>
+                </setting>
+                <setting>
+                    <name>keyStoreFileName</name>
+                    <value>lig.keystore</value>
+                </setting>
+                <setting>
+                    <name>keyPass</name>
+                    <value>simulator</value>
+                </setting>
+                <setting>
+                    <name>keyStorePass</name>
+                    <value>simulator</value>
+                </setting>
+                <setting>
+                    <name>keyAlias</name>
+                    <value>self_signed</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output/>
+            <countManagedExecutionContexts>1</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The third example. Stop a previously running server.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Третий пример. остановка ранее запущенного сервера.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources/>
+            <output/>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

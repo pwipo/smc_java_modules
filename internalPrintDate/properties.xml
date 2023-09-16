@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>PrintDate</uuid>
+    <provider>javaInternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <className>ru.smcsystem.smcmodules.module.PrintDate</className>
+    <ver>1.2.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+    <categories>Java, Date</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+
+    <defaultSettings>
+        <value>
+            <name>format</name>
+            <type>STRING</type>
+            <value>yyyy-MM-dd HH:mm:ss</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>формат времени. например: HH:mm:ss dd MMM yyyy.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>time format. for example: HH:mm:ss dd MMM yyyy</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>local</name>
+            <type>STRING</type>
+            <value>en</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Локаль.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Local.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>zoneId</name>
+            <type>STRING</type>
+            <value>UTC</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Зона времени, например: UTC, +3.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Time zone, for example: UTC, +3.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <validValues>
+                <value>TO_STRING</value>
+                <value>TO_NUMBER</value>
+                <value>NUMBER_TO_XLS</value>
+            </validValues>
+            <value>TO_STRING</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>режим работы:
+TO_STRING - возвращает строку в указанном формате. на вход принимает числа, их рассматривает как unix timestamp. если пусто, то возвращает текущее время.
+TO_NUMBER - возвращает число (unix timestamp). на вход принимает строки в указанном формате. если пусто, то возвращает текущее время.
+NUMBER_TO_XLS - возвращает число, представляющее собой время, понятное Excel. на вход принимает числа, их рассматривает как unix timestamp. если пусто, то возвращает текущее время.
+                    </value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>working mode:
+TO_STRING - returns a string in the specified format. accepts numbers as input, considers them as unix timestamp. if empty, returns the current time.
+TO_NUMBER - returns a number (unix timestamp). accepts strings in the specified format as input. if empty, returns the current time.
+NUMBER_TO_XLS - Returns a number representing the time that Excel understands. accepts numbers as input, considers them as unix timestamp. if empty, returns the current time.
+                    </value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>STRING</ValueType>
+    </typeSource>
+    <typeResult>
+        <ValueType>STRING</ValueType>
+        <ValueType>LONG</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>Prints the time as a string in the desired format or as a number (unix timestamp).</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Печатает время в виде строки в нужном формате или в виде числа (unix timestamp).</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>Prints the time as a string in the desired format or as a number (unix timestamp).
+the type parameter defines the mode of operation:
+    - returns the time as a string. takes as input a number in the format of milliseconds since the epoch.
+    - as a number. takes a string.
+the format parameter specifies the format for incoming and outgoing strings.
+if there are no sources, it prints the current time.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Печатает время в виде строки в нужном формате или в виде числа (unix timestamp).
+параметр type определяет режим работы:
+    - возвращает время в виде строки. на вход принимает число в формате милисекунд с начала эпохи.
+    - в виде числа. принимает строку.
+параметр format определяет формат для входящих и исходящих строк.
+если нет источников печатает текущее время.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>format</name>
+                    <value>HH:mm:ss dd MM yyyy</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>23:59:59 31 12 1999</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAB70lEQVRoge2avy8EQRTHP34EieJEg0RB6FCISiKhvFaiRUFBxB+hVagkotMoqFQSotHrdBpx11zcKUQhiB/FvrvMrd27m93Z27nLfJLJ7L15+958d37tXQ4aJwvkgV8pObGZIun4FXJKEjVZq8SvUA4e9jnV+J0GO5IqqpA1oMT/4a33ZML8dYtu/BKwGnRDUTOhKQFx4hdrKa/3ZBr110U3flV7W66ReuSlVp9EPsQ3Csbi1xvKLNV7fRIHok780P6anvNJ49aI1XQH2FppelVo6xHpaHovolE1c9pmRJwQ23BCbMMJsQ3TQnaAY4LPJ4Al4Ay4A66BzQT6EPvtdwF4lxi9Ae3rwI+0vyr5jiLmM/oa3w/sA1fAlxLDL2QAeMMTuii2GeAZ+AamNPPW7G8UIUPKfWrxC1kW+7nPfiD2bc284Otv2FxulBIwIdejwG2I36TU9z77p9RG10ncNTJG+IgEkQEexX82Qr7EvurqCMkAN+J7GjFf6kLmgAfxuwT6IuZLVcgW8IG3w+0BXTHypSZkV9qegPkYecqkImQcbyRe8HY3ExjdfhtlA+iR64uA9kPgJE6CZgmZlnpQip8Rk8ncL4024ITYhhNiG06IbTghtqG+ohSAYVrrdC8EGVekweS/GJIsBemzw0r+AG62I9fAFvwaAAAAAElFTkSuQmCC</icon>
+
+</properties>

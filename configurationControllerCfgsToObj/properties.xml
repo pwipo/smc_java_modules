@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>CfgsToObj</uuid>
+    <provider>java</provider>
+    <ver>1.1.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Configuration, Settings</categories>
+    <className>ru.smcsystem.modules.module.CfgsToObj</className>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The program is free for use.
+Forbidden: changing the program code, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Программа бесплатна для использования.
+Запрещено: изменение кода программы, а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <date>21-09-2022</date>
+
+    <defaultSettings>
+        <value>
+            <name>params</name>
+            <type>STRING</type>
+            <value></value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>List of parameters separated by ::. format (values separated by comma):
+number - managed configuration number (from 0),
+number - value type (can be: 0 - internal configuration values, 1 - settings, 2 - variables, 3 - execution context),
+string - parameter name. for configuration: enable, bufferSize, name, active. for context: enable, name, maxWorkInterval, active. context format: number.parameter_name, where number is the number of the context in the list of configuration contexts or context_name.parameter_name.
+string - public name.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Список параметров, разделенных ::. формат (значения разделены запятой):
+число - номер управляемой конфигурации (с 0),
+число - тип значения (может быть: 0 - внутренние значения конфигурации, 1 - настройки, 2 - переменные, 3 - контекст исполнения),
+строка - имя параметра. для конфигурации: enable, bufferSize, name, active. для контекста: enable, name, maxWorkInterval, active. формат для контекста: число.имя_параметра, где число номер контекста в списке контекстов конфигурации или имя_контекста.имя_параметра.
+строка - публичное имя.
+                    </value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeSource>
+
+    <typeResult>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>1</minManagedConfigurations>
+    <maxManagedConfigurations>-1</maxManagedConfigurations>
+
+    <useStorage>false</useStorage>
+
+    <threadSafe>true</threadSafe>
+
+    <privateUsage>false</privateUsage>
+
+    <defaultExecutionContext/>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module acts as a frontend for the specified parameters of managed configurations. Useful for implementing REST parameter access.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль выполняет роль фронтенда для указанных параметров управляемых конфигураций. Удобно использовать для реализации REST доступа к параметрам.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module acts as a frontend for the specified parameters of managed configurations. Useful for implementing REST parameter access.
+Operation algorithm: accepts a list of parameters in a given format. Further:
+    - read - reads all parameters and returns them as an object in the serialization format.
+    - write - accepts an object in the serialization format as input - and changes the corresponding values.
+format:
+    reading:
+        accepts:
+            number - 1
+        returns:
+            an object in object serialization format containing all values.
+    entry:
+        accepts:
+            number - 2
+            object in object serialization format
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль выполняет роль фронтенда для указанных параметров управляемых конфигураций. Удобно использовать для реализации REST доступа к параметрам.
+Алгоритм работы: принимает список параметров в заданном формате. далее:
+    - чтение - читает все параметры и возвращает их в виде объекта в формате сериализации.
+    - запись - принимает на вход объект в формате сериализации - и изменает соответствующие значения.
+формат:
+    чтение:
+        принимает:
+            число - 1
+        возвращает:
+            объект в формате сериализации объектов, содержащий все значения.
+    запись:
+        принимает:
+            число - 2
+            объект в формате сериализации объектов
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>First example. requests values from the first managed configuration.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. запрашивает значения из первой управляемой конфигурации.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>test</name>
+                    <value>0,0,enable,enable::0,0,name,name::0,1,param1,param::0,2,var1,var</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>enable</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>true</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>test</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>param</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>google.com</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>var</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>1</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. changes the values of the first managed configuration.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. изменяет значения первой управляемой конфигурации.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>test</name>
+                    <value>0,0,enable,enable::0,0,name,name::0,1,param1,param::0,2,var1,var</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>enable</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>false</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>name</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>param</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>microsoft.com</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>var</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value2</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output/>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>1</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon/>
+
+</properties>

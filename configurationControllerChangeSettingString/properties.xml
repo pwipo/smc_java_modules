@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>ChangeSetting</uuid>
+    <provider>javaConfigurationController</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Configuration, Settings</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.modules.configurationControllerChangeSettingString.ChangeSetting</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>key</name>
+            <type>STRING</type>
+            <value>address</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>key.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>ключ.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>value</name>
+            <type>STRING</type>
+            <value>8.8.8.8</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>value. if necessary, auto-conversion is performed.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>значение. при необходимости производится автоконвертация.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeResult>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BYTES</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>1</minManagedConfigurations>
+    <maxManagedConfigurations>-1</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module changes setting.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль меняет значение настройки.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module changes the setting value. The value of the value setting is converted to the target type.
+If there are sources, then these values are taken as the new setting value.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль меняет значение настройки. значение настройки value конвертируется в тип цели.
+Если есть источники, то эти значения беруться в качестве нового значения настройки.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The managed configuration is named "test", the setting name is "setting1", the string value is "value1". you need to change it to the value "value2".</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Управляемая конфигурация имеет имя "test", имя настройки "setting1" строковое значение "value1". нужно сменить его на значение "value2".</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>key</name>
+                    <value>setting1</value>
+                </setting>
+                <setting>
+                    <name>value</name>
+                    <value>value2</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>DATA 0: test key: setting1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value2</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>1</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>DB</uuid>
+    <provider>javaExternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, DB, Sql, Client, Server</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.DB</className>
+    <ver>1.0.6</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <validValues>
+                <value>derbyInMemory</value>
+                <value>derby</value>
+                <value>postgreeClient</value>
+                <value>mysqlClient</value>
+                <value>oracleClient</value>
+                <value>db2Client</value>
+            </validValues>
+            <value>mysqlClient</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>type of intercourse. can be either a connection to an existing external database, or creating your own instance:
+derbyInMemory - create your own Derby DBMS instance in memory and connect to it.
+derby - create your own Derby DBMS instance and connect to it.
+postgreeClient - connection to an external PostgreSQL DBMS.
+mysqlClient - connection to an external MySQL DBMS.
+oracleClient - connection to an external Oracle DBMS.
+db2Client - connection to an external DB2 DBMS.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>тип подклечения. может быть как подключение к существующей внешней бд, так и создание своего экземпляра:
+derbyInMemory - создание своего экземпляра СУБД Derby в памяти и подключение к нему.
+derby - создание своего экземпляра СУБД Derby и подключение к нему.
+postgreeClient - подключение к внешнешней СУБД PostgreSQL.
+mysqlClient - подключение к внешнешней СУБД MySQL.
+oracleClient - подключение к внешнешней СУБД Oracle.
+db2Client - подключение к внешнешней СУБД DB2.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>connection_params</name>
+            <type>STRING</type>
+            <value>localhost:3306/db</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>data to connect. format:
+derbyInMemory - db_name.
+derby - db_name.
+postgreeClient - server_name_or_ip:port/db_name.
+mysqlClient - server_name_or_ip:port/db_name.
+oracleClient - @//server_name_or_ip:port/service_name.
+db2Client - //server_name_or_ip[:port]/db_name.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>данные для подключения. формат:
+derbyInMemory - имя_бд.
+derby - имя_бд.
+postgreeClientя - имя_или_ип_сервера:порт/имя_бд.
+mysqlClient - имя_или_ип_сервера:порт/имя_бд.
+oracleClient - @//имя_или_ип_сервера:порт/имя_сервиса.
+db2Client - //имя_или_ип_сервера[:порт]/имя_бд.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>login</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>login.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>имя пользователя.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>password</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>password.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>пароль.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>useAutoConvert</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>only for parameterized SQL expressions (types: 7,8).
+determines whether autoconversion of parameters should be performed.
+if enabled, it allows you to transfer the types BOOLEAN, TIMESTAMP, DATE, TIME. also converts a NULL string to a null value.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>только для параметризованных SQL выражений (типы: 7,8).
+определяет нужно ли проводить автоконвертацию параметров.
+если включено то позволяет передавать типы BOOLEAN, TIMESTAMP, DATE, TIME. так же конвертирует строку NULL в нулевое значение.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>resultFormat</name>
+            <type>STRING</type>
+            <validValues>
+                <value>OBJECT_SERIALIZATION</value>
+                <value>OBJECT</value>
+                <value>OBJECT_WITHOUT_NULL</value>
+            </validValues>
+            <value>OBJECT_SERIALIZATION</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The type of object returned:
+OBJECT_SERIALIZATION - to a list of values in object serialization format
+OBJECT - directly into an object, if there are null values, then it is converted to a NULL string.
+OBJECT_WITHOUT_NULL - directly to an object without null values.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Тип возвращаемого объекта:
+OBJECT_SERIALIZATION - в список значений в формате сериализации объектов
+OBJECT - напрямую в объект, если есть нулевые значения то конвертируется в строку NULL.
+OBJECT_WITHOUT_NULL - напрямую в объект без нулевых значений.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>resultSetColumnNameToUpperCase</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Whether to capitalize response column names.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Приводить ли имена столбцов ответа к верхнему регистру.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+    </typeSource>
+
+    <typeResult/>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <useStorage>true</useStorage>
+
+    <threadSafe>true</threadSafe>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>represents the implementation of the client to the database.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>представляет собой реализацию клиента к бд.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>represents the implementation of the client to the database. while the database itself, in some cases, can also be created.
+format of incoming messages:
+    number - operation type:
+        1 - execution of commands in one transaction (either all commands are executed, or none),
+        2 - start a new external transaction,
+        3 - complete external transaction with saving,
+        4 - reject and complete the external transaction,
+        5 - execute commands in an external transaction,
+        6 - execute commands without transaction (each command is executed immediately),
+        7 - execute parameterized commands,
+        8 - execute parameterized commands in an external transaction.
+        9 - similar to 7, but accepts an array of objects or an array of arrays,
+        10 - similar to 8, but accepts an array of objects or an array of arrays.
+        11 - similar to 1, but for INSERT only and returns the generated key
+        12 - similar to 5, but for INSERT only and returns the generated key
+        13 - similar to 6, but for INSERT only and returns the generated key
+        14 - similar to 7, but for INSERT only and returns the generated key
+        15 - similar to 8, but for INSERT only and returns the generated key
+        16 - similar to 9, but for INSERT only and returns the generated key
+        17 - similar to 10, but for INSERT only and returns the generated key
+    for 3,4,5,8,10,12,15,17:
+        type - number - external transaction number.
+    for 1,5,6,11,12,13 - string - SQL expression.
+    for 7,8,14,15:
+        string - parameterized SQL expression (with symbols ? to insert real meanings).
+        for the situation if the autoconvert mode is enabled (useAutoConvert) and the database is mysql, then the pairs of values:
+             either type - values inserted into the parameterized SQL expression.
+             number - parameter type. mysql does not support ParameterMetaData. the types are specified in the java.sql.Types class.
+        otherwise:
+            either type - values inserted into the parameterized SQL expression.
+    for 9,10,16,17:
+        string - parameterized SQL expression (with symbols ? to insert real meanings).
+        array - each child object or array is treated as one set of parameters.
+        string - optional - comma-separated variable names. only for an array of objects. if absent, all field names from the first object are used.
+        array - data types for parameters, only if autoconvert (useAutoConvert) mode is enabled and the database is mysql - it does not support ParameterMetaData. the types are specified in the java.sql.Types class.
+returns for types:
+    for 1,5,6,7,8,9,10,11,12,13,14,15,16,17:
+        for selects - response in object serialization format:
+            digit - 2.
+            digit - number of lines.
+            digit - number of columns.
+            further value pairs: column_name: value.
+        for other types of requests: digit - the number of changes.
+    for 2,3,4: external transaction number.
+if the install.sql file is in the working directory, at startup it tries to execute commands in it in one transaction. in this case, if errors occur, displays a message in the console but allows you to continue to work - does not stop working with an error.
+</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>представляет собой реализацию клиента к бд. при этом сама бд, в некоторых случаях, так же может быть создана.
+формат входящих сообщений:
+    число - тип операциии:
+        1 - исполнение команд в одной транзакции (исполняются либо все команды, либо ни одной),
+        2 - начать новую внешнюю транзакцию,
+        3 - завершить с сохранением внешнюю транзакцию,
+        4 - отклонить и завершить внешнюю транзакцию,
+        5 - исполнять команды во внешней транзакции,
+        6 - исполнять команды без транзакий (каждая команда исполняется сразу),
+        7 - исполнить параметризованные команды,
+        8 - исполнить параметризованные команды во внешней транзакции.
+        9 - аналогичен 7, но принимает массив объектов или массив массивов,
+        10 - аналогичен 8, но принимает массив объектов или массив массивов.
+        11 - аналогичен 1, но предназначен только для INSERT и возвращает сгенерированный ключ
+        12 - аналогичен 5, но предназначен только для INSERT и возвращает сгенерированный ключ
+        13 - аналогичен 6, но предназначен только для INSERT и возвращает сгенерированный ключ
+        14 - аналогичен 7, но предназначен только для INSERT и возвращает сгенерированный ключ
+        15 - аналогичен 8, но предназначен только для INSERT и возвращает сгенерированный ключ
+        16 - аналогичен 9, но предназначен только для INSERT и возвращает сгенерированный ключ
+        17 - аналогичен 10, но предназначен только для INSERT и возвращает сгенерированный ключ
+    для 3,4,5,8,10,12,15,17:
+        типа - число - номер внешней транзакции.
+    для 1,5,6,11,12,13 - строка - SQL выражение.
+    для 7,8,14,15:
+        строка - параметризованное SQL выражение (с символами ? для вставки ральных начений).
+        для ситуации если включен режим автоконвертации (useAutoConvert) и базой данных является mysql, то пары значений:
+            либой тип - значения, вставляемые в параметризованное SQL выражение.
+            число - тип параметра. mysql не поддерживает ParameterMetaData. типы указаны в классе java.sql.Types.
+        иначе:
+            либой тип - значения, вставляемые в параметризованное SQL выражение.
+    для 9,10,16,17:
+        строка - параметризованное SQL выражение (с символами ? для вставки ральных начений).
+        массив - каждый дочерний объект или массив рассматривается как один набор параметров.
+        строка - опционально - имена переменных, разделенные запятой. только для массива объектов. если отсутствует, то используются все имена полей из первого объекта.
+        массив - типы данных для параметров, только если включен режим автоконвертации (useAutoConvert) и базой данных является mysql - она не поддерживает ParameterMetaData. типы указаны в классе java.sql.Types.
+возвращает для типов:
+    для 1,5,6,7,8,9,10:
+        для селектов - ответ в формате сериализации объектов:
+            цифра - 2.
+            цифра - количество строк.
+            цифра - количество столбцов.
+            далее пары значени: имя_столбца:значение.
+        для остальных типов запросов: цифра - количество измененний.
+    для 11,12,13,14,15,16,17:
+        число - сгенерированный ключ
+    для 2,3,4: номер внешней транзакции.
+если в рабочей директории есть файл install.sql, при старте пытается исполнить команды в нем в одной транзакции. при этом если возникают ошибки, выводит сообщение в консоль но позволяет работать дальше - не прекращает работу с ошибкой.
+</value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example. use of the dbms derby in memory.
+the initialization file is used (in the working directory, the install.sql file):
+CREATE TABLE textes (
+uuid VARCHAR(1000) PRIMARY KEY,
+text VARCHAR(1000),
+value INTEGER
+);
+
+INSERT INTO textes VALUES ('test', 'test msg', 1);
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. использование субд дерби в памяти.
+используется файл начальной инициализации (в рабочей директории файл install.sql):
+CREATE TABLE textes (
+uuid VARCHAR(1000) PRIMARY KEY,
+text VARCHAR(1000),
+value INTEGER
+);
+
+INSERT INTO textes VALUES ('test', 'test msg', 1);
+                    </value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>derbyInMemory</value>
+                </setting>
+                <setting>
+                    <name>connection_params</name>
+                    <value>ChatModuleDB2</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>select * from textes</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>UUID</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>test</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>TEXT</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>test msg</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>VALUE</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. use dbms derby.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. использование субд дерби.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>derby</value>
+                </setting>
+                <setting>
+                    <name>connection_params</name>
+                    <value>db1</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>CREATE TABLE Test (
+                                        id INTEGER PRIMARY KEY,
+                                        name VARCHAR(1000),
+                                        date TIMESTAMP
+                                        )</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>insert into Test VALUES (1, 'test1', '1960-01-01 23:03:20')</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>insert into Test VALUES (2, 'test2', '1960-01-01 23:03:20')</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>0</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The third example. the use of sub derby. parameterized SQL expression.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Третий пример. использование субд дерби. параметризованное SQL выражение.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>derby</value>
+                </setting>
+                <setting>
+                    <name>connection_params</name>
+                    <value>db1</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>7</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>select * from Test where name=?</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test1</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>id</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>test1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>date</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>1960-01-01 23:03:20</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

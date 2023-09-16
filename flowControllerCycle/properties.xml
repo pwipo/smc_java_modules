@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Cycle</uuid>
+    <provider>javaFlowController</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, FlowController</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.Cycle</className>
+    <ver>1.2.2</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <value>WHILE</value>
+            <validValues>
+                <value>WHILE</value>
+                <value>DO_WHILE</value>
+                <value>FOR</value>
+                <value>FOR_EACH</value>
+                <value>FOR_EACH_DYNAMIC</value>
+                <value>FOR_EACH_OBJECT</value>
+                <value>ENDLESS_CYCLE</value>
+                <value>FOR_DYNAMIC</value>
+                <value>FOR_EACH_OBJECT_PARALLEL</value>
+                <value>FOR_EACH_ALL</value>
+            </validValues>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Тип цикла:
+WHILE - аналогичен конструкции while. в бесконечном цикле каждая итерация: сначала запускает первый контекст, проверяется на остановку (параметр checkType). если все нормально, запускает по порядку остальные, иначе завершает работу.
+DO_WHILE - аналогичен конструкции do-while. в бесконечном цикле каждая итерация: сначала запускает запускает по порядку все контексты, данные от последнего проверяется на остановку (параметр checkType). если все нормально, продолжает, иначе завершает работу.
+FOR - аналогичен конструкции for. запускает в цикле все контексты. количество итераций устанавливается forCount.
+FOR_EACH - аналогичен конструкции for-each. для каждой порции входящих данных (количество определяется forCount) запускает в цикле все контексты. важно: если количество оставшихся данных меньше forCount, то он их не обрабатывает.
+FOR_EACH_DYNAMIC - аналогичен FOR_EACH, но итоговое количество порций дополнительно ограничивается первым числом. например если входных значений 101 и forCount=10 и первое значение равно 5, то итераций будет не 10 а 5.
+FOR_EACH_OBJECT - аналогичен конструкции for-each. работает для объектов представленых в формате сериализации (см. описание в ObjectDB и ValueTypeConverter для json).
+ENDLESS_CYCLE - бесконечный цикл. аналогичен WHILE, но без проверки первого контекста.
+FOR_DYNAMIC - аналогичен FOR, но количество итераций берется из первого входящего числового значения. требуется как минимум один источник. если числа нет, берется значение параметра forCount.
+FOR_EACH_OBJECT_PARALLEL - аналогичен FOR_EACH_OBJECT, и позволяет исполнять в несколько потоков (параметр countThreads). при каждом проходе делает соответствующее количество параллельных вызовов первого подключенного контекста передавая ему новый объект. старается загрузить все потоки и ждет пока они все исполняться, далее повторяет цикл. на каждой итерации может засыпать. параметры idForBreak и idForContinue тут не работают.
+FOR_EACH_ALL - аналогичен FOR_EACH, но если количество оставшихся данных меньше forCount, то он их тоже обрабатывает.
+                    </value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Cycle type:
+WHILE - Similar to the while construct. in an infinite loop, each iteration: first starts the first context, is checked for stop (checkType parameter). if everything is fine, it starts the rest in order, otherwise it shuts down.
+DO_WHILE - similar to the do-while construct. in an infinite loop, each iteration: first starts, starts all contexts in order, the data from the last is checked for stop (checkType parameter). if everything is fine, continues, otherwise shuts down.
+FOR - is similar to for. starts all contexts in a loop. the number of iterations is set by forCount.
+FOR_EACH - similar to the for-each construct. for each portion of incoming data (the number is determined by forCount) runs all contexts in a loop. important: if the amount of remaining data is less than forCount, then it does not process them.
+FOR_EACH_DYNAMIC - similar to FOR_EACH, but the total number of servings is additionally limited to the first number. for example, if the input values are 101 and forCount = 10 and the first value is 5, then the iterations will not be 10 but 5.
+FOR_EACH_OBJECT - Similar to for-each. works for objects represented in serialization format (see description in ObjectDB and ValueTypeConverter for json).
+ENDLESS_CYCLE - endless loop. similar to WHILE, but without checking the first context.
+FOR_DYNAMIC - similar to FOR, but the number of iterations is taken from the first incoming numeric value. at least one source is required. if there is no number, the value of the forCount parameter is taken.
+FOR_EACH_OBJECT_PARALLEL - similar to FOR_EACH_OBJECT, and allows execution in multiple threads (countThreads parameter). on each pass, makes the appropriate number of concurrent calls to the first connected context, passing it the new object. tries to load all the threads and waits until they are all executed, then repeats the cycle. at each iteration can fall asleep. the idForBreak and idForContinue parameters don't work here.
+FOR_EACH_ALL - similar to FOR_EACH, but if the amount of remaining data is less than forCount, then it also processes them.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>idForBreak</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Comma separated list of execution context ids. If not empty, then if there is no data after the execution of the specified managed context, it stops. equivalent to break.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Разделенные запятой номера контекстов. Если не пуст, то если нет данных после выполнения указанного управляемого контекстата, останавливается. эквивалентно break.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>idForContinue</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Comma separated list of execution context ids. If not empty, then if there is no data after the execution of the specified managed context, it start new iteration. equivalent to continue.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Разделенные запятой номера контекстов. Если не пуст, то если нет данных после выполнения указанного управляемого контекстата, начинает новую итерацию. эквивалентно continue.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>checkType</name>
+            <type>STRING</type>
+            <value>NO_DATA</value>
+            <validValues>
+                <value>NO_DATA</value>
+                <value>ANY_DATA</value>
+            </validValues>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Тип проверки для Break и Continue</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Type check for Break and Continue</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>forCount</name>
+            <type>INTEGER</type>
+            <value>10</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>indicates the number of iterations for the FOR type. for FOR_EACH indicates the number of values processed per cycle.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>указывает количество итераций для типа FOR. для FOR_EACH указывает количество обрабатываемых за такт значение.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>sleepTime</name>
+            <type>INTEGER</type>
+            <value>0</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>indicates the time of a stop (sleep) between complete cycles (when all execution contexts execute). in milliseconds</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>указывает время остановки (сна) между полными циклами (когда отработают все контексты исполнения). в милисекундах.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>sleepTimeType</name>
+            <type>STRING</type>
+            <value>FIXED</value>
+            <validValues>
+                <value>FIXED</value>
+                <value>FLOATING</value>
+            </validValues>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>тип интервала сна.
+FIXED - после окончания цикла. засыпает на указаное время всегда.
+FLOATING - после окончания цикла засыпает на разницу между sleepTime и временем затраченым на цикл. пример: если цикл завершился за 5 секунд. а время сна 10. то заснет на 5 секунд.
+                    </value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>type of sleep interval.
+FIXED - after the end of the cycle. always falls asleep at the specified time.
+FLOATING - after the end of the cycle, falls asleep on the difference between sleepTime and the time spent on the cycle. example: if the cycle completed in 5 seconds. and sleep time 10. it will fall asleep for 5 seconds.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>countThreads</name>
+            <type>INTEGER</type>
+            <value>1</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>number of threads.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>количество потоков.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <minManagedExecutionContexts>1</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>-1</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <typeResult>
+        <ValueType>INTEGER</ValueType>
+    </typeResult>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module operates as a loop of the specified type.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль работает как цикл указанного типа.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module operates as a loop of the specified type.
+cycle types are described in the type setting.
+if idForBreak is installed, data from contexts with such numbers is checked, and when triggered, it stops the cycle.
+if idForContinue is set, data from contexts with such numbers is checked, and when triggered, it stops the current iteration.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль работает как цикл указанного типа.
+типы цикла описаны в настройке type.
+если установлен idForBreak, проверяются данные от контекстов с такими номерами и при срабатывании - прекращает цикл.
+если установлен idForContinue, проверяются данные от контекстов с такими номерами и при срабатывании - прекращает текущую итераци.</value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                   <value>The first example. implements a for loop. will produce two run cycles for executing connected managed execution contexts (in order): first, second, first second.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. реализует цикл for. произведет два цикла запуска на выполнение подключенные управляемые контексты исполнения (по порядку): первый, второй, первые второй.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>FOR_EACH</value>
+                </setting>
+                <setting>
+                    <name>forCount</name>
+                    <value>2</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test2</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>2</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAABRklEQVRIia2UMU4DMRBFH2FDzpNDoFBCUBBcAkK2oE1JExFxBwqQuAMNhyBBSuAWEMRSeKwdHG9s7+6X3Nh//h/Z4w9puE3kJ6No2+QAuACegHcxKICpw6mFU+BTieqlDdbCjUYHuFdib8AY6HvEUby51AZhxb+BSyBTZ644QC7cArgLiY+E+AUcxnQjGAAbqT2pIvWADyFNEsQtxlK7Bro16oPIgIWYnNnN/RYNfjGdD4Af4NklTGn+ieykLXzivhlPgdb4p1V50NBkS8NGQb+muDbxNvgoBtcNDSpxTvlAWYBbC13Kj3ZVoz6X2hU7EnYopA1mnmNxRJlHxyHynDLscs+5fsAMExE2h2Yx3XSUSeERt5M2AZaKNwP2YgwshpjgcsXdtSLiWqqgH0sbLIEHTLy3mpw3bF/bTqSm6Svmnl9iC/4A/VVt4WpD0a4AAAAASUVORK5CYII=</icon>
+
+</properties>

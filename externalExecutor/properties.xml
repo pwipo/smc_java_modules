@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>ExternalProcessExecutor</uuid>
+    <provider>java</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, System</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.Executor</className>
+    <ver>1.0.1</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>commandPath</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Путь к исполняемому файлу. Может быть пусто.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Path to executable file. May be empty.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>workDirectory</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Рабочая папка для процесса. Может быть пусто.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>The working folder for the process. May be empty.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>args</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Список аргументов разделенных ::. Может быть пусто.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>List of arguments separated by ::. May be empty.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>encoding</name>
+            <type>STRING</type>
+            <value>UTF-8</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>кодеровка ответов процесса.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>encoding process result.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <typeSource>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeSource>
+
+    <typeResult>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>STRING</ValueType>
+    </typeResult>
+
+    <threadSafe>true</threadSafe>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module runs external executable files.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль запускает внешние исполняемые файлы.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module runs external executable files.
+It waits for completion and returns a completion code and text output.
+works in two modes:
+    static: runs without data sources. in this case, the settings are used.
+    dynamic: runs with data sources. in this case, processing occurs in the cycle of each action.
+             all messages in action are considered as the path to the executable file (1 message) and arguments (all subsequent messages).
+             the folder of the executable will be set as the working folder.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль запускает внешние исполняемые файлы.
+Ждет завершения и возвращает код завершения и текстовый вывод.
+работает в двух режимах:
+    статический: запускается без источников данных. в этом случае используются настройки.
+    динамический: запускается с источниками данных. в этом случае происходит обработка в цикле каждого действия.
+                  все сообщения в действии рассматриваются как путь до исполняемого файла (1 сообщение) и аргументы (все последующие сообщения).
+                  папка исполняемого файла будет назначена рабочей папкой.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>First example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>commandPath</name>
+                    <value>C:\Windows\System32\ping.exe</value>
+                </setting>
+                <setting>
+                    <name>args</name>
+                    <value>8.8.8.8</value>
+                </setting>
+                <setting>
+                    <name>encoding</name>
+                    <value>cp866</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>0</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>
+Обмен пакетами с 8.8.8.8 по с 32 байтами данных:
+Ответ от 8.8.8.8: число байт=32 время=19мс TTL=46
+Ответ от 8.8.8.8: число байт=32 время=19мс TTL=46
+Ответ от 8.8.8.8: число байт=32 время=19мс TTL=46
+Ответ от 8.8.8.8: число байт=32 время=19мс TTL=46
+
+Статистика Ping для 8.8.8.8:
+Пакетов: отправлено = 4, получено = 4, потеряно = 0
+(0% потерь)
+Приблизительное время приема-передачи в мс:
+Минимальное = 19мсек, Максимальное = 19 мсек, Среднее = 19 мсек
+                    </value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>encoding</name>
+                    <value>cp866</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>C:\Windows\System32\ping.exe</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>8.8.8.8</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>0</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>
+Обмен пакетами с 8.8.8.8 по с 32 байтами данных:
+Ответ от 8.8.8.8: число байт=32 время=19мс TTL=46
+Ответ от 8.8.8.8: число байт=32 время=19мс TTL=46
+Ответ от 8.8.8.8: число байт=32 время=19мс TTL=46
+Ответ от 8.8.8.8: число байт=32 время=19мс TTL=46
+
+Статистика Ping для 8.8.8.8:
+Пакетов: отправлено = 4, получено = 4, потеряно = 0
+(0% потерь)
+Приблизительное время приема-передачи в мс:
+Минимальное = 19мсек, Максимальное = 19 мсек, Среднее = 19 мсек
+                    </value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

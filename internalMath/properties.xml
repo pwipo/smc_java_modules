@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Math</uuid>
+    <provider>javaInternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Utils, Math</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.MathFuncs</className>
+    <ver>1.1.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <value>ABS</value>
+            <validValues>
+                <value>SIGMOID</value>
+                <value>SIGMOID_DERIVATIVE</value>
+                <value>SUM</value>
+                <value>SUM_BY_PARAM</value>
+                <value>ABS</value>
+                <value>MIN</value>
+                <value>MIN_INDEX</value>
+                <value>MAX</value>
+                <value>MAX_INDEX</value>
+                <value>MULTIPLY</value>
+                <value>MULTIPLY_BY_PARAM</value>
+                <value>AVERAGE</value>
+                <value>RMS</value>
+                <value>DIFFERENCE</value>
+                <value>DIFFERENCE_BY_PARAM</value>
+                <value>COUNT</value>
+                <value>EXP4J</value>
+                <value>MIN_MAX</value>
+            </validValues>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Type.
+SIGMOID - sigmoid. calculated for each input number. the parameter is used as an additional factor.
+SIGMOID_DERIVATIVE - derivative of a sigmoid. calculated for each input number. the parameter is used as an additional factor.
+SUM - sums up all incoming numbers.
+SUM_BY_PARAM - Outputs the result of adding the input value and parameter. calculated for each input number.
+ABS - displays the absolute (positive) value. calculated for each input number.
+MIN - displays the minimum number of all incoming.
+MIN_INDEX - Like MIN, but returns the sequence number of the message (starts at 0).
+MAX - displays the maximum number of all incoming.
+MAX_INDEX - Similar to MAX, but returns the sequence number of the message (starts at 0).
+MULTIPLY - Outputs the result of multiplying all incoming values.
+MULTIPLY_BY_PARAM - Outputs the result of multiplying the input value and parameter. calculated for each input number.
+AVERAGE - displays the average value - the sum of all values divided by the number.
+RMS - displays the rms value.
+DIFFERENCE - displays the difference between pairs of input values. computed for each pair of input numbers.
+DIFFERENCE_BY_PARAM - Outputs the difference between the input value and the parameter. calculated for each input number.
+COUNT - returns the number of input numbers.
+EXP4J - returns the result of the calculation of the formula. The library EXP4J is used. it is permissible to use variables in the formula. requires a minimum of 1 line. The first string value is considered as a formula. other lines as variable names in fomul. considers all numbers as values of variables in corresponding positions, if there are more values than variables, displays the result for each set of values. example: input values: 3 * sin (y) - 2 / (x - 2); x; y; 2.3; 3.14; 3.3; 4.14 answer: -6.66188870791721; -4.060289749112123.
+MIN_MAX - combines MIN and MAX, returns a number in a range. param - minimum value. param2 - maximum.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Тип.
+SIGMOID - сигмоид. вычисляется для каждого входящего числа. параметр используется как доп множитель.
+SIGMOID_DERIVATIVE - производная сигмоиды. вычисляется для каждого входящего числа. параметр используется как доп множитель.
+SUM - суммирует все входящего числа.
+SUM_BY_PARAM - выводит результат сложения входного значения и параметра. вычисляется для каждого входящего числа.
+ABS - выводит абсолютное (положительное) значение. вычисляется для каждого входящего числа.
+MIN - выводит минимальное число из всех входящих.
+MIN_INDEX - аналогичен MIN, но возвращает порядковый номер сообщения (начинается с 0).
+MAX - выводит максимальное число из всех входящих.
+MAX_INDEX - аналогичен MAX, но возвращает порядковый номер сообщения (начинается с 0).
+MULTIPLY - выводит результат перемножения всех входящих значения.
+MULTIPLY_BY_PARAM - выводит результат умножения входного значения и параметра. вычисляется для каждого входящего числа.
+AVERAGE - выводит среднее значение -сумма всех значений деленное на количество.
+RMS - выводит среднеквадратичное значение.
+DIFFERENCE - выводит разность между парами входящих значений. вычисляется для каждой пару входящих чисел.
+DIFFERENCE_BY_PARAM - выводит разность между входным значением и параметром. вычисляется для каждого входящего числа.
+COUNT - выдает количество входных чисел.
+EXP4J - выдает результат подсчета формулы. используется библиотека EXP4J. в формуле допустимо использовать переменных. требует минимум 1 строку. первое строковое значение рассматривает как формулу. остальные строки как имена переменных в фомуле. все числа рассматривает как значения переменных в соответствующих позициях, если значений больше переменных, выводит результат для каждого набора значений. пример: входящие значения: 3 * sin(y) - 2 / (x - 2);x;y;2.3;3.14;3.3;4.14 ответ: -6.66188870791721;-4.060289749112123.
+MIN_MAX - совмещает MIN и MAX, возвращает число в диапазоне. param - минимальное значение. param2 - максимальное.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>param</name>
+            <type>DOUBLE</type>
+            <value>1.0</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Param. depend on type.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Параметр. использование зависит от типа.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>param2</name>
+            <type>DOUBLE</type>
+            <value>1.0</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Param 2. depend on type.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Параметр 2. использование зависит от типа.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+    </typeSource>
+
+    <typeResult>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module provides a set of mathematical operations.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль предоставляет набор математических операций.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module provides a set of mathematical operations.
+    Set by type and parameter (not always needed).
+    return type / type depends on the operation.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль предоставляет набор математических операций.
+Задается типом и параметром (не всегда нужен).
+возвращаемые тип/тпиы зависят от операции.</value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>SUM</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>5</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>6</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>7</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>8</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>9</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>10</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>55</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAAEMAAABDCAYAAADHyrhzAAAABmJLR0QA/wD/AP+gvaeTAAAD10lEQVR4nO3YW4jVVRTH8c84jdN0sdEaCpmhi2UXAulCqUQZZKNdQMKKCuoleijwwSIJMqd66aXwISFESkILerCye1YPmg7k0M2HtIeKopgudKEoK2t62Hs4g/7nnH3m7HEI9hcO//85+7fWXv991n/vtTeFQqFQKBQKhUKhUCgUCoVCoTBhunBUE/ojWuirvQXbSWU+tmIDPsImdDSw6cfjLfT5EPpasJ8Ubsf3OCd+fwYjWDaOvg2rsV7jAavH2Vjbgn12luEf3Drmt7XYg5Mr9B14Fg9n6n8HejL5aokThIzYJ+397cIr2CxkRw7W4N5MvlriUeF1uD9BOx1vY7cwKLm4UsjCKeVU/C4MxukNtG3ChLofZ2WOozfGMC+z36Z4MQbxXoJ2TdTmmifGcnT0vXISfNflYiwX/uWR+FmHC3BSHZu/8QNmVLTPFlJ9JWZWtF8lLKFzx/E/M8bxXNITZKIdr2IbhtQG45342+UVNkfik6h7oKJ9HbbjgEMfqANPj+nn9XHiOiW2Dzb1NBlZEQP4vIHurqj7EyfW0S2Nun+FOaBNWHE2YwAv4IZxbC+LtvsSY2+p5K1iSbxua9Dnqni/Fd/W0b4m/LMLcK0wKF9LWzJHX5+/ErTZ6VJbRZbX0S1WS/HrE/w+GLVDeBPTEuPZGO12JOqzsiR2fgCz6uieiLr90jZui9QGr5ll8rNosynVIHWUU1gar0P4sY5uYbzuFjKpEYP4I96nvta9Qr0DHyTaZB2MlPmiU6242p7ot1vY48CliTaLxtzvTLTJxmlqqbywjq5vjK4/0fcGtUJuS6LN81H/pXx7nWTujJ0Pq59t56otlccm+L1IqDnmR7vvNH64buG1mqzKtiEvxc7XN9DNi7pvEnx24S0cJ8wVv0Tb0bORbtxcYTda6/yK4xP6yUonfosBXN1AO/qaVFWFbcJSe2a8fwrXjGl/WW0nPFqFHnyaNQ17o26VKWC0bhjW+HRqupDCb1S09astuYMO3WDdHdt/xoe4osLHTVHzrik6B30sBvBIon6ncJBzMLPxsVBhrqho78H7whnFJRXtnfhU2PjNSYwlO3uFQis1gAHsmoQ4VgtZVzVQh4U5QlZsbMLmDPwk75K3QJi3xtu0HRYGhFm+t0m7XcIym4M+fIHrMvlL4nzcg2Pi9xnCjvO2Cfi6EfdliKlH2IgtzuCrKfYIxdKFwmS1RdqBbxXtQpXYCnOFQ6VcGdbU8jMd5wnnA7cI88STE+x3RG3HOjwB+1nC1v4OfDXBGFqmQ8iKQqFQKBQKhUKhUCgUCoVCoVD4P/Af4MXPDlqVYVkAAAAASUVORK5CYII=</icon>
+
+</properties>

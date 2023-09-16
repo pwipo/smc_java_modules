@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Logic</uuid>
+    <provider>java</provider>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <className>ru.smcsystem.modules.module.Logic</className>
+    <categories>Java, Utils</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <validValues>
+                <value>AND</value>
+                <value>OR</value>
+                <value>NOT</value>
+            </validValues>
+            <value>AND</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>type of logical operation:
+AND - true if all sources have messages.
+OR - true if at least one source has messages.
+NOT - if the first source has no data - true. otherwise, a lie.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>тип логической операции:
+AND - истина если у всех источников есть сообщения.
+OR - истина если хотябы у одного источника есть сообщения.
+NOT - если у первого источника нет данных - истина. иначе - ложь.
+                    </value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeSource>
+
+    <typeResult>
+        <ValueType>INTEGER</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <useStorage>false</useStorage>
+
+    <threadSafe>true</threadSafe>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module allows logical operations on data.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль позволяет проводить логические операции над данными.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module allows logical operations on data.
+scheme of work.
+First, messages are converted to a logical representation:
+     If there are messages from the source - the truth.
+     otherwise, a lie.
+further relevant operations are carried out.
+if the result is true, returns 1. otherwise, returns nothing.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль позволяет проводить логические операции над данными.
+схема работы.
+сначала происходит конвертация сообщений в логическое представление:
+    Если есть сообщения от источника - истина.
+    иначе - ложь.
+далее проводятся соответствующие операции.
+если в результате получается истина, возвращает 1. иначе ничего не возвращает.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>First example. the first source has no data.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. у первого источника нет данных.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>NOT</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. the first source has no data.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. у первого источника нет данных.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>AND</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output/>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Third example. the second source has no data.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Третий пример. у второго источника нет данных.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>AND</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output/>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Fourth example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Четвертый пример.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>AND</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Fifth example. the second source has no data.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Пятый пример. у второго источника нет данных.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>OR</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>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</icon>
+
+</properties>

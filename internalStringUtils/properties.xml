@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>StringUtils</uuid>
+    <provider>javaInternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Utils, Text</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.StringUtil</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <validValues>
+                <value>JOIN</value>
+                <value>JOIN_INNER_WITH_TIME</value>
+                <value>SPLIT</value>
+                <value>SPLIT_REGEXP</value>
+                <value>APPEND</value>
+                <value>APPEND_FIRST</value>
+                <value>REPLACE</value>
+                <value>REPLACE_REGEXP</value>
+                <value>REPLACE_REGEXP_GROUP_ONE</value>
+                <value>CONTAIN</value>
+                <value>MATCH</value>
+                <value>PLACEHOLDERS</value>
+                <value>PLACEHOLDERS_OR_EMPTY</value>
+                <value>FILTER_SIZE</value>
+                <value>REGEXP_GROUP_ONE</value>
+                <value>ESCAPE_SQL</value>
+                <value>SIZE</value>
+                <value>IS_BLANK</value>
+                <value>IS_NOT_BLANK</value>
+                <value>FILTER</value>
+                <value>FILTER_ACTION</value>
+                <value>SUBSTRING</value>
+                <value>TRIM</value>
+                <value>REPLACE_REGEXP_MULTILINE</value>
+            </validValues>
+            <value>JOIN</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The action.
+types:
+    JOIN - combines all input values into one line. value is used as a delimiter.
+    JOIN_INNER_WITH_TIME - similar to JOIN, but combines only the values inside the action, returns a list of non-empty strings along with the time (value pairs: string and number)
+    SPLIT - splits input values. value is used as a separator if it is empty whitespace characters are used.
+    SPLIT_REGEXP - similar to SPLIT, but a regular expression is used as a delimiter.
+    APPEND - adds value to the end of input values.
+    APPEND_FIRST - Adds value to the beginning of input values.
+    REPLACE - replaces the first part of value in the input values with the second. format value: search_string :: replacement.
+    REPLACE_REGEXP - Similar to REPLACE, but using a regular expression. if there is a controlled execution context, it uses it: it starts with the parameter found with the value for replacement, the response is used as a replacement.
+    REPLACE_REGEXP_GROUP_ONE - similar to REPLACE_REGEXP, but only replaces the value in the first group (what is in the first quotes). the search string in value must contain (). if there is a managed execution context, it uses it: it starts with the parameter found with the value for replacement, the response is used as a replacement.  
+    CONTAIN - compares input values and strings in value. returns the row ordinal in value for the first match found. if there are no matches, nothing is returned. format value: string1 :: string2 :: string3 ...
+    MATCH - is similar to CONTAIN, but a regular expression is used.
+    PLACEHOLDERS - substitutes the input values into the template (value). the format used is the MessageFormat format. example: something there {0} somehow there {1}. for the place {0} the first input value is substituted, for the place {1} the second.
+    PLACEHOLDERS_OR_EMPTY - similar to PLACEHOLDERS, but if the input values are less than expected, nothing will be returned.
+    FILTER_SIZE - skips only values with a length - value characters or more. excess characters are chopped off.
+    REGEXP_GROUP_ONE - Searches for input values using a regular expression. displays the first group (what is in the first quotation marks) in the found lines. value must contain ().
+    ESCAPE_SQL - Performs line replacements to prevent SQL injection.
+    SIZE - returns the number of characters in a string.
+    IS_BLANK - if the empty string returns 1.
+    IS_NOT_BLANK - if the string is not empty returns 1.
+    FILTER - using regular expressions from value (separated by: :) returns only found ones.
+    FILTER_ACTION - Similar to FILTER, but returns all messages of the action in which the message was found.
+    SUBSTRING - gets a substring from the value of each incoming message (numbers are converted to text). The returned substring starts at the start position and ends before the end position (if not specified, it returns to the end). value stores the starting and ending positions (may not be specified) separated by ::, for example, 1::4. positions can be negative.
+    TRIM - removes whitespace at the beginning and end of each message.
+    REPLACE_REGEXP_MULTILINE - Similar to REPLACE_REGEXP, but MULTILINE mode is used.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Тип действия.
+типы:
+    JOIN - объединяет все входящие значения в одну строку. в качестве разделителя используется value.
+    JOIN_INNER_WITH_TIME - аналогичен JOIN, но объединяет только значения внутри действия, возвращает список не пустых строк вместе со временем (пары значений: строка и число)
+    SPLIT - разделяет входящие значения. в качестве разделителя используется value, если оно пусто используются пробельные символя.
+    SPLIT_REGEXP - аналогично SPLIT, но в качестве разделителя используются регулярное выражение.
+    APPEND - добавялет в конец входящих значений value.
+    APPEND_FIRST - добавялет в начало входящих значений value.
+    REPLACE - заменяет во входящих значениях первую часть value на вторую. формат value: искомая_строка::замена.
+    REPLACE_REGEXP - аналогично REPLACE, но используются регулярное выражение. если есть управляемый контекст исполнения то использует его: запускает с параметром, найденным значением для замены, ответ использует в качетве замены.
+    REPLACE_REGEXP_GROUP_ONE - аналогично REPLACE_REGEXP, но заменяет только значение в первой группе (то что в первых кавычках). искомая строка в value обязана содержать (). если есть управляемый контекст исполнения то использует его: запускает с параметром, найденным значением для замены, ответ использует в качетве замены.
+    CONTAIN - производит сравнение входящих значений и строк в value. выдает порядковый номер строки в value для первого найденного совпадения. если совпадений нет, ничего не выдает. формат value: строка1::строка2::строка3...
+    MATCH - аналогично CONTAIN, но используются регулярное выражение.
+    PLACEHOLDERS - подставляет в шаблон (value) входящие значения. в качестве формата используется MessageFormat формат. пример: что то там {0} как то там {1}. за место {0} подставляется первое входящее значение, за место {1} второе.
+    PLACEHOLDERS_OR_EMPTY - аналогичен PLACEHOLDERS, но если входящих значений будет меньше ожидаемых, ничего не вернет.
+    FILTER_SIZE - пропускает только значения имеющие длину - value символов или больше. лишнее символы обрубаются.
+    REGEXP_GROUP_ONE - производит поиск во входящих значениях с помощью регуляного выражения. выводит первую группу (то что в первых кавычках) в найденых строках. value обязан содержать ().
+    ESCAPE_SQL - производит замены в строке для предотвращения внедрения SQL.
+    SIZE - возвращает количество символов в строке.
+    IS_BLANK - если строка пустая возвращает 1.
+    IS_NOT_BLANK - если строка не пустая возвращает 1.
+    FILTER - используя регулярные выражения из value (разделенные ::) возвращает только найденные.
+    FILTER_ACTION - аналогично FILTER, но возвращает все сообщения действия, в котором было найдено сообщение.
+    SUBSTRING - получает подстроку из значения каждого входящего сообщеня (числа преобразуются в текст). Возвращенная подстрока начинается с символа в начальной позиции и заканчивается перед конечной позицией (если не задана, то возвращает до конца). в value хранятся начальная и конечная позиция (может быть не задана) раздаленные :: , пример - 1::4. позиции могут быть отрицательными.
+    TRIM - удаляет пробельные символы в начале и в конце каждого сообщения.
+    REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но используются режим MULTILINE.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>value</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>String value. used depending on the type of action chosen.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Строковое значение. используется в зависимости от выбранного типа действия.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>BYTES</ValueType>
+        <ValueType>STRING</ValueType>
+    </typeSource>
+    <typeResult>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>STRING</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>1</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module provides string handling tools like StringUtils.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль предоставляет средства работы со строками подобно StringUtils.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module provides string handling tools like StringUtils.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль предоставляет средства работы со строками подобно StringUtils.</value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example. join.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. объединение.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>value</name>
+                    <value> , </value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>one</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>two</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>two</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>one , two , free</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. split.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. расщепление.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>SPLIT</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>one two free</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>one</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>two</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>free</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The third example. adding value</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Третий пример. добавление значения.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>APPEND</value>
+                </setting>
+                <setting>
+                    <name>value</name>
+                    <value> hi</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>house</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>dog</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>house hi</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>dog hi</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Fourth example. substitution of parameters.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Четвертый пример. подстановка параметров.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>PLACEHOLDERS</value>
+                </setting>
+                <setting>
+                    <name>value</name>
+                    <value>one {0} two {1} three {2}</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>one 1 two 2 three 3</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The fifth example. search using regular expression.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Пятый пример. поиск с помощью регулярного выражения.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>REGEXP_GROUP_ONE</value>
+                </setting>
+                <setting>
+                    <name>value</name>
+                    <value>12 (\S+) 345</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>12 test1 345 12 test2 345</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>1234567890</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>123</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>34512 test3 345</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>test1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>test2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>test3</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Sixth example. replacement.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Шестой пример. замена.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>REPLACE_REGEXP</value>
+                </setting>
+                <setting>
+                    <name>value</name>
+                    <value>/files::</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>/files/1.txt</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>house</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>dog</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>/1.txt</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>house</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>dog</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Seventh example. substring.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Седьмой пример. подстрока.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>SUBSTRING</value>
+                </setting>
+                <setting>
+                    <name>value</name>
+                    <value>1::3</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>one</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>two</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>three</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>ne</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>wo</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>hr</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAADEAAAAxCAYAAABznEEcAAAABmJLR0QA/wD/AP+gvaeTAAAC2ElEQVRoge3aP4gVVxTH8Y/ZFWOiRYIbYdeoKEhSWCgEWbZRiDaCmNYNioWWiiIkTRBhC4UFE6yM1eqaFAFlI4QUohtSqPEPiIWCKBYqaGMsNKiEtTgz7DD79q3z3ux7g7wvXGbm3Dsz58fcf3PuhRuYyKU3GFQtBoVfeV+vd2MN7uJiUvgjfIvVrfezLqvRjVG8TGwbsHaOUHMSO5KMXjzCFYy31s+6rMc69OFxYhvB9u46N61LUuVJRSzEiuT8s+T4Ew613KPpOYi9WIoPE9vCNLNWY5nAUGt9nJEhtf1804X7omHPE/XtGM7jBJ63w9tpuIcXuCmq+VXRyI9nCw0LZT2t9q4gPcLP4dTwQft8KY96vVMtvhTjyGzyP24lx3eiiIgtGCvqUYP8oEDHUkTEouT4s+gMZoP5oitdNFPBLEWrE/xq9kbyT4SIQjQiIkuPzICT4yFeJ+dzsEztjuSVmOY0TDMi1uIfdE2TPy4maPAj9tR51g4xf2uIZkT0CQFjuJPLGxTTg5TPxVc5miv3KXblyham2eoEp/FbzjYgZsNZXuH7nG2VENEUjYj4Bf8pd7zYh50aHHyLiPgbf2FBcv0Mt3G5kRcnPBDVcUnG9gS/F3lIERF3xY9JmbzG1mYf8l7MnToiqkJHRFXoiKgKHRFVoSOiKnREVIWOiKpQxu/pbnyXs/WaXAhJ+VgEhbOMYX+zDpQh4mssx4WM7T7+zFyPmhra+QqbVUQEEQTYWCf/TJKyXBbBsqbptIkM83Ct4D1faDLyl1KGiHMm1/uKcAd/lPD+UkScSlLb6BIhx0ERjukTK5MDoof5t32uTWE5DmCTWLObi5VYzHuwetotqtRZoZJYx74kIn2ldIElkUYe+/E0OR/GN4SakUzhXrUVVyVlA9UjmKjXsKu6t2MKqYh+k4vaabR73NRQfDs5LEQcMbnLpj/NvK72fqdtrfVxRqbd7/QWg0C+WaoeY/0AAAAASUVORK5CYII=</icon>
+
+</properties>

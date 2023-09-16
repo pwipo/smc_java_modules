@@ -1,0 +1,731 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Get</uuid>
+    <provider>javaInternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Utils</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.Get</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>processingType</name>
+            <type>STRING</type>
+            <validValues>
+                <value>EACH_ACTION</value>
+                <value>EACH_SOURCE</value>
+                <value>ALL</value>
+            </validValues>
+            <value>EACH_ACTION</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Processing Type:
+EACH_ACTION - processes each action separately.
+EACH_SOURCE - processes each source separately.
+ALL - processes the message from all sources together.
+Not used for SOURCE_ID and SOURCE_ID_EMPTY_OR_ERRORS.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Тип обработки:
+EACH_ACTION - обрабатывает каждое дейстие отдельно.
+EACH_SOURCE - обрабатывает каждый источник отдельно.
+ALL - обрабатывает сообщение от всех источников вместе.
+Не используется для SOURCE_ID и SOURCE_ID_EMPTY_OR_ERRORS.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <validValues>
+                <value>WORK_DATA</value>
+                <value>DATA</value>
+                <value>ERROR</value>
+                <value>DATA_AND_ERROR</value>
+                <value>ALL</value>
+                <value>RANDOM</value>
+                <value>SOURCE_ID</value>
+                <value>SOURCE_ID_EMPTY_OR_ERRORS</value>
+            </validValues>
+            <value>WORK_DATA</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Operation types:
+WORK_DATA - processes data messages from the module. discards data if it was in a command or action where errors were encountered.
+DATA - processes data messages from the module.
+ERROR - processes messages with errors from the module.
+DATA_AND_ERROR - Handles all messages from the module.
+ALL - processes all messages, including messages from the system.
+RANDOM - processes data messages from the module. returns 1 or more random messages from each action (if ids is set, then it takes the number from there, otherwise 1).
+SOURCE_ID - returns numbers of sources (numbered starting from 0), which contain data and no errors.
+SOURCE_ID_EMPTY_OR_ERRORS - returns source numbers (numbered starting from 0) that have no data or errors.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Типы операции:
+WORK_DATA - обрабатывает сообщения с данными от модуля. отбразывает данные, если они были в комаде или действии, где встречались ошибки.
+DATA - обрабатывает сообщения с данными от модуля.
+ERROR - обрабатывает сообщения с ошибками от модуля.
+DATA_AND_ERROR - обрабатывает все сообщения от модуля.
+ALL - обрабатывает все сообщения, включая сообщения от системы.
+RANDOM - обрабатывает сообщения с данными от модуля. из каждого действия возвращает 1 или более случайных сообщения (если установлен ids, то берет количество от туда, иначе 1).
+SOURCE_ID - возвращает номера источников (нумерация с 0), в которых есть данные и нет ошибок.
+SOURCE_ID_EMPTY_OR_ERRORS - возвращает номера источников (нумерация с 0), в которых нет данные или есть ошибки.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>valueType</name>
+            <type>STRING</type>
+            <validValues>
+                <value>ALL</value>
+                <value>STRING</value>
+                <value>BYTE</value>
+                <value>SHORT</value>
+                <value>INTEGER</value>
+                <value>LONG</value>
+                <value>BIG_INTEGER</value>
+                <value>FLOAT</value>
+                <value>DOUBLE</value>
+                <value>BIG_DECIMAL</value>
+                <value>BYTES</value>
+                <value>NUMBER</value>
+                <value>BYTES_SIZE</value>
+            </validValues>
+            <value>ALL</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Type input values.
+ALL - Processes all values.
+BYTES SIZE - Only handles byte arrays. returns their sizes.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Типы входящих значений.
+ALL - обрабатывает все значения.
+BYTES_SIZE - обрабатывает только байтовые масивы. возвращает их размеры.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>ids</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>List of message positions in action to be received. id1,id2,id3:id4,-id1,id1:-id2. start from 0. If empty, displays all.
+If empty, prints everything. If the RANDOM type, then only 1 digit is needed - the number of received data.
+Not used for SOURCE_ID and SOURCE_ID_EMPTY_OR_ERRORS.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Список позиций сообщений в действии, которые надо получить. формат id1,id2,id3:id4,-id1,id1:-id2. начинается с 0.
+Если пусто, выводит все. Если тип RANDOM то нужна только 1 цифра - количетво получаемых данных.
+Не используется для SOURCE_ID и SOURCE_ID_EMPTY_OR_ERRORS.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>defaultValueType</name>
+            <type>STRING</type>
+            <validValues>
+                <value>STATIC</value>
+                <value>DYNAMIC</value>
+            </validValues>
+            <value>STATIC</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Determines how defaultValues will be interpreted:
+STATIC - Works as described in defaultValues.
+DYNAMIC - in this case all values are positions in incoming values, i.e. not these numbers are substituted, but the values from the sources. otherwise works the same. works only in a situation when there are positions in ids that are not in the sources (not enough data, see an example).
+Not used for SOURCE_ID and SOURCE_ID_EMPTY_OR_ERRORS.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Определяет как будет трактоваться defaultValues:
+STATIC - работает как описано в defaultValues.
+DYNAMIC - в этом случае все значения представляют собой позиции во входящих значениях, т.е. подставляются не эти цифры, а значения из источников. в остальном работает так же. работает только в ситуации когда в ids есть позиции, которых нет в источников (не достаточно данных, смотри пример).
+Не используется для SOURCE_ID и SOURCE_ID_EMPTY_OR_ERRORS.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>defaultValues</name>
+            <type>STRING</type>
+            <value></value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Default list of values. Format: value_1::value_2::...
+The values are automatically converted.
+If empty, not used.
+Works in two modes:
+    If ids is empty and there are no inputs, returns all default values.
+    If ids is not empty, then for each id (one or a pair), if there is no input value, the corresponding default value (in the same position) is searched for. if found, returns it.
+Not used for SOURCE_ID and SOURCE_ID_EMPTY_OR_ERRORS.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Список значений по умолчаниию. Формат: значение_1::значение_2::...
+Значения автоматически конвертируются.
+Если пусто, не используется.
+Работает в двух режимах:
+    Если ids пусто, и нет входящих значений, возвращает все значения по умолчанию.
+    Если ids не пусто, то для каждого id (одного или пары), если нет входного значения, ищется соответствующее значение по умолчанию (в той же позиции). если найдено, возвращает его.
+Не используется для SOURCE_ID и SOURCE_ID_EMPTY_OR_ERRORS.
+                    </value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>BYTE</ValueType>
+        <ValueType>BYTES</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>STRING</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+    </typeSource>
+    <typeResult>
+        <ValueType>BYTE</ValueType>
+        <ValueType>BYTES</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>STRING</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module allows you to get items in specified positions from sources.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль позволяет получить элементы в указанных позициях из источников.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module receives messages from sources.
+You can only receive messages in the specified positions, for this you need to fill in ids.
+The processing type is determined by processingType.
+If valueType is not ALL, first filters the incoming values to match the type.
+It is possible to use default values by setting defaultValues.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль получает сообщения из источников.
+Можно получать только сообщения в указанных позициях, для этого надо заполнить ids.
+Тип обработки определяется processingType.
+Если valueType не ALL, в начале фильтрует входящие значения на соответствие типу.
+Есть возможность использовать значения по умолчанию, настройка defaultValues.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>First example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>processingType</name>
+                    <value>EACH_SOURCE</value>
+                </setting>
+                <setting>
+                    <name>ids</name>
+                    <value>1,4</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                            </messages>
+                        </action>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>5</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>6</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>ids</name>
+                    <value>0, 3:4, 3:1, -1:-2, -3:-2</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>DOUBLE</type>
+                                    <value>5.3</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>6</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>7</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>8</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>9</value>
+                                </message>
+                            </messages>
+                        </action>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>11</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>12</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>13</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>14</value>
+                                </message>
+                                <message>
+                                    <type>DOUBLE</type>
+                                    <value>15.3</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>16</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>17</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>18</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>19</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>DOUBLE</type>
+                    <value>5.3</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>9</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>8</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>7</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>8</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>11</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>14</value>
+                </message>
+                <message>
+                    <type>DOUBLE</type>
+                    <value>15.3</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>14</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>13</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>12</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>19</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>18</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>17</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>18</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Using default values.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Использование значений по умолчанию.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>ids</name>
+                    <value>1,5</value>
+                </setting>
+                <setting>
+                    <name>defaultValues</name>
+                    <value>1::default_value</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>default_value</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Using default values dynamically.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Использование значений по умолчанию динамически.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>ids</name>
+                    <value>1,5</value>
+                </setting>
+                <setting>
+                    <name>defaultValues</name>
+                    <value>2::0</value>
+                </setting>
+                <setting>
+                    <name>defaultValueType</name>
+                    <value>DYNAMIC</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>1</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Getting numbers of sources with data without errors.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Получение номеров источников с данными без ошибок.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>SOURCE_ID</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+                <source>
+                    <actions/>
+                </source>
+                <source>
+                    <actions>
+                        <action>
+                            <messages/>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>0</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>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</icon>
+
+</properties>

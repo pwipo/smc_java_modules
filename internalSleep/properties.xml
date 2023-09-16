@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Sleep</uuid>
+    <provider>java</provider>
+    <ver>1.1.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <className>ru.smcsystem.modules.module.Sleep</className>
+    <categories>Java, Utils</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <validValues>
+                <value>FIXED</value>
+                <value>FLEXIBLE</value>
+                <value>NEW_MINUTE</value>
+                <value>NEW_HOUR</value>
+            </validValues>
+            <value>FIXED</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Kind of work.
+FIXED - Falls asleep for a given number of milliseconds.
+FLEXIBLE - Falls asleep for a given number of milliseconds minus the time elapsed since the last launch. for example: a value of 1000, 200 milliseconds have passed since the last launch, it will fall asleep for 800 milliseconds.
+NEW_MINUTE - falls asleep before the start of a new minute (the number of skipped minutes is determined by the value).
+NEW_HOUR - falls asleep before the start of a new hour (the number of missed hours is determined by the value).
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Тип работы.
+FIXED - засыпает на заданное количество милисекунд.
+FLEXIBLE - засыпает на заданное количество милисекунд минус время прошедшее с прошлого запуска. например: значение 1000, с прошлого запуска прошло 200 милисекунд, заснет на 800 милисекунд.
+NEW_MINUTE - засыпает до начала новой минуты (количество пропушенных минут определяется значением).
+NEW_HOUR - засыпает до начала нового часа (количество пропушенных часов определяется значением).
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>value</name>
+            <type>LONG</type>
+            <value>1000</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The value depends on the type of work.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Значение, зависит от типа работы.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>0</maxCountSources>
+
+    <typeSource/>
+
+    <typeResult>
+        <ValueType>LONG</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <useStorage>false</useStorage>
+
+    <threadSafe>true</threadSafe>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module allows you to pause the execution of the current thread (fall asleep).</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль позволяет приостановить на время выполнение текущего потока (заснуть).</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module allows you to pause the execution of the current thread (fall asleep).
+Sleep mode is determined by the parameters. Returns the number of milliseconds spent in a dream.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль позволяет приостановить на время выполнение текущего потока (заснуть).
+Режим сна определяется параметрами. Возвращает количество милисекунд проведенных во сне.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>First example. Sleep on one second.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. засыпает на 1 секунду.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>LONG</type>
+                    <value>1000</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>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</icon>
+
+</properties>

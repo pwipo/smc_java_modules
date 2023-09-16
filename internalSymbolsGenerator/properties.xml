@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>SymbolsGenerator</uuid>
+    <provider>javaInternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Utils</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.modules.internalSymbolsGenerator.SymbolsGenerator</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>sizeNumber</name>
+            <type>INTEGER</type>
+            <value>8</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Size numbers.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>число цифр.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>sizeAlphaUp</name>
+            <type>INTEGER</type>
+            <value>8</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Size uppercase letters.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>число прописные буквы.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>sizeAlphaLow</name>
+            <type>INTEGER</type>
+            <value>8</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Size lowercase letters.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>число строчные буквы.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>sizeNonAlphaNum</name>
+            <type>INTEGER</type>
+            <value>8</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Size other letters.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>число прочих символов.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+    </typeSource>
+    <typeResult>
+        <ValueType>STRING</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>Generates a sequence of characters.
+can use the incoming stream to get 4 values: the size of numbers, the size of uppercase characters, the size of lowercase characters, the size of other characters.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Генерирует последовательность символов.
+может использовать входящий поток для получения 4 значений: размер цифр, размер прописных символов, размер строчных символов, размер прочих символов.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>Specify the size of characters of different types: numbers, uppercase, lowercase, other.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Укажите размер символов разных типов: цифры, прописные, строчные, другие</value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>sizeNumber</name>
+                    <value>5</value>
+                </setting>
+                <setting>
+                    <name>sizeAlphaUp</name>
+                    <value>5</value>
+                </setting>
+                <setting>
+                    <name>sizeAlphaLow</name>
+                    <value>5</value>
+                </setting>
+                <setting>
+                    <name>sizeNonAlphaNum</name>
+                    <value>2</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>}F5OuWO8328'azmNn</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>5</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>5</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>6yy6.A8aJ8h[3m</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

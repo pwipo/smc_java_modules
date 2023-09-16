@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Switch</uuid>
+    <provider>javaFlowController</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, FlowController</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.modules.flowControllerSwitch.Switch</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>isNeedReturnDataFromLast</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>If set, then when triggered, returns data from the last managed context.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Если установлен, то при срабатывании, возвращает данные из последнего управляемого контекста.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>patterns</name>
+            <type>STRING</type>
+            <value></value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>a list of regular expressions. if not empty then compares input values and regular expressions. the sequence number of the first matched regular expression is used as the number of the executable context for the subsequent transition. value format: string1 :: string2 :: string3 ...</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>список регулярных выражений. если не пусто то производит сравнение входящих значений и регулярных выражений. порядковый номер первого совпавшего регуляроного выражения используется как номер исполняемого контекста для последующего перехода.формат value: строка1::строка2::строка3...</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <minManagedExecutionContexts>1</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>-1</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <typeResult>
+        <ValueType>STRING</ValueType>
+    </typeResult>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>A module works like a switch.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль работает подобно switch.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>A module works like a switch.
+Looks through all incoming messages in a loop.
+If the patterns field is empty, only digital messages are received. otherwise, it compares the input values with regular expressions; the ordinal of the first matched regular expression is used later.
+If the number corresponds to any managed execution context, then it starts it.
+If isNeedReturnDataFromLast is set, returns the response from the executed context.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль работает подобно switch.
+В цикле смотрит все входящие сообшения.
+Если поле patterns пусто то получает только цифровые сообщения. иначе сравнивает входящие значения с регулярными выражениями, порядковый номер первого совпавшего регуляроного выражения используется в дальнейшем.
+Если число соответствует какому либо управляемому контексту исполнения, то запускает его.
+Если установлен isNeedReturnDataFromLast, возвращает ответ от испольненного контекста.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example. launches a second managed execution context.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. запускает второй управляемый контекст исполнения.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output/>
+            <countManagedExecutionContexts>3</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. Launches the first and third execution context.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. Запускает первый и третий контекст исполнения.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>patterns</name>
+                    <value>str1::str2::val.*</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>str1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output/>
+            <countManagedExecutionContexts>3</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAABkklEQVRoge2aQW7CMBBFn3qHIqBHCkfoMWh7AHotKhWkVoWs2kXPUeiCruhiHAlFJBk7duLFPMkrhvh/O2Y8GsAwjFAWwBr4Bc4jj6PTUviaeM5AfNNYaU0s3BdOwBKY+a5CAmbAA6LpjHJnXlzwMp2uYB4RbWtN8NEFT1MqCmSKaDtogqt3cWg2QAlMOuLU+sYysnPzftFuJnsjt8Cnm/ub5h+ZqEYmwBvwqtOoZoLsSNvORDNyOdmHl0wdXWaiGNGsWBvbi+drx95DnyqwrwnIwEj9IKbMMV1z9TJS4r+S2wATyQ97iJFNAhNN+tSBMc5HF3vl87M47G28M+AVRZt9U5IkIe766/Im+hWlRF6Hocn+0qjlqr6bEYQkIScj2sJKjRVWPbHCqgkrrBSMXo/EMAEZGLHCyhMrrLSBVlh5YIVVaKAVVpFQGzm4wBxabnXuEG0/9Q+u1SNVJr1PqSiQSlOpCS4Q1yekZzdPJMqHOfAE/CHa1G3qFf4JcKihbk9XFEj3tGqOjjmC/zBgGIbwD0pN+bEelrPsAAAAAElFTkSuQmCC</icon>
+
+</properties>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>OrderingExecutor</uuid>
+    <provider>javaFlowController</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, FlowController</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.modules.flowControllerOrderingExecutor.OrderingExecutor</className>
+    <ver>1.1.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>executionType</name>
+            <type>STRING</type>
+            <value>now</value>
+            <validValues>
+                <value>now</value>
+                <value>later</value>
+                <value>parallel</value>
+                <value>parallel_wait</value>
+            </validValues>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Тип запуска</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Execution type</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <value>execute</value>
+            <validValues>
+                <value>start</value>
+                <value>execute</value>
+                <value>stop</value>
+                <value>update</value>
+            </validValues>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Тип команды</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Command type</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>isNeedReturnDataFromLast</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>If set, then when triggered, returns data from the last managed context.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Если установлен, то при срабатывании, возвращает данные из последнего управляемого контекста.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>breakWhenError</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>If set, then if an error occurs in the executed managed context, it stops immediately. equivalent to break.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Если установлен, то при ошибке в выполненном управляемом контексте, сразу останавливается. эквивалентно break.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>breakWhenNoDataFromPrev</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>If installed and if the previous configuration did not return data, stop execution.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Если установлен и если прошлая конфигурация не вернула данных - прекращать выполнение.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <minManagedExecutionContexts>1</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>-1</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module starts all managed configurations in order.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль по порядку запускает все управляемые конфигурации.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module starts all managed configurations in order. It can execute managed contexts immediately or put in a queue.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль по порядку запускает все управляемые конфигурации. Может исполнять управляемые контексты сразу или ставить в очередь.</value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example. starts all managed execution contexts in turn.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. запускает по очереди все управляемые контексты исполнения.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources/>
+            <output/>
+            <countManagedExecutionContexts>2</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAACPklEQVRYhb3XTUiUQRgH8F+2WqF2Svo6RJGp0BcEUhoWQqeCLkF171bXrn1cCjp2S4ouQYfoEFEQFEliRlBSdOhkoUHkpSIjlfDtMLPuy7auu+76/uFh3mHmmf//nWc+nqE69ETLYxizmMRrDOAUWqsct2JMRstjCEkJ+42baK+V8DQ+YVesn4iWRjM6cRgX8CYlZBbXsHqpAs7FQQ5U6deBe5iLQkawsVLndpxFY6w3lum7GPZjLIqYwO5KnG5Fh0M1EKexDoMpERsWc9iCM8jVSQA0pUSMYFWpTj3YU0fSYqxTCMfl4sYcpvF5GQUQFvMcfomhWBkb5vAdD/FhGQV8Ebb0XmH7PlpGrgXRKYRhCi3QJ/z51gxFvI0iTjbgII4J05IVHsSyHxqwI0PyPHGCVxnzzqMjCvgGd3EnYwGtUcB0DvsyJv8Pa6JlifkQ5PAnY3LYHMuxBuHWm8DRDAX0xfJdg7ANm9V271eL47F8liHnPLoUHcVZ434UMFDcMKx0hpu3oTqQ9wo37wy2FTeWI0/wokbyNiHDTnC1VIc02VMLpE1LRJPwA4kw0yXHzpN/jeUTrK0DeVuKfFyZpDQvYKdwSST4iO4ayHsVpn1c4YFTVgAhOXkf639xW3XPrC6F1Z7gpQrS8bQAQpwuCslqIqzeQZwXTrL1sU+LkGb14xJGU2PN4IoK11OxgDy24zp+Kr9L0jaFG0pstWKsSH3nX7p9C/RtxRHh7ujGJiHXz+GHEOtRPMfjKGJR/ANnxabWC/VODAAAAABJRU5ErkJggg==</icon>
+
+</properties>

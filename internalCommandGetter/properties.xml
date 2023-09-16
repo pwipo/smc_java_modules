@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>CommandGetter</uuid>
+    <provider>javaInternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <className>ru.smcsystem.smcmodules.module.message.getter.CommandGetter</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>15-01-2022</date>
+    <categories>Java, Utils</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+
+    <defaultSettings/>
+
+    <minCountSources>2</minCountSources>
+    <maxCountSources>2</maxCountSources>
+
+    <typeSource>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeSource>
+
+    <typeResult>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module allows you to work with the source as a list and display its messages as an object containing time and value or as a list of lists, one for each command.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль позволяет работать с источником как со списком и выводить его сообщения в виде объекта содержащего время и значение или как список списков, по одному на каждую команду.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module allows you to work with the source as a list and display its messages as an object containing time and value or as a list of lists, one for each command.
+Uses the object serialization format. 2 types:
+    - array of objects with fields: date (number, UNIX time) and value (any type).
+    - an array of objects with fields: date (number, UNIX time) and values (an array of values of any type).
+It accepts 2 sources as input:
+    1 - commands
+    2 - message source
+command format:
+    number of commands (message sets), format:
+        number - 1
+    print all messages, format:
+        number - 2
+    display messages from commands (message sets) located in position from-to, format:
+        number - 3
+        number - the position of the first command in the list - included in the output
+        number - position of the last command in the list - number - not included in the output, format:
+    output messages from the last N commands (message sets):
+        number - 4
+        number - number of last commands
+    display only non-empty commands for execution, created in the specified time period and containing the specified values (messages). the result is returned in the format of a list of lists, the format is:
+        number - 5
+        number - time, from, in UNIX format.
+        number - time, before, in UNIX format.
+        number - number of values, can be 0.
+        for each value:
+             any type - values.
+         number - optional - the number of processed elements at a time - by default 1000. The module requests this number at a time, and then searches in them. affects performance.
+    similar to 2, but the result is returned in the format of a list of message lists, the format is:
+        number - 6
+    similar to 3, but the result is returned in the format of a list of message lists, the format is:
+        number - 7
+        number - the position of the first command in the list - included in the output
+        number - the position of the last command in the list - number - is not included in the output.
+    similar to 4, but the result is returned in the format of a list of message lists, the format is:
+        number - 8
+        number - number of last commands
+    similar to 8, but only non-empty commands for execution are considered, format:
+        number - 9
+        number - number of last commands
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль позволяет работать с источником как со списком и выводить его сообщения в виде объекта содержащего время и значение или как список списков, по одному на каждую команду.
+Использует формат сериализации объектов. 2 типа:
+    - массив объектов с полями: date (число, время UNIX) и value (любой тип).
+    - массив объектов с полями: date (число, время UNIX) и values (массив значений любого типа).
+На вход принимает 2 источника:
+    1 - команды
+    2 - источник сообщений
+формат команд:
+    количество команд (наборов сообщений), формат:
+        число - 1
+    вывести все сообщения, формат:
+        число - 2
+    вывести сообщения из команд (наборов сообщений), находящихся в позиции с-до, формат:
+        число - 3
+        число - позиция первой команды в списке - включается в вывод
+        число - позиция последней команды в списке - число - не включается в вывод, формат:
+    вывести сообщения из последних N команд (наборов сообщений):
+        число - 4
+        число - количество последних команд
+    вывести только непустые команды на исполнение (EXECUTE), созданные в указанный период времени и содержащий указанные значения (сообщения). результат возвращает в формате списка списков, формат:
+        число - 5
+        число - время, от, в формате UNIX.
+        число - время, до, в формате UNIX.
+        число - количество значений, может быть 0.
+        для каждого значения:
+            любой тип - значения.
+        число - опционально - количество обрабатываемых элементов за раз - по умолчанию 1000. такое количество модуль запрашивает за раз, и дальше производит в них поиск. влияет на производительность.
+    аналогичен 2, но результат возвращает в формате списка списков сообщений, формат:
+        число - 6
+    аналогичен 3, но результат возвращает в формате списка списков сообщений, формат:
+        число - 7
+        число - позиция первой команды в списке - включается в вывод
+        число - позиция последней команды в списке - число - не включается в вывод.
+    аналогичен 4, но результат возвращает в формате списка списков сообщений, формат:
+        число - 8
+        число - количество последних команд
+    аналогичен 8, но считаются только непустые команды на исполнение (EXECUTE), формат:
+        число - 9
+        число - количество последних команд
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. Вывести количество команд.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. Вывести все сообщения.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>date</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>11111111111</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>date</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>11111111111</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>date</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>11111111111</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Comparator</uuid>
+    <provider>javaInternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Utils</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.Comparator</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>moreResult</name>
+            <type>STRING</type>
+            <value>1</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The answer is when the first value is greater than the second. if empty, displays nothing. can be of any type. the Base64 format is used for the byte array.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Ответ когда первое значение больше второго. если пусто - не выводит ничего. может быть любого типа. для массива байтов применяется формат Base64.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>lessResult</name>
+            <type>STRING</type>
+            <value>-1</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The answer is when the second value is greater than the first. if empty, displays nothing. can be of any type. the Base64 format is used for the byte array.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Ответ когда второе значение больше первого. если пусто - не выводит ничего. может быть любого типа. для массива байтов применяется формат Base64.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>equalsResult</name>
+            <type>STRING</type>
+            <value>0</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The answer is when the values are equal. if empty, displays nothing. if empty, displays nothing. can be of any type. the Base64 format is used for the byte array.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Ответ когда значения равны. если пусто - не выводит ничего. может быть любого типа. для массива байтов применяется формат Base64.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>useValue</name>
+            <type>STRING</type>
+            <value>false</value>
+            <validValues>
+                <value>false</value>
+                <value>true</value>
+            </validValues>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Использовать ли значение (value), если да то оно выступает в качестве первого значения.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Whether to use the value (value), if yes then it acts as the first value.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>value</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>value for compare. can be of any type. the Base64 format is used for the byte array.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>значение для сравнения. может быть любого типа. для массива байтов применяется формат Base64.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>BYTE</ValueType>
+        <ValueType>BYTES</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>STRING</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+    </typeSource>
+
+    <typeResult>
+        <ValueType>BYTE</ValueType>
+        <ValueType>BYTES</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>STRING</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module compares pairs of values of all types.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль сравнивает пары значений всех типов.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module compares pairs of values of all types.
+if the type classes do not match (string, number, byte array) then they are compared as strings.
+if a value is used for comparison, it is compared with it.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль сравнивает пары значений всех типов.
+если классы типов не совпадают (строка, число, массив байт) то сравниваются как строки.
+если используется значение для сравнения, то сравнивается с ним.</value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>5</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>DOUBLE</type>
+                                    <value>7.1</value>
+                                </message>
+                                <message>
+                                    <type>DOUBLE</type>
+                                    <value>12.1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test2</value>
+                                </message>
+                                <message>
+                                    <type>BYTES</type>
+                                    <value>AQIDBAUG</value>
+                                </message>
+                                <message>
+                                    <type>BYTES</type>
+                                    <value>AQIDBAU=</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>-1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>0</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>-1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

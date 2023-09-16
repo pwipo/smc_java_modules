@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>PrintValue</uuid>
+    <provider>javaInternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <className>ru.smcsystem.smcmodules.module.PrintValue</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+    <categories>Java, Utils</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+
+    <defaultSettings>
+        <value>
+            <name>type</name>
+            <type>STRING</type>
+            <validValues>
+                <value>STRING</value>
+                <value>BYTE</value>
+                <value>SHORT</value>
+                <value>INTEGER</value>
+                <value>BIG_INTEGER</value>
+                <value>LONG</value>
+                <value>FLOAT</value>
+                <value>DOUBLE</value>
+                <value>BIG_DECIMAL</value>
+                <value>AUTO</value>
+            </validValues>
+            <value>STRING</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>value type.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>тип значения.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>appendType</name>
+            <type>STRING</type>
+            <validValues>
+                <value>FIRST</value>
+                <value>LAST</value>
+                <value>PLACEHOLDER</value>
+            </validValues>
+            <value>LAST</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>the type of adding items to incoming messages.
+FIRST - incoming messages are appended to the end, after their own values.
+LAST - incoming messages are added to the beginning, before their own values.
+PLACEHOLDER - incoming sources are treated as values in the template. format: {source_number}. see example.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>тип добавления элементов к входящим сообщениям.
+FIRST - входяште сообщения добавляются в конец, после собственных значений.
+LAST - входяште сообщения добавляются в начало, перед собственными значениями.
+PLACEHOLDER - входящие источники рссматриваются как значения в шаблоне. формат: {номер_источника}. смотри пример.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>value</name>
+            <type>STRING</type>
+            <value>Hello world</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>value.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>значение.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>splitterValues</name>
+            <type>STRING</type>
+            <value>::</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Splitter for value list.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Разделитель для значений.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeResult>
+        <ValueType>STRING</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>Sends a message with a given value and type.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Отправляет сообщение с заданным значением и типом.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>Sends a message with a given value and type. if there are sources, then it displays its own values and incoming ones (the order is determined by the setting).</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Отправляет сообщение с заданным значением и типом. если есть источники, то выводит и свои значения и входящие (порядок определяется настройкой).</value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>value</name>
+                    <value>HI</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>HI</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. connected 2 sources in the first value: 1, 2, 3 in the second 3, 4, 5.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. подключено 2 источника в первом значения: 1, 2, 3 во втором 3, 4, 5.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>appendType</name>
+                    <value>PLACEHOLDER</value>
+                </setting>
+                <setting>
+                    <name>value</name>
+                    <value>START::{0}::MIDDLE::{1}::END</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>START</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>MIDDLE</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>5</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>6</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>END</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAABKElEQVRoge2Yaw6CMBCER2O4k3gBiedS9FpyE17X0B/U8CrS0pZMmv2Shh9LYSbbhXYBgYuD5f2fICqWMdZ3DKliT04b59lm0hbrzEeTETHChhhhQ4ywIUbYiNJIAuAFoEW3RdCNH0txX2PtPQ2AXGme8dxBoO/x0BlpVPCsC5KRos/MjGla2RnpjbLYGbkBqAFUADLTSYxLq0Kvq5zE4lxaQxgzkqHLSgngOokt6mU08o84l5YYYcO2ryWdxtBIp5ENMTKggPsBqXAVwZIRr19Dky3KXtsYay3DjLTqmnoWFYKLumqPujnsuxzAthpZqwnT59x1kxNlpjF4gKuRt6ORWpnQtoNMYKqRESxfLWfkP+KZ3U+mUiOhicbI1vMIXbclmowIbHwBwCnvZ+1Ni9MAAAAASUVORK5CYII=</icon>
+
+</properties>

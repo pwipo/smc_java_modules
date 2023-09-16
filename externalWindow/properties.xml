@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>Window</uuid>
+    <provider>java</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Gui, Window</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.Window</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>mode</name>
+            <type>STRING</type>
+            <validValues>
+                <value>PASSIVE</value>
+                <value>ACTIVE</value>
+            </validValues>
+            <value>PASSIVE</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>режим работы</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>work mode</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>getPressedKeys</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Get pressed keys.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Получить нажатые клавишы.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>printElements</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>true</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>печатать ли значения всех именованных элементов (при каждом запросе и событии).</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Whether to print the values of all named elements (for every request and event).</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>configuration</name>
+            <type>STRING</type>
+            <value><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+                <frame
+                        xmlns="http://www.swixml.org/2007/SwixmlTags"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:schemaLocation="http://www.swixml.org/2007/SwixmlTags http://www.swixml.org/2007/swixml.xsd"
+                        size="640,480" title="[[title]]" defaultCloseOperation="JFrame.EXIT_ON_CLOSE">
+
+                    <layout type="borderlayout"/>
+
+                    <panel constraints="BorderLayout.NORTH">
+                        <label font="Georgia-BOLD-36" text="[[north]]"/>
+                        <textfield id="northInput" columns="20" Text="[[north]]"/>
+                        <button id="buttonNorth" text="[[button]]"/>
+                    </panel>
+
+                    <panel constraints="BorderLayout.CENTER">
+                        <label font="Georgia-BOLD-36" text="[[center]]"/>
+                        <textfield id="centerInput" columns="20" Text="[[center]]"/>
+                        <button id="buttonCenter" text="[[button]]"/>
+                    </panel>
+
+                    <panel constraints="BorderLayout.SOUTH">
+                        <label font="Georgia-BOLD-36" id="out" text="[[south]]"/>
+                        <textfield id="southInput" columns="20" Text="[[south]]"/>
+                        <button id="buttonSouth" text="[[button]]"/>
+                    </panel>
+
+                </frame>]]></value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>XML конфигурация для окна.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>XML config for window.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>sleep</name>
+            <type>INTEGER</type>
+            <value>500</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>время сна (в милисекундах) для активного режима. между интервалами сна происходит опрос нажатых клавиш, кнопок,меню и тп.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>sleep time (in milliseconds) for the active mode. Between sleep intervals, a survey of the pressed keys, buttons, menus, etc. takes place.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>useButtonEvents</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>true</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>обрабатывать ли события нажатия на кнопку.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Whether to process events of pressing the button.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>useMenuEvents</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>true</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>обрабатывать ли события нажатия на пункт меню.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>whether to handle events clicking on a menu item.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>useListSelectionEvents</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>true</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>обрабатывать ли события выбора элемента в списке.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Whether to handle the event of selecting an item in the list.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>useTreeSelectionEvents</name>
+            <type>STRING</type>
+            <validValues>
+                <value>true</value>
+                <value>false</value>
+            </validValues>
+            <value>true</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>обрабатывать ли события выбора элемента в дереве.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Whether to handle item selection events in the tree.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>defaultButton</name>
+            <type>STRING</type>
+            <value></value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>имя кнопки по умолчанию. если ничего не выбрано, то именно эта кнопка будет реагировать на нажатие клавиши Enter.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>The default button name. if nothing is selected, it is this button that will respond to pressing the Enter key.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>lang</name>
+            <type>STRING</type>
+            <value>north::en::NORTH::ru::Север;;
+center::en::CENTER::ru::Центор;;
+south::en::SOUTH::ru::Юг;;
+button::en::BUTTON::ru::Кнопка;;
+title::en::Text::ru::Текст;;
+            </value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Массив строка для интернационализации. формат: имя_переменной::имя_языка_1::текст::имя_языка_2::текст_2::...</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Array string for internationalization. format: variable_name::language_name_1::text::language_2_name::text_2::...</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>0</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeSource>
+
+    <typeResult>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>STRING</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>-1</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <threadSafe>true</threadSafe>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module is a simple configurable graphic window.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль представляет собой простое конфигурируемое графическое окно.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module is a simple configurable graphic window.
+The module uses the swixml library.
+For configuration, use the documentation at http://www.swixml.org.
+work in two modes:
+    passive:
+        at the first start it launches a window. and returns control.
+        all subsequent launches:
+            returns current data:
+                if there were events, prints them:
+                    number - the number of events
+                    further events in format:
+                        for buttons:
+                            string - name of the button
+                        for menu item:
+                            line - name of menu item
+                        for the list:
+                            string - list name
+                            number - the number of selected items
+                            strings - selected items
+                        for wood:
+                            string - tree name
+                            number - the number of selected items
+                            strings - selected items
+
+                if printElements is set, sends the values ​​of all named elements:
+                    number - the number of elements
+                    further - line pairs - element_name and element_value
+                further, if there are sources, he perceives them as teams. format:
+                    number - type of command:
+                        0 - close the window. closes the window and stops processing commands.
+                        1 - get the value of the element.
+                            further string - element_name
+                            returns the value of an element.
+                        2 - set the element value.
+                            further a line - an element_name.
+                            then a string, number or byte array - the value for the corresponding element.
+                        3 - enable / disable the item.
+                            further a line - an element_name.
+                            then the digit - 1 - enable, 0 - disable.
+                        4 - show / hide the element.
+                            further a line - an element_name.
+                            further digit - 1 - show, 0 - hide.
+                        5 - select words / phrases in lines (only for text element).
+                            further a line - an element_name.
+                            further lines.
+                        6 - get the selected line (only for the text element) ..
+                            further a line - an element_name.
+                        7 - replace the selected line (only for a text element).
+                            further a line - an element_name.
+                            then the line is a replacement.
+                        8 - insert a line at the current cursor position (only for a text element).
+                            further a line - an element_name.
+                            then the line is the text.
+                        9 - replace strings (only for text element).
+                            further a line - an element_name.
+                            then the line is the search text.
+                            the next line is the replacement text.
+                        10 - sets the value of the comp list (old everything).
+                            then the string is element_name.
+                            further values ​​- items to add to the list.
+                        11 - Adds a value to the list.
+                            then the string is element_name.
+                            further values ​​- items to add to the list.
+                        12 - removes the value from the list.
+                            then the string is element_name.
+                            then the number is the position of the item in the list.
+                        13 - get the value of the selected item in the list.
+                            then the string is element_name.
+                        14 - enables / disables editing of components (only for text element).
+                            then the string is element_name.
+                            then the number is 1-enable, 0-disable.
+                        15 - selects a fragment based on regexp expression. generally similar to 5 but allows you to highlight not only whole words.
+                            then the string is element_name.
+                            further lines.
+    active:
+        if it starts with controlled execution contexts, it starts and displays a window. Further, when a processed event occurs, it starts the first managed context with arguments. event format described above.
+        if there is an answer, he perceives it as commands and executes them. the command format is described above.
+        does not return control until the window is closed.
+        if launched without contexts but with sources: perceives them as commands and executes them. the command format is described above.
+        if it starts without contexts and without sources and the window is already running: closes the window.
+
+There is an opportunity to internationalize the text. To do this, use the lang setting. In the text, the variable name is surrounded by double quotes: [[message]].
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль представляет собой простое конфигурируемое графическое окно.
+Модуль использует библиотеку swixml.
+По конфигурации используйсте документацию сайта http://www.swixml.org.
+
+работае в двух режимах:
+    пассивный:
+        при первом запуске запускает окно. и возвращает управление.
+        все последующие запуски:
+            возвращает текущие данные:
+                если были события, печатает их:
+                    число - количество событий
+                    далее события в формате:
+                        для кнопок:
+                            строка - имя кнпки
+                        для пункта меню:
+                            строка - имя пункта меню
+                        для списка:
+                            строка - имя списка
+                            число - количество выбранных елементов
+                            строки - выбранные элементы
+                        для дерева:
+                            строка - имя дерева
+                            число - количество выбранных елементов
+                            строки - выбранные элементы
+
+                если установлен printElements, отправляет значения всех именованных елементов:
+                    число - количество елементов
+                    далее - пары строк - имя_елемента и значение_елемента
+                далее если есть источники - воспринимает их как команды. формат:
+                    число - тип команды:
+                        0 - закрыть окно. закрывает окно и прекращает обработку команд.
+                        1 - получить значение елемента.
+                            далее строка - имя_елемента
+                            возвращает значение элемента.
+                        2 - установить значение елемента.
+                            далее строка - имя_елемента.
+                            далее строка,цифра или байтовые массив - значение для ссответствующего элемента.
+                        3 - включить/отключить элемент.
+                            далее строка - имя_елемента.
+                            далее цифра - 1 - включить, 0 - отключить.
+                        4 - показать/скрыть элемент.
+                            далее строка - имя_елемента.
+                            далее цифра - 1 - показать, 0 - скрыть.
+                        5 - выделить слова/фразы в строках (только для текстового элемента).
+                            далее строка - имя_елемента.
+                            далее строки.
+                        6 - получить выделенную строку (только для текстового элемента)..
+                            далее строка - имя_елемента.
+                        7 - заменать выделенную строку (только для текстового элемента).
+                            далее строка - имя_елемента.
+                            далее строка - замена.
+                        8 - вставтить строку в текущую позицию курсора (только для текстового элемента).
+                            далее строка - имя_елемента.
+                            далее строка - текст.
+                        9 - заменить строки (только для текстового элемента).
+                            далее строка - имя_елемента.
+                            далее строка - текст поиска.
+                            далее строка - текст замены.
+                        10 - устанавливает значение компанента список (стариая все).
+                            далее строка - имя_елемента.
+                            далее значения - элементы для добавления в список.
+                        11 - добавляет значение в список.
+                            далее строка - имя_елемента.
+                            далее значения - элементы для добавления в список.
+                        12 - удаляет значение из списка.
+                            далее строка - имя_елемента.
+                            далее число - позиция элемента в списке.
+                        13 - получить значение выделенного элемента в списке.
+                            далее строка - имя_елемента.
+                        14 - разрешает/запрещает редактировать компанент (только для текстового элемента).
+                            далее строка - имя_елемента.
+                            далее число - 1-разрешить, 0-запретить.
+                        15 - выделяет фрагмент на основе regexp выражения. в целом аналогичен 5 но позволяет выделять не только целые слова.
+                            далее строка - имя_елемента.
+                            далее строки.
+    активный:
+        если запускается с управляемыми контекстами исполнения - запускает и показывает окно. далее при возникновении обрабатываемого события, запускает первый управляемый контекст с аргументами. формат событий описан выше.
+        если есть ответ - воспринимает его как команды и исполняет их. формат команд описан выше.
+        не возвращает управления до закрытия окна.
+        если запускается без контекстов но с источниками: воспринимает их как команды и исполняет их. формат команд описан выше.
+        если запускается без контекстов и без источников и окно уже запущено: закрывет окно.
+
+Есть возможность по интернационализации текста. Для этого используется настройка lang. В тексте имя переменной обрамляется двойными кавыйчками: [[message]].
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>First example. A simple window with several input elements launched in passive mode.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. простое окно с несколькими элементами ввода запущенное в пассивном режиме.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>getPressedKeys</name>
+                    <value>true</value>
+                </setting>
+                <setting>
+                    <name>printElements</name>
+                    <value>true</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output/>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. a window with several input elements launched in active mode with one controlled execution context that processes all clicks (or data entry) on the window elements.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. окно с несколькими элементами ввода запущенное в активном режиме c одним управляемым контекстам исполнения обрабатывающим все нажатия (или ввод данных) на элементы окна.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>mode</name>
+                    <value>ACTIVE</value>
+                </setting>
+                <setting>
+                    <name>getPressedKeys</name>
+                    <value>true</value>
+                </setting>
+                <setting>
+                    <name>printElements</name>
+                    <value>true</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources/>
+            <output/>
+            <countManagedExecutionContexts>1</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAAv0lEQVRoge3ZQQqDMBQE0GkRD1Xs+UzPVXoUc4y2my9uUv9PwTjKPAhmEWGGn10AEREh0QN4AMgAPmRrApAsoysRBPZWihSZ7PAtcrixActkXHPrPbwAPJ19Md9182h13lhC/tqH7TmRiGK+zvnhMNiu1t/WJnJplqJO8aacZiIqwkZF2KgIGxVhoyJsVISNirBRETYqwkZF2KgIm1MXyfYdWgYJuts3r54yR3joGSNFeiszP/gwraqnNxER2dwXI5K6ndppw4AAAAAASUVORK5CYII=</icon>
+
+</properties>

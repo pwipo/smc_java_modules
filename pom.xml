@@ -34,6 +34,9 @@
         <module>example</module>
         <module>internalCommandGetter</module>
         <module>configurationControllerCfgsToObj</module>
+        <module>externalHttpClient</module>
+        <module>internalValueTransformer</module>
+        <module>internalValueTypeConverter</module>
     </modules>
 
     <groupId>ru.smcsystem.modules</groupId>

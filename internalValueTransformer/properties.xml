@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>ValueTransformer</uuid>
+    <provider>java</provider>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <className>ru.smcsystem.modules.module.ValueTransformer</className>
+    <categories>Java, Utils</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>config</name>
+            <type>STRING</type>
+            <value>1::2::3</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>configuration. each row contains one transformation element. the first value is a pattern. the rest are values. all elements are separated ::.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>конфигурация. каждая строка содержит один элемент трансформации. первое значение - паттерн. остальные - значения. все элементы разделены ::.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>BYTES</ValueType>
+        <ValueType>STRING</ValueType>
+    </typeSource>
+
+    <typeSource>
+        <ValueType>LONG</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BYTES</ValueType>
+        <ValueType>STRING</ValueType>
+    </typeSource>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <useStorage>false</useStorage>
+
+    <threadSafe>true</threadSafe>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module allows you to transform input values.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль позволяет транформировать входящие значения.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module allows you to transform input values.
+Scheme of work:
+at start, a list of transformation elements is created based on the config setting.
+as any element, you can use numbers, strings and a byte array (Base64 encoding) - the type is automatically detected.
+if a string is passed as a pattern, then it is used to create the regexp expression.
+during operation, for each input value, the first suitable transformation element is searched based on its pattern.
+    if it is, the values ​​of the found transformation element are returned.
+    otherwise, the original value is returned.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль позволяет транформировать входящие значения.
+Схема работы:
+при старте создается список элментов трансформации на основе настройки config.
+в качестве любого элемента можно использовать цифры, строки и байтовый массив (кодировка Base64) - происходит автоматическое определение типа.
+если в качестве паттерна передается строка, то она используется для создания regexp выражения.
+при работе, для каждого входящего значения ищется первый подходящий элемент трасформации на основе его паттерна.
+    если находится - возвращаются значения найденного элемента трасформации.
+    иначе - возвращается первоначальное значение.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>First example.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>config</name>
+                    <value>1::2::three::4
+5::6
+h.*::hello
+                    </value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>5</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>hi</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>three</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>6</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>hello</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

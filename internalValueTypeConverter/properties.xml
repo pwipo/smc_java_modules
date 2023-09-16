@@ -1,0 +1,1441 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>ValueTypeConverter</uuid>
+    <provider>javaInternal</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Utils</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.modules.internalValueTypeConverter.ValueTypeConverter</className>
+    <ver>1.1.3</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>17-10-2021</date>
+
+    <defaultSettings>
+        <value>
+            <name>type</name>
+            <type>INTEGER</type>
+            <validValues>
+                <value>1</value>
+                <value>2</value>
+                <value>3</value>
+                <value>4</value>
+                <value>5</value>
+                <value>6</value>
+                <value>7</value>
+                <value>8</value>
+                <value>9</value>
+                <value>10</value>
+                <value>11</value>
+                <value>12</value>
+                <value>13</value>
+                <value>14</value>
+                <value>15</value>
+                <value>16</value>
+                <value>17</value>
+                <value>18</value>
+                <value>19</value>
+                <value>20</value>
+                <value>21</value>
+                <value>22</value>
+                <value>23</value>
+                <value>24</value>
+                <value>25</value>
+                <value>26</value>
+            </validValues>
+            <value>5</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The type of conversion:
+1 - from byte array to byte digits.
+2 - from digits to byte array.
+3 - from string to long integer. if the string is not converted to a number or not a string, then nothing is returned. there can be many values on one line. filters non-numeric characters.
+4 - from string to fractional double precision. if the string is not converted to a number or not a string, then nothing is returned. there can be many values on one line. filters non-numeric characters.
+5 - from digit to string.
+6 - from bytes to string (not Base64). in param, you can specify an encoding, such as utf-8 or windows-1251.
+7 - from string to bytes (not Base64). in param, you can specify an encoding, such as utf-8 or windows-1251.
+8 - from an object in the object serialization format to a JSON string. see examples.
+9 - from JSON string (objects array) to object serialization format. see examples.
+10 - auto converting:
+    if string then convert to Long, Double or bytes (if the string is in Base64 format)
+    if bytes convert to string (using Base64 format)
+    else convert to string
+11 - from a string in CSV format to values. the separator is specified in param.
+12 - from values to a CSV format string. param format: count_values_in_row::delimiter.
+13 - similar to 8. difference - whenever possible, tries to convert to an object (if only one element).
+14 - similarly 3. difference - works for all types: converts strings to a number or returns 0, for numbers - returns an integer, for a bat array - returns the size.
+15 - from XML format string to object serialization format. see examples.
+16 - from an object in the object serialization format to an XML format string. see examples.
+17 - similar to 9, saved for compatibility.
+18 - any type to string. easy conversion.
+19 - from string to byte array (Base64 format).
+20 - from byte array to string (Base64 format).
+21 - list into an array of simple objects or an array of values in the object serialization format (ObjectArray). in param you can set the number of fields for each object as well as their names separated by ::. if set (greater than 0) but no names, then an array of simple objects is formed, each pair of values is treated as a field name and value. if there are names, then incoming messages are considered as values (names are taken from the parameter). if the parameter is not set or 0, then all values are treated as simple, and an array of simple values is formed (2 numbers are added to the beginning of the list: the type of elements, for example, 3 and the number of elements). See examples for better understanding.
+22 - array in the format of object serialization (ObjectArray) into a list. if the array contains objects, then pairs are displayed: field name, value. otherwise, all the simple values of the array are displayed.
+23 - from strings to numbers. at the same time, if it cannot convert to a number, then it returns the previous value.
+24 - ObjectArray to serialization format (list of simple values).
+25 - object in object serialization format (list of simple values) in ObjectArray.
+26 - similar to 22, but only outputs field values for objects.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Тип конвертации:
+1 - из байтового массива в байтовые цифры.
+2 - из цифр в байтовый массив.
+3 - из строки в целое типа лонг. если строка не переводится в число или не строка, то ничего не возвращает. может быть много значений в одной строке. фильтрует не цифровые символы.
+4 - из строки в дробное двойной точности. если строка не переводится в число или не строка, то ничего не возвращает. может быть много значений в одной строке. фильтрует не цифровые символы.
+5 - из цифры в строку.
+6 - из массива байт в строку (не Base64). в param можно указать кодировку, например utf-8 или windows-1251.
+7 - из строки в массив байт (не Base64). в param можно указать кодировку, например utf-8 или windows-1251.
+8 - из объекта в формате сериализации объектов в строку формата JSON. смотри примеры.
+9 - из строки формата JSON (массив объектов) в формат сериализации объектов. смотри примеры.
+10 - авто конвертация:
+    если строка - конвертирует в Long, Double или массив байт (если строка в формате Base64)
+    если байты - конвертирует в строку (формат Base64)
+    иначе конвертирует в строку
+11 - из строки в формате CSV в значения. в param указывается разделитель.
+12 - из значений в строку формата CSV. формат param: количество_значений_в_строке::разделитель.
+13 - аналогично 8. отличие - по возможности, старается преобразовать в объект (если только один элемент).
+14 - аналогично 3. отличие - работает для всех типов: строки переводит в число или возвращает 0, для чисел - возвращает целое число, для батового массив - возвращает размер.
+15 - из строки формата XML в формат сериализации объектов. смотри примеры.
+16 - из объекта в формате сериализации объектов в строку формата XML. смотри примеры.
+17 - аналогичен 9, сохранен для совместимости.
+18 - любой тип в строку. простая конвертация.
+19 - из строки в массив байт (формат Base64).
+20 - из массива байт в строку (формат Base64).
+21 - список в массив простых объектов или массив значений в формате сериализации объектов (ObjectArray). в param можно задать количество полей у каждого объекта а так же их имена, разделенные ::. если задан (больше 0) но нет имен, то формируется массив простых объектов, каждая пара значений трактуется как имя и значение поля. если есть имена, то входящие сообщения рассматриваются как значения (имена берутся из параметра). если параметр не задан или 0, то все значения трактуются как простые, и формируется массив простых значений (добавляется 2 числа в начало списка: тип элементов, например 3 и количество элементов). для лучшего понимания смотри примеры.
+22 - массив в формате сериализации объектов (ObjectArray) в список. если в массиве содержаться объекты, то выводятся пары: имя поля, значение. иначе выводятся все простые значения массива.
+23 - из строк в числа. при этом если не может преобразовать в число, то возвращает предыдущее значение.
+24 - ObjectArray в формат сериализации (список простых значений).
+25 - объект в формате сериализации объектов (список простых значений) в ObjectArray.
+26 - аналогичен 22, но для объектов выводит только значения полей.
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>param</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>additional param.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Дополнительный параметр.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>BYTE</ValueType>
+        <ValueType>BYTES</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>STRING</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+    </typeSource>
+    <typeResult>
+        <ValueType>BYTE</ValueType>
+        <ValueType>BYTES</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>STRING</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>Value converter.</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Конвертер значений.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>Install type convertion for sources.
+JSON objects use the serialization format used in other modules.
+For example, the DB module in this form outputs strings, this allows you to connect the database directly to the converter to generate json objects (type 8).
+Wherever it is indicated that the module accepts an object in the serialization format, it also accepts a new type ObjectArray.
+object serialization format (array of objects):
+    number - type of elements. can be: 0-ObjectArray, 1-ObjectElement, 2-ObjectElementSimple, 3-AnySimpleTypes, 4-String, 5-Byte, 6-Short, 7-Integer, 8-Long, 9-Float, 10-Double, 11-BigInteger, 12-BigDecimal, 13-byte[], 14-OBJECT_ELEMENT_OPTIMIZED, 15-OBJECT_ELEMENT_SIMPLE_OPTIMIZED.
+    number - the number of elements in the array.
+    items. depends on the type. format:
+        if item type is 0-ObjectArray, then list of arrays. each has format described above, recursion.
+        if item type is 1 (ObjectElement): then list of objects. each has format:
+            if the fields in all objects are the same and their number is the same, then:
+                 number - the number of fields in the object
+                 header, for each field of the first object:
+                     string - field name
+                     only if the fields contain objects (ObjectArray, ObjectElement) then
+                         number - field type, can be 0-ObjectArray, 1-ObjectElement, 2-ObjectElementSimple, 3-AnySimpleTypes, 4-String, 5-Byte, 6-Short, 7-Integer, 8-Long, 9-Float, 10-Double , 11-BigInteger, 12-BigDecimal, 13-byte[]
+                 field values of all objects:
+                     value, depending on the type. format:
+                         if type is 0-ObjectArray: then they are arrays, each with the format described above (recursion).
+                         if type is 1-ObjectElement: then they are objects, each in the format described above (recursion).
+                         if type is 2-ObjectElementSimple: then they are simple objects, each in the format described above (recursion).
+                         otherwise: any type is a simple value.
+            otherwise, for each object:
+                 number - the number of fields in the object
+                 fields:
+                     string - field name.
+                     number - field type. can be: 0-ObjectArray, 1-ObjectElement, 2-ObjectElementSimple, 3-AnySimpleTypes, 4-String, 5-Byte, 6-Short, 7-Integer, 8-Long, 9-Float, 10-Double, 11-BigInteger , 12-BigDecimal, 13-byte[].
+                     value, depending on the type. format:
+                         if type is 0-ObjectArray: then they are arrays, each with the format described above (recursion).
+                         if type is 1-ObjectElement: then they are objects, each in the format described above (recursion).
+                         if type is 2-ObjectElementSimple: then they are simple objects, each in the format described above (recursion).
+                         otherwise: any type is a simple value.
+        if type is 2 (ObjectElementSimple): then these are simple objects, format:
+             if the fields in all objects are the same and their number is the same, then:
+                 number - the number of fields in each object (one for all).
+                 header, for each field of the first object:
+                     string - field name
+                 field values of all objects:
+                     any type is a simple value.
+             otherwise:
+                 number - the number of fields in each object (one for all).
+                 list of fields of each object. format:
+                     string - field name.
+                     any type is a simple value.
+        else: list of simple values, format:
+            any type - simple value.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Установите тип конвертирования для источников.
+Для объектов JSON используется формат сериализации, применяемый и в других модулях.
+Например модуль DB в таком виде выдает строки, это позволяет подключить базу данных непосредственно к конвертеру для формирования json объектов (тип 8).
+Везде где указано, что модуль принимает объект в формате сериализации так же он принимает новый тим ObjectArray.
+Формат сериализации объекта (массив объектов):
+    число - тип элементов. может быть: 0-ObjectArray, 1-ObjectElement, 2-ObjectElementSimple, 3-AnySimpleTypes, 4-String, 5-Byte, 6-Short, 7-Integer, 8-Long, 9-Float, 10-Double, 11-BigInteger, 12-BigDecimal, 13-byte[], 14-OBJECT_ELEMENT_OPTIMIZED, 15-OBJECT_ELEMENT_SIMPLE_OPTIMIZED.
+    число - количество элеметов в массиве.
+    элементы. зависит от типа. формат:
+        если тип - 0 (ObjectArray): то это массивы, каждый имеет формат описанный выше (рекурсия).
+        если тип - 1 (ObjectElement): то это объекты, формат:
+            если поля во всех объектах одинаковые и их количество совпадает, то:
+                число - количество полей в объекте
+                заголовок, для каждого поля первого объекта:
+                    строка - имя поля
+                    только если поля содержат объекты (ObjectArray, ObjectElement), то
+                        число - тип поля, может быть 0-ObjectArray, 1-ObjectElement, 2-ObjectElementSimple, 3-AnySimpleTypes, 4-String, 5-Byte, 6-Short, 7-Integer, 8-Long, 9-Float, 10-Double, 11-BigInteger, 12-BigDecimal, 13-byte[]
+                значения полей всех объектов:
+                    значение, завист от типа. формат:
+                        если тип - 0-ObjectArray: то это массивы, каждый имеет формат описанный выше (рекурсия).
+                        если тип - 1-ObjectElement: то это объекты, каждый имеет формат описанный выше (рекурсия).
+                        если тип - 2-ObjectElementSimple: то это простые объекты, каждый имеет формат описанный выше (рекурсия).
+                        иначе: любой тип - простое значение.
+            иначе, для каждого объекта:
+                число - количество полей в объекте
+                поля:
+                    строка - имя поля.
+                    число - тип поля. может быть: 0-ObjectArray, 1-ObjectElement, 2-ObjectElementSimple, 3-AnySimpleTypes, 4-String, 5-Byte, 6-Short, 7-Integer, 8-Long, 9-Float, 10-Double, 11-BigInteger, 12-BigDecimal, 13-byte[].
+                    значение, завист от типа. формат:
+                        если тип - 0-ObjectArray: то это массивы, каждый имеет формат описанный выше (рекурсия).
+                        если тип - 1-ObjectElement: то это объекты, каждый имеет формат описанный выше (рекурсия).
+                        если тип - 2-ObjectElementSimple: то это простые объекты, каждый имеет формат описанный выше (рекурсия).
+                        иначе: любой тип - простое значение.
+        если тип - 2 (ObjectElementSimple): то это простые объекты, формат:
+            если поля во всех объектах одинаковые и их количество совпадает, то:
+                число - количество полей в каждом объекте (одно на всех).
+                заголовок, для каждого поля первого объекта:
+                    строка - имя поля
+                значения полей всех объектов:
+                    любой тип - простое значение.
+            иначе:
+                число - количество полей в каждом объекте (одно на всех).
+                список полей каждого объекта. формат:
+                    строка - имя поля.
+                    любой тип - простое значение.
+        иначе: список простых значений, формат:
+            любой тип - значение.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>The first example. To long.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. В число.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>3</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>6</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>20</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>6</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>20</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Second example. Auto.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Второй пример. Автоконвертация.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>10</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>BYTE</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>SHORT</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                                <message>
+                                    <type>LONG</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>FLOAT</type>
+                                    <value>5.0</value>
+                                </message>
+                                <message>
+                                    <type>DOUBLE</type>
+                                    <value>6.0</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>1.1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>16777215</value>
+                                </message>
+                                <message>
+                                    <type>BYTES</type>
+                                    <value>AQIDBAU=</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>3</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>5.0</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>6.0</value>
+                </message>
+                <message>
+                    <type>LONG</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>DOUBLE</type>
+                    <value>1.1</value>
+                </message>
+                <message>
+                    <type>LONG</type>
+                    <value>16777215</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>AQIDBAU=</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Third example. Converting the value to a JSON array string.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Третий пример. Конвертация значение в строку JSON массив.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>8</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>name</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>field1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>name1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>field2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>name</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>dyulky.liotgultug</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>aethjrtsykjyilyli</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value>[{"name":"test","value":{"field1":"name1","field2":"value1"}},{"name":"dyulky.liotgultug","value":"aethjrtsykjyilyli"}]</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Fourth example. Converting JSON array of objects to values.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Четвертый пример. Конвертация JSON массива объектов в значения.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>9</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>[{"name":"test","value":{"field1":"name1","field2":"value1"}},{"name":"dyulky.liotgultug","value":"aethjrtsykjyilyli"}]</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>test</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>field1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>field2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>dyulky.liotgultug</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>aethjrtsykjyilyli</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Fifth example. Converting a value to an XML string.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Пятый пример. Конвертация значения в строку XML.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>16</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>name</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>company</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>childNodes</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>0</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>name</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>Staff</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value> </value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>id</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>7</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>childNodes</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>0</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>name</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>firstname</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>yong</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>name</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>lastname</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>mook kim</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>name</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>nickname</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>mkyong</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>name</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>4</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>salary</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>value</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>7</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>100000</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>STRING</type>
+                    <value><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<company>
+    test2
+    <Staff id="1">
+        <firstname>yong</firstname>
+        <lastname>mook kim</lastname>
+        <nickname>mkyong</nickname>
+        <salary>100000</salary>
+    </Staff>
+</company>]]>
+                    </value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Sixth example. Converting XML to Object.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Шестой пример. Конвертация XML в объект.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>9</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<company>
+    test2
+    <Staff id="1">
+        <firstname>yong</firstname>
+        <lastname>mook kim</lastname>
+        <nickname>mkyong</nickname>
+        <salary>100000</salary>
+    </Staff>
+</company>]]>
+                                    </value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>company</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>test2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>childNodes</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>0</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>Staff</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value> </value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>id</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>7</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>childNodes</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>0</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>firstname</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>yong</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>lastname</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>mook kim</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>nickname</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>mkyong</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>4</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>salary</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>7</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>100000</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Seventh example. Converting a list of values to an array of values in object serialization format.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Седьмой пример. Конвертация списка значений в массив значений в формате сериализации объектов.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>21</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>123</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>456</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>789</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>6</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>123</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>456</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>789</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Eighth example. Converting a list to an array of simple objects in object serialization format.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Восьмой пример. Конвертация списка в массив простых объектов в формате сериализации объектов.</value>
+                </entry>
+            </description>
+            <settings>
+                <setting>
+                    <name>type</name>
+                    <value>21</value>
+                </setting>
+                <setting>
+                    <name>param</name>
+                    <value>2::name::value</value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test1</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>1</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test2</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>2</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>test3</value>
+                                </message>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>3</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>test1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>test2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>2</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>name</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>test3</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>value</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>3</value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAACPUlEQVRIib1WP2gaYRx9X/n0SrEoHDgIzrp4SjuYksVBhQ42dOnklpBRzsW7LLnZLNnN2EOKSyanDN3agiKaEijd4pAhPR0ES3stvA6paUzOP4FLH3xwcD/e+733/b7vDvgPiACwIcQEAH1ZV1xvAUQEAFsI8SbxbEMElMfSj47dnz9+f+19Isl3EsCrxPMX2Hj52hfyv5BC4NeX7sctCeDpZPQNnz+895EfmIycAICAwFVuD4ZHAGBZFkj6uizL+ifw4A5mOD8/Rz6fRygUQqFQwHA4XElgGAYymcx6Atvb2+j3+9jd3UWv18POzs5S8mq1ioODAxSLxaV1tCyLJBkMBrm3t0eSNE2TwWCQi2AYBgFQ13XP95ZlEQDnHLiui06ng3q9jm63C9d1PTsyTRP1eh26ruPw8HBp93MO4HHs1+nccRw6juPp4I7A7HlWsE4spVKJpVLJU2DuekilUkgmkwCARCIBTdOWxpJOp3F6enpdI4SApmkYDAbeEd13Q23bpmEYrFQqzGazBEDbthdHdB/yGc7Ozthut6nrOhVFuRPRUoFV5CS5v79PKSWj0ShzudwdgYVXRa1WWzmKrVYL4/EYQghcXl5CURQ0m83FY3oT6XSatVptYeckmUqlqCgKNzc3WS6XGY/HqWnanAMppfw+Ho+f3Fbt9/uLzF3j5gTdxmg0gpRyKsPh8Emj0dgSQiAWi60kXQcXFxc4OjpCOBw+AYCIqqrHUsopfProSymnqqoe4+qH4mHxBwzbxgIZ84TaAAAAAElFTkSuQmCC</icon>
+
+</properties>

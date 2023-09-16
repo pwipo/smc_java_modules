@@ -29,3 +29,6 @@
 /internalSleep/target/
 /internalStringUtils/target/
 /internalSymbolsGenerator/target/
+/externalHttpClient/target/
+/internalValueTransformer/target/
+/internalValueTypeConverter/target/

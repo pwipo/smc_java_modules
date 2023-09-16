@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>HttpClient</uuid>
+    <provider>java</provider>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Net, Http, Client</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The author and copyright holder is Nikolay V. Ulyanov.
+The program is free for use.
+Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+Программа бесплатна для использования.
+Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <className>ru.smcsystem.smcmodules.module.Http</className>
+    <ver>1.0.0</ver>
+    <apiVer>1.0.0</apiVer>
+    <date>31-12-2020</date>
+
+    <defaultSettings>
+        <value>
+            <name>cookies</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>куки формат: ключ=значение::ключ2=значение2...</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>cookies format: key=value::key2=value2...</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>userAuth</name>
+            <type>STRING</type>
+            <value>false</value>
+            <validValues>
+                <value>false</value>
+                <value>true</value>
+            </validValues>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Использовать ли простую аутентификацию.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>use simple authentication.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>username</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>имя пользователя.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>user name.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>password</name>
+            <type>STRING</type>
+            <value> </value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>пароль.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>password.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>charset</name>
+            <type>STRING</type>
+            <value></value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Кодировка для текстовых ответов. Если пусто то определяется автоматически на основе заголовка Content-Type.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Encoding for text responses. If empty, it is determined automatically based on the Content-Type header.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <minCountSources>1</minCountSources>
+    <maxCountSources>-1</maxCountSources>
+
+    <typeSource>
+        <ValueType>STRING</ValueType>
+        <ValueType>BYTE</ValueType>
+        <ValueType>SHORT</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>LONG</ValueType>
+        <ValueType>FLOAT</ValueType>
+        <ValueType>DOUBLE</ValueType>
+        <ValueType>BIG_INTEGER</ValueType>
+        <ValueType>BIG_DECIMAL</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeSource>
+
+    <typeResult>
+        <ValueType>STRING</ValueType>
+        <ValueType>INTEGER</ValueType>
+        <ValueType>BYTES</ValueType>
+    </typeResult>
+
+    <minManagedExecutionContexts>0</minManagedExecutionContexts>
+    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
+
+    <minManagedConfigurations>0</minManagedConfigurations>
+    <maxManagedConfigurations>0</maxManagedConfigurations>
+
+    <threadSafe>true</threadSafe>
+
+    <description>
+        <entry>
+            <key>en</key>
+            <value>The module is a web client</value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль представляет собой веб клиент.</value>
+        </entry>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value>The module is a web client. allows you to work with HTTP and HTTPS.
+format of incoming messages:
+    1 - number - type: 0-GET, 1-POST
+    2 - string - address
+    further optional:
+        number - number of headers
+        string - headers - format: name=value
+    further optional, only for POST:
+        if there are several messages:
+            number - number of parameters
+            parameters - message pairs:
+                string - name
+                any type is a value. if there are values ​​with the BYTES type, the Multipart request format is used
+        if one message (last) - it is used as a request body - any type
+response format:
+    1 - number - response code
+    further optional:
+        2 - number - number of headers (total)
+        string - headers - format: name=value
+    the last message is the body of the response. If the caption ContentType = text - then the type is a string and a byte array.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Модуль представляет собой веб клиент. позволяет работать с HTTP и HTTPS.
+формат входящих сообщений:
+    1 - число - тип: 0-GET, 1-POST
+    2 - строка - адрес
+    далее опционально:
+        число - количество заголовков
+        строка - заголовки - формат: имя=значение
+    далее опционально, только для POST:
+        если неколько сообщений:
+            число - количество параметров
+            параметры - пары сообщений:
+                строка - имя
+                любой тип - значение. если есть значения с типом BYTES - используется Multipart формат запроса
+        если одно сообщение (последнее) - оно используется в качестве тела запроса - тип любой
+формат ответа:
+    1 - число - код ответа
+    далее опционально:
+        2 - число - количество заголовков (общее количество)
+        строка - заголовки - формат: имя=значение
+    последнее сообщение - тело ответа. Если заколовок ContentType = text - то тип строка иниче байтовый масив.
+            </value>
+        </entry>
+    </help>
+
+    <examples>
+        <example>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>First example. partial output.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Первый пример. частичный вывод данных.</value>
+                </entry>
+            </description>
+            <settings/>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>INTEGER</type>
+                                    <value>0</value>
+                                </message>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>https://www.google.com/</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message>
+                    <type>INTEGER</type>
+                    <value>200</value>
+                </message>
+                <message>
+                    <type>INTEGER</type>
+                    <value>13</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>Content-Type=text/html; charset=ISO-8859-1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>Date=</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>Expires=-1</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>Cache-Control=private, max-age=0</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>P3P=CP="This is not a P3P policy! See g.co/p3phelp for more info."</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>Server=gws</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>X-XSS-Protection=0</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>X-Frame-Options=SAMEORIGIN</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>Transfer-Encoding=chunked</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>Set-Cookie=1P_JAR=20</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>Set-Cookie=CGIC=; expires=</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>Set-Cookie=CGIC=; expires=</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value>Set-Cookie=NID=200=</value>
+                </message>
+                <message>
+                    <type>STRING</type>
+                    <value><![CDATA[
+<!doctype html><html itemscope="" itemtype="http://schema.org/WebPage" lang="ru"><head></head><body></body></html>
+                    ]]>
+                    </value>
+                </message>
+            </output>
+            <countManagedExecutionContexts>0</countManagedExecutionContexts>
+            <countManagedConfigurations>0</countManagedConfigurations>
+        </example>
+    </examples>
+
+</properties>

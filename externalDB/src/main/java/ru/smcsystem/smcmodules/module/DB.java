@@ -87,6 +87,7 @@ public class DB implements Module {
     }
 
     private Boolean resultSetColumnNameToUpperCase;
+    private Integer queryTimeout;
 
     @Override
     public void start(ConfigurationTool externalConfigurationTool) throws ModuleException {
@@ -101,6 +102,7 @@ public class DB implements Module {
         useAutoConvert = Boolean.parseBoolean((String) externalConfigurationTool.getSetting("useAutoConvert").orElseThrow(() -> new ModuleException("useAutoConvert setting")).getValue());
         resultFormat = ResultFormat.valueOf((String) externalConfigurationTool.getSetting("resultFormat").orElseThrow(() -> new ModuleException("resultFormat setting")).getValue());
         resultSetColumnNameToUpperCase = Boolean.parseBoolean((String) externalConfigurationTool.getSetting("resultSetColumnNameToUpperCase").orElseThrow(() -> new ModuleException("resultSetColumnNameToUpperCase setting")).getValue());
+        queryTimeout = (Integer) externalConfigurationTool.getSetting("queryTimeout").orElseThrow(() -> new ModuleException("queryTimeout setting")).getValue();
 
         String dbParam = connection_params;
         if (Type.derby.equals(type)/* || Type.derbyInMemory.equals(type)*/) {
@@ -333,6 +335,7 @@ public class DB implements Module {
             for (int i = 0; i < messages.size(); i++) {
                 IMessage message = messages.get(i);
                 try (Statement stm = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+                    stm.setQueryTimeout(queryTimeout);
                     if (isUpdateReturnKeys) {
                         stm.executeUpdate((String) message.getValue(), Statement.RETURN_GENERATED_KEYS);
                     } else {
@@ -375,6 +378,7 @@ public class DB implements Module {
             String sql = (String) messages.poll().getValue();
             if (!isArray) {
                 try (PreparedStatement stm = isUpdateReturnKeys ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+                    stm.setQueryTimeout(queryTimeout);
                     ParameterMetaData parameterMetaData = stm.getParameterMetaData();
                     int parameterCount = parameterMetaData.getParameterCount();
                     if ((messages.size() < parameterCount) || (useAutoConvert && type == Type.mysqlClient && messages.size() < parameterCount * 2)) {
@@ -458,6 +462,7 @@ public class DB implements Module {
                         if (objectElement.getFields().isEmpty() || !objectElement.isSimple())
                             continue;
                         try (PreparedStatement stm = isUpdateReturnKeys ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+                            stm.setQueryTimeout(queryTimeout);
                             ParameterMetaData parameterMetaData = stm.getParameterMetaData();
                             int parameterCount = parameterMetaData.getParameterCount();
                             if (objectElement.getFields().size() < parameterCount || objectElement.getFields().size() < fieldNames.size() || (useAutoConvert && type == Type.mysqlClient && parameterTypes.size() < parameterCount)) {
@@ -530,6 +535,7 @@ public class DB implements Module {
                         if (objectArray1.size() == 0 || !objectArray1.isSimple())
                             continue;
                         try (PreparedStatement stm = isUpdateReturnKeys ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+                            stm.setQueryTimeout(queryTimeout);
                             ParameterMetaData parameterMetaData = stm.getParameterMetaData();
                             int parameterCount = parameterMetaData.getParameterCount();
                             if ((objectArray1.size() < parameterCount) || (useAutoConvert && type == Type.mysqlClient && parameterTypes.size() < parameterCount)) {
@@ -826,6 +832,7 @@ public class DB implements Module {
             for (int i = 0; i < messages.size(); i++) {
                 IMessage message = messages.get(i);
                 try (Statement stm = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+                    stm.setQueryTimeout(queryTimeout);
                     if (isUpdateReturnKeys) {
                         stm.executeUpdate((String) message.getValue(), Statement.RETURN_GENERATED_KEYS);
                     } else {

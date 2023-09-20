@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.DB</className>
-    <ver>1.0.6</ver>
+    <ver>1.0.7</ver>
     <apiVer>1.0.0</apiVer>
     <date>31-12-2020</date>
 
@@ -196,6 +196,21 @@ OBJECT_WITHOUT_NULL - напрямую в объект без нулевых з�
                 <entry>
                     <key>ru</key>
                     <value>Приводить ли имена столбцов ответа к верхнему регистру.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>queryTimeout</name>
+            <type>INTEGER</type>
+            <value>0</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Sets the number of seconds the driver will wait for a Statement object to execute to the given number of seconds. If 0, then waits indefinitely.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Устанавливает количество секунд, в течение которых драйвер будет ждать выполнения объекта Statement, равное заданному количеству секунд. Если 0, то ждет бесконечно.</value>
                 </entry>
             </description>
         </value>

@@ -517,6 +517,11 @@ public class DB implements Module {
                                 connection.rollback();
                             throw new ModuleException(String.format("%s: %d %s", e.getMessage(), elementId, sql), e);
                         }
+                        if (externalExecutionContextTool.isNeedStop()) {
+                            if (needRollback)
+                                connection.rollback();
+                            break;
+                        }
                     }
                 } else if (ModuleUtils.isArrayContainArrays(objectArray)) {
                     List<Integer> parameterTypes = List.of();
@@ -586,6 +591,11 @@ public class DB implements Module {
                             if (needRollback)
                                 connection.rollback();
                             throw new ModuleException(String.format("%s: %d %s", e.getMessage(), elementId, sql), e);
+                        }
+                        if (externalExecutionContextTool.isNeedStop()) {
+                            if (needRollback)
+                                connection.rollback();
+                            break;
                         }
                     }
                 }

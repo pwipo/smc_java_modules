@@ -397,6 +397,32 @@ public class DB implements Module {
                             }
                             if ("NULL".equals(value)) {
                                 stm.setNull(i, parameterType);
+                            } else if (value instanceof ObjectArray) {
+                                ObjectArray objectArrayValue = (ObjectArray) value;
+                                if (objectArrayValue.isSimple()) {
+                                    Array array;
+                                    if (objectArrayValue.getType() != ObjectType.VALUE_ANY && ModuleUtils.isArrayContainNumber(objectArrayValue)) {
+                                        if (objectArrayValue.getType() == ObjectType.FLOAT || objectArrayValue.getType() == ObjectType.DOUBLE || objectArrayValue.getType() == ObjectType.BIG_DECIMAL) {
+                                            List<Float> lst = new ArrayList<>(objectArrayValue.size());
+                                            for (int k = 0; k < objectArrayValue.size(); k++)
+                                                lst.add(((Number) objectArrayValue.get(k)).floatValue());
+                                            array = stm.getConnection().createArrayOf("FLOAT", lst.toArray());
+                                        } else {
+                                            List<Long> lst = new ArrayList<>(objectArrayValue.size());
+                                            for (int k = 0; k < objectArrayValue.size(); k++)
+                                                lst.add(((Number) objectArrayValue.get(k)).longValue());
+                                            array = stm.getConnection().createArrayOf("BIGINT", lst.toArray());
+                                        }
+                                    } else {
+                                        List<String> lst = new ArrayList<>(objectArrayValue.size());
+                                        for (int k = 0; k < objectArrayValue.size(); k++)
+                                            lst.add(objectArrayValue.get(k).toString());
+                                        array = stm.getConnection().createArrayOf("VARCHAR", lst.toArray());
+                                    }
+                                    stm.setArray(i, array);
+                                } else {
+                                    stm.setNull(i, parameterType);
+                                }
                             } else {
                                 switch (parameterType) {
                                     case Types.BOOLEAN:
@@ -459,7 +485,7 @@ public class DB implements Module {
                     }
                     for (int i = 0; i < objectArray.size(); i++) {
                         ObjectElement objectElement = (ObjectElement) objectArray.get(i);
-                        if (objectElement.getFields().isEmpty() || !objectElement.isSimple())
+                        if (objectElement.getFields().isEmpty())
                             continue;
                         try (PreparedStatement stm = isUpdateReturnKeys ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                             stm.setQueryTimeout(queryTimeout);
@@ -484,6 +510,32 @@ public class DB implements Module {
                                     if (ModuleUtils.isString(f) && ModuleUtils.getString(f).equals("NULL")) {
                                         stm.setNull(j, parameterType);
                                         // System.out.println(f);
+                                    } else if (ModuleUtils.isObjectArray(f)) {
+                                        ObjectArray objectArrayValue = ModuleUtils.getObjectArray(f);
+                                        if (objectArrayValue.isSimple()) {
+                                            Array array;
+                                            if (objectArrayValue.getType() != ObjectType.VALUE_ANY && ModuleUtils.isArrayContainNumber(objectArrayValue)) {
+                                                if (objectArrayValue.getType() == ObjectType.FLOAT || objectArrayValue.getType() == ObjectType.DOUBLE || objectArrayValue.getType() == ObjectType.BIG_DECIMAL) {
+                                                    List<Float> lst = new ArrayList<>(objectArrayValue.size());
+                                                    for (int k = 0; k < objectArrayValue.size(); k++)
+                                                        lst.add(((Number) objectArrayValue.get(k)).floatValue());
+                                                    array = stm.getConnection().createArrayOf("FLOAT", lst.toArray());
+                                                } else {
+                                                    List<Long> lst = new ArrayList<>(objectArrayValue.size());
+                                                    for (int k = 0; k < objectArrayValue.size(); k++)
+                                                        lst.add(((Number) objectArrayValue.get(k)).longValue());
+                                                    array = stm.getConnection().createArrayOf("BIGINT", lst.toArray());
+                                                }
+                                            } else {
+                                                List<String> lst = new ArrayList<>(objectArrayValue.size());
+                                                for (int k = 0; k < objectArrayValue.size(); k++)
+                                                    lst.add(objectArrayValue.get(k).toString());
+                                                array = stm.getConnection().createArrayOf("VARCHAR", lst.toArray());
+                                            }
+                                            stm.setArray(j, array);
+                                        } else {
+                                            stm.setNull(j, parameterType);
+                                        }
                                     } else {
                                         switch (parameterType) {
                                             case Types.BOOLEAN:
@@ -537,7 +589,7 @@ public class DB implements Module {
                     }
                     for (int i = 0; i < objectArray.size(); i++) {
                         ObjectArray objectArray1 = (ObjectArray) objectArray.get(i);
-                        if (objectArray1.size() == 0 || !objectArray1.isSimple())
+                        if (objectArray1.size() == 0)
                             continue;
                         try (PreparedStatement stm = isUpdateReturnKeys ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                             stm.setQueryTimeout(queryTimeout);
@@ -559,6 +611,32 @@ public class DB implements Module {
                                     }
                                     if ("NULL".equals(value)) {
                                         stm.setNull(j, parameterType);
+                                    } else if (value instanceof ObjectArray) {
+                                        ObjectArray objectArrayValue = (ObjectArray) value;
+                                        if (objectArrayValue.isSimple()) {
+                                            Array array;
+                                            if (objectArrayValue.getType() != ObjectType.VALUE_ANY && ModuleUtils.isArrayContainNumber(objectArrayValue)) {
+                                                if (objectArrayValue.getType() == ObjectType.FLOAT || objectArrayValue.getType() == ObjectType.DOUBLE || objectArrayValue.getType() == ObjectType.BIG_DECIMAL) {
+                                                    List<Float> lst = new ArrayList<>(objectArrayValue.size());
+                                                    for (int k = 0; k < objectArrayValue.size(); k++)
+                                                        lst.add(((Number) objectArrayValue.get(k)).floatValue());
+                                                    array = stm.getConnection().createArrayOf("FLOAT", lst.toArray());
+                                                } else {
+                                                    List<Long> lst = new ArrayList<>(objectArrayValue.size());
+                                                    for (int k = 0; k < objectArrayValue.size(); k++)
+                                                        lst.add(((Number) objectArrayValue.get(k)).longValue());
+                                                    array = stm.getConnection().createArrayOf("BIGINT", lst.toArray());
+                                                }
+                                            } else {
+                                                List<String> lst = new ArrayList<>(objectArrayValue.size());
+                                                for (int k = 0; k < objectArrayValue.size(); k++)
+                                                    lst.add(objectArrayValue.get(k).toString());
+                                                array = stm.getConnection().createArrayOf("VARCHAR", lst.toArray());
+                                            }
+                                            stm.setArray(j, array);
+                                        } else {
+                                            stm.setNull(j, parameterType);
+                                        }
                                     } else {
                                         boolean isString = value instanceof String;
                                         switch (parameterType) {

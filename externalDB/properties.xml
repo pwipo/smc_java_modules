@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.DB</className>
-    <ver>1.0.8</ver>
+    <ver>1.0.9</ver>
     <apiVer>1.0.0</apiVer>
     <date>31-12-2020</date>
 
@@ -140,14 +140,16 @@ db2Client - //имя_или_ип_сервера[:порт]/имя_бд.
                     <key>en</key>
                     <value>only for parameterized SQL expressions (types: 7,8).
 determines whether autoconversion of parameters should be performed.
-if enabled, it allows you to transfer the types BOOLEAN, TIMESTAMP, DATE, TIME. also converts a NULL string to a null value.
+if enabled, it allows you to transfer the types BOOLEAN, TIMESTAMP, DATE, TIME.
+converts a NULL string to a null value, converts an array (ObjectArray) to the corresponding array.
                     </value>
                 </entry>
                 <entry>
                     <key>ru</key>
                     <value>только для параметризованных SQL выражений (типы: 7,8).
 определяет нужно ли проводить автоконвертацию параметров.
-если включено то позволяет передавать типы BOOLEAN, TIMESTAMP, DATE, TIME. так же конвертирует строку NULL в нулевое значение.
+если включено то позволяет передавать типы BOOLEAN, TIMESTAMP, DATE, TIME.
+конвертирует строку NULL в нулевое значение, конвертирует массив (ObjectArray) в соответствующий массив.
                     </value>
                 </entry>
             </description>

@@ -787,7 +787,7 @@ public class DB implements Module {
                     value = convertNull(rs.getObject(column_name)).toString();
                 } else if (columnType == java.sql.Types.BIGINT) {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
-                    value = rs.getInt(column_name);
+                    value = rs.getLong(column_name);
                 } else if (columnType == java.sql.Types.BOOLEAN) {
                     // externalExecutionContextTool.addMessage(BooleanUtils.toStringTrueFalse(rs.getBoolean(column_name)));
                     value = BooleanUtils.toStringTrueFalse(rs.getBoolean(column_name));
@@ -824,10 +824,10 @@ public class DB implements Module {
                     value = convertNull(rs.getString(column_name));
                 } else if (columnType == java.sql.Types.TINYINT) {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
-                    value = rs.getInt(column_name);
+                    value = rs.getShort(column_name);
                 } else if (columnType == java.sql.Types.SMALLINT) {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
-                    value = rs.getInt(column_name);
+                    value = rs.getShort(column_name);
                 } else if (columnType == java.sql.Types.DATE) {
                     Date date = rs.getDate(column_name);
                     // externalExecutionContextTool.addMessage(date != null ? date.getTime() : "NULL");

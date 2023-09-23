@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.DB</className>
-    <ver>1.0.9</ver>
+    <ver>1.0.10</ver>
     <apiVer>1.0.0</apiVer>
     <date>31-12-2020</date>
 

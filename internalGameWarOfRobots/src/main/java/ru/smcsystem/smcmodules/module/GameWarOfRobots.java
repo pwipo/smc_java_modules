@@ -159,8 +159,8 @@ public class GameWarOfRobots implements Module {
                 .flatMap(i -> executionContextTool.getMessages(i).stream())
                 .forEach(a -> {
                     doPlayerActions(a.getMessages().stream()
-                            .filter(m -> ValueType.BYTE.equals(m.getType()) || ValueType.SHORT.equals(m.getType()) || ValueType.INTEGER.equals(m.getType()) || ValueType.LONG.equals(m.getType()) || ValueType.FLOAT.equals(m.getType()) || ValueType.DOUBLE.equals(m.getType()) || ValueType.BIG_INTEGER.equals(m.getType()) || ValueType.BIG_DECIMAL.equals(m.getType()))
-                            .map(m -> (Number) m.getValue())
+                            .filter(ModuleUtils::isNumber)
+                            .map(ModuleUtils::getNumber)
                             .map(n -> KYE_CODE.parse(n.intValue()))
                             .filter(Optional::isPresent)
                             .map(Optional::get)

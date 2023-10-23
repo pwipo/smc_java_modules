@@ -4,16 +4,21 @@ import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.api.tools.execution.ExecutionContextTool;
+import ru.smcsystem.smc.utils.ModuleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Logic implements Module {
 
     private enum Type {
         AND,
         OR,
-        NOT
+        NOT,
+        AND_BOOLEAN,
+        OR_BOOLEAN,
+        NOT_BOOLEAN
     }
 
     private Type type;
@@ -37,10 +42,10 @@ public class Logic implements Module {
         }
 
         List<Boolean> sourcesHasData = new ArrayList<>(executionContextTool.countSource() + 1);
-        for (int i = 0; i < executionContextTool.countSource(); i++) {
-            sourcesHasData.add(executionContextTool.getMessages(i).stream()
-                    .anyMatch(a -> !a.getMessages().isEmpty()));
-        }
+        for (int i = 0; i < executionContextTool.countSource(); i++)
+            sourcesHasData.add(executionContextTool.getMessages(i).stream().anyMatch(ModuleUtils::hasData));
+
+        Type type = Objects.equals(executionContextTool.getType(), "default") ? this.type : Type.valueOf(executionContextTool.getType().toUpperCase());
         switch (type) {
             case AND:
                 if (sourcesHasData.stream().allMatch(b -> b))
@@ -53,6 +58,15 @@ public class Logic implements Module {
             case NOT:
                 if (!sourcesHasData.get(0))
                     executionContextTool.addMessage(1);
+                break;
+            case AND_BOOLEAN:
+                executionContextTool.addMessage(sourcesHasData.stream().allMatch(b -> b));
+                break;
+            case OR_BOOLEAN:
+                executionContextTool.addMessage(sourcesHasData.stream().anyMatch(b -> b));
+                break;
+            case NOT_BOOLEAN:
+                executionContextTool.addMessage(!sourcesHasData.get(0));
                 break;
         }
     }

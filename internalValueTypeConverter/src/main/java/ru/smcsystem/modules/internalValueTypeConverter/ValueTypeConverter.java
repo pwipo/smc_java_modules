@@ -11,6 +11,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import ru.smcsystem.api.dto.*;
 import ru.smcsystem.api.enumeration.ObjectType;
+import ru.smcsystem.api.enumeration.ValueType;
 import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
@@ -78,6 +79,13 @@ public class ValueTypeConverter implements Module {
         objectArrayToMessages,
         messagesToObjectArray,
         objectArrayValuesToList,
+        fromJSONArrayStringNew,
+        fromJSONObjectStringNew,
+        fromXmlSimple,
+        toXmlSimple,
+        autoNew,
+        toBoolean,
+        fromCsvToValuesNew
     }
 
     private Charset charset;
@@ -93,6 +101,12 @@ public class ValueTypeConverter implements Module {
         // end = null;
         lParam = null;
         // objectArrayCache = null;
+        updateSettings();
+
+        base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
+    }
+
+    private void updateSettings() {
         if (Type.fromValuesToCsv.equals(type)) {
             String[] split = param.split("::");
             if (split.length < 2)
@@ -110,8 +124,6 @@ public class ValueTypeConverter implements Module {
         } else if (Type.stringToBytes.equals(type) || Type.bytesToString.equals(type)) {
             charset = StringUtils.isNotBlank(param) ? Charset.forName(param) : Charset.defaultCharset();
         }
-
-        base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
     }
 
     @Override
@@ -122,89 +134,120 @@ public class ValueTypeConverter implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
-        for (int i = 0; i < executionContextTool.countSource(); i++) {
-            List<IAction> actions = executionContextTool.getMessages(i);
-            switch (type) {
-                case bytesToNumbers:
-                    bytesToNumbers(executionContextTool, actions);
-                    break;
-                case numbersToBytes:
-                    numbersToBytes(executionContextTool, actions);
-                    break;
-                case stringToLong:
-                    stringToLong(executionContextTool, actions);
-                    break;
-                case stringToDouble:
-                    stringToDouble(executionContextTool, actions);
-                    break;
-                case numberToString:
-                    numberToString(executionContextTool, actions);
-                    break;
-                case bytesToString:
-                    bytesToString(executionContextTool, actions);
-                    break;
-                case stringToBytes:
-                    stringToBytes(executionContextTool, actions);
-                    break;
-                case toJSONArrayString:
-                    toJSONString(executionContextTool, actions, true);
-                    break;
-                case toJSONObjectString:
-                    toJSONString(executionContextTool, actions, false);
-                    break;
-                case fromJSONArrayString:
-                    fromJSONString(executionContextTool, configurationTool, actions);
-                    break;
-                case auto:
-                    auto(executionContextTool, actions);
-                    break;
-                case fromCsvToValues:
-                    fromCsvToValues(executionContextTool, actions);
-                    break;
-                case fromValuesToCsv:
-                    fromValuesToCsv(executionContextTool, actions);
-                    break;
-                case toLong:
-                    toLong(executionContextTool, actions);
-                    break;
-                case fromXml:
-                    fromXML(executionContextTool, actions);
-                    break;
-                case toXml:
-                    toXML(executionContextTool, actions);
-                    break;
-                case fromJSONObjectString:
-                    fromJSONString(executionContextTool, configurationTool, actions);
-                    break;
-                case toString:
-                    toString(executionContextTool, actions);
-                    break;
-                case base64ToBytes:
-                    base64ToBytes(executionContextTool, configurationTool, actions);
-                    break;
-                case bytesToBase64:
-                    bytesToBase64(executionContextTool, configurationTool, actions);
-                    break;
-                case listToObjectArray:
-                    listToObjectArray(executionContextTool, actions);
-                    break;
-                case objectArrayToList:
-                    objectArrayToList(executionContextTool, actions, true);
-                    break;
-                case stringToNumberOrOrigin:
-                    stringToNumberOrOrigin(executionContextTool, actions);
-                    break;
-                case objectArrayToMessages:
-                    objectArrayToMessages(executionContextTool, actions);
-                    break;
-                case messagesToObjectArray:
-                    messagesToObjectArray(executionContextTool, actions);
-                    break;
-                case objectArrayValuesToList:
-                    objectArrayToList(executionContextTool, actions, false);
-                    break;
-            }
+        if (Objects.equals(executionContextTool.getType(), "default")) {
+            for (int i = 0; i < executionContextTool.countSource(); i++)
+                process(executionContextTool, configurationTool, executionContextTool.getMessages(i), type);
+        } else {
+            Type type = Type.valueOf(executionContextTool.getType());
+            if (type != this.type)
+                updateSettings();
+            process(executionContextTool, configurationTool, executionContextTool.getMessages(0), type);
         }
+    }
+
+    private void process(ExecutionContextTool executionContextTool, ConfigurationTool configurationTool, List<IAction> actions, Type type) {
+        switch (type) {
+            case bytesToNumbers:
+                bytesToNumbers(executionContextTool, actions);
+                break;
+            case numbersToBytes:
+                numbersToBytes(executionContextTool, actions);
+                break;
+            case stringToLong:
+                stringToLong(executionContextTool, actions);
+                break;
+            case stringToDouble:
+                stringToDouble(executionContextTool, actions);
+                break;
+            case numberToString:
+                numberToString(executionContextTool, actions);
+                break;
+            case bytesToString:
+                bytesToString(executionContextTool, actions);
+                break;
+            case stringToBytes:
+                stringToBytes(executionContextTool, actions);
+                break;
+            case toJSONArrayString:
+                toJSONString(executionContextTool, actions, true);
+                break;
+            case toJSONObjectString:
+                toJSONString(executionContextTool, actions, false);
+                break;
+            case fromJSONArrayString:
+                fromJSONString(executionContextTool, configurationTool, actions, false);
+                break;
+            case auto:
+                auto(executionContextTool, actions, false);
+                break;
+            case fromCsvToValues:
+                fromCsvToValues(executionContextTool, actions, false);
+                break;
+            case fromValuesToCsv:
+                fromValuesToCsv(executionContextTool, actions);
+                break;
+            case toLong:
+                toLong(executionContextTool, actions);
+                break;
+            case fromXml:
+                fromXML(executionContextTool, actions, false);
+                break;
+            case toXml:
+                toXML(executionContextTool, actions, false);
+                break;
+            case fromJSONObjectString:
+                fromJSONString(executionContextTool, configurationTool, actions, false);
+                break;
+            case toString:
+                toString(executionContextTool, actions);
+                break;
+            case base64ToBytes:
+                base64ToBytes(executionContextTool, configurationTool, actions);
+                break;
+            case bytesToBase64:
+                bytesToBase64(executionContextTool, configurationTool, actions);
+                break;
+            case listToObjectArray:
+                listToObjectArray(executionContextTool, actions);
+                break;
+            case objectArrayToList:
+                objectArrayToList(executionContextTool, actions, true);
+                break;
+            case stringToNumberOrOrigin:
+                stringToNumberOrOrigin(executionContextTool, actions);
+                break;
+            case objectArrayToMessages:
+                objectArrayToMessages(executionContextTool, actions);
+                break;
+            case messagesToObjectArray:
+                messagesToObjectArray(executionContextTool, actions);
+                break;
+            case objectArrayValuesToList:
+                objectArrayToList(executionContextTool, actions, false);
+                break;
+            case fromJSONArrayStringNew:
+                fromJSONString(executionContextTool, configurationTool, actions, true);
+                break;
+            case fromJSONObjectStringNew:
+                fromJSONString(executionContextTool, configurationTool, actions, true);
+                break;
+            case fromXmlSimple:
+                fromXML(executionContextTool, actions, true);
+                break;
+            case toXmlSimple:
+                toXML(executionContextTool, actions, true);
+                break;
+            case autoNew:
+                auto(executionContextTool, actions, true);
+                break;
+            case toBoolean:
+                toBoolean(executionContextTool, actions);
+                break;
+            case fromCsvToValuesNew:
+                fromCsvToValues(executionContextTool, actions, true);
+                break;
+        }
+
     }
 
     @Override
@@ -375,6 +418,7 @@ public class ValueTypeConverter implements Module {
             case DOUBLE:
             case BIG_INTEGER:
             case BIG_DECIMAL:
+            case BOOLEAN:
                 for (int i = 0; i < mainList.size(); i++)
                     jsonArray.put(mainList.get(i));
                 break;
@@ -409,10 +453,11 @@ public class ValueTypeConverter implements Module {
                 case DOUBLE:
                 case BIG_INTEGER:
                 case BIG_DECIMAL:
+                case BOOLEAN:
                     jsonObject.put(name, objectField.getValue());
                     break;
                 case BYTES:
-                    jsonObject.put(name, Base64.getEncoder().encodeToString((byte[]) objectField.getValue()));
+                    jsonObject.put(name, objectField.getValue() != null ? Base64.getEncoder().encodeToString((byte[]) objectField.getValue()) : null);
                     break;
             }
         });
@@ -481,19 +526,19 @@ public class ValueTypeConverter implements Module {
     */
 
     // формат: цифра - количество полей в объекте, далее пары - название поля, значение
-    private void fromJSONString(ExecutionContextTool executionContextTool, ConfigurationTool configurationTool, List<IAction> actions) {
+    private void fromJSONString(ExecutionContextTool executionContextTool, ConfigurationTool configurationTool, List<IAction> actions, boolean withNewFuncs) {
         actions.forEach(a -> a.getMessages().stream()
-                .filter(m -> !ModuleUtils.isNumber(m))
+                .filter(m -> ModuleUtils.isString(m) || ModuleUtils.isBytes(m))
                 .map(m -> ModuleUtils.isBytes(m) ? new String((byte[]) m.getValue()) : String.valueOf(m.getValue()))
                 .forEach(s -> {
                     try {
                         String json = s.trim();
                         if (json.startsWith("[")) {
                             JSONArray jsonArray = new JSONArray(json);
-                            executionContextTool.addMessage(fromJSONString(jsonArray));
+                            executionContextTool.addMessage(fromJSONString(jsonArray, withNewFuncs));
                         } else {
                             JSONObject jsonObject = new JSONObject(json);
-                            ObjectElement objectElement = fromJSONString(jsonObject);
+                            ObjectElement objectElement = fromJSONString(jsonObject, withNewFuncs);
                             executionContextTool.addMessage(new ObjectArray(List.of(objectElement), ObjectType.OBJECT_ELEMENT));
                         }
                     } catch (Exception e) {
@@ -502,7 +547,7 @@ public class ValueTypeConverter implements Module {
                 }));
     }
 
-    private ObjectArray fromJSONString(JSONArray jsonArray) {
+    private ObjectArray fromJSONString(JSONArray jsonArray, boolean withNewFuncs) {
         ObjectArray objectArray = new ObjectArray();
         if (jsonArray.isEmpty())
             return objectArray;
@@ -517,7 +562,7 @@ public class ValueTypeConverter implements Module {
                 } else if (!ObjectType.OBJECT_ELEMENT.equals(objectType)) {
                     continue;
                 }
-                ObjectElement objectElement = fromJSONString(jsonArray.getJSONObject(i));
+                ObjectElement objectElement = fromJSONString(jsonArray.getJSONObject(i), withNewFuncs);
                 list.add(objectElement);
             } else if (obj instanceof JSONArray) {
                 if (objectType == null) {
@@ -525,14 +570,14 @@ public class ValueTypeConverter implements Module {
                 } else if (!ObjectType.OBJECT_ARRAY.equals(objectType)) {
                     continue;
                 }
-                list.add(fromJSONString((JSONArray) obj));
+                list.add(fromJSONString((JSONArray) obj, withNewFuncs));
             } else {
                 if (objectType == null) {
                     objectType = ObjectType.VALUE_ANY;
                 } else if (!ObjectType.VALUE_ANY.equals(objectType)) {
                     continue;
                 }
-                list.add(obj instanceof Number ? obj : fromString(obj.toString(), base64, false));
+                list.add(obj instanceof Number ? obj : (withNewFuncs && obj instanceof Boolean ? obj : fromString(obj.toString(), base64, false, withNewFuncs)));
             }
         }
         if (objectType != null) {
@@ -558,7 +603,7 @@ public class ValueTypeConverter implements Module {
         return newType != null && !typeForCheck.equals(newType) ? null : typeForCheck;
     }
 
-    private ObjectElement fromJSONString(JSONObject jsonObject) {
+    private ObjectElement fromJSONString(JSONObject jsonObject, boolean withNewFuncs) {
         ObjectElement objectElement = new ObjectElement();
         jsonObject.keySet()//.stream()
                 // .filter(k -> jsonObject.get(k) instanceof String)
@@ -568,16 +613,25 @@ public class ValueTypeConverter implements Module {
                     ObjectField objectField = new ObjectField(k);
                     if (o instanceof JSONArray) {
                         // executionContextTool.addMessage(start);
-                        objectField.setValue(fromJSONString((JSONArray) o));
+                        objectField.setValue(fromJSONString((JSONArray) o, withNewFuncs));
                         // executionContextTool.addMessage(end);
                     } else if (o instanceof JSONObject) {
                         // executionContextTool.addMessage(start);
-                        objectField.setValue(fromJSONString((JSONObject) o));
+                        objectField.setValue(fromJSONString((JSONObject) o, withNewFuncs));
                         // executionContextTool.addMessage(end);
-                    } else {
+                    } else if (o != null) {
                         // executionContextTool.addMessage(o instanceof Number ? o : fromString(o.toString(), base64, false));
-                        Object value = o instanceof Number ? o : fromString(o.toString(), base64, false);
-                        objectField.setValue(ModuleUtils.getObjectType(value), value);
+                        ValueType valueType = ModuleUtils.getValueTypeObject(o);
+                        Object value = o;
+                        if (valueType == null || valueType == ValueType.STRING || (!withNewFuncs && valueType == ValueType.BOOLEAN)) {
+                            value = fromString(o.toString(), base64, false, withNewFuncs);
+                            valueType = ModuleUtils.getValueTypeObject(value);
+                        }
+                        objectField.setValue(ModuleUtils.convertTo(valueType), value);
+                    } else {
+                        if (!withNewFuncs)
+                            return;
+                        objectField.setValue((String) null);
                     }
                     objectElement.getFields().add(objectField);
                 });
@@ -590,14 +644,14 @@ public class ValueTypeConverter implements Module {
      * @param executionContextTool
      * @param actions
      */
-    private void auto(ExecutionContextTool executionContextTool, List<IAction> actions) {
+    private void auto(ExecutionContextTool executionContextTool, List<IAction> actions, boolean withNewFuncs) {
         actions.forEach(a -> executionContextTool.addMessage(
                 a.getMessages().stream()
                         .map(m -> {
                             if (ModuleUtils.isString(m)) {
-                                return fromString((String) m.getValue(), base64, true);
+                                return fromString((String) m.getValue(), base64, true, withNewFuncs);
                             } else if (ModuleUtils.isObjectArray(m)) {
-                                return auto(ModuleUtils.getObjectArray(m));
+                                return auto(ModuleUtils.getObjectArray(m), withNewFuncs);
                             } else {
                                 return toString(m);
                             }
@@ -605,7 +659,7 @@ public class ValueTypeConverter implements Module {
                         .collect(Collectors.toList())));
     }
 
-    private ObjectArray auto(ObjectArray objectArray) {
+    private ObjectArray auto(ObjectArray objectArray, boolean withNewFuncs) {
         if (objectArray == null || objectArray.size() == 0)
             return new ObjectArray();
         ObjectArray result = null;
@@ -613,19 +667,19 @@ public class ValueTypeConverter implements Module {
             case OBJECT_ARRAY:
                 result = new ObjectArray(objectArray.size(), ObjectType.OBJECT_ARRAY);
                 for (int i = 0; i < objectArray.size(); i++)
-                    result.add(auto((ObjectArray) objectArray.get(i)));
+                    result.add(auto((ObjectArray) objectArray.get(i), withNewFuncs));
                 break;
             case OBJECT_ELEMENT:
                 result = new ObjectArray(objectArray.size(), ObjectType.OBJECT_ELEMENT);
                 for (int i = 0; i < objectArray.size(); i++)
-                    result.add(auto((ObjectElement) objectArray.get(i)));
+                    result.add(auto((ObjectElement) objectArray.get(i), withNewFuncs));
                 break;
             case VALUE_ANY:
                 result = new ObjectArray(objectArray.size(), ObjectType.VALUE_ANY);
                 for (int i = 0; i < objectArray.size(); i++) {
                     Object value = objectArray.get(i);
                     if (value instanceof String) {
-                        result.addValueAny(fromString((String) value, base64, true));
+                        result.addValueAny(fromString((String) value, base64, true, withNewFuncs));
                     } else if (value instanceof byte[]) {
                         result.add(Base64.getEncoder().encodeToString((byte[]) value));
                     } else {
@@ -636,7 +690,7 @@ public class ValueTypeConverter implements Module {
             case STRING:
                 result = new ObjectArray(objectArray.size(), ObjectType.VALUE_ANY);
                 for (int i = 0; i < objectArray.size(); i++)
-                    result.addValueAny(fromString((String) objectArray.get(i), base64, true));
+                    result.addValueAny(fromString((String) objectArray.get(i), base64, true, withNewFuncs));
                 break;
             case BYTE:
             case SHORT:
@@ -655,26 +709,40 @@ public class ValueTypeConverter implements Module {
                 for (int i = 0; i < objectArray.size(); i++)
                     result.add(Base64.getEncoder().encodeToString((byte[]) objectArray.get(i)));
                 break;
+            case BOOLEAN:
+                result = new ObjectArray(objectArray.size(), withNewFuncs ? ObjectType.INTEGER : ObjectType.STRING);
+                for (int i = 0; i < objectArray.size(); i++) {
+                    if (withNewFuncs) {
+                        result.add((Boolean) objectArray.get(i) ? 1 : 0);
+                    } else {
+                        result.add(objectArray.get(i).toString());
+                    }
+                }
+                break;
         }
         return result;
     }
 
-    private ObjectElement auto(ObjectElement objectElement) {
+    private ObjectElement auto(ObjectElement objectElement, boolean withNewFuncs) {
         ObjectElement result = new ObjectElement();
         if (objectElement == null || objectElement.getFields().isEmpty())
             return result;
         objectElement.getFields().forEach(f -> {
+            if (f.getValue() == null) {
+                result.getFields().add(new ObjectField(f.getName(), f));
+                return;
+            }
             switch (f.getType()) {
                 case OBJECT_ARRAY:
-                    result.getFields().add(new ObjectField(f.getName(), auto((ObjectArray) f.getValue())));
+                    result.getFields().add(new ObjectField(f.getName(), auto((ObjectArray) f.getValue(), withNewFuncs)));
                     break;
                 case OBJECT_ELEMENT:
-                    result.getFields().add(new ObjectField(f.getName(), auto((ObjectElement) f.getValue())));
+                    result.getFields().add(new ObjectField(f.getName(), auto((ObjectElement) f.getValue(), withNewFuncs)));
                     break;
                 case VALUE_ANY: {
                     Object value = f.getValue();
                     if (value instanceof String) {
-                        value = fromString((String) value, base64, true);
+                        value = fromString((String) value, base64, true, withNewFuncs);
                         result.getFields().add(new ObjectField(f.getName(), ModuleUtils.convertTo(ModuleUtils.getValueTypeObject(value)), value));
                     } else if (value instanceof byte[]) {
                         result.getFields().add(new ObjectField(f.getName(), Base64.getEncoder().encodeToString((byte[]) value)));
@@ -684,7 +752,7 @@ public class ValueTypeConverter implements Module {
                     break;
                 }
                 case STRING: {
-                    Object value = fromString((String) f.getValue(), base64, true);
+                    Object value = fromString((String) f.getValue(), base64, true, withNewFuncs);
                     result.getFields().add(new ObjectField(f.getName(), ModuleUtils.convertTo(ModuleUtils.getValueTypeObject(value)), value));
                     break;
                 }
@@ -701,8 +769,14 @@ public class ValueTypeConverter implements Module {
                 case BYTES:
                     result.getFields().add(new ObjectField(f.getName(), Base64.getEncoder().encodeToString((byte[]) f.getValue())));
                     break;
+                case BOOLEAN:
+                    if (withNewFuncs) {
+                        result.getFields().add(new ObjectField(f.getName(), (Boolean) f.getValue() ? 1 : 0));
+                    } else {
+                        result.getFields().add(new ObjectField(f.getName(), f.getValue().toString()));
+                    }
+                    break;
             }
-
         });
         return result;
     }
@@ -723,12 +797,14 @@ public class ValueTypeConverter implements Module {
         return result;
     }
 
-    private Object fromString(String value, Pattern base64, boolean toNumbers) {
+    private Object fromString(String value, Pattern base64, boolean toNumbers, boolean withBoolean) {
         Object result;
         if (toNumbers && NumberUtils.isCreatable(value)) {
             result = NumberUtils.createNumber(value);
         } else if (toNumbers && NumberUtils.isCreatable(value.replaceAll(" ", ""))) {
             result = NumberUtils.createNumber(value.replaceAll(" ", ""));
+        } else if (withBoolean && ("true".equals(value) || "false".equals(value))) {
+            result = "true".equals(value);
         } else {
             if (StringUtils.length(value) >= 4 && base64.matcher(value).find()) {
                 try {
@@ -744,13 +820,23 @@ public class ValueTypeConverter implements Module {
         return result;
     }
 
-    private void fromCsvToValues(ExecutionContextTool executionContextTool, List<IAction> actions) {
+    private void toBoolean(ExecutionContextTool executionContextTool, List<IAction> actions) {
+        actions.forEach(a -> {
+            if (!ModuleUtils.hasData(a)) {
+                executionContextTool.addMessage(false);
+            } else {
+                a.getMessages().forEach(m -> executionContextTool.addMessage(ModuleUtils.toBoolean(m)));
+            }
+        });
+    }
+
+    private void fromCsvToValues(ExecutionContextTool executionContextTool, List<IAction> actions, boolean withNewFuncs) {
         actions.forEach(a -> executionContextTool.addMessage(a.getMessages().stream()
-                .filter(m -> !ModuleUtils.isNumber(m))
+                .filter(m -> ModuleUtils.isString(m) || ModuleUtils.isBytes(m))
                 .map(m -> ModuleUtils.isBytes(m) ? new String((byte[]) m.getValue()) : String.valueOf(m.getValue()))
                 .flatMap(s -> Arrays.stream((s).split("\\R")))
                 .flatMap(s -> Arrays.stream(s.split(param)))
-                .map(value -> fromString(value, base64, true))
+                .map(value -> fromString(value, base64, true, withNewFuncs))
                 .collect(Collectors.toList())));
     }
 
@@ -788,6 +874,12 @@ public class ValueTypeConverter implements Module {
                         case BYTES:
                             executionContextTool.addMessage(((byte[]) m.getValue()).length);
                             break;
+                        case OBJECT_ARRAY:
+                            executionContextTool.addMessage(((ObjectArray) m.getValue()).size());
+                            break;
+                        case BOOLEAN:
+                            executionContextTool.addMessage(((Boolean) m.getValue()) ? 1 : 0);
+                            break;
                     }
                 }));
     }
@@ -803,9 +895,9 @@ public class ValueTypeConverter implements Module {
         return e;
     }
 
-    private void fromXML(ExecutionContextTool executionContextTool, List<IAction> actions) {
+    private void fromXML(ExecutionContextTool executionContextTool, List<IAction> actions, boolean useSimple) {
         actions.forEach(a -> a.getMessages().stream()
-                .filter(m -> !ModuleUtils.isNumber(m))
+                .filter(m -> ModuleUtils.isString(m) || ModuleUtils.isBytes(m))
                 .map(m -> ModuleUtils.isBytes(m) ? new String((byte[]) m.getValue()) : String.valueOf(m.getValue()))
                 .forEach(s -> {
                     Element element = null;
@@ -814,7 +906,7 @@ public class ValueTypeConverter implements Module {
                     } catch (Exception e) {
                         executionContextTool.addError(e.getClass().getSimpleName() + ": " + e.getMessage());
                     }
-                    ObjectArray objectArray = new ObjectArray(List.of(fromXML(element)), ObjectType.OBJECT_ELEMENT);
+                    ObjectArray objectArray = useSimple && element != null ? new ObjectArray(fromXMLSimple(List.of(element))) : new ObjectArray(fromXML(element));
                     executionContextTool.addMessage(objectArray);
                 }));
     }
@@ -843,7 +935,7 @@ public class ValueTypeConverter implements Module {
         }
         if (textContent == null || textContent.isEmpty())
             textContent = OBJECT_FILED_VALUE_VALUE_EMPTY;
-        Object value = fromString(textContent, base64, true);
+        Object value = fromString(textContent, base64, true, false);
         result.getFields().add(new ObjectField(OBJECT_FILED_NAME_VALUE, ModuleUtils.getObjectType(value), value));
 
         NamedNodeMap attributes = element.getAttributes();
@@ -872,7 +964,37 @@ public class ValueTypeConverter implements Module {
         return result;
     }
 
-    private void toXML(ExecutionContextTool executionContextTool, List<IAction> actions) {
+    private ObjectElement fromXMLSimple(List<Element> elements) {
+        ObjectElement result = new ObjectElement();
+        if (elements == null)
+            return result;
+        elements.forEach(element -> {
+            ObjectField objectField = new ObjectField(element.getNodeName());
+            NodeList childNodes = element.getChildNodes();
+            List<Element> childElements = new LinkedList<>();
+            StringBuilder sb = new StringBuilder();
+            if (childNodes != null && childNodes.getLength() > 0) {
+                for (int i = 0; i < childNodes.getLength(); i++) {
+                    Node node = childNodes.item(i);
+                    if (Node.ELEMENT_NODE == node.getNodeType()) {
+                        childElements.add((Element) node);
+                    } else if (Node.TEXT_NODE == node.getNodeType()) {
+                        sb.append(node.getNodeValue());
+                    }
+                }
+            }
+            if (!childElements.isEmpty()) {
+                objectField.setValue(fromXMLSimple(childElements));
+            } else {
+                Object value = fromString(sb.toString(), base64, true, true);
+                objectField.setValue(ModuleUtils.getObjectType(value), value);
+            }
+            result.getFields().add(objectField);
+        });
+        return result;
+    }
+
+    private void toXML(ExecutionContextTool executionContextTool, List<IAction> actions, boolean useSimple) {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder;
         try {
@@ -890,7 +1012,18 @@ public class ValueTypeConverter implements Module {
                     Document doc = docBuilder.newDocument();
                     ObjectArray objectArray = ModuleUtils.deserializeToObject(messages);
                     ObjectElement objectElement = (ObjectElement) objectArray.get(0);
-                    Element rootElement = toXML(objectElement, doc);
+                    Element rootElement;
+                    if (useSimple) {
+                        List<Element> elements = toXMLSimple(objectElement, doc);
+                        if (elements.size() == 1) {
+                            rootElement = elements.get(0);
+                        } else {
+                            rootElement = doc.createElement("root");
+                            elements.forEach(rootElement::appendChild);
+                        }
+                    } else {
+                        rootElement = toXML(objectElement, doc);
+                    }
                     doc.appendChild(rootElement);
                     StringWriter out = new StringWriter();
                     try {
@@ -947,6 +1080,27 @@ public class ValueTypeConverter implements Module {
         }
 
         return result;
+    }
+
+    private List<Element> toXMLSimple(ObjectElement objectElement, Document doc) {
+        if (objectElement == null || doc == null)
+            return new ArrayList<>();
+        return objectElement.getFields().stream()
+                .map(f -> {
+                    Element element = doc.createElement(f.getName());
+                    if (ModuleUtils.isObjectArray(f) && ModuleUtils.isArrayContainObjectElements((ObjectArray) f.getValue())) {
+                        ObjectArray objectArray = (ObjectArray) f.getValue();
+                        List<Element> innerElements = new ArrayList<>();
+                        for (int i = 0; i < objectArray.size(); i++)
+                            innerElements.addAll(toXMLSimple((ObjectElement) objectArray.get(i), doc));
+                        innerElements.forEach(element::appendChild);
+                    } else if (ModuleUtils.isObjectElement(f)) {
+                        toXMLSimple((ObjectElement) f.getValue(), doc).forEach(element::appendChild);
+                    } else if (f.getValue() != null) {
+                        element.appendChild(doc.createTextNode(f.getValue().toString()));
+                    }
+                    return element;
+                }).collect(Collectors.toList());
     }
 
     private void prettyPrint(Node xml, StringWriter out) throws TransformerFactoryConfigurationError, TransformerException {

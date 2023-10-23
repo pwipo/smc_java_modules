@@ -3,8 +3,7 @@
 
     <uuid>Sleep</uuid>
     <provider>java</provider>
-    <ver>1.1.0</ver>
-    <apiVer>1.0.0</apiVer>
+    <ver>1.2.0</ver>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
@@ -28,7 +27,8 @@ The program is supplied as is. For problems arising during the operation or inst
             </value>
         </entry>
     </copyrightAndLicense>
-    <date>31-12-2020</date>
+    <apiVer>1.4.0</apiVer>
+    <date>22-10-2023</date>
 
     <defaultSettings>
         <value>
@@ -79,20 +79,36 @@ NEW_HOUR - засыпает до начала нового часа (колич�
         </value>
     </defaultSettings>
 
-    <minCountSources>0</minCountSources>
-    <maxCountSources>0</maxCountSources>
-
-    <typeSource/>
-
-    <typeResult>
-        <ValueType>LONG</ValueType>
-    </typeResult>
-
-    <minManagedExecutionContexts>0</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>0</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources/>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>LONG</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <useStorage>false</useStorage>
 

@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.StringUtil</className>
-    <ver>1.0.0</ver>
-    <apiVer>1.0.0</apiVer>
-    <date>31-12-2020</date>
+    <ver>1.1.0</ver>
+    <apiVer>1.4.0</apiVer>
+    <date>21-10-2023</date>
 
     <defaultSettings>
         <value>
@@ -64,62 +64,60 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>en</key>
-                    <value>The action.
-types:
-    JOIN - combines all input values into one line. value is used as a delimiter.
-    JOIN_INNER_WITH_TIME - similar to JOIN, but combines only the values inside the action, returns a list of non-empty strings along with the time (value pairs: string and number)
-    SPLIT - splits input values. value is used as a separator if it is empty whitespace characters are used.
-    SPLIT_REGEXP - similar to SPLIT, but a regular expression is used as a delimiter.
-    APPEND - adds value to the end of input values.
-    APPEND_FIRST - Adds value to the beginning of input values.
-    REPLACE - replaces the first part of value in the input values with the second. format value: search_string :: replacement.
-    REPLACE_REGEXP - Similar to REPLACE, but using a regular expression. if there is a controlled execution context, it uses it: it starts with the parameter found with the value for replacement, the response is used as a replacement.
-    REPLACE_REGEXP_GROUP_ONE - similar to REPLACE_REGEXP, but only replaces the value in the first group (what is in the first quotes). the search string in value must contain (). if there is a managed execution context, it uses it: it starts with the parameter found with the value for replacement, the response is used as a replacement.  
-    CONTAIN - compares input values and strings in value. returns the row ordinal in value for the first match found. if there are no matches, nothing is returned. format value: string1 :: string2 :: string3 ...
-    MATCH - is similar to CONTAIN, but a regular expression is used.
-    PLACEHOLDERS - substitutes the input values into the template (value). the format used is the MessageFormat format. example: something there {0} somehow there {1}. for the place {0} the first input value is substituted, for the place {1} the second.
-    PLACEHOLDERS_OR_EMPTY - similar to PLACEHOLDERS, but if the input values are less than expected, nothing will be returned.
-    FILTER_SIZE - skips only values with a length - value characters or more. excess characters are chopped off.
-    REGEXP_GROUP_ONE - Searches for input values using a regular expression. displays the first group (what is in the first quotation marks) in the found lines. value must contain ().
-    ESCAPE_SQL - Performs line replacements to prevent SQL injection.
-    SIZE - returns the number of characters in a string.
-    IS_BLANK - if the empty string returns 1.
-    IS_NOT_BLANK - if the string is not empty returns 1.
-    FILTER - using regular expressions from value (separated by: :) returns only found ones.
-    FILTER_ACTION - Similar to FILTER, but returns all messages of the action in which the message was found.
-    SUBSTRING - gets a substring from the value of each incoming message (numbers are converted to text). The returned substring starts at the start position and ends before the end position (if not specified, it returns to the end). value stores the starting and ending positions (may not be specified) separated by ::, for example, 1::4. positions can be negative.
-    TRIM - removes whitespace at the beginning and end of each message.
-    REPLACE_REGEXP_MULTILINE - Similar to REPLACE_REGEXP, but MULTILINE mode is used.
+                    <value>The action:
+JOIN - combines all input values into one line. value is used as a delimiter.
+JOIN_INNER_WITH_TIME - similar to JOIN, but combines only the values inside the action, returns a list of non-empty strings along with the time (value pairs: string and number)
+SPLIT - splits input values. value is used as a separator if it is empty whitespace characters are used.
+SPLIT_REGEXP - similar to SPLIT, but a regular expression is used as a delimiter.
+APPEND - adds value to the end of input values.
+APPEND_FIRST - Adds value to the beginning of input values.
+REPLACE - replaces the first part of value in the input values with the second. format value: search_string :: replacement.
+REPLACE_REGEXP - Similar to REPLACE, but using a regular expression. if there is a controlled execution context, it uses it: it starts with the parameter found with the value for replacement, the response is used as a replacement.
+REPLACE_REGEXP_GROUP_ONE - similar to REPLACE_REGEXP, but only replaces the value in the first group (what is in the first quotes). the search string in value must contain (). if there is a managed execution context, it uses it: it starts with the parameter found with the value for replacement, the response is used as a replacement.  
+CONTAIN - compares input values and strings in value. returns the row ordinal in value for the first match found. if there are no matches, nothing is returned. format value: string1 :: string2 :: string3 ...
+MATCH - is similar to CONTAIN, but a regular expression is used.
+PLACEHOLDERS - substitutes the input values into the template (value). the format used is the MessageFormat format. example: something there {0} somehow there {1}. for the place {0} the first input value is substituted, for the place {1} the second.
+PLACEHOLDERS_OR_EMPTY - similar to PLACEHOLDERS, but if the input values are less than expected, nothing will be returned.
+FILTER_SIZE - skips only values with a length - value characters or more. excess characters are chopped off.
+REGEXP_GROUP_ONE - Searches for input values using a regular expression. displays the first group (what is in the first quotation marks) in the found lines. value must contain ().
+ESCAPE_SQL - Performs line replacements to prevent SQL injection.
+SIZE - returns the number of characters in a string.
+IS_BLANK - if the empty string returns 1.
+IS_NOT_BLANK - if the string is not empty returns 1.
+FILTER - using regular expressions from value (separated by: :) returns only found ones.
+FILTER_ACTION - Similar to FILTER, but returns all messages of the action in which the message was found.
+SUBSTRING - gets a substring from the value of each incoming message (numbers are converted to text). The returned substring starts at the start position and ends before the end position (if not specified, it returns to the end). value stores the starting and ending positions (may not be specified) separated by ::, for example, 1::4. positions can be negative.
+TRIM - removes whitespace at the beginning and end of each message.
+REPLACE_REGEXP_MULTILINE - Similar to REPLACE_REGEXP, but MULTILINE mode is used.
                     </value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>Тип действия.
-типы:
-    JOIN - объединяет все входящие значения в одну строку. в качестве разделителя используется value.
-    JOIN_INNER_WITH_TIME - аналогичен JOIN, но объединяет только значения внутри действия, возвращает список не пустых строк вместе со временем (пары значений: строка и число)
-    SPLIT - разделяет входящие значения. в качестве разделителя используется value, если оно пусто используются пробельные символя.
-    SPLIT_REGEXP - аналогично SPLIT, но в качестве разделителя используются регулярное выражение.
-    APPEND - добавялет в конец входящих значений value.
-    APPEND_FIRST - добавялет в начало входящих значений value.
-    REPLACE - заменяет во входящих значениях первую часть value на вторую. формат value: искомая_строка::замена.
-    REPLACE_REGEXP - аналогично REPLACE, но используются регулярное выражение. если есть управляемый контекст исполнения то использует его: запускает с параметром, найденным значением для замены, ответ использует в качетве замены.
-    REPLACE_REGEXP_GROUP_ONE - аналогично REPLACE_REGEXP, но заменяет только значение в первой группе (то что в первых кавычках). искомая строка в value обязана содержать (). если есть управляемый контекст исполнения то использует его: запускает с параметром, найденным значением для замены, ответ использует в качетве замены.
-    CONTAIN - производит сравнение входящих значений и строк в value. выдает порядковый номер строки в value для первого найденного совпадения. если совпадений нет, ничего не выдает. формат value: строка1::строка2::строка3...
-    MATCH - аналогично CONTAIN, но используются регулярное выражение.
-    PLACEHOLDERS - подставляет в шаблон (value) входящие значения. в качестве формата используется MessageFormat формат. пример: что то там {0} как то там {1}. за место {0} подставляется первое входящее значение, за место {1} второе.
-    PLACEHOLDERS_OR_EMPTY - аналогичен PLACEHOLDERS, но если входящих значений будет меньше ожидаемых, ничего не вернет.
-    FILTER_SIZE - пропускает только значения имеющие длину - value символов или больше. лишнее символы обрубаются.
-    REGEXP_GROUP_ONE - производит поиск во входящих значениях с помощью регуляного выражения. выводит первую группу (то что в первых кавычках) в найденых строках. value обязан содержать ().
-    ESCAPE_SQL - производит замены в строке для предотвращения внедрения SQL.
-    SIZE - возвращает количество символов в строке.
-    IS_BLANK - если строка пустая возвращает 1.
-    IS_NOT_BLANK - если строка не пустая возвращает 1.
-    FILTER - используя регулярные выражения из value (разделенные ::) возвращает только найденные.
-    FILTER_ACTION - аналогично FILTER, но возвращает все сообщения действия, в котором было найдено сообщение.
-    SUBSTRING - получает подстроку из значения каждого входящего сообщеня (числа преобразуются в текст). Возвращенная подстрока начинается с символа в начальной позиции и заканчивается перед конечной позицией (если не задана, то возвращает до конца). в value хранятся начальная и конечная позиция (может быть не задана) раздаленные :: , пример - 1::4. позиции могут быть отрицательными.
-    TRIM - удаляет пробельные символы в начале и в конце каждого сообщения.
-    REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но используются режим MULTILINE.
+                    <value>Тип действия:
+JOIN - объединяет все входящие значения в одну строку. в качестве разделителя используется value.
+JOIN_INNER_WITH_TIME - аналогичен JOIN, но объединяет только значения внутри действия, возвращает список не пустых строк вместе со временем (пары значений: строка и число)
+SPLIT - разделяет входящие значения. в качестве разделителя используется value, если оно пусто используются пробельные символя.
+SPLIT_REGEXP - аналогично SPLIT, но в качестве разделителя используются регулярное выражение.
+APPEND - добавялет в конец входящих значений value.
+APPEND_FIRST - добавялет в начало входящих значений value.
+REPLACE - заменяет во входящих значениях первую часть value на вторую. формат value: искомая_строка::замена.
+REPLACE_REGEXP - аналогично REPLACE, но используются регулярное выражение. если есть управляемый контекст исполнения то использует его: запускает с параметром, найденным значением для замены, ответ использует в качетве замены.
+REPLACE_REGEXP_GROUP_ONE - аналогично REPLACE_REGEXP, но заменяет только значение в первой группе (то что в первых кавычках). искомая строка в value обязана содержать (). если есть управляемый контекст исполнения то использует его: запускает с параметром, найденным значением для замены, ответ использует в качетве замены.
+CONTAIN - производит сравнение входящих значений и строк в value. выдает порядковый номер строки в value для первого найденного совпадения. если совпадений нет, ничего не выдает. формат value: строка1::строка2::строка3...
+MATCH - аналогично CONTAIN, но используются регулярное выражение.
+PLACEHOLDERS - подставляет в шаблон (value) входящие значения. в качестве формата используется MessageFormat формат. пример: что то там {0} как то там {1}. за место {0} подставляется первое входящее значение, за место {1} второе.
+PLACEHOLDERS_OR_EMPTY - аналогичен PLACEHOLDERS, но если входящих значений будет меньше ожидаемых, ничего не вернет.
+FILTER_SIZE - пропускает только значения имеющие длину - value символов или больше. лишнее символы обрубаются.
+REGEXP_GROUP_ONE - производит поиск во входящих значениях с помощью регуляного выражения. выводит первую группу (то что в первых кавычках) в найденых строках. value обязан содержать ().
+ESCAPE_SQL - производит замены в строке для предотвращения внедрения SQL.
+SIZE - возвращает количество символов в строке.
+IS_BLANK - если строка пустая возвращает 1.
+IS_NOT_BLANK - если строка не пустая возвращает 1.
+FILTER - используя регулярные выражения из value (разделенные ::) возвращает только найденные.
+FILTER_ACTION - аналогично FILTER, но возвращает все сообщения действия, в котором было найдено сообщение.
+SUBSTRING - получает подстроку из значения каждого входящего сообщеня (числа преобразуются в текст). Возвращенная подстрока начинается с символа в начальной позиции и заканчивается перед конечной позицией (если не задана, то возвращает до конца). в value хранятся начальная и конечная позиция (может быть не задана) раздаленные :: , пример - 1::4. позиции могут быть отрицательными.
+TRIM - удаляет пробельные символы в начале и в конце каждого сообщения.
+REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но используются режим MULTILINE.
                     </value>
                 </entry>
             </description>
@@ -141,31 +139,1379 @@ types:
         </value>
     </defaultSettings>
 
-    <minCountSources>0</minCountSources>
-    <maxCountSources>-1</maxCountSources>
-
-    <typeSource>
-        <ValueType>BYTE</ValueType>
-        <ValueType>SHORT</ValueType>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>LONG</ValueType>
-        <ValueType>FLOAT</ValueType>
-        <ValueType>DOUBLE</ValueType>
-        <ValueType>BIG_INTEGER</ValueType>
-        <ValueType>BIG_DECIMAL</ValueType>
-        <ValueType>BYTES</ValueType>
-        <ValueType>STRING</ValueType>
-    </typeSource>
-    <typeResult>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>STRING</ValueType>
-    </typeResult>
-
-    <minManagedExecutionContexts>0</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>1</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию. Результат зависит от настройки type.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context. The result depends on the setting type.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>1</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>JOIN</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>JOIN_INNER_WITH_TIME</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>SPLIT</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>SPLIT_REGEXP</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>APPEND</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>APPEND_FIRST</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>REPLACE</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>REPLACE_REGEXP</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>REPLACE_REGEXP_GROUP_ONE</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>CONTAIN</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>MATCH</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>PLACEHOLDERS</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>PLACEHOLDERS_OR_EMPTY</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>FILTER_SIZE</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>REGEXP_GROUP_ONE</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>ESCAPE_SQL</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>SIZE</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>IS_BLANK</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>IS_NOT_BLANK</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>FILTER</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>FILTER_ACTION</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>SUBSTRING</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>TRIM</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>REPLACE_REGEXP_MULTILINE</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Результат зависит от типа операции и входящих значений.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>The result depends on the type of operation and the input values.</value>
+                        </entry>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>join</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>объединяет все входящие значения в одну строку. в качестве разделителя используется value.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>combines all input values into one line. value is used as a delimiter.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>join_inner_with_time</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогичен JOIN, но объединяет только значения внутри действия, возвращает список не пустых строк вместе со временем (пары значений: строка и число)</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>similar to JOIN, but combines only the values inside the action, returns a list of non-empty strings along with the time (value pairs: string and number)</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>FOR</type>
+                    <countStatic>-1</countStatic>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <valueType>LONG</valueType>
+                            <value>12345678</value>
+                        </element>
+                    </elements>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>split</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>разделяет входящие значения. в качестве разделителя используется value, если оно пусто используются пробельные символя.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>splits input values. value is used as a separator if it is empty whitespace characters are used.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>split_regexp</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогично SPLIT, но в качестве разделителя используются регулярное выражение.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>similar to SPLIT, but a regular expression is used as a delimiter.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>append</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>добавялет в конец входящих значений value.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>adds value to the end of input values.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>append_first</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>добавялет в начало входящих значений value.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Adds value to the beginning of input values.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>replace</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>заменяет во входящих значениях первую часть value на вторую. формат value: искомая_строка::замена.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>replaces the first part of value in the input values with the second. format value: search_string :: replacement.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>replace_regexp</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогично REPLACE, но используются регулярное выражение. если есть управляемый контекст исполнения то использует его: запускает с параметром, найденным значением для замены, ответ использует в качетве замены.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Similar to REPLACE, but using a regular expression. if there is a controlled execution context, it uses it: it starts with the parameter found with the value for replacement, the response is used as a replacement.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>1</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>replace_regexp_group_one</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогично REPLACE_REGEXP, но заменяет только значение в первой группе (то что в первых кавычках). искомая строка в value обязана содержать (). если есть управляемый контекст исполнения то использует его: запускает с параметром, найденным значением для замены, ответ использует в качетве замены.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>similar to REPLACE_REGEXP, but only replaces the value in the first group (what is in the first quotes). the search string in value must contain (). if there is a managed execution context, it uses it: it starts with the parameter found with the value for replacement, the response is used as a replacement.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>1</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>contain</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>производит сравнение входящих значений и строк в value. выдает порядковый номер строки в value для первого найденного совпадения. если совпадений нет, ничего не выдает. формат value: строка1::строка2::строка3...</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>compares input values and strings in value. returns the row ordinal in value for the first match found. if there are no matches, nothing is returned. format value: string1 :: string2 :: string3 ...</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>match</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогично CONTAIN, но используются регулярное выражение.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>is similar to CONTAIN, but a regular expression is used.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>placeholders</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>подставляет в шаблон (value) входящие значения. в качестве формата используется MessageFormat формат. пример: что то там {0} как то там {1}. за место {0} подставляется первое входящее значение, за место {1} второе.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>substitutes the input values into the template (value). the format used is the MessageFormat format. example: something there {0} somehow there {1}. for the place {0} the first input value is substituted, for the place {1} the second.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>placeholders_or_empty</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогичен PLACEHOLDERS, но если входящих значений будет меньше ожидаемых, ничего не вернет.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>similar to PLACEHOLDERS, but if the input values are less than expected, nothing will be returned.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>filter_size</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>пропускает только значения имеющие длину - value символов или больше. лишнее символы обрубаются.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>skips only values with a length - value characters or more. excess characters are chopped off.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>regexp_group_one</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>производит поиск во входящих значениях с помощью регуляного выражения. выводит первую группу (то что в первых кавычках) в найденых строках. value обязан содержать ().</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Searches for input values using a regular expression. displays the first group (what is in the first quotation marks) in the found lines. value must contain ().</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>escape_sql</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>производит замены в строке для предотвращения внедрения SQL.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Performs line replacements to prevent SQL injection.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>size</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>возвращает количество символов в строке.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>returns the number of characters in a string.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>3</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>is_blank</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>если строка пустая возвращает 1.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>if the empty string returns 1.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>is_not_blank</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>если строка не пустая возвращает 1.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>if the string is not empty returns 1.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>filter</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>используя регулярные выражения из value (разделенные ::) возвращает только найденные.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>using regular expressions from value (separated by: :) returns only found ones.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>filter_action</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогично FILTER, но возвращает все сообщения действия, в котором было найдено сообщение.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Similar to FILTER, but returns all messages of the action in which the message was found.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>FOR</type>
+                    <countStatic>-1</countStatic>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                        <element>
+                            <type>FOR</type>
+                            <countValueId>-1</countValueId>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>str</value>
+                                </element>
+                            </elements>
+                        </element>
+                    </elements>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>substring</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>получает подстроку из значения каждого входящего сообщеня (числа преобразуются в текст). Возвращенная подстрока начинается с символа в начальной позиции и заканчивается перед конечной позицией (если не задана, то возвращает до конца). в value хранятся начальная и конечная позиция (может быть не задана) раздаленные :: , пример - 1::4. позиции могут быть отрицательными.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>gets a substring from the value of each incoming message (numbers are converted to text). The returned substring starts at the start position and ends before the end position (if not specified, it returns to the end). value stores the starting and ending positions (may not be specified) separated by ::, for example, 1::4. positions can be negative.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>trim</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>удаляет пробельные символы в начале и в конце каждого сообщения.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>removes whitespace at the beginning and end of each message.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>replace_regexp_multiline</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогично REPLACE_REGEXP, но используются режим MULTILINE.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Similar to REPLACE_REGEXP, but MULTILINE mode is used.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>1</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>str</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>str</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <description>
         <entry>

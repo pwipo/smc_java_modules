@@ -3,8 +3,7 @@
 
     <uuid>Logic</uuid>
     <provider>java</provider>
-    <ver>1.0.0</ver>
-    <apiVer>1.0.0</apiVer>
+    <ver>1.1.0</ver>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
@@ -28,7 +27,8 @@ The program is supplied as is. For problems arising during the operation or inst
             </value>
         </entry>
     </copyrightAndLicense>
-    <date>31-12-2020</date>
+    <apiVer>1.4.0</apiVer>
+    <date>22-10-2023</date>
 
     <defaultSettings>
         <value>
@@ -38,6 +38,9 @@ The program is supplied as is. For problems arising during the operation or inst
                 <value>AND</value>
                 <value>OR</value>
                 <value>NOT</value>
+                <value>AND_BOOLEAN</value>
+                <value>OR_BOOLEAN</value>
+                <value>NOT_BOOLEAN</value>
             </validValues>
             <value>AND</value>
             <description>
@@ -47,6 +50,9 @@ The program is supplied as is. For problems arising during the operation or inst
 AND - true if all sources have messages.
 OR - true if at least one source has messages.
 NOT - if the first source has no data - true. otherwise, a lie.
+AND_BOOLEAN - similar to AND, but always returns type BOOLEAN.
+OR_BOOLEAN - similar to OR, but always returns type BOOLEAN.
+NOT_BOOLEAN - similar to NOT, but always returns type BOOLEAN.
                     </value>
                 </entry>
                 <entry>
@@ -55,37 +61,300 @@ NOT - if the first source has no data - true. otherwise, a lie.
 AND - истина если у всех источников есть сообщения.
 OR - истина если хотябы у одного источника есть сообщения.
 NOT - если у первого источника нет данных - истина. иначе - ложь.
+AND_BOOLEAN - аналогичен AND, но всегда возвращает тип BOOLEAN.
+OR_BOOLEAN - аналогичен OR, но всегда возвращает тип BOOLEAN.
+NOT_BOOLEAN - аналогичен NOT, но всегда возвращает тип BOOLEAN.
                     </value>
                 </entry>
             </description>
         </value>
     </defaultSettings>
 
-    <minCountSources>1</minCountSources>
-    <maxCountSources>-1</maxCountSources>
-
-    <typeSource>
-        <ValueType>STRING</ValueType>
-        <ValueType>BYTE</ValueType>
-        <ValueType>SHORT</ValueType>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>LONG</ValueType>
-        <ValueType>FLOAT</ValueType>
-        <ValueType>DOUBLE</ValueType>
-        <ValueType>BIG_INTEGER</ValueType>
-        <ValueType>BIG_DECIMAL</ValueType>
-        <ValueType>BYTES</ValueType>
-    </typeSource>
-
-    <typeResult>
-        <ValueType>INTEGER</ValueType>
-    </typeResult>
-
-    <minManagedExecutionContexts>0</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию. Результат зависит от настройки type.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context. Результат зависит от настройки type.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>and</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>истина если у всех источников есть сообщения.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>true if all sources have messages.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>or</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>истина если хотябы у одного источника есть сообщения.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>true if at least one source has messages.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>not</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>если у первого источника нет данных - истина. иначе - ложь.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>if the first source has no data - true. otherwise, a lie.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>and_boolean</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогичен AND, но всегда возвращает тип BOOLEAN.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>similar to AND, but always returns type BOOLEAN.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <valueType>BOOLEAN</valueType>
+                    <value>true</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>or_boolean</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогичен OR, но всегда возвращает тип BOOLEAN.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>similar to OR, but always returns type BOOLEAN.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <valueType>BOOLEAN</valueType>
+                    <value>true</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>not_boolean</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогичен NOT, но всегда возвращает тип BOOLEAN.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>similar to NOT, but always returns type BOOLEAN.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <valueType>BOOLEAN</valueType>
+                    <value>true</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <useStorage>false</useStorage>
 
@@ -108,8 +377,8 @@ NOT - если у первого источника нет данных - ист
             <value>The module allows logical operations on data.
 scheme of work.
 First, messages are converted to a logical representation:
-     If there are messages from the source - the truth.
-     otherwise, a lie.
+    If there are messages from the source - the truth.
+    otherwise, a lie.
 further relevant operations are carried out.
 if the result is true, returns 1. otherwise, returns nothing.
             </value>

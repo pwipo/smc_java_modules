@@ -54,17 +54,24 @@ public class CollectionUtil implements Module {
     private List<Pattern> searchs;
     // private String start;
     // private String end;
+    private String value;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
         type = Type.valueOf((String) configurationTool.getSetting("type").orElseThrow(() -> new ModuleException("type setting")).getValue());
-        String value = (String) configurationTool.getSetting("value").orElseThrow(() -> new ModuleException("value setting")).getValue();
+        value = (String) configurationTool.getSetting("value").orElseThrow(() -> new ModuleException("value setting")).getValue();
         params = null;
         strParams = null;
         countValuesInObject = 1;
         searchs = null;
         values = null;
         base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
+        // start = (String) configurationTool.getSetting("start").orElseThrow(() -> new ModuleException("start setting")).getValue();
+        // end = (String) configurationTool.getSetting("end").orElseThrow(() -> new ModuleException("end setting")).getValue();
+        updateSettings();
+    }
+
+    private void updateSettings() {
         if (Type.MAP_GET_VALUE.equals(type) || Type.MAP_GET_VALUE_EXT.equals(type) ||
                 Type.MAP_GET_VALUE_OBJECT_LIST.equals(type) || Type.MAP_GET_VALUE_OBJECT_LIST_PATH.equals(type)
                 || Type.MAP_GET_VALUE_OBJECT_LIST_SIMPLE.equals(type) || Type.MAP_GET_VALUE_OBJECT_LIST_PATH_SIMPLE.equals(type)) {
@@ -130,9 +137,6 @@ public class CollectionUtil implements Module {
                 throw new ModuleException("wrong value");
             }
         }
-        // start = (String) configurationTool.getSetting("start").orElseThrow(() -> new ModuleException("start setting")).getValue();
-        // end = (String) configurationTool.getSetting("end").orElseThrow(() -> new ModuleException("end setting")).getValue();
-
     }
 
     @Override
@@ -143,6 +147,9 @@ public class CollectionUtil implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
+        Type type = Objects.equals(executionContextTool.getType(), "default") ? this.type : Type.valueOf(executionContextTool.getType().toUpperCase());
+        if (type != this.type)
+            updateSettings();
         switch (type) {
             case SIZE:
                 executionContextTool.addMessage(Stream.iterate(0, n -> n + 1)

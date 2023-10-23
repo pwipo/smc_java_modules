@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,6 +75,7 @@ public class MathFuncs implements Module {
                 .filter(ModuleUtils::isNumber)
                 .map(ModuleUtils::getNumber)
                 .collect(Collectors.toList());
+        Type type = Objects.equals(executionContextTool.getType(), "default") ? this.type : Type.valueOf(executionContextTool.getType().toUpperCase());
         if (values.isEmpty() && (!type.equals(Type.COUNT) && !type.equals(Type.EXP4J)))
             return;
 

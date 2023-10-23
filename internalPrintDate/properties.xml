@@ -7,9 +7,9 @@
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
     <className>ru.smcsystem.smcmodules.module.PrintDate</className>
-    <ver>1.2.0</ver>
-    <apiVer>1.0.0</apiVer>
-    <date>31-12-2020</date>
+    <ver>1.3.0</ver>
+    <apiVer>1.4.0</apiVer>
+    <date>22-10-2023</date>
     <categories>Java, Date</categories>
     <copyrightAndLicense>
         <entry>
@@ -106,30 +106,188 @@ NUMBER_TO_XLS - Returns a number representing the time that Excel understands. a
         </value>
     </defaultSettings>
 
-    <minCountSources>0</minCountSources>
-    <maxCountSources>-1</maxCountSources>
-
-    <typeSource>
-        <ValueType>BYTE</ValueType>
-        <ValueType>SHORT</ValueType>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>LONG</ValueType>
-        <ValueType>FLOAT</ValueType>
-        <ValueType>DOUBLE</ValueType>
-        <ValueType>BIG_INTEGER</ValueType>
-        <ValueType>BIG_DECIMAL</ValueType>
-        <ValueType>STRING</ValueType>
-    </typeSource>
-    <typeResult>
-        <ValueType>STRING</ValueType>
-        <ValueType>LONG</ValueType>
-    </typeResult>
-
-    <minManagedExecutionContexts>0</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию. Результат зависит от настройки type.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context. The result depends on the setting type.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>to_string</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>возвращает строку в указанном формате. на вход принимает числа, их рассматривает как unix timestamp. если пусто, то возвращает текущее время.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>returns a string in the specified format. accepts numbers as input, considers them as unix timestamp. if empty, returns the current time.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Числа.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Numbers.</value>
+                                </entry>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>23.10.2020</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>to_number</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>возвращает число (unix timestamp). на вход принимает строки в указанном формате. если пусто, то возвращает текущее время.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>returns a number (unix timestamp). accepts strings in the specified format as input. if empty, returns the current time.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>23.10.2020</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>LONG</valueType>
+                    <value>1134346647</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>number_to_xls</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>возвращает число, представляющее собой время, понятное Excel. на вход принимает числа, их рассматривает как unix timestamp. если пусто, то возвращает текущее время.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Returns a number representing the time that Excel understands. accepts numbers as input, considers them as unix timestamp. if empty, returns the current time.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Числа.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Numbers.</value>
+                                </entry>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>DOUBLE</valueType>
+                    <value>1245.43</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <description>
         <entry>

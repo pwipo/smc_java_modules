@@ -43,10 +43,7 @@ import ru.smcsystem.smc.utils.ModuleUtils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -122,116 +119,182 @@ public class Http implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
-        // executionContextTool.addMessage("Http world");
-        if (executionContextTool.countSource() > 0) {
-            Stream.iterate(0, n -> n + 1)
-                    .limit(executionContextTool.countSource())
-                    .flatMap(n -> executionContextTool.getMessages(n).stream())
-                    .map(IAction::getMessages)
-                    .filter(messages -> messages.size() >= 2)
-                    .forEach(messages -> {
-                        int nextElementId = 0;
-                        try {
-                            Method method = Method.values()[(getNumber(messages.get(nextElementId++)).intValue())];
-                            String address = getString(messages.get(nextElementId++));
+        try {
+            switch (executionContextTool.getType()) {
+                case "default":
+                    if (executionContextTool.countSource() == 0)
+                        break;
+                    Stream.iterate(0, n -> n + 1)
+                            .limit(executionContextTool.countSource())
+                            .flatMap(n -> executionContextTool.getMessages(n).stream())
+                            .map(IAction::getMessages)
+                            .filter(messages -> messages.size() >= 2)
+                            .map(LinkedList::new)
+                            .forEach(messages -> {
+                                try {
+                                    Method method = Method.values()[(getNumber(messages.poll()).intValue())];
+                                    String address = getString(messages.poll());
 
-                            HttpRequestBase request = null;
-                            switch (method) {
-                                case GET:
-                                    request = new HttpGet(address);
-                                    break;
-                                case POST:
-                                    request = new HttpPost(address);
-                                    break;
-                            }
-
-                            if (messages.size() > nextElementId + 1) {
-                                int countHeaders = getNumber(messages.get(nextElementId++)).intValue();
-                                for (int endElement = nextElementId + countHeaders; endElement > nextElementId; nextElementId++) {
-                                    String[] split = messages.get(nextElementId).getValue().toString().split("=");
-                                    if (split.length > 1)
-                                        request.addHeader(split[0].trim(), split[1].trim());
-                                }
-                            }
-
-                            if (Method.POST.equals(method) && messages.size() > nextElementId) {
-                                Map<String, Object> params = new HashMap<>();
-                                boolean useMultipart = false;
-                                HttpEntity reqEntity = null;
-                                if (messages.size() == nextElementId + 1) {
-                                    IMessage value = messages.get(nextElementId++);
-                                    if (ValueType.BYTES.equals(value.getType())) {
-                                        reqEntity = new ByteArrayEntity((byte[]) value.getValue(), ContentType.DEFAULT_BINARY);
-                                    } else {
-                                        reqEntity = new StringEntity(value.getValue().toString());
+                                    HttpRequestBase request = null;
+                                    switch (method) {
+                                        case GET:
+                                            request = new HttpGet(address);
+                                            break;
+                                        case POST:
+                                            request = new HttpPost(address);
+                                            break;
                                     }
-                                } else {
-                                    int countParams = getNumber(messages.get(nextElementId++)).intValue();
-                                    for (int endElement = nextElementId + countParams; endElement > nextElementId + 1; nextElementId = nextElementId + 2) {
-                                        IMessage value = messages.get(nextElementId + 1);
-                                        if (!useMultipart)
-                                            useMultipart = ValueType.BYTES.equals(value.getType());
-                                        params.put(messages.get(nextElementId).getValue().toString(), value.getValue());
-                                    }
-                                    if (useMultipart) {
-                                        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-                                        params.forEach((k, v) -> {
-                                            if (v instanceof byte[]) {
-                                                builder.addPart(k, new ByteArrayBody((byte[]) v, k));
-                                            } else {
-                                                try {
-                                                    builder.addPart(k, new StringBody(v.toString()));
-                                                } catch (UnsupportedEncodingException e) {
-                                                    throw new ModuleException("wrong params", e);
-                                                }
-                                            }
-                                        });
-                                        reqEntity = builder.build();
-                                    } else {
-                                        List<NameValuePair> nvps = params.entrySet().stream()
-                                                .map(e -> new BasicNameValuePair(e.getKey(), e.getValue().toString()))
-                                                .collect(Collectors.toList());
-                                        try {
-                                            reqEntity = new UrlEncodedFormEntity(nvps);
-                                        } catch (UnsupportedEncodingException e) {
-                                            throw new ModuleException("wrong params", e);
+
+                                    if (!messages.isEmpty()) {
+                                        int countHeaders = getNumber(messages.poll()).intValue();
+                                        for (int i = 0; i < countHeaders; i++) {
+                                            String[] split = ModuleUtils.getString(messages.poll()).split("=");
+                                            if (split.length > 1)
+                                                request.addHeader(split[0].trim(), split[1].trim());
                                         }
                                     }
-                                }
-                                ((HttpPost) request).setEntity(reqEntity);
-                            }
 
-                            // System.out.println(request.getRequestLine());
-                            try (CloseableHttpResponse response = client.execute(request)) {
-                                int status = response.getStatusLine().getStatusCode();
-                                executionContextTool.addMessage(status);
-                                Object result = null;
-                                // if (status >= 200 && status < 300) {
-                                HttpEntity entity = response.getEntity();
-                                if (entity != null) {
-                                    executionContextTool.addMessage(response.getAllHeaders().length);
-                                    Arrays.stream(response.getAllHeaders()).forEach(h -> executionContextTool.addMessage(h.getName() + "=" + h.getValue()));
+                                    if (Method.POST.equals(method) && !messages.isEmpty())
+                                        ((HttpPost) request).setEntity(getPost(messages, true));
 
-                                    if (ContentType.getOrDefault(entity).getMimeType().startsWith("text")) {
-                                        result = charset != null ? EntityUtils.toString(entity, charset) : EntityUtils.toString(entity);
-                                    } else {
-                                        result = EntityUtils.toByteArray(entity);
-                                    }
-                                    EntityUtils.consume(entity);
+                                    // System.out.println(request.getRequestLine());
+                                    proceessRequest(executionContextTool, request);
+                                } catch (Exception e) {
+                                    executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
+                                    configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                                 }
-                                // }
-                                if (result != null)
-                                    executionContextTool.addMessage(List.of(result));
-                            } catch (Exception e) {
-                                throw new ModuleException("execute exception", e);
-                            } finally {
-                                request.releaseConnection();
-                            }
-                        } catch (Exception e) {
-                            executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
-                            configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+                            });
+                    break;
+                case "get": {
+                    Optional<IAction> lastActionWithData = ModuleUtils.getLastActionWithData(executionContextTool.getMessages(0));
+                    if (lastActionWithData.isEmpty())
+                        break;
+                    LinkedList<IMessage> messages = new LinkedList<>(lastActionWithData.get().getMessages());
+                    String address = ModuleUtils.getString(messages.poll());
+                    HttpRequestBase request = new HttpGet(address);
+                    addHeaders(request, messages);
+                    proceessRequest(executionContextTool, request);
+                    break;
+                }
+                case "post": {
+                    Optional<IAction> lastActionWithData = ModuleUtils.getLastActionWithData(executionContextTool.getMessages(0));
+                    if (lastActionWithData.isEmpty())
+                        break;
+                    LinkedList<IMessage> messages = new LinkedList<>(lastActionWithData.get().getMessages());
+                    String address = ModuleUtils.getString(messages.poll());
+                    HttpRequestBase request = new HttpPost(address);
+                    addHeaders(request, messages);
+                    Optional<IAction> lastActionWithDataPost = ModuleUtils.getLastActionWithData(executionContextTool.getMessages(1));
+                    if (lastActionWithDataPost.isPresent())
+                        ((HttpPost) request).setEntity(getPost(new LinkedList<>(lastActionWithDataPost.get().getMessages()), false));
+                    proceessRequest(executionContextTool, request);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
+            configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+        }
+    }
+
+    private HttpEntity getPost(LinkedList<IMessage> messages, boolean useCounter) throws UnsupportedEncodingException {
+        HttpEntity reqEntity = null;
+        if (messages.isEmpty())
+            return reqEntity;
+        Map<String, Object> params = new HashMap<>();
+        boolean useMultipart = false;
+        if (messages.size() == 1) {
+            IMessage value = messages.poll();
+            if (ValueType.BYTES.equals(value.getType())) {
+                reqEntity = new ByteArrayEntity((byte[]) value.getValue(), ContentType.DEFAULT_BINARY);
+            } else {
+                reqEntity = new StringEntity(value.getValue().toString());
+            }
+        } else {
+            if (useCounter) {
+                int countParams = getNumber(messages.poll()).intValue();
+                for (int i = 0; i + 1 < countParams; i = i + 2) {
+                    String name = ModuleUtils.toString(messages.poll());
+                    IMessage value = messages.poll();
+                    if (!useMultipart)
+                        useMultipart = value != null && ValueType.BYTES.equals(value.getType());
+                    if (value != null)
+                        params.put(name, value.getValue());
+                }
+            } else {
+                while (!messages.isEmpty()) {
+                    String name = ModuleUtils.toString(messages.poll());
+                    IMessage value = messages.poll();
+                    if (!useMultipart)
+                        useMultipart = value != null && ValueType.BYTES.equals(value.getType());
+                    if (name != null && value != null)
+                        params.put(name, value.getValue());
+                }
+            }
+            if (useMultipart) {
+                MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                params.forEach((k, v) -> {
+                    if (v instanceof byte[]) {
+                        builder.addPart(k, new ByteArrayBody((byte[]) v, k));
+                    } else {
+                        try {
+                            builder.addPart(k, new StringBody(v.toString()));
+                        } catch (UnsupportedEncodingException e) {
+                            throw new ModuleException("wrong params", e);
                         }
-                    });
+                    }
+                });
+                reqEntity = builder.build();
+            } else {
+                List<NameValuePair> nvps = params.entrySet().stream()
+                        .map(e -> new BasicNameValuePair(e.getKey(), e.getValue().toString()))
+                        .collect(Collectors.toList());
+                try {
+                    reqEntity = new UrlEncodedFormEntity(nvps);
+                } catch (UnsupportedEncodingException e) {
+                    throw new ModuleException("wrong params", e);
+                }
+            }
+        }
+        return reqEntity;
+    }
+
+    private void addHeaders(HttpRequestBase request, LinkedList<IMessage> messages) {
+        while (!messages.isEmpty()) {
+            String header = ModuleUtils.getString(messages.poll());
+            if (header != null) {
+                String[] split = header.split("=");
+                if (split.length > 1)
+                    request.addHeader(split[0].trim(), split[1].trim());
+            }
+        }
+    }
+
+    private void proceessRequest(ExecutionContextTool executionContextTool, HttpRequestBase request) {
+        try (CloseableHttpResponse response = client.execute(request)) {
+            int status = response.getStatusLine().getStatusCode();
+            executionContextTool.addMessage(status);
+            Object result = null;
+            // if (status >= 200 && status < 300) {
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                executionContextTool.addMessage(response.getAllHeaders().length);
+                Arrays.stream(response.getAllHeaders()).forEach(h -> executionContextTool.addMessage(h.getName() + "=" + h.getValue()));
+
+                if (ContentType.getOrDefault(entity).getMimeType().startsWith("text")) {
+                    result = charset != null ? EntityUtils.toString(entity, charset) : EntityUtils.toString(entity);
+                } else {
+                    result = EntityUtils.toByteArray(entity);
+                }
+                EntityUtils.consume(entity);
+            }
+            // }
+            if (result != null)
+                executionContextTool.addMessage(List.of(result));
+        } catch (Exception e) {
+            throw new ModuleException("execute exception", e);
+        } finally {
+            request.releaseConnection();
         }
     }
 

@@ -38,7 +38,10 @@ public class IfInteger implements Module {
         HAS_STRING,
         HAS_NUMBER,
         HAS_BYTES,
-        HAS_OBJECT_ARRAY
+        HAS_OBJECT_ARRAY,
+        IS_TRUE,
+        IS_FALSE,
+        HAS_BOOLEANS,
     }
 
     @Override
@@ -68,8 +71,8 @@ public class IfInteger implements Module {
         boolean execute[] = new boolean[]{false};
 
         boolean checkNumbers = Type.NUMBER_EQUAL.equals(type) || Type.NUMBER_MORE_THEN.equals(type) || Type.NUMBER_MORE_THEN_OR_EQUAL.equals(type) || Type.NUMBER_LESS_THEN.equals(type) || Type.NUMBER_LESS_THEN_OR_EQUAL.equals(type);
-        boolean checkType = Type.HAS_STRING.equals(type) || Type.HAS_NUMBER.equals(type) || Type.HAS_BYTES.equals(type) || Type.HAS_OBJECT_ARRAY.equals(type);
-        boolean checkEq = Type.EQUAL.equals(type) || Type.NOT_EQUAL.equals(type);
+        boolean checkType = Type.HAS_STRING.equals(type) || Type.HAS_NUMBER.equals(type) || Type.HAS_BYTES.equals(type) || Type.HAS_OBJECT_ARRAY.equals(type) || Type.HAS_BOOLEANS.equals(type);
+        boolean checkEq = Type.EQUAL.equals(type) || Type.NOT_EQUAL.equals(type) || Type.IS_TRUE.equals(type) || Type.IS_FALSE.equals(type);
         boolean checkError = Type.HAS_ERROR.equals(type) || Type.NO_ERROR.equals(type);
 
         List<Object> sourceValues = isNeedInsertSourceDataToExecutionContexts ? new LinkedList<>() : null;
@@ -150,6 +153,9 @@ public class IfInteger implements Module {
                         case HAS_OBJECT_ARRAY:
                             checkResult = iAction.getMessages().stream().anyMatch(ModuleUtils::isObjectArray);
                             break;
+                        case HAS_BOOLEANS:
+                            checkResult = iAction.getMessages().stream().anyMatch(ModuleUtils::isBoolean);
+                            break;
                     }
                     if (checkResult) {
                         execute[0] = true;
@@ -172,6 +178,16 @@ public class IfInteger implements Module {
                 break;
             case NOT_EXIST_ANY:
                 execute[0] = countExists < executionContextTool.countSource();
+                break;
+            case NUMBER_EQUAL:
+                break;
+            case NUMBER_MORE_THEN:
+                break;
+            case NUMBER_MORE_THEN_OR_EQUAL:
+                break;
+            case NUMBER_LESS_THEN:
+                break;
+            case NUMBER_LESS_THEN_OR_EQUAL:
                 break;
             case EQUAL:
             case NOT_EQUAL:
@@ -224,6 +240,28 @@ public class IfInteger implements Module {
             case NO_ERROR:
                 execute[0] = countErrors == 0;
                 break;
+            case IS_TRUE:
+                execute[0] = sources.stream()
+                        .flatMap(Collection::stream)
+                        .flatMap(a -> a.getMessages().stream())
+                        .filter(ModuleUtils::isBoolean)
+                        .map(m -> (Boolean) m.getValue())
+                        .filter(v -> v)
+                        .findFirst().orElse(false);
+                break;
+            case IS_FALSE: {
+                List<IAction> data = sources.stream()
+                        .flatMap(Collection::stream)
+                        .filter(ModuleUtils::hasData)
+                        .collect(Collectors.toList());
+                execute[0] = data.isEmpty() || !data.stream()
+                        .flatMap(a -> a.getMessages().stream())
+                        .filter(ModuleUtils::isBoolean)
+                        .map(m -> (Boolean) m.getValue())
+                        .filter(v -> !v)
+                        .findFirst().orElse(false);
+                break;
+            }
         }
 
         Optional<IAction> dataFromExecuted = Optional.empty();

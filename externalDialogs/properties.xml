@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Dialogs</className>
-    <ver>1.0.0</ver>
-    <apiVer>1.0.0</apiVer>
-    <date>31-12-2020</date>
+    <ver>1.1.0</ver>
+    <apiVer>1.4.0</apiVer>
+    <date>19-10-2023</date>
 
     <defaultSettings>
         <value>
@@ -51,14 +51,14 @@ The program is supplied as is. For problems arising during the operation or inst
                     <key>en</key>
                     <value>
 dialog box type:
-    INPUT - a dialog box with a single input field. returns text from a field if press button.
-    TWO_INPUT - a dialog box with two input fields. returns text from fields if press button.
-    CONFIRM_OK_CANCEL - dialog box with OK and CANCEL buttons. if OK is pressed returns 0, if CANCEL is 2, if the window is closed otherwise -1.
-    CONFIRM_YES_NO - a dialog box with the YES and NO buttons. if YES is pressed returns 0, if NO - 1, if the window is closed otherwise -1.
-    CONFIRM_YES_NO_CANCEL - a dialog box with the YES, NO and CANCEL buttons. if YES is pressed returns 0, if NO - 1, if CANCEL - 2, if the window is closed otherwise -1.
-    MESSAGE - a dialog box with text. returns nothing.
-    FILE_READ - a dialog box for selecting a file to read. returns the absolute path to the file (if selected).
-    FILE_SAVE - dialog box for selecting a file for recording. returns the absolute path to the file (if selected).
+    INPUT - a dialog box with a single input field. returns text from a field if press button.
+    TWO_INPUT - a dialog box with two input fields. returns text from fields if press button.
+    CONFIRM_OK_CANCEL - dialog box with OK and CANCEL buttons. if OK is pressed returns 0, if CANCEL is 2, if the window is closed otherwise -1.
+    CONFIRM_YES_NO - a dialog box with the YES and NO buttons. if YES is pressed returns 0, if NO - 1, if the window is closed otherwise -1.
+    CONFIRM_YES_NO_CANCEL - a dialog box with the YES, NO and CANCEL buttons. if YES is pressed returns 0, if NO - 1, if CANCEL - 2, if the window is closed otherwise -1.
+    MESSAGE - a dialog box with text. returns nothing.
+    FILE_READ - a dialog box for selecting a file to read. returns the absolute path to the file (if selected).
+    FILE_SAVE - dialog box for selecting a file for recording. returns the absolute path to the file (if selected).
     SELECT - a dialog box for selecting an option from a list. returns selected value. Incoming messages are used as options.
                     </value>
                 </entry>
@@ -128,21 +128,261 @@ message::en::Message::ru::Текст;;
         </value>
     </defaultSettings>
 
-    <minCountSources>0</minCountSources>
-    <maxCountSources>-1</maxCountSources>
-
-    <typeSource/>
-
-    <typeResult>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>STRING</ValueType>
-    </typeResult>
-
-    <minManagedExecutionContexts>0</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию. Результат зависит от настройки type.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context. The result depends on the setting type.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Все входящие значения со всех контекстов соединяет в одно текстовое сообщение и передает дальше для обработки и отображения.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>All incoming values from all contexts are combined into one text message and passed on for processing and display.</value>
+                        </entry>
+                    </description>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <description/>
+                            <valueType>STRING</valueType>
+                            <value>Hello world</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>IF</type>
+                    <checkSetting>type</checkSetting>
+                    <valueType>STRING</valueType>
+                    <value>INPUT</value>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Выводит сообщение, введенное в поле ввода.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Displays the message entered in the input field.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>Hello world</value>
+                        </element>
+                    </elements>
+                </element>
+                <element>
+                    <type>IF</type>
+                    <checkSetting>type</checkSetting>
+                    <valueType>STRING</valueType>
+                    <value>TWO_INPUT</value>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Выводит сообщение, введенное в поле ввода.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Displays the message entered in the input field.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>Hello world</value>
+                        </element>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Выводит сообщение, введенное во второе поле ввода.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Displays the message entered in the second input field.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>Hello world2</value>
+                        </element>
+                    </elements>
+                </element>
+                <element>
+                    <type>IF</type>
+                    <checkSetting>type</checkSetting>
+                    <valueType>STRING</valueType>
+                    <value>CONFIRM_OK_CANCEL</value>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Выводит 0 для YES и 2 для CANCEL.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Display 0 for OK and 2 for CANCEL.</value>
+                                </entry>
+                            </description>
+                            <valueType>INTEGER</valueType>
+                            <value>0</value>
+                        </element>
+                    </elements>
+                </element>
+                <element>
+                    <type>IF</type>
+                    <checkSetting>type</checkSetting>
+                    <valueType>STRING</valueType>
+                    <value>YES_NO_OPTION</value>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Выводит 0 для YES и 1 для NO.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Display 0 for YES and 1 for NO.</value>
+                                </entry>
+                            </description>
+                            <valueType>INTEGER</valueType>
+                            <value>0</value>
+                        </element>
+                    </elements>
+                </element>
+                <element>
+                    <type>IF</type>
+                    <checkSetting>type</checkSetting>
+                    <valueType>STRING</valueType>
+                    <value>YES_NO_CANCEL_OPTION</value>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Выводит 0 для YES, 1 для NO и 2 для CANCEL.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Display 0 for YES, 1 for NO and 2 for CANCEL.</value>
+                                </entry>
+                            </description>
+                            <valueType>INTEGER</valueType>
+                            <value>0</value>
+                        </element>
+                    </elements>
+                </element>
+                <element>
+                    <type>IF</type>
+                    <checkSetting>type</checkSetting>
+                    <valueType>STRING</valueType>
+                    <value>FILE_READ</value>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Выводит полный путь к выбранному файлу.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Display absolute path selected file.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>/test/file.txt</value>
+                        </element>
+                    </elements>
+                </element>
+                <element>
+                    <type>IF</type>
+                    <checkSetting>type</checkSetting>
+                    <valueType>STRING</valueType>
+                    <value>FILE_SAVE</value>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Выводит полный путь к выбранному файлу.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Display absolute path selected file.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>/test/file.txt</value>
+                        </element>
+                    </elements>
+                </element>
+                <element>
+                    <type>IF</type>
+                    <checkSetting>type</checkSetting>
+                    <valueType>STRING</valueType>
+                    <value>SELECT</value>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>-1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Выводит выбранные элементы.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Output selected items.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>ITEM_1</value>
+                        </element>
+                    </elements>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <threadSafe>true</threadSafe>
 

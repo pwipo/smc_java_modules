@@ -14,6 +14,7 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -63,6 +64,10 @@ public class StringUtil implements Module {
         patterns = null;
         values = null;
         numberValues = null;
+        updateSettings();
+    }
+
+    private void updateSettings() {
         switch (type) {
             case SPLIT:
             case SPLIT_REGEXP:
@@ -124,7 +129,6 @@ public class StringUtil implements Module {
                 break;
         }
     }
-
     @Override
     public void update(ConfigurationTool configurationTool) throws ModuleException {
         stop(configurationTool);
@@ -133,6 +137,9 @@ public class StringUtil implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
+        Type type = Objects.equals(executionContextTool.getType(), "default") ? this.type : Type.valueOf(executionContextTool.getType().toUpperCase());
+        if (type != this.type)
+            updateSettings();
         switch (type) {
             case JOIN: {
                 String result = Stream.iterate(0, n -> n + 1)
@@ -205,6 +212,7 @@ public class StringUtil implements Module {
                                 .forEach(v -> executionContextTool.addMessage(v.trim()))));
                 break;
             case REPLACE_REGEXP:
+            case REPLACE_REGEXP_MULTILINE:
                 Stream.iterate(0, n -> n + 1)
                         .limit(executionContextTool.countSource())
                         .forEach(i -> executionContextTool.getMessages(i).forEach(a -> a.getMessages().stream()

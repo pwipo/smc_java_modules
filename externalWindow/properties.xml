@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Window</className>
-    <ver>1.0.0</ver>
-    <apiVer>1.0.0</apiVer>
-    <date>31-12-2020</date>
+    <ver>1.1.0</ver>
+    <apiVer>1.4.0</apiVer>
+    <date>22-10-2023</date>
 
     <defaultSettings>
         <value>
@@ -258,32 +258,670 @@ title::en::Text::ru::Текст;;
         </value>
     </defaultSettings>
 
-    <minCountSources>0</minCountSources>
-    <maxCountSources>-1</maxCountSources>
-
-    <typeSource>
-        <ValueType>BYTE</ValueType>
-        <ValueType>SHORT</ValueType>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>LONG</ValueType>
-        <ValueType>FLOAT</ValueType>
-        <ValueType>DOUBLE</ValueType>
-        <ValueType>BIG_INTEGER</ValueType>
-        <ValueType>BIG_DECIMAL</ValueType>
-        <ValueType>STRING</ValueType>
-        <ValueType>BYTES</ValueType>
-    </typeSource>
-
-    <typeResult>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>STRING</ValueType>
-    </typeResult>
-
-    <minManagedExecutionContexts>0</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>-1</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>-1</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>FOR</type>
+                            <countStatic>-1</countStatic>
+                            <elements>
+                                <element>
+                                    <type>VALUE</type>
+                                    <count>1</count>
+                                    <valueType>INTEGER</valueType>
+                                    <value>1</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>Определяет тип операции 0-15.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>Default execution context.</value>
+                                        </entry>
+                                    </description>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>0</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>закрыть окно. закрывает окно и прекращает обработку команд.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>close the window. closes the window and stops processing commands.</value>
+                                        </entry>
+                                    </description>
+                                    <elements/>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>1</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>получить значение элемента.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>get the value of the element.</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>2</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>установить значение елемента.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>set the element value.</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE_ANY</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>value</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>3</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>включить/отключить элемент.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>enable / disable the item.</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>INTEGER</valueType>
+                                            <value>1</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>4</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>показать/скрыть элемент.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>show / hide the element.</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>INTEGER</valueType>
+                                            <value>1</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>5</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>выделить слова/фразы в строках (только для текстового элемента).</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>select words / phrases in lines (only for text element).</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>-1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>values</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>6</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>получить выделенную строку (только для текстового элемента).</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>get the selected line (only for the text element).</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>7</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>заменать выделенную строку (только для текстового элемента).</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>replace the selected line (only for a text element).</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>values</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>8</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>вставтить строку в текущую позицию курсора (только для текстового элемента).</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>insert a line at the current cursor position (only for a text element).</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>values</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>9</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>заменить строки (только для текстового элемента).</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>replace strings (only for text element).</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>search</value>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>values</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>10</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>устанавливает значение компонента список (стирая все).</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>sets the value of the list component (erasing everything).</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>-1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>values</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>11</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>добавляет значение в список.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>Adds a value to the list.</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>values</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>12</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>удаляет значение из списка.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>removes the value from the list.</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>INTEGER</valueType>
+                                            <value>1</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>13</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>получить значение выделенного элемента в списке.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>get the value of the selected item in the list.</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>14</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>разрешает/запрещает редактировать компанент (только для текстового элемента).</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>enables / disables editing of components (only for text element).</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>INTEGER</valueType>
+                                            <value>1</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                                <element>
+                                    <type>IF</type>
+                                    <checkValueId>-1</checkValueId>
+                                    <valueType>INTEGER</valueType>
+                                    <value>15</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>выделяет фрагмент на основе regexp выражения. в целом аналогичен 5 но позволяет выделять не только целые слова.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>selects a fragment based on regexp expression. generally similar to 5 but allows you to highlight not only whole words.</value>
+                                        </entry>
+                                    </description>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя элемента.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>element name.</value>
+                                                </entry>
+                                            </description>
+                                        </element>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>-1</count>
+                                            <valueType>STRING</valueType>
+                                            <value>values</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                            </elements>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <optional>true</optional>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <threadSafe>true</threadSafe>
 
@@ -305,82 +943,82 @@ title::en::Text::ru::Текст;;
 The module uses the swixml library.
 For configuration, use the documentation at http://www.swixml.org.
 work in two modes:
-    passive:
-        at the first start it launches a window. and returns control.
-        all subsequent launches:
-            returns current data:
-                if there were events, prints them:
-                    number - the number of events
-                    further events in format:
-                        for buttons:
+    passive:
+        at the first start it launches a window. and returns control.
+        all subsequent launches:
+            returns current data:
+                if there were events, prints them:
+                    number - the number of events
+                    further events in format:
+                        for buttons:
                             string - name of the button
-                        for menu item:
+                        for menu item:
                             line - name of menu item
-                        for the list:
-                            string - list name
-                            number - the number of selected items
-                            strings - selected items
-                        for wood:
-                            string - tree name
-                            number - the number of selected items
-                            strings - selected items
+                        for the list:
+                            string - list name
+                            number - the number of selected items
+                            strings - selected items
+                        for wood:
+                            string - tree name
+                            number - the number of selected items
+                            strings - selected items
 
-                if printElements is set, sends the values ​​of all named elements:
-                    number - the number of elements
-                    further - line pairs - element_name and element_value
-                further, if there are sources, he perceives them as teams. format:
-                    number - type of command:
-                        0 - close the window. closes the window and stops processing commands.
-                        1 - get the value of the element.
-                            further string - element_name
-                            returns the value of an element.
-                        2 - set the element value.
-                            further a line - an element_name.
-                            then a string, number or byte array - the value for the corresponding element.
-                        3 - enable / disable the item.
-                            further a line - an element_name.
-                            then the digit - 1 - enable, 0 - disable.
-                        4 - show / hide the element.
-                            further a line - an element_name.
-                            further digit - 1 - show, 0 - hide.
-                        5 - select words / phrases in lines (only for text element).
-                            further a line - an element_name.
-                            further lines.
-                        6 - get the selected line (only for the text element) ..
-                            further a line - an element_name.
-                        7 - replace the selected line (only for a text element).
-                            further a line - an element_name.
-                            then the line is a replacement.
-                        8 - insert a line at the current cursor position (only for a text element).
-                            further a line - an element_name.
-                            then the line is the text.
-                        9 - replace strings (only for text element).
-                            further a line - an element_name.
-                            then the line is the search text.
-                            the next line is the replacement text.
-                        10 - sets the value of the comp list (old everything).
-                            then the string is element_name.
-                            further values ​​- items to add to the list.
-                        11 - Adds a value to the list.
-                            then the string is element_name.
-                            further values ​​- items to add to the list.
-                        12 - removes the value from the list.
-                            then the string is element_name.
-                            then the number is the position of the item in the list.
-                        13 - get the value of the selected item in the list.
-                            then the string is element_name.
-                        14 - enables / disables editing of components (only for text element).
-                            then the string is element_name.
-                            then the number is 1-enable, 0-disable.
-                        15 - selects a fragment based on regexp expression. generally similar to 5 but allows you to highlight not only whole words.
-                            then the string is element_name.
-                            further lines.
+                    if printElements is set, sends the values of all named elements:
+                        number - the number of elements
+                        further - line pairs - element_name and element_value
+                    further, if there are sources, he perceives them as teams. format:
+                        number - type of command:
+                            0 - close the window. closes the window and stops processing commands.
+                            1 - get the value of the element.
+                                further string - element_name
+                                returns the value of an element.
+                            2 - set the element value.
+                                further a line - an element_name.
+                                then a string, number or byte array - the value for the corresponding element.
+                            3 - enable / disable the item.
+                                further a line - an element_name.
+                                then the digit - 1 - enable, 0 - disable.
+                            4 - show / hide the element.
+                                further a line - an element_name.
+                                further digit - 1 - show, 0 - hide.
+                            5 - select words / phrases in lines (only for text element).
+                                further a line - an element_name.
+                                further lines.
+                            6 - get the selected line (only for the text element) ..
+                                further a line - an element_name.
+                            7 - replace the selected line (only for a text element).
+                                further a line - an element_name.
+                                then the line is a replacement.
+                            8 - insert a line at the current cursor position (only for a text element).
+                                further a line - an element_name.
+                                then the line is the text.
+                            9 - replace strings (only for text element).
+                                further a line - an element_name.
+                                then the line is the search text.
+                                the next line is the replacement text.
+                            10 - sets the value of the comp list (old everything).
+                                then the string is element_name.
+                                further values - items to add to the list.
+                            11 - Adds a value to the list.
+                                then the string is element_name.
+                                further values - items to add to the list.
+                            12 - removes the value from the list.
+                                then the string is element_name.
+                                then the number is the position of the item in the list.
+                            13 - get the value of the selected item in the list.
+                                then the string is element_name.
+                            14 - enables / disables editing of components (only for text element).
+                                then the string is element_name.
+                                then the number is 1-enable, 0-disable.
+                            15 - selects a fragment based on regexp expression. generally similar to 5 but allows you to highlight not only whole words.
+                                then the string is element_name.
+                                further lines.
     active:
-        if it starts with controlled execution contexts, it starts and displays a window. Further, when a processed event occurs, it starts the first managed context with arguments. event format described above.
-        if there is an answer, he perceives it as commands and executes them. the command format is described above.
-        does not return control until the window is closed.
-        if launched without contexts but with sources: perceives them as commands and executes them. the command format is described above.
-        if it starts without contexts and without sources and the window is already running: closes the window.
+        if it starts with controlled execution contexts, it starts and displays a window. Further, when a processed event occurs, it starts the first managed context with arguments. event format described above.
+        if there is an answer, he perceives it as commands and executes them. the command format is described above.
+        does not return control until the window is closed.
+        if launched without contexts but with sources: perceives them as commands and executes them. the command format is described above.
+        if it starts without contexts and without sources and the window is already running: closes the window.
 
 There is an opportunity to internationalize the text. To do this, use the lang setting. In the text, the variable name is surrounded by double quotes: [[message]].
             </value>

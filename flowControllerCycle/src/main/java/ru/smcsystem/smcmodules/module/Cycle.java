@@ -1,5 +1,6 @@
 package ru.smcsystem.smcmodules.module;
 
+import ru.smcsystem.api.dto.IAction;
 import ru.smcsystem.api.dto.IMessage;
 import ru.smcsystem.api.dto.IValue;
 import ru.smcsystem.api.dto.ObjectArray;
@@ -42,7 +43,9 @@ public class Cycle implements Module {
 
     private enum CheckType {
         NO_DATA,
-        ANY_DATA
+        ANY_DATA,
+        IS_TRUE,
+        IS_FALSE
     }
 
     private CheckType checkType;
@@ -391,6 +394,26 @@ public class Cycle implements Module {
                 result = executionContextTool.getFlowControlTool().getMessagesFromExecuted(id).stream()
                         .anyMatch(a -> a.getMessages().stream().anyMatch(m -> MessageType.DATA.equals(m.getMessageType())));
                 break;
+            case IS_TRUE:
+                result = executionContextTool.getFlowControlTool().getMessagesFromExecuted(id).stream()
+                        .flatMap(a -> a.getMessages().stream())
+                        .filter(ModuleUtils::isBoolean)
+                        .map(m -> (Boolean) m.getValue())
+                        .filter(v -> v)
+                        .findFirst().orElse(false);
+                break;
+            case IS_FALSE: {
+                List<IAction> data = executionContextTool.getFlowControlTool().getMessagesFromExecuted(id).stream()
+                        .filter(ModuleUtils::hasData)
+                        .collect(Collectors.toList());
+                result = data.isEmpty() || !data.stream()
+                        .flatMap(a -> a.getMessages().stream())
+                        .filter(ModuleUtils::isBoolean)
+                        .map(m -> (Boolean) m.getValue())
+                        .filter(v -> !v)
+                        .findFirst().orElse(false);
+                break;
+            }
         }
         // throw new ModuleException("wrong checkType");
         return result;

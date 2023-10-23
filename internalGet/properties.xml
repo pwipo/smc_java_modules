@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Get</className>
-    <ver>1.0.0</ver>
-    <apiVer>1.0.0</apiVer>
-    <date>31-12-2020</date>
+    <ver>1.1.0</ver>
+    <apiVer>1.4.0</apiVer>
+    <date>22-10-2023</date>
 
     <defaultSettings>
         <value>
@@ -219,39 +219,48 @@ Not used for SOURCE_ID and SOURCE_ID_EMPTY_OR_ERRORS.
         </value>
     </defaultSettings>
 
-    <minCountSources>1</minCountSources>
-    <maxCountSources>-1</maxCountSources>
-
-    <typeSource>
-        <ValueType>BYTE</ValueType>
-        <ValueType>BYTES</ValueType>
-        <ValueType>LONG</ValueType>
-        <ValueType>DOUBLE</ValueType>
-        <ValueType>SHORT</ValueType>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>FLOAT</ValueType>
-        <ValueType>STRING</ValueType>
-        <ValueType>BIG_INTEGER</ValueType>
-        <ValueType>BIG_DECIMAL</ValueType>
-    </typeSource>
-    <typeResult>
-        <ValueType>BYTE</ValueType>
-        <ValueType>BYTES</ValueType>
-        <ValueType>LONG</ValueType>
-        <ValueType>DOUBLE</ValueType>
-        <ValueType>SHORT</ValueType>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>FLOAT</ValueType>
-        <ValueType>STRING</ValueType>
-        <ValueType>BIG_INTEGER</ValueType>
-        <ValueType>BIG_DECIMAL</ValueType>
-    </typeResult>
-
-    <minManagedExecutionContexts>0</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <description>
         <entry>

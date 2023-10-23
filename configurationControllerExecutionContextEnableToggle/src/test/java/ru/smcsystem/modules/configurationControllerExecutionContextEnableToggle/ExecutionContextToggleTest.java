@@ -39,7 +39,7 @@ public class ExecutionContextToggleTest {
                                 , null
                                 , Map.of("address", new Value(ValueType.STRING, "google.com"))
                                 , null
-                                , List.of(new ExecutionContext("main", -1))
+                                , List.of(new ExecutionContext("main", "default", -1))
                                 , null)
                 ),
                 null

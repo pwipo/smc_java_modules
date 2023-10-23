@@ -3,8 +3,7 @@
 
     <uuid>Cache</uuid>
     <provider>java</provider>
-    <ver>1.0.0</ver>
-    <apiVer>1.0.0</apiVer>
+    <ver>1.1.0</ver>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
@@ -28,7 +27,8 @@ The program is supplied as is. For problems arising during the operation or inst
             </value>
         </entry>
     </copyrightAndLicense>
-    <date>31-12-2020</date>
+    <apiVer>1.4.0</apiVer>
+    <date>22-10-2023</date>
 
     <defaultSettings>
         <value>
@@ -97,40 +97,244 @@ The program is supplied as is. For problems arising during the operation or inst
         </value>
     </defaultSettings>
 
-    <minCountSources>1</minCountSources>
-    <maxCountSources>-1</maxCountSources>
-
-    <typeSource>
-        <ValueType>STRING</ValueType>
-        <ValueType>BYTE</ValueType>
-        <ValueType>SHORT</ValueType>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>LONG</ValueType>
-        <ValueType>FLOAT</ValueType>
-        <ValueType>DOUBLE</ValueType>
-        <ValueType>BIG_INTEGER</ValueType>
-        <ValueType>BIG_DECIMAL</ValueType>
-        <ValueType>BYTES</ValueType>
-    </typeSource>
-
-    <typeResult>
-        <ValueType>STRING</ValueType>
-        <ValueType>BYTE</ValueType>
-        <ValueType>SHORT</ValueType>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>LONG</ValueType>
-        <ValueType>FLOAT</ValueType>
-        <ValueType>DOUBLE</ValueType>
-        <ValueType>BIG_INTEGER</ValueType>
-        <ValueType>BIG_DECIMAL</ValueType>
-        <ValueType>BYTES</ValueType>
-    </typeResult>
-
-    <minManagedExecutionContexts>0</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>1</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>1</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>size</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>возвращает количество данных в кэше</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>returns the amount of data in the cache</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>0</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources/>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>LONG</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>clear_all</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>удаляет кэш</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>deletes the cache</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>0</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources/>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>LONG</valueType>
+                    <value>1</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>LONG</valueType>
+                    <value>0</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>get</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Получить значение элемента</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Get the value of an item</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <valueType>STRING</valueType>
+                            <value>key</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>put</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Установить значение элемента</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Set the value of the element</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output/>
+        </type>
+        <type>
+            <type>invalidate</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Удалить элемент</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Remove item</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <valueType>STRING</valueType>
+                            <value>key</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output/>
+        </type>
+        <type>
+            <type>get_all</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Получить все ключи</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Get all the keys</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>0</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources/>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <useStorage>false</useStorage>
 
@@ -158,7 +362,7 @@ The algorithm is as follows - for an incoming data set from each source (each ac
     if found, the result is returned from it,
     if not, then the first managed execution context is called, after execution, its results are cached and returned as a response.
 If there are no managed contexts, then it works as a regular cache.
-all incoming values ​​are treated as commands for managing the cache:
+all incoming values are treated as commands for managing the cache:
     returns the amount of data in the cache.
         Parameters:
             digit 1
@@ -178,7 +382,7 @@ all incoming values ​​are treated as commands for managing the cache:
         Parameters:
             digit 4
             string - key
-            the rest of the action values ​​are treated as the element value
+            the rest of the action values are treated as the element value
     Remove item.
         Parameters:
             digit 5
@@ -192,7 +396,7 @@ all incoming values ​​are treated as commands for managing the cache:
 if the items in the cache become more cacheSize, then the oldest are deleted (as a rule).
 if expireTime is greater than zero, then the expiration time limit is used. old items are removed.
 The age of elements is determined by the time when they were last accessed.
-if cacheNull is set, then null (empty) values ​​are also saved.
+if cacheNull is set, then null (empty) values are also saved.
             </value>
         </entry>
         <entry>

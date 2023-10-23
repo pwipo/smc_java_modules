@@ -1034,4 +1034,49 @@ public class ValueTypeConverterTest {
         process.stop();
     }
 
+    @Test
+    public void test16() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "type", new Value(29),
+                                "charsetName", new Value(ValueType.STRING, "UTF-8"),
+                                "param", new Value(ValueType.STRING, " ")
+
+                        ),
+                        null,
+                        null
+                ),
+                new ValueTypeConverter()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(MessageType.DATA, new Date(), new Value("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+                                                        "<company>\ntest2" +
+                                                        "    <Staff id=\"1\">\n" +
+                                                        "        <firstname>yong</firstname>\n" +
+                                                        "        <lastname>mook kim</lastname>\n" +
+                                                        "        <nickname>mkyong</nickname>\n" +
+                                                        "        <salary>100000</salary>\n" +
+                                                        "    </Staff>\n" +
+                                                        "</company>"))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null,
+                null);
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        process.stop();
+    }
+
 }

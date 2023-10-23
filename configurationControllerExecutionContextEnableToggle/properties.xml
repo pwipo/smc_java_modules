@@ -26,24 +26,42 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.configurationControllerExecutionContextEnableToggle.ExecutionContextToggle</className>
-    <ver>1.0.0</ver>
-    <apiVer>1.0.0</apiVer>
-    <date>31-12-2020</date>
+    <ver>1.1.0</ver>
+    <apiVer>1.4.0</apiVer>
+    <date>23-10-2023</date>
 
     <defaultSettings/>
 
-    <minCountSources>0</minCountSources>
-    <maxCountSources>0</maxCountSources>
-
-    <typeResult>
-        <ValueType>STRING</ValueType>
-    </typeResult>
-
-    <minManagedExecutionContexts>0</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>1</minManagedConfigurations>
-    <maxManagedConfigurations>-1</maxManagedConfigurations>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>0</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>1</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>-1</maxCountManagedConfigurations>
+            <sources/>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>STRING</valueType>
+                    <value>execution context 1 1 true</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <description>
         <entry>

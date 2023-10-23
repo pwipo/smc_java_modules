@@ -2,7 +2,6 @@ package ru.smcsystem.modules.module;
 
 import com.google.common.cache.CacheBuilder;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import ru.smcsystem.api.dto.IAction;
 import ru.smcsystem.api.dto.IMessage;
 import ru.smcsystem.api.dto.IValue;
@@ -28,6 +27,10 @@ public class Cache implements Module {
     private int maxValueSize;
 
     private com.google.common.cache.Cache<String, List<Object>> cache;
+
+    private enum Type {
+        size, clear_all, get, put, invalidate, get_all
+    }
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -62,104 +65,106 @@ public class Cache implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
-        /*
-        if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() == 0) {
-            executionContextTool.addError("need managed execution context");
-            return;
-        }
-        */
-        if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0) {
-            Stream.iterate(0, n -> n + 1)
-                    .limit(executionContextTool.countSource())
-                    .flatMap(i -> executionContextTool.getMessages(i).stream())
-                    .forEach(a -> {
-                        String name = genName(a.getMessages());
-                        try {
-                            List<Object> objects = cache.get(name, () -> {
-                                        executionContextTool.getFlowControlTool().executeNow(
-                                                CommandType.EXECUTE,
-                                                0,
-                                                a.getMessages().stream()
-                                                        .map(IValue::getValue)
-                                                        .collect(Collectors.toList()));
-                                        return executionContextTool.getFlowControlTool().getMessagesFromExecuted(0).stream()
-                                                .flatMap(a2 -> a2.getMessages().stream())
-                                                // .filter(m -> maxValueSize <= 0 || (ModuleUtils.isBytes(m) && ((byte[]) m.getValue()).length < maxValueSize) || (ModuleUtils.isString(m) && ((String) m.getValue()).length() < maxValueSize))
-                                                .map(IValue::getValue)
-                                                .collect(Collectors.toList());
-                                    }
-                            );
-                            if (CollectionUtils.isNotEmpty(objects)) {
-                                executionContextTool.addMessage(objects);
-                            } else if (!cacheNull || (maxValueSize > 0 && objects.stream().anyMatch(o -> ((o instanceof byte[]) && (((byte[]) o).length > maxValueSize)) || ((o instanceof String) && (((String) o).length() > maxValueSize))))) {
-                                cache.invalidate(name);
+        if (executionContextTool.getType().equals("default")) {
+            if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0) {
+                Stream.iterate(0, n -> n + 1)
+                        .limit(executionContextTool.countSource())
+                        .flatMap(i -> executionContextTool.getMessages(i).stream())
+                        .forEach(a -> {
+                            String name = genName(a.getMessages());
+                            try {
+                                List<Object> objects = cache.get(name, () -> {
+                                            executionContextTool.getFlowControlTool().executeNow(
+                                                    CommandType.EXECUTE,
+                                                    0,
+                                                    a.getMessages().stream()
+                                                            .map(IValue::getValue)
+                                                            .collect(Collectors.toList()));
+                                            return executionContextTool.getFlowControlTool().getMessagesFromExecuted(0).stream()
+                                                    .flatMap(a2 -> a2.getMessages().stream())
+                                                    // .filter(m -> maxValueSize <= 0 || (ModuleUtils.isBytes(m) && ((byte[]) m.getValue()).length < maxValueSize) || (ModuleUtils.isString(m) && ((String) m.getValue()).length() < maxValueSize))
+                                                    .map(IValue::getValue)
+                                                    .collect(Collectors.toList());
+                                        }
+                                );
+                                if (CollectionUtils.isNotEmpty(objects)) {
+                                    executionContextTool.addMessage(objects);
+                                } else if (!cacheNull || (maxValueSize > 0 && objects.stream().anyMatch(o -> ((o instanceof byte[]) && (((byte[]) o).length > maxValueSize)) || ((o instanceof String) && (((String) o).length() > maxValueSize))))) {
+                                    cache.invalidate(name);
+                                }
+                            } catch (ExecutionException e) {
+                                throw new ModuleException("error", e);
                             }
-                        } catch (ExecutionException e) {
-                            throw new ModuleException("error", e);
-                        }
 
-                    });
+                        });
 
-        } else {
-            Stream.iterate(0, n -> n + 1)
-                    .limit(executionContextTool.countSource())
-                    .flatMap(i -> executionContextTool.getMessages(i).stream())
-                    .map(IAction::getMessages)
-                    // .filter(m -> ValueType.BYTE.equals(m.getType()) || ValueType.SHORT.equals(m.getType()) || ValueType.INTEGER.equals(m.getType()) || ValueType.LONG.equals(m.getType()) || ValueType.FLOAT.equals(m.getType()) || ValueType.DOUBLE.equals(m.getType()) || ValueType.BIG_INTEGER.equals(m.getType()) || ValueType.BIG_DECIMAL.equals(m.getType()))
-                    // .map(m -> (Number) m.getValue())
-                    .forEach(messages -> {
-                        try {
+            } else {
+                Stream.iterate(0, n -> n + 1)
+                        .limit(executionContextTool.countSource())
+                        .flatMap(i -> executionContextTool.getMessages(i).stream())
+                        .map(IAction::getMessages)
+                        // .filter(m -> ValueType.BYTE.equals(m.getType()) || ValueType.SHORT.equals(m.getType()) || ValueType.INTEGER.equals(m.getType()) || ValueType.LONG.equals(m.getType()) || ValueType.FLOAT.equals(m.getType()) || ValueType.DOUBLE.equals(m.getType()) || ValueType.BIG_INTEGER.equals(m.getType()) || ValueType.BIG_DECIMAL.equals(m.getType()))
+                        // .map(m -> (Number) m.getValue())
+                        .forEach(messages -> {
                             LinkedList<IMessage> messagesList = new LinkedList<>(messages);
                             while (!messagesList.isEmpty()) {
-                                Number number = getNumber(messagesList);
-                                switch (number.intValue()) {
-                                    case 1:
-                                        //get size
-                                        executionContextTool.addMessage(cache.size());
-                                        break;
-                                    case 2:
-                                        //clear all
-                                        executionContextTool.addMessage(cache.size());
-                                        cache.invalidateAll();
-                                        executionContextTool.addMessage(cache.size());
-                                        break;
-                                    case 3: {
-                                        //get
-                                        List<Object> list = cache.getIfPresent(getString(messagesList));
-                                        if (CollectionUtils.isNotEmpty(list))
-                                            executionContextTool.addMessage(list);
-                                        break;
-                                    }
-                                    case 4: {
-                                        //put
-                                        String key = getString(messagesList);
-                                        List<Object> objects = messagesList.stream()
-                                                .filter(m -> maxValueSize <= 0 || (ModuleUtils.isBytes(m) && ((byte[]) m.getValue()).length < maxValueSize) || (ModuleUtils.isString(m) && ((String) m.getValue()).length() < maxValueSize))
-                                                .map(IValue::getValue)
-                                                .collect(Collectors.toList());
-                                        messagesList.clear();
-                                        if (CollectionUtils.isNotEmpty(objects) || cacheNull)
-                                            cache.put(key, objects);
-                                        break;
-                                    }
-                                    case 5:
-                                        //invalidate entry
-                                        cache.invalidate(getString(messagesList));
-                                        break;
-                                    case 6:
-                                        //get all entries keys
-                                        cache.asMap().forEach((k, v) -> {
-                                            executionContextTool.addMessage(k);
-                                            // executionContextTool.addMessage(v);
-                                        });
-                                        break;
-                                }
+                                Type type = Type.values()[getNumber(messagesList).intValue() - 1];
+                                process(configurationTool, executionContextTool, messagesList, type);
                             }
-                        } catch (Exception e) {
-                            executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
-                            configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
-                        }
+                        });
+            }
+        } else {
+            Type type = Type.valueOf(executionContextTool.getType().toUpperCase());
+            List<IMessage> messages = type == Type.size || type == Type.clear_all || type == Type.get_all ? List.of() : ModuleUtils.getLastActionWithData(executionContextTool.getMessages(0)).map(IAction::getMessages).orElse(List.of());
+            process(configurationTool, executionContextTool, new LinkedList<>(messages), type);
+        }
+    }
+
+    private void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, LinkedList<IMessage> messagesList, Type type) {
+        try {
+            switch (type) {
+                case size:
+                    executionContextTool.addMessage(cache.size());
+                    break;
+                case clear_all:
+                    executionContextTool.addMessage(cache.size());
+                    cache.invalidateAll();
+                    executionContextTool.addMessage(cache.size());
+                    break;
+                case get: {
+                    //get
+                    List<Object> list = cache.getIfPresent(getString(messagesList));
+                    if (CollectionUtils.isNotEmpty(list))
+                        executionContextTool.addMessage(list);
+                    break;
+                }
+                case put: {
+                    //put
+                    String key = getString(messagesList);
+                    List<Object> objects = messagesList.stream()
+                            .filter(m -> maxValueSize <= 0 || (ModuleUtils.isBytes(m) && ((byte[]) m.getValue()).length < maxValueSize) || (ModuleUtils.isString(m) && ((String) m.getValue()).length() < maxValueSize))
+                            .map(IValue::getValue)
+                            .collect(Collectors.toList());
+                    messagesList.clear();
+                    if (CollectionUtils.isNotEmpty(objects) || cacheNull)
+                        cache.put(key, objects);
+                    break;
+                }
+                case invalidate:
+                    //invalidate entry
+                    cache.invalidate(getString(messagesList));
+                    break;
+                case get_all:
+                    //get all entries keys
+                    cache.asMap().forEach((k, v) -> {
+                        executionContextTool.addMessage(k);
+                        // executionContextTool.addMessage(v);
                     });
+                    break;
+            }
+        } catch (Exception e) {
+            executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
+            configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
         }
     }
 

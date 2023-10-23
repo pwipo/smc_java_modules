@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Http</className>
-    <ver>1.0.0</ver>
-    <apiVer>1.0.0</apiVer>
-    <date>31-12-2020</date>
+    <ver>1.1.0</ver>
+    <apiVer>1.4.0</apiVer>
+    <date>19-10-2023</date>
 
     <defaultSettings>
         <value>
@@ -112,33 +112,609 @@ The program is supplied as is. For problems arising during the operation or inst
         </value>
     </defaultSettings>
 
-    <minCountSources>1</minCountSources>
-    <maxCountSources>-1</maxCountSources>
-
-    <typeSource>
-        <ValueType>STRING</ValueType>
-        <ValueType>BYTE</ValueType>
-        <ValueType>SHORT</ValueType>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>LONG</ValueType>
-        <ValueType>FLOAT</ValueType>
-        <ValueType>DOUBLE</ValueType>
-        <ValueType>BIG_INTEGER</ValueType>
-        <ValueType>BIG_DECIMAL</ValueType>
-        <ValueType>BYTES</ValueType>
-    </typeSource>
-
-    <typeResult>
-        <ValueType>STRING</ValueType>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>BYTES</ValueType>
-    </typeResult>
-
-    <minManagedExecutionContexts>0</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Работает с GET и POST запросами.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Works with GET and POST requests.</value>
+                        </entry>
+                    </description>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>GET или POST.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>GET or POST.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>GET</value>
+                        </element>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Адрес.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Address.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>https://www.google.com</value>
+                        </element>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <optional>true</optional>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Если есть, то определяет количество заголовков.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>If there is, then determines the number of headers.</value>
+                                </entry>
+                            </description>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                        <element>
+                            <type>FOR</type>
+                            <countValueId>-1</countValueId>
+                            <optional>true</optional>
+                            <elements>
+                                <element>
+                                    <type>VALUE</type>
+                                    <count>1</count>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>заголовки - формат: имя=значение</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>headers - format: name=value</value>
+                                        </entry>
+                                    </description>
+                                    <valueType>STRING</valueType>
+                                    <value>Content-Type: text/html</value>
+                                </element>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkValueId>0</checkValueId>
+                            <valueType>STRING</valueType>
+                            <value>POST</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>1</count>
+                                    <optional>true</optional>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>Тело POST запроса, за место именованных параметров. может быть строкой или байтовым массивом.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>The body of the POST request, in place of the named parameters. can be a string or a byte array.</value>
+                                        </entry>
+                                    </description>
+                                    <valueType>STRING</valueType>
+                                    <value>hello world</value>
+                                </element>
+                                <element>
+                                    <type>VALUE</type>
+                                    <count>1</count>
+                                    <optional>true</optional>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>Если есть, то определяет количество именованых POST параметров. только если не указано тело.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>If there is, then determines the number of headers. only if no body is specified.</value>
+                                        </entry>
+                                    </description>
+                                    <valueType>INTEGER</valueType>
+                                </element>
+                                <element>
+                                    <type>FOR</type>
+                                    <countValueId>-1</countValueId>
+                                    <optional>true</optional>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>имя параметра</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>param name</value>
+                                                </entry>
+                                            </description>
+                                            <valueType>STRING</valueType>
+                                            <value>name</value>
+                                        </element>
+                                        <element>
+                                            <type>VALUE_ANY</type>
+                                            <count>1</count>
+                                            <description>
+                                                <entry>
+                                                    <key>ru</key>
+                                                    <value>значение параметра. может быть строкой или байтовым массивом.</value>
+                                                </entry>
+                                                <entry>
+                                                    <key>en</key>
+                                                    <value>param value. can be a string or a byte array.</value>
+                                                </entry>
+                                            </description>
+                                            <valueType>STRING</valueType>
+                                            <value>value</value>
+                                        </element>
+                                    </elements>
+                                </element>
+                            </elements>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Код ответа.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Response code.</value>
+                        </entry>
+                    </description>
+                    <valueType>INTEGER</valueType>
+                    <value>200</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Если есть, то определяет количество заголовков.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>If there is, then determines the number of headers.</value>
+                        </entry>
+                    </description>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+                <element>
+                    <type>FOR</type>
+                    <countValueId>-1</countValueId>
+                    <optional>true</optional>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>заголовки - формат: имя=значение</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>headers - format: name=value</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>Content-Type: text/html</value>
+                        </element>
+                    </elements>
+                </element>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>тело ответа, если заголовок ContentType = text - то тип строка иначе байтовый массив.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>response body, if the header ContentType = text - then the type is a string, otherwise a byte array.</value>
+                        </entry>
+                    </description>
+                    <valueType>STRING</valueType>
+                    <value>response value</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>get</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения для GET запросов.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Execution context for GET requests.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Адрес.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Address.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>https://www.google.com</value>
+                        </element>
+                        <element>
+                            <type>VALUE</type>
+                            <count>-1</count>
+                            <optional>true</optional>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>заголовки - формат: имя=значение</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>headers - format: name=value</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>Content-Type: text/html</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Код ответа.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Response code.</value>
+                        </entry>
+                    </description>
+                    <valueType>INTEGER</valueType>
+                    <value>200</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Если есть, то определяет количество заголовков.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>If there is, then determines the number of headers.</value>
+                        </entry>
+                    </description>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+                <element>
+                    <type>FOR</type>
+                    <countValueId>-1</countValueId>
+                    <optional>true</optional>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>заголовки - формат: имя=значение</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>headers - format: name=value</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>Content-Type: text/html</value>
+                        </element>
+                    </elements>
+                </element>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>тело ответа, если заголовок ContentType = text - то тип строка иначе байтовый массив.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>response body, if the header ContentType = text - then the type is a string, otherwise a byte array.</value>
+                        </entry>
+                    </description>
+                    <valueType>STRING</valueType>
+                    <value>response value</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>post</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения для POST запросов.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Execution context for POST requests.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>2</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Адрес.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Address.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>https://www.google.com</value>
+                        </element>
+                        <element>
+                            <type>VALUE</type>
+                            <count>-1</count>
+                            <optional>true</optional>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>заголовки - формат: имя=значение</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>headers - format: name=value</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>Content-Type: text/html</value>
+                        </element>
+                    </elements>
+                </source>
+                <source>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Определяет тело или именованные параметры POST запроса.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Defines the body or named parameters of a POST request.</value>
+                        </entry>
+                    </description>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>1</count>
+                            <optional>true</optional>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Тело POST запроса, за место именованных параметров. может быть строкой или байтовым массивом.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>The body of the POST request, in place of the named parameters. can be a string or a byte array.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>hello world</value>
+                        </element>
+                        <element>
+                            <type>FOR</type>
+                            <countStatic>-1</countStatic>
+                            <optional>true</optional>
+                            <elements>
+                                <element>
+                                    <type>VALUE</type>
+                                    <count>-1</count>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>имя параметра. только если не указано тело.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>param name. only if no body is specified.</value>
+                                        </entry>
+                                    </description>
+                                    <valueType>STRING</valueType>
+                                </element>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>значение параметра. может быть строкой или байтовым массивом. только если не указано тело.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>param value. can be a string or a byte array. only if no body is specified.</value>
+                                        </entry>
+                                    </description>
+                                    <valueType>STRING</valueType>
+                                </element>
+                            </elements>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Код ответа.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Response code.</value>
+                        </entry>
+                    </description>
+                    <valueType>INTEGER</valueType>
+                    <value>200</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Если есть, то определяет количество заголовков.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>If there is, then determines the number of headers.</value>
+                        </entry>
+                    </description>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+                <element>
+                    <type>FOR</type>
+                    <countValueId>-1</countValueId>
+                    <optional>true</optional>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>заголовки - формат: имя=значение</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>headers - format: name=value</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>Content-Type: text/html</value>
+                        </element>
+                    </elements>
+                </element>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>тело ответа, если заголовок ContentType = text - то тип строка иначе байтовый массив.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>response body, if the header ContentType = text - then the type is a string, otherwise a byte array.</value>
+                        </entry>
+                    </description>
+                    <valueType>STRING</valueType>
+                    <value>response value</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <threadSafe>true</threadSafe>
 
@@ -168,7 +744,7 @@ format of incoming messages:
             number - number of parameters
             parameters - message pairs:
                 string - name
-                any type is a value. if there are values ​​with the BYTES type, the Multipart request format is used
+                any type is a value. if there are values with the BYTES type, the Multipart request format is used
         if one message (last) - it is used as a request body - any type
 response format:
     1 - number - response code

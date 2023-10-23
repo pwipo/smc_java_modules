@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Cycle</className>
-    <ver>1.2.2</ver>
-    <apiVer>1.0.0</apiVer>
-    <date>31-12-2020</date>
+    <ver>1.3.0</ver>
+    <apiVer>1.4.0</apiVer>
+    <date>22-10-2023</date>
 
     <defaultSettings>
         <value>
@@ -117,6 +117,8 @@ FOR_EACH_ALL - similar to FOR_EACH, but if the amount of remaining data is less 
             <validValues>
                 <value>NO_DATA</value>
                 <value>ANY_DATA</value>
+                <value>IS_TRUE</value>
+                <value>IS_FALSE</value>
             </validValues>
             <description>
                 <entry>
@@ -201,18 +203,55 @@ FLOATING - after the end of the cycle, falls asleep on the difference between sl
         </value>
     </defaultSettings>
 
-    <minCountSources>0</minCountSources>
-    <maxCountSources>-1</maxCountSources>
-
-    <minManagedExecutionContexts>1</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>-1</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
-
-    <typeResult>
-        <ValueType>INTEGER</ValueType>
-    </typeResult>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>1</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>-1</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <optional>true</optional>
+                    <valueType>STRING</valueType>
+                    <value>force stop cycle</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>LONG</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <description>
         <entry>

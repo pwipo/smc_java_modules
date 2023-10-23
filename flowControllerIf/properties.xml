@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.flowControllerIfInteger.IfInteger</className>
-    <ver>1.1.1</ver>
-    <apiVer>1.0.0</apiVer>
-    <date>31-12-2020</date>
+    <ver>1.2.0</ver>
+    <apiVer>1.4.0</apiVer>
+    <date>22-10-2023</date>
 
     <defaultSettings>
         <value>
@@ -67,6 +67,9 @@ The program is supplied as is. For problems arising during the operation or inst
                 <value>HAS_NUMBER</value>
                 <value>HAS_BYTES</value>
                 <value>HAS_OBJECT_ARRAY</value>
+                <value>IS_TRUE</value>
+                <value>IS_FALSE</value>
+                <value>HAS_BOOLEANS</value>
             </validValues>
             <value>NUMBER_EQUAL</value>
             <description>
@@ -90,6 +93,9 @@ HAS_STRING - true if there is at least one message of type STRING.
 HAS_NUMBER - true if there is at least one number message.
 HAS_BYTES - true if there is at least one message of type BYTES.
 HAS_OBJECT_ARRAY True if there is at least one message of type OBJECT_ARRAY.
+IS_TRUE - if there is at least one message of type BOOLEAN true.
+IS_FALSE - if there is at least one message of type BOOLEAN false or there are no messages.
+HAS_BOOLEANS - true if there is at least one message of type BOOLEAN.
                     </value>
                 </entry>
                 <entry>
@@ -112,6 +118,9 @@ HAS_STRING - правда, если есть хотя бы одно сообще
 HAS_NUMBER - правда, если есть хотя бы одно сообщение типа число.
 HAS_BYTES - правда, если есть хотя бы одно сообщение типа BYTES.
 HAS_OBJECT_ARRAY - правда, если есть хотя бы одно сообщение типа OBJECT_ARRAY.
+IS_TRUE - если есть хотя бы одно сообщение типа BOOLEAN true.
+IS_FALSE - если есть хотя бы одно сообщение типа BOOLEAN false или нет ни одного сообщения.
+HAS_BOOLEANS - правда, если есть хотя бы одно сообщение типа BOOLEAN.
                     </value>
                 </entry>
             </description>
@@ -190,14 +199,49 @@ HAS_OBJECT_ARRAY - правда, если есть хотя бы одно соо
         </value>
     </defaultSettings>
 
-    <minCountSources>1</minCountSources>
-    <maxCountSources>-1</maxCountSources>
-
-    <minManagedExecutionContexts>1</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>-1</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>1</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>-1</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <valueType>INTEGER</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <optional>true</optional>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <typeSource/>
 

@@ -10,6 +10,7 @@ import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.api.tools.execution.ExecutionContextTool;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -46,6 +47,7 @@ public class OrderingExecutor implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTools, ExecutionContextTool executionContextTool) throws ModuleException {
+        CommandType type = Objects.equals(executionContextTool.getType(), "default") ? this.type : CommandType.valueOf(executionContextTool.getType().toUpperCase());
         switch (type) {
             case START:
             case STOP:

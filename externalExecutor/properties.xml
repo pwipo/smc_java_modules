@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Executor</className>
-    <ver>1.0.1</ver>
-    <apiVer>1.0.0</apiVer>
-    <date>31-12-2020</date>
+    <ver>1.1.0</ver>
+    <apiVer>1.4.0</apiVer>
+    <date>23-10-2023</date>
 
     <defaultSettings>
         <value>
@@ -93,32 +93,97 @@ The program is supplied as is. For problems arising during the operation or inst
         </value>
     </defaultSettings>
 
-    <minCountSources>0</minCountSources>
-    <maxCountSources>-1</maxCountSources>
-
-    <minManagedExecutionContexts>0</minManagedExecutionContexts>
-    <maxManagedExecutionContexts>0</maxManagedExecutionContexts>
-
-    <minManagedConfigurations>0</minManagedConfigurations>
-    <maxManagedConfigurations>0</maxManagedConfigurations>
-
-    <typeSource>
-        <ValueType>BYTE</ValueType>
-        <ValueType>SHORT</ValueType>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>LONG</ValueType>
-        <ValueType>BIG_INTEGER</ValueType>
-        <ValueType>FLOAT</ValueType>
-        <ValueType>DOUBLE</ValueType>
-        <ValueType>BIG_DECIMAL</ValueType>
-        <ValueType>STRING</ValueType>
-        <ValueType>BYTES</ValueType>
-    </typeSource>
-
-    <typeResult>
-        <ValueType>INTEGER</ValueType>
-        <ValueType>STRING</ValueType>
-    </typeResult>
+    <types>
+        <type>
+            <type>default</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Контекст исполнения по умолчанию.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default execution context.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>-1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element>
+                            <type>FOR</type>
+                            <countStatic>-1</countStatic>
+                            <elements>
+                                <element>
+                                    <type>VALUE</type>
+                                    <count>1</count>
+                                    <valueType>STRING</valueType>
+                                    <value>/path/to/prog</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>Путь к исполняемому файлу.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>Path to the executable file.</value>
+                                        </entry>
+                                    </description>
+                                </element>
+                                <element>
+                                    <type>VALUE_ANY</type>
+                                    <count>-1</count>
+                                    <valueType>INTEGER</valueType>
+                                    <value>1</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>Параметры.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>Params.</value>
+                                        </entry>
+                                    </description>
+                                </element>
+                            </elements>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>0</value>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Код завершения, 0-нормальное завершение.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Exit code, 0 is normal exit.</value>
+                        </entry>
+                    </description>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <valueType>STRING</valueType>
+                    <value>response</value>
+                </element>
+            </output>
+        </type>
+    </types>
 
     <threadSafe>true</threadSafe>
 

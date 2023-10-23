@@ -62,6 +62,7 @@ public class DB implements Module {
         OBJECT_SERIALIZATION,
         OBJECT,
         OBJECT_WITHOUT_NULL,
+        OBJECT_WITH_NULL_AND_BOOLEAN,
     }
 
     private ResultFormat resultFormat;
@@ -205,62 +206,79 @@ public class DB implements Module {
 
     @Override
     public void process(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool) throws ModuleException {
-        ModuleUtils.processMessages(externalConfigurationTool, externalExecutionContextTool, (id, messages) -> {
-            OperationType operationType = OperationType.values()[ModuleUtils.getNumber(messages.poll()).intValue() - 1];
-            switch (operationType) {
-                case EXECUTE_IN_ONE_TRANSACTION:
-                    execute(externalConfigurationTool, externalExecutionContextTool, messages, true, false);
-                    break;
-                case BEGIN_EXTERNAL_TRANSACTION:
-                    startConnectionWithTransaction(externalExecutionContextTool);
-                    break;
-                case END_AND_COMMIT_EXTERNAL_TRANSACTION:
-                    commitAndStopConnection(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue());
-                    break;
-                case END_AND_ROLLBACK_EXTERNAL_TRANSACTION:
-                    rollbackAndStopConnection(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue());
-                    break;
-                case EXECUTE_IN_EXTERNAL_TRANSACTION:
-                    executeInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false);
-                    break;
-                case EXECUTE_EACH_IN_OWN_TRANSACTION:
-                    execute(externalConfigurationTool, externalExecutionContextTool, messages, false, false);
-                    break;
-                case EXECUTE_WITH_PARAMS_IN_ONE_TRANSACTION:
-                    executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, false, false);
-                    break;
-                case EXECUTE_WITH_PARAMS_IN_EXTERNAL_TRANSACTION:
-                    executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false, false);
-                    break;
-                case EXECUTE_WITH_PARAMS_ARRAY_IN_ONE_TRANSACTION:
-                    executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, true, false);
-                    break;
-                case EXECUTE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION:
-                    executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true, false);
-                    break;
-                case EXECUTE_UPDATE_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY:
-                    execute(externalConfigurationTool, externalExecutionContextTool, messages, true, true);
-                    break;
-                case EXECUTE_UPDATE_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY:
-                    executeInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true);
-                    break;
-                case EXECUTE_UPDATE_EACH_IN_OWN_TRANSACTION_RETURN_GENERATED_KEY:
-                    execute(externalConfigurationTool, externalExecutionContextTool, messages, false, true);
-                    break;
-                case EXECUTE_UPDATE_WITH_PARAMS_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY:
-                    executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, false, true);
-                    break;
-                case EXECUTE_UPDATE_WITH_PARAMS_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY:
-                    executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false, true);
-                    break;
-                case EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY:
-                    executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, true, true);
-                    break;
-                case EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY:
-                    executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true, true);
-                    break;
-            }
-        });
+        if (externalExecutionContextTool.getType().equals("default")) {
+            ModuleUtils.processMessages(externalConfigurationTool, externalExecutionContextTool, (id, messages) -> {
+                OperationType operationType = OperationType.values()[ModuleUtils.getNumber(messages.poll()).intValue() - 1];
+                process(externalConfigurationTool, externalExecutionContextTool, operationType, messages);
+            });
+        } else {
+            ModuleUtils.getLastActionWithData(externalExecutionContextTool.getMessages(0)).map(a -> new LinkedList<>(a.getMessages())).ifPresent(messages -> {
+                OperationType operationType = OperationType.valueOf(externalExecutionContextTool.getType().toUpperCase());
+                try {
+                    process(externalConfigurationTool, externalExecutionContextTool, operationType, messages);
+                } catch (Exception e) {
+                    externalExecutionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
+                    externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+                }
+            });
+        }
+    }
+
+    private void process(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, OperationType operationType, LinkedList<IMessage> messages) throws Exception {
+        switch (operationType) {
+            case EXECUTE_IN_ONE_TRANSACTION:
+                execute(externalConfigurationTool, externalExecutionContextTool, messages, true, false);
+                break;
+            case BEGIN_EXTERNAL_TRANSACTION:
+                startConnectionWithTransaction(externalExecutionContextTool);
+                break;
+            case END_AND_COMMIT_EXTERNAL_TRANSACTION:
+                commitAndStopConnection(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue());
+                break;
+            case END_AND_ROLLBACK_EXTERNAL_TRANSACTION:
+                rollbackAndStopConnection(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue());
+                break;
+            case EXECUTE_IN_EXTERNAL_TRANSACTION:
+                executeInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false);
+                break;
+            case EXECUTE_EACH_IN_OWN_TRANSACTION:
+                execute(externalConfigurationTool, externalExecutionContextTool, messages, false, false);
+                break;
+            case EXECUTE_WITH_PARAMS_IN_ONE_TRANSACTION:
+                executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, false, false);
+                break;
+            case EXECUTE_WITH_PARAMS_IN_EXTERNAL_TRANSACTION:
+                executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false, false);
+                break;
+            case EXECUTE_WITH_PARAMS_ARRAY_IN_ONE_TRANSACTION:
+                executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, true, false);
+                break;
+            case EXECUTE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION:
+                executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true, false);
+                break;
+            case EXECUTE_UPDATE_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY:
+                execute(externalConfigurationTool, externalExecutionContextTool, messages, true, true);
+                break;
+            case EXECUTE_UPDATE_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY:
+                executeInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true);
+                break;
+            case EXECUTE_UPDATE_EACH_IN_OWN_TRANSACTION_RETURN_GENERATED_KEY:
+                execute(externalConfigurationTool, externalExecutionContextTool, messages, false, true);
+                break;
+            case EXECUTE_UPDATE_WITH_PARAMS_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY:
+                executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, false, true);
+                break;
+            case EXECUTE_UPDATE_WITH_PARAMS_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY:
+                executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false, true);
+                break;
+            case EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY:
+                executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, true, true);
+                break;
+            case EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY:
+                executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true, true);
+                break;
+        }
+
     }
 
     @Override
@@ -507,52 +525,56 @@ public class DB implements Module {
                                     }
                                     // String parameterClassName = parameterMetaData.getParameterClassName(j);
                                     Object value = f.getValue();
-                                    if (ModuleUtils.isString(f) && ModuleUtils.getString(f).equals("NULL")) {
-                                        stm.setNull(j, parameterType);
-                                        // System.out.println(f);
-                                    } else if (ModuleUtils.isObjectArray(f)) {
-                                        ObjectArray objectArrayValue = ModuleUtils.getObjectArray(f);
-                                        if (objectArrayValue.isSimple()) {
-                                            Array array;
-                                            if (objectArrayValue.getType() != ObjectType.VALUE_ANY && ModuleUtils.isArrayContainNumber(objectArrayValue)) {
-                                                if (objectArrayValue.getType() == ObjectType.FLOAT || objectArrayValue.getType() == ObjectType.DOUBLE || objectArrayValue.getType() == ObjectType.BIG_DECIMAL) {
-                                                    List<Float> lst = new ArrayList<>(objectArrayValue.size());
-                                                    for (int k = 0; k < objectArrayValue.size(); k++)
-                                                        lst.add(((Number) objectArrayValue.get(k)).floatValue());
-                                                    array = stm.getConnection().createArrayOf("FLOAT", lst.toArray());
-                                                } else {
-                                                    List<Long> lst = new ArrayList<>(objectArrayValue.size());
-                                                    for (int k = 0; k < objectArrayValue.size(); k++)
-                                                        lst.add(((Number) objectArrayValue.get(k)).longValue());
-                                                    array = stm.getConnection().createArrayOf("BIGINT", lst.toArray());
-                                                }
-                                            } else {
-                                                List<String> lst = new ArrayList<>(objectArrayValue.size());
-                                                for (int k = 0; k < objectArrayValue.size(); k++)
-                                                    lst.add(objectArrayValue.get(k).toString());
-                                                array = stm.getConnection().createArrayOf("VARCHAR", lst.toArray());
-                                            }
-                                            stm.setArray(j, array);
-                                        } else {
+                                    if (value != null) {
+                                        if (ModuleUtils.isString(f) && ModuleUtils.getString(f).equals("NULL")) {
                                             stm.setNull(j, parameterType);
+                                            // System.out.println(f);
+                                        } else if (ModuleUtils.isObjectArray(f)) {
+                                            ObjectArray objectArrayValue = ModuleUtils.getObjectArray(f);
+                                            if (objectArrayValue.isSimple()) {
+                                                Array array;
+                                                if (objectArrayValue.getType() != ObjectType.VALUE_ANY && ModuleUtils.isArrayContainNumber(objectArrayValue)) {
+                                                    if (objectArrayValue.getType() == ObjectType.FLOAT || objectArrayValue.getType() == ObjectType.DOUBLE || objectArrayValue.getType() == ObjectType.BIG_DECIMAL) {
+                                                        List<Float> lst = new ArrayList<>(objectArrayValue.size());
+                                                        for (int k = 0; k < objectArrayValue.size(); k++)
+                                                            lst.add(((Number) objectArrayValue.get(k)).floatValue());
+                                                        array = stm.getConnection().createArrayOf("FLOAT", lst.toArray());
+                                                    } else {
+                                                        List<Long> lst = new ArrayList<>(objectArrayValue.size());
+                                                        for (int k = 0; k < objectArrayValue.size(); k++)
+                                                            lst.add(((Number) objectArrayValue.get(k)).longValue());
+                                                        array = stm.getConnection().createArrayOf("BIGINT", lst.toArray());
+                                                    }
+                                                } else {
+                                                    List<String> lst = new ArrayList<>(objectArrayValue.size());
+                                                    for (int k = 0; k < objectArrayValue.size(); k++)
+                                                        lst.add(objectArrayValue.get(k).toString());
+                                                    array = stm.getConnection().createArrayOf("VARCHAR", lst.toArray());
+                                                }
+                                                stm.setArray(j, array);
+                                            } else {
+                                                stm.setNull(j, parameterType);
+                                            }
+                                        } else {
+                                            switch (parameterType) {
+                                                case Types.BOOLEAN:
+                                                    value = toBoolean(f);
+                                                    break;
+                                                case Types.TIMESTAMP:
+                                                    value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new Timestamp(toLong(f)) : f.getValue();
+                                                    break;
+                                                case Types.DATE:
+                                                    value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new java.sql.Date(toLong(f)) : f.getValue();
+                                                    break;
+                                                case Types.TIME:
+                                                    value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new Time(toLong(f)) : f.getValue();
+                                                    break;
+                                            }
+                                            stm.setObject(j, value);
+                                            // System.out.println(j + " " + f.getName() + " " + parameterType + " " + parameterClassName + " " + value);
                                         }
                                     } else {
-                                        switch (parameterType) {
-                                            case Types.BOOLEAN:
-                                                value = toBoolean(f);
-                                                break;
-                                            case Types.TIMESTAMP:
-                                                value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new Timestamp(toLong(f)) : f.getValue();
-                                                break;
-                                            case Types.DATE:
-                                                value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new java.sql.Date(toLong(f)) : f.getValue();
-                                                break;
-                                            case Types.TIME:
-                                                value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new Time(toLong(f)) : f.getValue();
-                                                break;
-                                        }
-                                        stm.setObject(j, value);
-                                        // System.out.println(j + " " + f.getName() + " " + parameterType + " " + parameterClassName + " " + value);
+                                        stm.setNull(j, parameterType);
                                     }
                                 } else {
                                     stm.setObject(j, f.getValue());
@@ -731,6 +753,8 @@ public class DB implements Module {
     private boolean toBoolean(ObjectField field) {
         if (ModuleUtils.isString(field)) {
             return BooleanUtils.toBoolean(ModuleUtils.getString(field));
+        } else if (ModuleUtils.isBoolean(field)) {
+            return (Boolean) field.getValue();
         } else if (ModuleUtils.isBytes(field)) {
             return false;
         } else if (ModuleUtils.isNumber(field)) {
@@ -781,16 +805,31 @@ public class DB implements Module {
                 // externalExecutionContextTool.addMessage(column_name);
                 Object value;
                 int columnType = rsmd.getColumnType(i);
+                ObjectType fieldType;
                 if (columnType == java.sql.Types.ARRAY) {
                     // externalExecutionContextTool.addMessage(ValueType.BYTES, rs.getArray(column_name));
                     // externalExecutionContextTool.addMessage(convertNull(rs.getObject(column_name)).toString());
-                    value = convertNull(rs.getObject(column_name)).toString();
+                    fieldType = ObjectType.STRING;
+                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
+                        value = convertNull(rs.getObject(column_name)).toString();
+                    } else {
+                        value = rs.getObject(column_name);
+                        if (value != null)
+                            value = value.toString();
+                    }
                 } else if (columnType == java.sql.Types.BIGINT) {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
+                    fieldType = ObjectType.LONG;
                     value = rs.getLong(column_name);
                 } else if (columnType == java.sql.Types.BOOLEAN) {
                     // externalExecutionContextTool.addMessage(BooleanUtils.toStringTrueFalse(rs.getBoolean(column_name)));
-                    value = BooleanUtils.toStringTrueFalse(rs.getBoolean(column_name));
+                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
+                        fieldType = ObjectType.STRING;
+                        value = BooleanUtils.toStringTrueFalse(rs.getBoolean(column_name));
+                    } else {
+                        fieldType = ObjectType.BOOLEAN;
+                        value = rs.getBoolean(column_name);
+                    }
                 } else if (columnType == java.sql.Types.BLOB) {
                     /*
                     Blob blob = rs.getBlob("SomeDatabaseField");
@@ -799,50 +838,95 @@ public class DB implements Module {
                     blob.free();
                     */
                     // externalExecutionContextTool.addMessage(convertNull(rs.getBytes(column_name)));
-                    value = convertNull(rs.getBytes(column_name));
+                    fieldType = ObjectType.BYTES;
+                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
+                        value = convertNull(rs.getBytes(column_name));
+                    } else {
+                        value = rs.getBytes(column_name);
+                    }
                 } else if (columnType == java.sql.Types.CLOB) {
                     Clob clob = rs.getClob(i);
                     // externalExecutionContextTool.addMessage(convertNull(clob != null && clob.length() > 0 ? IOUtils.toString(clob.getCharacterStream()) : null));
-                    value = convertNull(clob != null && clob.length() > 0 ? IOUtils.toString(clob.getCharacterStream()) : null);
+                    fieldType = ObjectType.STRING;
+                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
+                        value = convertNull(clob != null && clob.length() > 0 ? IOUtils.toString(clob.getCharacterStream()) : null);
+                    } else {
+                        value = clob != null && clob.length() > 0 ? IOUtils.toString(clob.getCharacterStream()) : null;
+                    }
                 } else if (columnType == java.sql.Types.DOUBLE) {
                     // externalExecutionContextTool.addMessage(rs.getDouble(column_name));
+                    fieldType = ObjectType.DOUBLE;
                     value = rs.getDouble(column_name);
                 } else if (columnType == java.sql.Types.FLOAT) {
                     // externalExecutionContextTool.addMessage(rs.getFloat(column_name));
+                    fieldType = ObjectType.FLOAT;
                     value = rs.getFloat(column_name);
                 } else if (columnType == java.sql.Types.INTEGER) {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
+                    fieldType = ObjectType.INTEGER;
                     value = rs.getInt(column_name);
                 } else if (columnType == Types.DECIMAL) {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
+                    fieldType = ObjectType.BIG_DECIMAL;
                     value = rs.getBigDecimal(column_name);
                 } else if (columnType == java.sql.Types.NVARCHAR) {
                     // externalExecutionContextTool.addMessage(convertNull(rs.getNString(column_name)));
-                    value = convertNull(rs.getNString(column_name));
+                    fieldType = ObjectType.STRING;
+                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
+                        value = convertNull(rs.getNString(column_name));
+                    } else {
+                        value = rs.getNString(column_name);
+                    }
                 } else if (columnType == java.sql.Types.VARCHAR) {
                     // externalExecutionContextTool.addMessage(convertNull(rs.getString(column_name)));
-                    value = convertNull(rs.getString(column_name));
+                    fieldType = ObjectType.STRING;
+                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
+                        value = convertNull(rs.getString(column_name));
+                    } else {
+                        value = rs.getString(column_name);
+                    }
                 } else if (columnType == java.sql.Types.TINYINT) {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
+                    fieldType = ObjectType.SHORT;
                     value = rs.getShort(column_name);
                 } else if (columnType == java.sql.Types.SMALLINT) {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
+                    fieldType = ObjectType.SHORT;
                     value = rs.getShort(column_name);
                 } else if (columnType == java.sql.Types.DATE) {
                     Date date = rs.getDate(column_name);
                     // externalExecutionContextTool.addMessage(date != null ? date.getTime() : "NULL");
-                    value = date != null ? date.getTime() : "NULL";
+                    fieldType = ObjectType.LONG;
+                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
+                        value = date != null ? date.getTime() : "NULL";
+                    } else {
+                        value = date != null ? date.getTime() : null;
+                    }
                 } else if (columnType == java.sql.Types.TIMESTAMP) {
                     Timestamp timestamp = rs.getTimestamp(column_name);
                     // externalExecutionContextTool.addMessage(timestamp != null ? timestamp.getTime() : "NULL");
-                    value = timestamp != null ? timestamp.getTime() : "NULL";
+                    fieldType = ObjectType.LONG;
+                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
+                        value = timestamp != null ? timestamp.getTime() : "NULL";
+                    } else {
+                        value = timestamp != null ? timestamp.getTime() : null;
+                    }
                 } else {
                     // externalExecutionContextTool.addMessage(convertNull(rs.getObject(column_name)).toString());
-                    value = convertNull(rs.getObject(column_name)).toString();
+                    fieldType = ObjectType.STRING;
+                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
+                        value = convertNull(rs.getObject(column_name)).toString();
+                    } else {
+                        value = rs.getObject(column_name);
+                        if (value != null)
+                            value = value.toString();
+                    }
                     // externalConfigurationTool.loggerInfo(column_name + " " + columnType + " " + rsmd.getColumnClassName(i) + value);
                 }
-                if (resultFormat != ResultFormat.OBJECT_WITHOUT_NULL || !rs.wasNull())
-                    objectElement.getFields().add(new ObjectField(resultSetColumnNameToUpperCase ? column_name.toUpperCase() : column_name, ModuleUtils.getObjectType(value), value));
+                if (rs.wasNull())
+                    value = !rs.wasNull() ? value : null;
+                if (resultFormat != ResultFormat.OBJECT_WITHOUT_NULL || value != null)
+                    objectElement.getFields().add(new ObjectField(resultSetColumnNameToUpperCase ? column_name.toUpperCase() : column_name, fieldType, value));
             }
             objectArray.add(objectElement);
         }

@@ -275,6 +275,85 @@ Each object is a separate virtual server. The fields of the object correspond to
                 </entry>
             </description>
         </value>
+        <value>
+            <name>requestType</name>
+            <type>STRING</type>
+            <validValues>
+                <value>LIST</value>
+                <value>OBJECT</value>
+            </validValues>
+            <value>LIST</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>the type of request format that is created by the module for each external request and which is passed to the corresponding context. format:
+LIST - list of simple values:
+     1 - line - method
+     2 - line - URL address
+     3 - line - client address
+     4 - line - session ID
+     5 - number - number of parameters (get and post)
+     6 and further parameters (format key=value)
+     number - number of headers
+     lines - headers (format key=value),
+     Further
+         for multipart request (only for post request):
+             number - number of parts
+             further in iteration:
+                 number - the number of headers of a piece of data
+                 headers of a piece of data (format key=value)
+                 byte array - the data itself.
+         otherwise - a byte array - the body of the request.
+OBJECT - in the form of OBJECT_ARRAY containing 1 object, which contains the following fields:
+     method - string - method
+     uri - string - URL address
+     remoteAddr - string - client address
+     sessionId - string - session ID
+     params - an object with fields for each parameter
+     headers - an object with fields for each header
+     data:
+         if the type is multipart - an array of objects, each of which contains fields:
+             headers - an object with fields for each header
+             data - byte array - contains the data itself.
+         otherwise, a byte array contains the data itself.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>тип формата запроса, который создается модулем на каждый внешний запрос и который передается соответствующему контексту. формат:
+LIST - список простых значений:
+    1 - строка - метод
+    2 - строка - URL адрес
+    3 - строка - адрес клиента
+    4 - строка - ид сессии
+    5 - число - количество параметров (get и post)
+    6 и далее параметры (формат ключ=значение)
+    число - количестово заголовков
+    строки - заголовки (формат ключ=значение),
+    далее
+        для multipart запроса (только для post запроса):
+            число - количестово частей
+            далее в итерации:
+                число - количестово заголовков куска данных
+                заголовки куска данных (формат ключ=значение)
+                байтовый массив - сами данные.
+        иначе - байтовый массив - тело запроса.
+OBJECT - в виде OBJECT_ARRAY содержащем 1 объект, в котором содержаться поля:
+    method - строка - метод
+    uri - строка - URL адрес
+    remoteAddr - строка - адрес клиента
+    sessionId - строка - ид сессии
+    params - объект с полями для каждого параметра
+    headers - объект с полями для каждого заголовка
+    data:
+        если тип - multipart - массив объектов, каждый из которых содержит поля:
+            headers - объект с полями для каждого заголовка
+            data - байтовый массив - содержит сами данные.
+        иначе - байтовый массив - содержит сами данные.
+                    </value>
+                </entry>
+            </description>
+        </value>
     </defaultSettings>
 
     <types>
@@ -335,34 +414,19 @@ if there are no sources. regarded as a stop command.
 if the HTTPS protocol is used, it is necessary to load the key (RSA) into the working directory of the configuration.
 you can also use the virtual servers mode (VIRTUAL). in this case, you can set your own settings for each server loco.
 command to generate: keytool -genkeypair -keyalg RSA -alias self_signed -keypass simulator -keystore lic.key -storepass pass
-    response format:
-        1 - number - message response code,
-        the rest except the last - strings - headers in the format key = value,
-        the last is a byte array or string is the response body.
-    request format:
-        1 - string - method
-        2 - string - URL
-        3 - string - customer address
-        4 - string - session id
-        5 - number - number of parameters (get and post)
-        6 and further parameters (key = value format)
-        number - number of headers
-        strings - headers (key = value format),
-        Further
-            for a multipart request (only for a post request):
-                number - the count of parts
-                further in iteration:
-                    number - the number of headers of the data piece
-                    chunk headers (format key = value)
-                    byte array - the data itself.
-                else - byte array - request body.
+
+response format:
+    1 - number - message response code,
+    the rest except the last - strings - headers in the format key = value,
+    the last is a byte array or string is the response body.
+The request format depends on the requestType setting. a description of the format is described there.
             </value>
         </entry>
         <entry>
             <key>ru</key>
             <value>Модуль предоставляет функцилональность веб сервера.
 если есть контексты исполнения, запускается. прослушавает указанное соединение. при поступлении запроса,
-если список разрешенных адресов не пуст и если указаннй путь находится в списке разрешенных, то запускается только контекст находящийся на тойжке позиции в списке.
+если список разрешенных адресов не пуст и если указаннй путь находится в списке разрешенных, то запускается только контекст находящийся на той же позиции в списке.
 если список разрешенных адресов пуст, последовательно запускает все контексты исполнения.
 контексты запускаются с данными запроса в качестве подставного последнего набора данных от сервера. поэтому у запускаемых должен быть настроен источник на сервер
 (аналог вызова функции). после исполнения, данные от последнего исполненго контекста (если запускалось несколько) используются в качестве ответа.
@@ -370,27 +434,12 @@ command to generate: keytool -genkeypair -keyalg RSA -alias self_signed -keypass
 если используется протокол HTTPS, необходимо в рабочую директорию конфигурации загрузить ключ (RSA).
 так же можно использовать режимвиртуальных серверов (VIRTUAL). в этом случае для каждлоко сервера можно выставить свои настройки.
 команда для генерации: keytool -genkeypair -keyalg RSA -alias self_signed -keypass simulator -keystore lic.key -storepass simulator
-    формат ответа:
-        1 - число - сообщение код ответа,
-        остальные кроме последнего - строки - заголовки в формате ключ=значение,
-        последнее - байтовоый массив или строка - тело ответа.
-    формат запроса:
-        1 - строка - метод
-        2 - строка - URL адрес
-        3 - строка - адрес клиента
-        4 - строка - ид сессии
-        5 - число - количество параметров (get и post)
-        6 и далее параметры (формат ключ=значение)
-        число - количестово заголовков
-        строки - заголовки (формат ключ=значение),
-        далее
-            для multipart запроса (только для post запроса):
-                число - количестово частей
-                далее в итерации:
-                    число - количестово заголовков куска данных
-                    заголовки куска данных (формат ключ=значение)
-                    байтовый массив - сами данные.
-            иначе - байтовый массив - тело запроса.
+
+формат ответа:
+    1 - число - сообщение код ответа,
+    остальные кроме последнего - строки - заголовки в формате ключ=значение,
+    последнее - байтовоый массив или строка - тело ответа.
+формат запроса зависит от настройки requestType. описание формата описано в ней.
             </value>
         </entry>
     </help>

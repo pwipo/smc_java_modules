@@ -51,6 +51,7 @@ public class ServerTest {
         settings.put("maxPostSize", new Value(10485760));
         settings.put("allowMultipartParsing", new Value("true"));
         settings.put("virtualServerSettings", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
+        settings.put("requestType", new Value("LIST"));
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -198,6 +199,7 @@ public class ServerTest {
         settings.put("maxPostSize", new Value(10485760));
         settings.put("allowMultipartParsing", new Value("true"));
         settings.put("virtualServerSettings", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
+        settings.put("requestType", new Value("OBJECT"));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -267,6 +269,7 @@ public class ServerTest {
         settings.put("maxPostSize", new Value(10485760));
         settings.put("allowMultipartParsing", new Value("true"));
         settings.put("virtualServerSettings", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
+        settings.put("requestType", new Value("OBJECT"));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -368,6 +371,7 @@ public class ServerTest {
         settings.put("maxPostSize", new Value(10485760));
         settings.put("allowMultipartParsing", new Value("true"));
         settings.put("virtualServerSettings", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
+        settings.put("requestType", new Value("OBJECT"));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -462,6 +466,7 @@ public class ServerTest {
         settings.put("sessionTimeout", new Value(30));
         settings.put("maxPostSize", new Value(10485760));
         settings.put("allowMultipartParsing", new Value("true"));
+        settings.put("requestType", new Value("OBJECT"));
         settings.put("virtualServerSettings", new Value(new ObjectArray(
                 new ObjectElement(
                         new ObjectField("protocol", "HTTP")
@@ -520,6 +525,8 @@ public class ServerTest {
                 null,
                 List.of(
                         list -> {
+                            System.out.println("func1");
+                            System.out.println(list);
                             return new Action(
                                     List.of(
                                             new Message(MessageType.DATA, new Date(), new Value(200))
@@ -528,6 +535,8 @@ public class ServerTest {
                                     ActionType.EXECUTE);
                         },
                         list -> {
+                            System.out.println("func2");
+                            System.out.println(list);
                             return new Action(
                                     List.of(
                                             new Message(MessageType.DATA, new Date(), new Value(200))
@@ -536,6 +545,8 @@ public class ServerTest {
                                     ActionType.EXECUTE);
                         },
                         list -> {
+                            System.out.println("func3");
+                            System.out.println(list);
                             return new Action(
                                     List.of(
                                             new Message(MessageType.DATA, new Date(), new Value(200))
@@ -565,7 +576,7 @@ public class ServerTest {
 
         System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "http://localhost:8080/hello"));
         System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "https://localhost:8081/test"));
-        System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "https://service.smcsystem.ru:8082/store"));
+        // System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "https://service.smcsystem.ru:8082/store"));
 
         ExecutionContextToolImpl executionContextTool2 = new ExecutionContextToolImpl(null, null, null);
         process.execute(executionContextTool2);

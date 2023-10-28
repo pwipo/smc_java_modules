@@ -16,7 +16,9 @@ import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import ru.smcsystem.api.dto.IValue;
 import ru.smcsystem.api.dto.ObjectArray;
 import ru.smcsystem.api.dto.ObjectElement;
+import ru.smcsystem.api.dto.ObjectField;
 import ru.smcsystem.api.enumeration.CommandType;
+import ru.smcsystem.api.enumeration.ObjectType;
 import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
@@ -52,6 +54,11 @@ public class Server implements Module {
         VIRTUAL
     }
 
+    public enum RequestType {
+        LIST,
+        OBJECT
+    }
+
     // private AtomicLong requestCounter;
 
     private Map<Long, Exchanger<List<Object>>> requestMap;
@@ -61,6 +68,7 @@ public class Server implements Module {
     private volatile Tomcat tomcat;
     private Map<String, VirtualServerInfo> virtualServerInfoMap;
     private Protocol protocol;
+    private RequestType requestType;
 
     @Override
     public void start(ConfigurationTool externalConfigurationTool) throws ModuleException {
@@ -82,6 +90,7 @@ public class Server implements Module {
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.toList());
         ObjectArray virtualServerSettings = (ObjectArray) externalConfigurationTool.getSetting("virtualServerSettings").orElseThrow(() -> new ModuleException("virtualServerSettings setting")).getValue();
+        requestType = RequestType.valueOf((String) externalConfigurationTool.getSetting("requestType").orElseThrow(() -> new ModuleException("requestType setting")).getValue());
 
         virtualServerInfoMap = new HashMap<>();
         if (protocol == Protocol.VIRTUAL) {
@@ -103,6 +112,7 @@ public class Server implements Module {
                 Integer sessionTimeoutVar = objectElement.findField("sessionTimeout").map(ModuleUtils::getNumber).map(Number::intValue).orElse(sessionTimeout);
                 Integer maxPostSizeVar = objectElement.findField("maxPostSize").map(ModuleUtils::getNumber).map(Number::intValue).orElse(maxPostSize);
                 Boolean allowMultipartParsingVar = objectElement.findField("allowMultipartParsing").map(ModuleUtils::getString).map(Boolean::parseBoolean).orElse(allowMultipartParsing);
+                RequestType requestTypeVar = objectElement.findField("requestType").map(ModuleUtils::getString).map(RequestType::valueOf).orElse(requestType);
                 URL url = null;
                 try {
                     url = new URL(protocolVar.name().toLowerCase(), hostname, portVar, "");
@@ -121,7 +131,9 @@ public class Server implements Module {
                         paths.put(j, path.substring(urlHeader.length()));
                     }
                 }
-                VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, urlHeader, url, keyStoreFileNameVar, keyStorePassVar, keyAliasVar, keyPassVar, strAddressVar, paths, requestTimeoutVar, countThreadsVar, backlogVar, sessionTimeoutVar, maxPostSizeVar, allowMultipartParsingVar);
+                VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, urlHeader, url, keyStoreFileNameVar, keyStorePassVar,
+                        keyAliasVar, keyPassVar, strAddressVar, paths, requestTimeoutVar, countThreadsVar, backlogVar, sessionTimeoutVar, maxPostSizeVar,
+                        allowMultipartParsingVar, requestTypeVar);
                 virtualServerInfoMap.put(virtualServerInfo.getUrlHeader(), virtualServerInfo);
             }
         } else {
@@ -131,7 +143,9 @@ public class Server implements Module {
                 Stream.iterate(0, n -> n + 1)
                         .limit(availablePathsList.size())
                         .forEach(id -> paths.put(id, availablePathsList.get(id)));
-                VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, hostname, new URL(protocol.name().toLowerCase(), hostname, port, ""), keyStoreFileName, keyStorePass, keyAlias, keyPass, strAddress, paths, requestTimeout, countThreads, backlog, sessionTimeout, maxPostSize, allowMultipartParsing);
+                VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, hostname, new URL(protocol.name().toLowerCase(), hostname, port, ""),
+                        keyStoreFileName, keyStorePass, keyAlias, keyPass, strAddress, paths, requestTimeout, countThreads, backlog, sessionTimeout,
+                        maxPostSize, allowMultipartParsing, requestType);
                 virtualServerInfoMap = Map.of(virtualServerInfo.getUrlHeader(), virtualServerInfo);
             } catch (Exception e) {
                 throw new ModuleException("error", e);
@@ -143,7 +157,11 @@ public class Server implements Module {
         newRequests = new LinkedList<>();
     }
 
-    private VirtualServerInfo buildVirtualInfo(ConfigurationTool externalConfigurationTool, String urlOrigin, URL url, String keyStoreFileName, String keyStorePass, String keyAlias, String keyPass, String strAddress, Map<Integer, String> paths, Integer requestTimeout, Integer countThreads, Integer backlog, Integer sessionTimeout, Integer maxPostSize, Boolean allowMultipartParsing) {
+    private VirtualServerInfo buildVirtualInfo(ConfigurationTool externalConfigurationTool, String urlOrigin, URL url,
+                                               String keyStoreFileName, String keyStorePass, String keyAlias, String keyPass,
+                                               String strAddress, Map<Integer, String> paths, Integer requestTimeout, Integer countThreads,
+                                               Integer backlog, Integer sessionTimeout, Integer maxPostSize, Boolean allowMultipartParsing,
+                                               RequestType requestTypeVar) {
         File keyStore = null;
         if (StringUtils.isNotBlank(keyStoreFileName)) {
             keyStore = new File(externalConfigurationTool.getWorkDirectory(), keyStoreFileName);
@@ -163,7 +181,8 @@ public class Server implements Module {
                     .filter(e -> StringUtils.isNotBlank(e.getValue()))
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> Pattern.compile(e.getValue())));
         }
-        return new VirtualServerInfo(urlOrigin, url, keyStore, keyStorePass, keyAlias, keyPass, address, patterns, requestTimeout, countThreads, backlog, sessionTimeout, maxPostSize, allowMultipartParsing);
+        return new VirtualServerInfo(urlOrigin, url, keyStore, keyStorePass, keyAlias, keyPass, address, patterns,
+                requestTimeout, countThreads, backlog, sessionTimeout, maxPostSize, allowMultipartParsing, requestTypeVar);
     }
 
     @Override
@@ -319,7 +338,7 @@ public class Server implements Module {
                     }
                     int idForGetResponse = idsForExecute.get(idsForExecute.size() - 1);
 
-                    List<Object> request = createRequest(req);
+                    List<Object> request = createRequest(req, virtualServerInfo.getRequestType());
                     long threadId = externalExecutionContextTool.getFlowControlTool().executeParallel(
                             CommandType.EXECUTE,
                             idsForExecute,
@@ -413,22 +432,16 @@ public class Server implements Module {
         }
     }
 
-    private List<Object> createRequest(HttpServletRequest req) throws IOException, ServletException {
+    private List<Object> createRequest(HttpServletRequest req, RequestType requestType) throws IOException, ServletException {
         List<Object> request = new LinkedList<>();
-        request.add(req.getMethod());
-        request.add(req.getRequestURI());
-        request.add(req.getRemoteAddr());
-        request.add(req.getSession().getId());
 
-        List<String> parameters = new LinkedList<>();
+        List<Map.Entry<String, String>> parameters = new LinkedList<>();
         req.getParameterMap().forEach((key, value) -> {
             if (value == null)
                 return;
             for (String aValue : value)
-                parameters.add(key + "=" + aValue);
+                parameters.add(Map.entry(key, aValue));
         });
-        request.add(parameters.size());
-        request.addAll(parameters);
 
         Map<String, String> mainHeaders = new HashMap<>();
         Enumeration<String> headerNames = req.getHeaderNames();
@@ -436,29 +449,86 @@ public class Server implements Module {
             String headerName = headerNames.nextElement();
             mainHeaders.put(headerName, req.getHeader(headerName));
         }
-        request.add(mainHeaders.size());
-        mainHeaders.forEach((k, v) -> request.add(k + "=" + v));
 
-        if (ServletFileUpload.isMultipartContent(req)) {
-            request.add(req.getParts().size());
-            for (Part part : req.getParts()) {
+        if (requestType == RequestType.LIST) {
+            request.add(req.getMethod());
+            request.add(req.getRequestURI());
+            request.add(req.getRemoteAddr());
+            request.add(req.getSession().getId());
 
-                Map<String, String> headers = new HashMap<>();
-                for (String headerName : part.getHeaderNames()) {
-                    headers.put(headerName, part.getHeader(headerName));
+            request.add(parameters.size());
+            request.addAll(parameters.stream()
+                    .map(e -> e.getKey() + "=" + e.getValue())
+                    .collect(Collectors.toList()));
+
+            request.add(mainHeaders.size());
+            mainHeaders.forEach((k, v) -> request.add(k + "=" + v));
+
+            if (ServletFileUpload.isMultipartContent(req)) {
+                request.add(req.getParts().size());
+                for (Part part : req.getParts()) {
+
+                    Map<String, String> headers = new HashMap<>();
+                    for (String headerName : part.getHeaderNames()) {
+                        headers.put(headerName, part.getHeader(headerName));
+                    }
+
+                    byte[] bytes = IOUtils.toByteArray(part.getInputStream());
+                    if (bytes != null && bytes.length > 0) {
+                        request.add(headers.size());
+                        headers.forEach((k, v) -> request.add(k + "=" + v));
+                        request.add(bytes);
+                    }
                 }
-
-                byte[] bytes = IOUtils.toByteArray(part.getInputStream());
-                if (bytes != null && bytes.length > 0) {
-                    request.add(headers.size());
-                    headers.forEach((k, v) -> request.add(k + "=" + v));
+            } else {
+                byte[] bytes = IOUtils.toByteArray(req.getInputStream());
+                if (bytes != null && bytes.length > 0)
                     request.add(bytes);
-                }
             }
         } else {
-            byte[] bytes = IOUtils.toByteArray(req.getInputStream());
-            if (bytes != null && bytes.length > 0)
-                request.add(bytes);
+            ObjectElement objectElement = new ObjectElement(
+                    new ObjectField("method", req.getMethod())
+                    , new ObjectField("uri", req.getRequestURI())
+                    , new ObjectField("remoteAddr", req.getRemoteAddr())
+                    , new ObjectField("sessionId", req.getSession().getId())
+            );
+            if (!parameters.isEmpty())
+                objectElement.getFields().add(new ObjectField("params",
+                        new ObjectElement(parameters.stream()
+                                .map(e -> new ObjectField(e.getKey(), e.getValue()))
+                                .collect(Collectors.toList()))));
+            if (!mainHeaders.isEmpty())
+                objectElement.getFields().add(new ObjectField("headers",
+                        new ObjectElement(mainHeaders.entrySet().stream()
+                                .map(e -> new ObjectField(e.getKey(), e.getValue()))
+                                .collect(Collectors.toList()))));
+            if (ServletFileUpload.isMultipartContent(req)) {
+                List<ObjectElement> parts = new ArrayList<>(req.getParts().size());
+                for (Part part : req.getParts()) {
+                    Map<String, String> headers = new HashMap<>();
+                    for (String headerName : part.getHeaderNames())
+                        headers.put(headerName, part.getHeader(headerName));
+
+                    byte[] bytes = IOUtils.toByteArray(part.getInputStream());
+                    if (bytes != null && bytes.length > 0) {
+                        ObjectElement objectElementPart = new ObjectElement(new ObjectField("data", bytes));
+                        if (!headers.isEmpty())
+                            objectElementPart.getFields().add(new ObjectField("headers",
+                                    new ObjectElement(headers.entrySet().stream()
+                                            .map(e -> new ObjectField(e.getKey(), e.getValue()))
+                                            .collect(Collectors.toList()))));
+                        parts.add(objectElementPart);
+                    }
+                }
+                if (!parts.isEmpty())
+                    objectElement.getFields().add(new ObjectField("data", new ObjectArray((List) parts, ObjectType.OBJECT_ELEMENT)));
+            } else {
+                byte[] bytes = IOUtils.toByteArray(req.getInputStream());
+                if (bytes != null && bytes.length > 0)
+                    objectElement.getFields().add(new ObjectField("data", bytes));
+            }
+
+            request.add(new ObjectArray(objectElement));
         }
 
         return request;

@@ -48,14 +48,18 @@ public class ChangeSetting implements Module {
                         });
             }
         } else if (executionContextTool.getType().equals("set")) {
-            ModuleUtils.getLastActionWithData(executionContextTool.getMessages(0))
-                    .map(a -> ModuleUtils.deserializeToObject(new LinkedList<>(a.getMessages())))
-                    .filter(ModuleUtils::isArrayContainObjectElements)
-                    .map(a -> (ObjectElement) a.get(0))
-                    .ifPresent(e -> e.getFields().forEach(f -> {
-                        if (f.getValue() != null)
-                            change(executionContextTool, f.getName(), f.getValue());
-                    }));
+            ModuleUtils.processMessages(configurationTools, executionContextTool, 0, (id, messages) -> {
+                if (messages == null)
+                    return;
+                ObjectArray objectArray = ModuleUtils.deserializeToObject(messages);
+                if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
+                    ((ObjectElement) objectArray.get(0)).getFields()
+                            .forEach(f -> {
+                                if (f.getValue() != null)
+                                    change(executionContextTool, f.getName(), f.getValue());
+                            });
+                }
+            });
         }
     }
 

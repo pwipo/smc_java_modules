@@ -216,7 +216,7 @@ The program is supplied as is. For problems arising during the operation or inst
                             <value>2</value>
                             <elements>
                                 <element>
-                                    <type>VALUE_ANY</type>
+                                    <type>VALUE</type>
                                     <count>-1</count>
                                     <description>
                                         <entry>
@@ -268,7 +268,7 @@ The program is supplied as is. For problems arising during the operation or inst
                             <value>5</value>
                             <elements>
                                 <element>
-                                    <type>VALUE_ANY</type>
+                                    <type>VALUE</type>
                                     <count>-1</count>
                                     <description>
                                         <entry>
@@ -872,7 +872,7 @@ The program is supplied as is. For problems arising during the operation or inst
             </sources>
             <output>
                 <element>
-                    <type>VALUE_ANY</type>
+                    <type>VALUE</type>
                     <count>-1</count>
                     <description>
                         <entry>
@@ -912,7 +912,7 @@ The program is supplied as is. For problems arising during the operation or inst
                     <count>1</count>
                     <elements>
                         <element>
-                            <type>VALUE_ANY</type>
+                            <type>VALUE</type>
                             <count>-1</count>
                             <description>
                                 <entry>
@@ -1042,7 +1042,7 @@ The program is supplied as is. For problems arising during the operation or inst
                     <count>1</count>
                     <elements>
                         <element>
-                            <type>VALUE_ANY</type>
+                            <type>VALUE</type>
                             <count>-1</count>
                             <description>
                                 <entry>

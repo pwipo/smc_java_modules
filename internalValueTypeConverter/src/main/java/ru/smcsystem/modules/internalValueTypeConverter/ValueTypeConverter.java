@@ -37,14 +37,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ValueTypeConverter implements Module {
-
+    private static final Pattern base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
     private Type type;
     // private String charsetName;
     private String param;
     private Long lParam;
     private List<String> strings;
 
-    private Pattern base64;
     // private String start;
     // private String end;
     private final static String OBJECT_FILED_NAME_NAME = "name";
@@ -102,8 +101,6 @@ public class ValueTypeConverter implements Module {
         lParam = null;
         // objectArrayCache = null;
         updateSettings();
-
-        base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
     }
 
     private void updateSettings() {
@@ -141,7 +138,8 @@ public class ValueTypeConverter implements Module {
             Type type = Type.valueOf(executionContextTool.getType());
             if (type != this.type)
                 updateSettings();
-            process(executionContextTool, configurationTool, executionContextTool.getMessages(0), type);
+            List<IAction> actions = executionContextTool.countSource() > 0 ? executionContextTool.getMessages(0) : null;
+            process(executionContextTool, configurationTool, actions, type);
         }
     }
 
@@ -256,7 +254,6 @@ public class ValueTypeConverter implements Module {
         // charsetName = null;
         // columnCount = null;
         param = null;
-        base64 = null;
         lParam = null;
         strings = null;
         // start = null;
@@ -806,7 +803,7 @@ public class ValueTypeConverter implements Module {
         } else if (withBoolean && ("true".equals(value) || "false".equals(value))) {
             result = "true".equals(value);
         } else {
-            if (StringUtils.length(value) >= 4 && base64.matcher(value).find()) {
+            if (StringUtils.length(value) >= 2 && !value.isBlank() && base64.matcher(value).find()) {
                 try {
                     result = Base64.getDecoder().decode(value);
                 } catch (Exception e) {

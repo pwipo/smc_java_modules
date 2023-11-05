@@ -29,29 +29,18 @@ public class CommandGetter implements Module {
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
         if (Objects.equals(executionContextTool.getType(), "default")) {
-            executionContextTool.getMessages(0).forEach(a -> {
-                LinkedList<IMessage> messages = new LinkedList<>(a.getMessages());
-                try {
-                    while (!messages.isEmpty()) {
-                        Type type = Type.values()[ModuleUtils.getNumber(messages.poll()).intValue() - 1];
-                        process(executionContextTool, type, messages, 1);
-                    }
-                } catch (Exception e) {
-                    executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
-                    configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+            ModuleUtils.processMessages(configurationTool, executionContextTool, (i, messages) -> {
+                while (!messages.isEmpty()) {
+                    Type type = Type.values()[ModuleUtils.getNumber(messages.poll()).intValue() - 1];
+                    process(executionContextTool, type, messages, 1);
                 }
             });
         } else {
-            List<IMessage> iMessages = ModuleUtils.getLastActionWithData(executionContextTool.getMessages(0)).map(IAction::getMessages).orElse(List.of());
             Type type = Type.valueOf(executionContextTool.getType().toUpperCase());
-            try {
-                LinkedList<IMessage> messages = new LinkedList<>(iMessages);
+            ModuleUtils.processMessages(configurationTool, executionContextTool, 0, (i, messages) -> {
                 int id = type == Type.COUNT || type == Type.GET_ALL || type == Type.GET_ALL_AS_COMMANDS ? 0 : 1;
                 process(executionContextTool, type, messages, id);
-            } catch (Exception e) {
-                executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
-                configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
-            }
+            });
         }
     }
 

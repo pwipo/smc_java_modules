@@ -212,15 +212,9 @@ public class DB implements Module {
                 process(externalConfigurationTool, externalExecutionContextTool, operationType, messages);
             });
         } else {
-            ModuleUtils.getLastActionWithData(externalExecutionContextTool.getMessages(0)).map(a -> new LinkedList<>(a.getMessages())).ifPresent(messages -> {
-                OperationType operationType = OperationType.valueOf(externalExecutionContextTool.getType().toUpperCase());
-                try {
-                    process(externalConfigurationTool, externalExecutionContextTool, operationType, messages);
-                } catch (Exception e) {
-                    externalExecutionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
-                    externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
-                }
-            });
+            OperationType operationType = OperationType.valueOf(externalExecutionContextTool.getType().toUpperCase());
+            ModuleUtils.processMessages(externalConfigurationTool, externalExecutionContextTool, 0, (id, messages) ->
+                    process(externalConfigurationTool, externalExecutionContextTool, operationType, messages));
         }
     }
 

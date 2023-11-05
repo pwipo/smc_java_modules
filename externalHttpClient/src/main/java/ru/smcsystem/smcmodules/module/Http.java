@@ -45,7 +45,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Http implements Module {
 
@@ -119,68 +118,55 @@ public class Http implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
-        try {
-            switch (executionContextTool.getType()) {
-                case "default":
-                    if (executionContextTool.countSource() == 0)
-                        break;
-                    Stream.iterate(0, n -> n + 1)
-                            .limit(executionContextTool.countSource())
-                            .flatMap(n -> executionContextTool.getMessages(n).stream())
-                            .map(IAction::getMessages)
-                            .filter(messages -> messages.size() >= 2)
-                            .map(LinkedList::new)
-                            .forEach(messages -> {
-                                try {
-                                    Method method = Method.values()[(getNumber(messages.poll()).intValue())];
-                                    String address = getString(messages.poll());
+        switch (executionContextTool.getType()) {
+            case "default":
+                ModuleUtils.processMessages(configurationTool, executionContextTool, (id, messages) -> {
+                    if (messages.size() < 2)
+                        return;
+                    Method method = Method.values()[(getNumber(messages.poll()).intValue())];
+                    String address = getString(messages.poll());
 
-                                    HttpRequestBase request = null;
-                                    switch (method) {
-                                        case GET:
-                                            request = new HttpGet(address);
-                                            break;
-                                        case POST:
-                                            request = new HttpPost(address);
-                                            break;
-                                    }
+                    HttpRequestBase request = null;
+                    switch (method) {
+                        case GET:
+                            request = new HttpGet(address);
+                            break;
+                        case POST:
+                            request = new HttpPost(address);
+                            break;
+                    }
 
-                                    if (!messages.isEmpty()) {
-                                        int countHeaders = getNumber(messages.poll()).intValue();
-                                        for (int i = 0; i < countHeaders; i++) {
-                                            String[] split = ModuleUtils.getString(messages.poll()).split("=");
-                                            if (split.length > 1)
-                                                request.addHeader(split[0].trim(), split[1].trim());
-                                        }
-                                    }
+                    if (!messages.isEmpty()) {
+                        int countHeaders = getNumber(messages.poll()).intValue();
+                        for (int i = 0; i < countHeaders; i++) {
+                            String[] split = ModuleUtils.getString(messages.poll()).split("=");
+                            if (split.length > 1)
+                                request.addHeader(split[0].trim(), split[1].trim());
+                        }
+                    }
 
-                                    if (Method.POST.equals(method) && !messages.isEmpty())
-                                        ((HttpPost) request).setEntity(getPost(messages, true));
+                    if (Method.POST.equals(method) && !messages.isEmpty())
+                        ((HttpPost) request).setEntity(getPost(messages, true));
 
-                                    // System.out.println(request.getRequestLine());
-                                    proceessRequest(executionContextTool, request);
-                                } catch (Exception e) {
-                                    executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
-                                    configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
-                                }
-                            });
-                    break;
-                case "get": {
-                    Optional<IAction> lastActionWithData = ModuleUtils.getLastActionWithData(executionContextTool.getMessages(0));
-                    if (lastActionWithData.isEmpty())
-                        break;
-                    LinkedList<IMessage> messages = new LinkedList<>(lastActionWithData.get().getMessages());
+                    // System.out.println(request.getRequestLine());
+                    proceessRequest(executionContextTool, request);
+                });
+                break;
+            case "get": {
+                ModuleUtils.processMessages(configurationTool, executionContextTool, 0, (id, messages) -> {
+                    if (messages == null)
+                        return;
                     String address = ModuleUtils.getString(messages.poll());
                     HttpRequestBase request = new HttpGet(address);
                     addHeaders(request, messages);
                     proceessRequest(executionContextTool, request);
-                    break;
-                }
-                case "post": {
-                    Optional<IAction> lastActionWithData = ModuleUtils.getLastActionWithData(executionContextTool.getMessages(0));
-                    if (lastActionWithData.isEmpty())
-                        break;
-                    LinkedList<IMessage> messages = new LinkedList<>(lastActionWithData.get().getMessages());
+                });
+                break;
+            }
+            case "post": {
+                ModuleUtils.processMessages(configurationTool, executionContextTool, 0, (id, messages) -> {
+                    if (messages == null)
+                        return;
                     String address = ModuleUtils.getString(messages.poll());
                     HttpRequestBase request = new HttpPost(address);
                     addHeaders(request, messages);
@@ -188,12 +174,9 @@ public class Http implements Module {
                     if (lastActionWithDataPost.isPresent())
                         ((HttpPost) request).setEntity(getPost(new LinkedList<>(lastActionWithDataPost.get().getMessages()), false));
                     proceessRequest(executionContextTool, request);
-                    break;
-                }
+                });
+                break;
             }
-        } catch (Exception e) {
-            executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
-            configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
         }
     }
 

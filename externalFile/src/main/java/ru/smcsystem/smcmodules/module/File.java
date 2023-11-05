@@ -294,13 +294,11 @@ public class File implements Module {
                     }
                 }
             } else {
-                Optional<LinkedList<IMessage>> optionalMessages = ModuleUtils.getLastActionWithData(externalExecutionContextTool.getMessages(0)).map(IAction::getMessages).map(LinkedList::new);
-                if (optionalMessages.isPresent()) {
-                    Type type = Type.valueOf(externalExecutionContextTool.getType());
-                    if (type != this.type)
-                        updateSettings();
-                    process(externalExecutionContextTool, type, optionalMessages.get());
-                }
+                Type type = Type.valueOf(externalExecutionContextTool.getType());
+                if (type != this.type)
+                    updateSettings();
+                ModuleUtils.processMessages(externalConfigurationTool, externalExecutionContextTool, 0, (id, messages) ->
+                        process(externalExecutionContextTool, type, messages));
             }
         } catch (Exception e) {
             throw new ModuleException(e.getMessage(), e);

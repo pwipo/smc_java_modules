@@ -2,7 +2,6 @@ package ru.smcsystem.modules.module;
 
 import com.google.common.cache.CacheBuilder;
 import org.apache.commons.collections4.CollectionUtils;
-import ru.smcsystem.api.dto.IAction;
 import ru.smcsystem.api.dto.IMessage;
 import ru.smcsystem.api.dto.IValue;
 import ru.smcsystem.api.enumeration.CommandType;
@@ -99,72 +98,60 @@ public class Cache implements Module {
                         });
 
             } else {
-                Stream.iterate(0, n -> n + 1)
-                        .limit(executionContextTool.countSource())
-                        .flatMap(i -> executionContextTool.getMessages(i).stream())
-                        .map(IAction::getMessages)
-                        // .filter(m -> ValueType.BYTE.equals(m.getType()) || ValueType.SHORT.equals(m.getType()) || ValueType.INTEGER.equals(m.getType()) || ValueType.LONG.equals(m.getType()) || ValueType.FLOAT.equals(m.getType()) || ValueType.DOUBLE.equals(m.getType()) || ValueType.BIG_INTEGER.equals(m.getType()) || ValueType.BIG_DECIMAL.equals(m.getType()))
-                        // .map(m -> (Number) m.getValue())
-                        .forEach(messages -> {
-                            LinkedList<IMessage> messagesList = new LinkedList<>(messages);
-                            while (!messagesList.isEmpty()) {
-                                Type type = Type.values()[getNumber(messagesList).intValue() - 1];
-                                process(configurationTool, executionContextTool, messagesList, type);
-                            }
-                        });
+                ModuleUtils.processMessages(configurationTool, executionContextTool, (i, messages) -> {
+                    while (!messages.isEmpty())
+                        process(executionContextTool, messages, null);
+                });
             }
         } else {
             Type type = Type.valueOf(executionContextTool.getType().toUpperCase());
-            List<IMessage> messages = type == Type.size || type == Type.clear_all || type == Type.get_all ? List.of() : ModuleUtils.getLastActionWithData(executionContextTool.getMessages(0)).map(IAction::getMessages).orElse(List.of());
-            process(configurationTool, executionContextTool, new LinkedList<>(messages), type);
+            ModuleUtils.processMessages(configurationTool, executionContextTool, 0, (i, messages) ->
+                    process(executionContextTool, messages, type));
         }
     }
 
-    private void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, LinkedList<IMessage> messagesList, Type type) {
-        try {
-            switch (type) {
-                case size:
-                    executionContextTool.addMessage(cache.size());
-                    break;
-                case clear_all:
-                    executionContextTool.addMessage(cache.size());
-                    cache.invalidateAll();
-                    executionContextTool.addMessage(cache.size());
-                    break;
-                case get: {
-                    //get
-                    List<Object> list = cache.getIfPresent(getString(messagesList));
-                    if (CollectionUtils.isNotEmpty(list))
-                        executionContextTool.addMessage(list);
-                    break;
-                }
-                case put: {
-                    //put
-                    String key = getString(messagesList);
-                    List<Object> objects = messagesList.stream()
-                            .filter(m -> maxValueSize <= 0 || (ModuleUtils.isBytes(m) && ((byte[]) m.getValue()).length < maxValueSize) || (ModuleUtils.isString(m) && ((String) m.getValue()).length() < maxValueSize))
-                            .map(IValue::getValue)
-                            .collect(Collectors.toList());
-                    messagesList.clear();
-                    if (CollectionUtils.isNotEmpty(objects) || cacheNull)
-                        cache.put(key, objects);
-                    break;
-                }
-                case invalidate:
-                    //invalidate entry
-                    cache.invalidate(getString(messagesList));
-                    break;
-                case get_all:
-                    //get all entries keys
-                    cache.asMap().forEach((k, v) -> {
-                        executionContextTool.addMessage(k);
-                        // executionContextTool.addMessage(v);
-                    });
-                    break;
+    private void process(ExecutionContextTool executionContextTool, LinkedList<IMessage> messagesList, Type type) {
+        if (type == null)
+            type = Type.values()[getNumber(messagesList).intValue() - 1];
+        switch (type) {
+            case size:
+                executionContextTool.addMessage(cache.size());
+                break;
+            case clear_all:
+                executionContextTool.addMessage(cache.size());
+                cache.invalidateAll();
+                executionContextTool.addMessage(cache.size());
+                break;
+            case get: {
+                //get
+                List<Object> list = cache.getIfPresent(getString(messagesList));
+                if (CollectionUtils.isNotEmpty(list))
+                    executionContextTool.addMessage(list);
+                break;
             }
-        } catch (Exception e) {
-            executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
-            configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+            case put: {
+                //put
+                String key = getString(messagesList);
+                List<Object> objects = messagesList.stream()
+                        .filter(m -> maxValueSize <= 0 || (ModuleUtils.isBytes(m) && ((byte[]) m.getValue()).length < maxValueSize) || (ModuleUtils.isString(m) && ((String) m.getValue()).length() < maxValueSize))
+                        .map(IValue::getValue)
+                        .collect(Collectors.toList());
+                messagesList.clear();
+                if (CollectionUtils.isNotEmpty(objects) || cacheNull)
+                    cache.put(key, objects);
+                break;
+            }
+            case invalidate:
+                //invalidate entry
+                cache.invalidate(getString(messagesList));
+                break;
+            case get_all:
+                //get all entries keys
+                cache.asMap().forEach((k, v) -> {
+                    executionContextTool.addMessage(k);
+                    // executionContextTool.addMessage(v);
+                });
+                break;
         }
     }
 

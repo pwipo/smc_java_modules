@@ -322,7 +322,9 @@ public class DBTest {
                                 "login", new Value(ValueType.STRING, ""),
                                 "password", new Value(ValueType.STRING, ""),
                                 "useAutoConvert", new Value("true"),
-                                "resultFormat", new Value("OBJECT")
+                                "resultFormat", new Value("OBJECT"),
+                                "resultSetColumnNameToUpperCase", new Value("false"),
+                                "queryTimeout", new Value(0)
                         ),
                         null,
                         "C:\\Users\\user\\Documents\\tmp\\12"
@@ -338,6 +340,114 @@ public class DBTest {
                                 List.of(
                                         new Message(MessageType.DATA, new Date(), new Value(ValueType.INTEGER, 1)),
                                         new Message(MessageType.DATA, new Date(), new Value(ValueType.STRING, "select * from users"))
+                                ),
+                                ActionType.EXECUTE
+                        ))),
+                null,
+                null
+        );
+
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
+        process.stop();
+    }
+
+    @Test
+    public void processInsertMultiline() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of("type", new Value(ValueType.STRING, "derbyInMemory"),
+                                "connection_params", new Value(ValueType.STRING, "TestDB"),
+                                "login", new Value(ValueType.STRING, ""),
+                                "password", new Value(ValueType.STRING, ""),
+                                "useAutoConvert", new Value("true"),
+                                "resultFormat", new Value("OBJECT_WITH_NULL_AND_BOOLEAN"),
+                                "resultSetColumnNameToUpperCase", new Value("false"),
+                                "queryTimeout", new Value(0)
+                        ),
+                        null,
+                        "C:\\Users\\user\\Documents\\tmp\\12"
+                ),
+                new DB()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(List.of(
+                List.of(
+                        new Action(
+                                List.of(
+                                        new Message(MessageType.DATA, new Date(), new Value(ValueType.INTEGER, 1)),
+                                        new Message(MessageType.DATA, new Date(), new Value(ValueType.STRING, "select * from users"))
+                                ),
+                                ActionType.EXECUTE
+                        ))),
+                null,
+                null
+        );
+
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
+        executionContextTool = new ExecutionContextToolImpl(List.of(
+                List.of(
+                        new Action(
+                                List.of(
+                                        new Message(MessageType.DATA, new Date(), new Value(19)),
+                                        new Message(MessageType.DATA, new Date(), new Value("INSERT INTO users (login, password, salt, email, created, email_confirmed, version) VALUES (?, ?, ? ,?, CURRENT_TIMESTAMP,  CURRENT_TIMESTAMP,  CURRENT_TIMESTAMP)")),
+                                        new Message(MessageType.DATA, new Date(), new Value(new ObjectArray(
+                                                new ObjectElement(new ObjectField("login", "user1"), new ObjectField("password", "password1"), new ObjectField("salt", "salt1"), new ObjectField("email", "email1"))
+                                                , new ObjectElement(new ObjectField("login", "user2"), new ObjectField("password", "password2"), new ObjectField("salt", "salt2"), new ObjectField("email", "email2"))
+                                                , new ObjectElement(new ObjectField("login", "user3"), new ObjectField("password", "password3"), new ObjectField("salt", "salt3"), new ObjectField("email", "email3"))
+                                                , new ObjectElement(new ObjectField("login", "user4"), new ObjectField("password", "password4"), new ObjectField("salt", "salt4"), new ObjectField("email", "email4"))
+                                        ))),
+                                        new Message(MessageType.DATA, new Date(), new Value("login, password, salt, email"))
+                                ),
+                                ActionType.EXECUTE
+                        ))),
+                null,
+                null
+        );
+
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
+        executionContextTool = new ExecutionContextToolImpl(List.of(
+                List.of(
+                        new Action(
+                                List.of(
+                                        new Message(MessageType.DATA, new Date(), new Value("INSERT INTO users (login, password, salt, email, created, email_confirmed, version) VALUES (?, ?, ? ,?, CURRENT_TIMESTAMP,  CURRENT_TIMESTAMP,  CURRENT_TIMESTAMP)")),
+                                        new Message(MessageType.DATA, new Date(), new Value(new ObjectArray(
+                                                new ObjectElement(new ObjectField("login", "user5"), new ObjectField("password", "password5"), new ObjectField("salt", "salt5"), new ObjectField("email", "email5"))
+                                                , new ObjectElement(new ObjectField("login", "user6"), new ObjectField("password", "password6"), new ObjectField("salt", "salt6"), new ObjectField("email", "email6"))
+                                        ))),
+                                        new Message(MessageType.DATA, new Date(), new Value("login, password, salt, email"))
+                                ),
+                                ActionType.EXECUTE
+                        ))),
+                null,
+                null,
+                null,
+                "execute",
+                "EXECUTE_MULTILINE_INSERT_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY"
+        );
+
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
+        executionContextTool = new ExecutionContextToolImpl(List.of(
+                List.of(
+                        new Action(
+                                List.of(
+                                        new Message(MessageType.DATA, new Date(), new Value(1)),
+                                        new Message(MessageType.DATA, new Date(), new Value("select * from users"))
                                 ),
                                 ActionType.EXECUTE
                         ))),

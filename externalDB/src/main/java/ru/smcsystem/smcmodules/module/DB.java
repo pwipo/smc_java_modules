@@ -85,6 +85,8 @@ public class DB implements Module {
         EXECUTE_UPDATE_WITH_PARAMS_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY,
         EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY,
         EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY,
+        EXECUTE_MULTILINE_INSERT_IN_ONE_TRANSACTION,
+        EXECUTE_MULTILINE_INSERT_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY,
     }
 
     private Boolean resultSetColumnNameToUpperCase;
@@ -271,6 +273,12 @@ public class DB implements Module {
             case EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY:
                 executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true, true);
                 break;
+            case EXECUTE_MULTILINE_INSERT_IN_ONE_TRANSACTION:
+                executePreparedStatementInsertMultiline(externalConfigurationTool, externalExecutionContextTool, messages, false);
+                break;
+            case EXECUTE_MULTILINE_INSERT_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY:
+                executePreparedStatementInsertMultiline(externalConfigurationTool, externalExecutionContextTool, messages, true);
+                break;
         }
 
     }
@@ -344,34 +352,15 @@ public class DB implements Module {
     private void execute(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, List<IMessage> messages, boolean useTransaction, boolean isUpdateReturnKeys) throws Exception {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(!useTransaction);
-            for (int i = 0; i < messages.size(); i++) {
-                IMessage message = messages.get(i);
-                try (Statement stm = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
-                    stm.setQueryTimeout(queryTimeout);
-                    if (isUpdateReturnKeys) {
-                        stm.executeUpdate((String) message.getValue(), Statement.RETURN_GENERATED_KEYS);
-                    } else {
-                        stm.execute((String) message.getValue());
-                    }
-                    printStmResult(externalConfigurationTool, externalExecutionContextTool, stm, isUpdateReturnKeys);
-                } catch (Exception e) {
-                    // e.printStackTrace();
-                    if (useTransaction) {
-                        // try {
-                        connection.rollback();
-                        /*
-                        } catch (SQLException e1) {
-                            RuntimeException exception = new RuntimeException(e1);
-                            exception.addSuppressed(e);
-                            throw exception;
-                        }
-                        */
-                    }
-                    throw new ModuleException(String.format("%s: %d %s", e.getMessage(), i, message.getValue()), e);
-                }
-            }
-            if (useTransaction) {
-                connection.commit();
+            try {
+                for (int i = 0; i < messages.size(); i++)
+                    executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(messages.get(i)));
+                if (useTransaction)
+                    connection.commit();
+            } catch (Exception e) {
+                if (useTransaction)
+                    connection.rollback();
+                throw e;
             }
         }
     }
@@ -385,9 +374,11 @@ public class DB implements Module {
     }
 
     private void executePreparedStatement(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, LinkedList<IMessage> messages, Connection connection, boolean needRollback, boolean isArray, boolean isUpdateReturnKeys) throws Exception {
+        externalConfigurationTool.loggerTrace("executePreparedStatement");
         int elementId = 0;
         while (!messages.isEmpty()) {
-            String sql = (String) messages.poll().getValue();
+            String sql = ModuleUtils.getString(messages.poll());
+            externalConfigurationTool.loggerTrace(sql);
             if (!isArray) {
                 try (PreparedStatement stm = isUpdateReturnKeys ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                     stm.setQueryTimeout(queryTimeout);
@@ -471,11 +462,23 @@ public class DB implements Module {
                 }
             } else {
                 ObjectArray objectArray = ModuleUtils.deserializeToObject(messages);
+                if (objectArray.size() == 0) {
+                    externalExecutionContextTool.addError("need ObjectArray params");
+                    return;
+                }
+                String fields = null;
                 if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
-                    String fields = ModuleUtils.getString(messages.peek());
+                    fields = ModuleUtils.getString(messages.peek());
+                    if (fields != null)
+                        messages.poll();
+                }
+                List<Integer> parameterTypes = getParameterTypes(externalExecutionContextTool, type, messages, connection, sql);
+                if (parameterTypes == null)
+                    return;
+                int parameterCount = parameterTypes.size();
+                if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
                     List<String> fieldNames;
                     if (fields != null) {
-                        messages.poll();
                         fieldNames = Arrays.stream(fields.split(","))
                                 .map(String::trim)
                                 .filter(s -> !s.isBlank())
@@ -484,26 +487,13 @@ public class DB implements Module {
                         ObjectElement objectElement = (ObjectElement) objectArray.get(0);
                         fieldNames = objectElement.getFields().stream().map(ObjectField::getName).collect(Collectors.toList());
                     }
-                    List<Integer> parameterTypes = List.of();
-                    if (useAutoConvert && type == Type.mysqlClient) {
-                        ObjectArray objectArrayTypes = ModuleUtils.deserializeToObject(messages);
-                        if (objectArrayTypes.size() == 0 || !objectArrayTypes.isSimple()) {
-                            externalExecutionContextTool.addError("need param types");
-                            return;
-                        }
-                        parameterTypes = new ArrayList<>(objectArrayTypes.size());
-                        for (int i = 0; i < objectArrayTypes.size(); i++)
-                            parameterTypes.add(((Number) objectArrayTypes.get(i)).intValue());
-                    }
                     for (int i = 0; i < objectArray.size(); i++) {
                         ObjectElement objectElement = (ObjectElement) objectArray.get(i);
                         if (objectElement.getFields().isEmpty())
                             continue;
                         try (PreparedStatement stm = isUpdateReturnKeys ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                             stm.setQueryTimeout(queryTimeout);
-                            ParameterMetaData parameterMetaData = stm.getParameterMetaData();
-                            int parameterCount = parameterMetaData.getParameterCount();
-                            if (objectElement.getFields().size() < parameterCount || objectElement.getFields().size() < fieldNames.size() || (useAutoConvert && type == Type.mysqlClient && parameterTypes.size() < parameterCount)) {
+                            if (objectElement.getFields().size() < parameterCount || objectElement.getFields().size() < fieldNames.size()) {
                                 externalExecutionContextTool.addError("need " + parameterCount + " params");
                                 return;
                             }
@@ -511,12 +501,7 @@ public class DB implements Module {
                                 int jj = j - 1;
                                 ObjectField f = objectElement.findField(fieldNames.get(jj)).orElseThrow(() -> new NoSuchElementException(fieldNames.get(jj)));
                                 if (useAutoConvert) {
-                                    int parameterType;
-                                    if (type == Type.mysqlClient) {
-                                        parameterType = parameterTypes.get(jj);
-                                    } else {
-                                        parameterType = parameterMetaData.getParameterType(j);
-                                    }
+                                    int parameterType = parameterTypes.get(jj);
                                     // String parameterClassName = parameterMetaData.getParameterClassName(j);
                                     Object value = f.getValue();
                                     if (value != null) {
@@ -592,26 +577,13 @@ public class DB implements Module {
                         }
                     }
                 } else if (ModuleUtils.isArrayContainArrays(objectArray)) {
-                    List<Integer> parameterTypes = List.of();
-                    if (useAutoConvert && type == Type.mysqlClient) {
-                        ObjectArray objectArrayTypes = ModuleUtils.deserializeToObject(messages);
-                        if (objectArrayTypes.size() == 0 || !objectArrayTypes.isSimple()) {
-                            externalExecutionContextTool.addError("need param types");
-                            return;
-                        }
-                        parameterTypes = new ArrayList<>(objectArrayTypes.size());
-                        for (int i = 0; i < objectArrayTypes.size(); i++)
-                            parameterTypes.add(((Number) objectArrayTypes.get(i)).intValue());
-                    }
                     for (int i = 0; i < objectArray.size(); i++) {
                         ObjectArray objectArray1 = (ObjectArray) objectArray.get(i);
                         if (objectArray1.size() == 0)
                             continue;
                         try (PreparedStatement stm = isUpdateReturnKeys ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                             stm.setQueryTimeout(queryTimeout);
-                            ParameterMetaData parameterMetaData = stm.getParameterMetaData();
-                            int parameterCount = parameterMetaData.getParameterCount();
-                            if ((objectArray1.size() < parameterCount) || (useAutoConvert && type == Type.mysqlClient && parameterTypes.size() < parameterCount)) {
+                            if (objectArray1.size() < parameterCount) {
                                 externalExecutionContextTool.addError("need " + parameterCount + " params");
                                 return;
                             }
@@ -619,12 +591,7 @@ public class DB implements Module {
                                 int jj = j - 1;
                                 Object value = objectArray1.get(jj);
                                 if (useAutoConvert) {
-                                    int parameterType;
-                                    if (type == Type.mysqlClient) {
-                                        parameterType = parameterTypes.get(jj);
-                                    } else {
-                                        parameterType = parameterMetaData.getParameterType(j);
-                                    }
+                                    int parameterType = parameterTypes.get(jj);
                                     if ("NULL".equals(value)) {
                                         stm.setNull(j, parameterType);
                                     } else if (value instanceof ObjectArray) {
@@ -698,6 +665,262 @@ public class DB implements Module {
         }
     }
 
+    private List<Integer> getParameterTypes(ExecutionContextTool externalExecutionContextTool, Type type, LinkedList<IMessage> messages, Connection connection, String sql) throws SQLException {
+        List<Integer> parameterTypes = null;
+        if (type == Type.mysqlClient) {
+            ObjectArray objectArrayTypes = ModuleUtils.deserializeToObject(messages);
+            if (objectArrayTypes.size() == 0 || !objectArrayTypes.isSimple()) {
+                externalExecutionContextTool.addError("need param types " + objectArrayTypes.size());
+                return parameterTypes;
+            }
+            parameterTypes = new ArrayList<>(objectArrayTypes.size());
+            for (int i = 0; i < objectArrayTypes.size(); i++)
+                parameterTypes.add(((Number) objectArrayTypes.get(i)).intValue());
+        } else {
+            try (PreparedStatement stm = connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+                ParameterMetaData parameterMetaData = stm.getParameterMetaData();
+                int parameterCount = parameterMetaData.getParameterCount();
+                parameterTypes = new ArrayList<>(parameterCount);
+                for (int j = 1; j <= parameterCount; j++)
+                    parameterTypes.add(parameterMetaData.getParameterType(j));
+            }
+        }
+        return parameterTypes;
+    }
+
+    private void executePreparedStatementInsertMultiline(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, LinkedList<IMessage> messages, boolean isUpdateReturnKeys) throws Exception {
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            List<String> sqlInserts = buildInsertMultiline(externalConfigurationTool, externalExecutionContextTool, messages, connection);
+            if (sqlInserts != null && !sqlInserts.isEmpty()) {
+                try {
+                    for (int i = 0; i < sqlInserts.size(); i++)
+                        executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, sqlInserts.get(i));
+                    connection.commit();
+                } catch (Exception e) {
+                    connection.rollback();
+                    throw e;
+                }
+            }
+        }
+    }
+
+    private List<String> buildInsertMultiline(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, LinkedList<IMessage> messages, Connection connection) throws Exception {
+        externalConfigurationTool.loggerTrace("buildInsertMultiline");
+        List<String> result = new LinkedList<>();
+        while (!messages.isEmpty()) {
+            String sql = ModuleUtils.getString(messages.poll());
+            externalConfigurationTool.loggerTrace(sql);
+            ObjectArray objectArray = ModuleUtils.deserializeToObject(messages);
+            if (objectArray.size() == 0) {
+                externalExecutionContextTool.addError("need ObjectArray params");
+                return null;
+            }
+
+            String regexpSqlValues = "[^)]+VALUES[^(]+";
+            String[] split = sql.split(regexpSqlValues);
+            if (split.length != 2) {
+                split = sql.split(regexpSqlValues.toLowerCase());
+                if (split.length != 2 || !split[1].contains("?")) {
+                    externalExecutionContextTool.addError("Wrong sql " + split.length);
+                    return null;
+                }
+            }
+            String sqlInsert = split[0] + " VALUES ";
+            String[] parts = split[1].split("\\?");
+            int sqlParams = parts.length - 1;
+            String fields = null;
+            if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
+                fields = ModuleUtils.getString(messages.peek());
+                if (fields != null)
+                    messages.poll();
+            }
+            List<Integer> parameterTypes = getParameterTypes(externalExecutionContextTool, type, messages, connection, sql);
+            if (parameterTypes == null)
+                return null;
+            int parameterCount = parameterTypes.size();
+            if (sqlParams != parameterCount) {
+                externalExecutionContextTool.addError("Wrong count parameters");
+                return null;
+            }
+            List<List<String>> sqlParamList = new LinkedList<>();
+            if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
+                List<String> fieldNames;
+                if (fields != null) {
+                    fieldNames = Arrays.stream(fields.split(","))
+                            .map(String::trim)
+                            .filter(s -> !s.isBlank())
+                            .collect(Collectors.toList());
+                } else {
+                    ObjectElement objectElement = (ObjectElement) objectArray.get(0);
+                    fieldNames = objectElement.getFields().stream().map(ObjectField::getName).collect(Collectors.toList());
+                }
+                for (int i = 0; i < objectArray.size(); i++) {
+                    ObjectElement objectElement = (ObjectElement) objectArray.get(i);
+                    if (objectElement.getFields().isEmpty())
+                        continue;
+                    if (objectElement.getFields().size() < parameterCount || objectElement.getFields().size() < fieldNames.size()) {
+                        externalExecutionContextTool.addError("need " + parameterCount + " params");
+                        return null;
+                    }
+                    List<String> sqlParamListInner = new ArrayList<>(parameterCount);
+                    for (int j = 1; j <= parameterCount; j++) {
+                        int jj = j - 1;
+                        ObjectField f = objectElement.findField(fieldNames.get(jj)).orElseThrow(() -> new NoSuchElementException(fieldNames.get(jj)));
+                        if (useAutoConvert) {
+                            int parameterType = parameterTypes.get(jj);
+                            Object value = f.getValue();
+                            if (value != null) {
+                                if (ModuleUtils.isString(f) && ModuleUtils.getString(f).equals("NULL")) {
+                                    sqlParamListInner.add("null");
+                                } else if (ModuleUtils.isObjectArray(f)) {
+                                    ObjectArray objectArrayValue = ModuleUtils.getObjectArray(f);
+                                    if (objectArrayValue.isSimple()) {
+                                        if (objectArrayValue.getType() != ObjectType.VALUE_ANY && ModuleUtils.isArrayContainNumber(objectArrayValue)) {
+                                            if (objectArrayValue.getType() == ObjectType.FLOAT || objectArrayValue.getType() == ObjectType.DOUBLE || objectArrayValue.getType() == ObjectType.BIG_DECIMAL) {
+                                                List<Float> lst = new ArrayList<>(objectArrayValue.size());
+                                                for (int k = 0; k < objectArrayValue.size(); k++)
+                                                    lst.add(((Number) objectArrayValue.get(k)).floatValue());
+                                                sqlParamListInner.add("(" + lst.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
+                                            } else {
+                                                List<Long> lst = new ArrayList<>(objectArrayValue.size());
+                                                for (int k = 0; k < objectArrayValue.size(); k++)
+                                                    lst.add(((Number) objectArrayValue.get(k)).longValue());
+                                                sqlParamListInner.add("(" + lst.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
+                                            }
+                                        } else {
+                                            List<String> lst = new ArrayList<>(objectArrayValue.size());
+                                            for (int k = 0; k < objectArrayValue.size(); k++)
+                                                lst.add(escapeSql(objectArrayValue.get(k).toString()));
+                                            sqlParamListInner.add("(" + String.join(",", lst) + ")");
+                                        }
+                                    } else {
+                                        sqlParamListInner.add("null");
+                                    }
+                                } else {
+                                    switch (parameterType) {
+                                        case Types.BOOLEAN:
+                                            value = toBoolean(f);
+                                            sqlParamListInner.add(value.toString());
+                                            break;
+                                        case Types.TIMESTAMP:
+                                            value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new Timestamp(toLong(f)) : f.getValue();
+                                            sqlParamListInner.add("'" + value.toString() + "'");
+                                            break;
+                                        case Types.DATE:
+                                            value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new java.sql.Date(toLong(f)) : f.getValue();
+                                            sqlParamListInner.add("'" + value.toString() + "'");
+                                            break;
+                                        case Types.TIME:
+                                            value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new Time(toLong(f)) : f.getValue();
+                                            sqlParamListInner.add("'" + value.toString() + "'");
+                                            break;
+                                        default:
+                                            sqlParamListInner.add(ModuleUtils.isNumber(f) || ModuleUtils.isBoolean(f) ? f.getValue().toString() : escapeSql(f.getValue().toString()));
+                                    }
+                                }
+                            } else {
+                                sqlParamListInner.add("null");
+                            }
+                        } else {
+                            sqlParamListInner.add(ModuleUtils.isNumber(f) || ModuleUtils.isBoolean(f) ? f.getValue().toString() : escapeSql(f.getValue().toString()));
+                        }
+                    }
+                    sqlParamList.add(sqlParamListInner);
+                }
+            } else if (ModuleUtils.isArrayContainArrays(objectArray)) {
+                for (int i = 0; i < objectArray.size(); i++) {
+                    ObjectArray objectArray1 = (ObjectArray) objectArray.get(i);
+                    if (objectArray1.size() == 0)
+                        continue;
+                    if (objectArray1.size() < parameterCount) {
+                        externalExecutionContextTool.addError("need " + parameterCount + " params");
+                        return null;
+                    }
+                    List<String> sqlParamListInner = new ArrayList<>(parameterCount);
+                    for (int j = 1; j <= parameterCount; j++) {
+                        int jj = j - 1;
+                        Object value = objectArray1.get(jj);
+                        if (useAutoConvert) {
+                            int parameterType = parameterTypes.get(jj);
+                            if ("NULL".equals(value)) {
+                                sqlParamListInner.add("null");
+                            } else if (value instanceof ObjectArray) {
+                                ObjectArray objectArrayValue = (ObjectArray) value;
+                                if (objectArrayValue.isSimple()) {
+                                    Array array;
+                                    if (objectArrayValue.getType() != ObjectType.VALUE_ANY && ModuleUtils.isArrayContainNumber(objectArrayValue)) {
+                                        if (objectArrayValue.getType() == ObjectType.FLOAT || objectArrayValue.getType() == ObjectType.DOUBLE || objectArrayValue.getType() == ObjectType.BIG_DECIMAL) {
+                                            List<Float> lst = new ArrayList<>(objectArrayValue.size());
+                                            for (int k = 0; k < objectArrayValue.size(); k++)
+                                                lst.add(((Number) objectArrayValue.get(k)).floatValue());
+                                            sqlParamListInner.add("(" + lst.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
+                                        } else {
+                                            List<Long> lst = new ArrayList<>(objectArrayValue.size());
+                                            for (int k = 0; k < objectArrayValue.size(); k++)
+                                                lst.add(((Number) objectArrayValue.get(k)).longValue());
+                                            sqlParamListInner.add("(" + lst.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
+                                        }
+                                    } else {
+                                        List<String> lst = new ArrayList<>(objectArrayValue.size());
+                                        for (int k = 0; k < objectArrayValue.size(); k++)
+                                            lst.add(escapeSql(objectArrayValue.get(k).toString()));
+                                        sqlParamListInner.add("(" + String.join(",", lst) + ")");
+                                    }
+                                } else {
+                                    sqlParamListInner.add("null");
+                                }
+                            } else {
+                                boolean isString = value instanceof String;
+                                switch (parameterType) {
+                                    case Types.BOOLEAN:
+                                        value = toBooleanObj(value);
+                                        sqlParamListInner.add(value.toString());
+                                        break;
+                                    case Types.TIMESTAMP:
+                                        value = !isString || NumberUtils.isCreatable((String) value) ? new Timestamp(toLongObj(value)) : value;
+                                        sqlParamListInner.add("'" + value.toString() + "'");
+                                        break;
+                                    case Types.DATE:
+                                        value = !isString || NumberUtils.isCreatable((String) value) ? new java.sql.Date(toLongObj(value)) : value;
+                                        sqlParamListInner.add("'" + value.toString() + "'");
+                                        break;
+                                    case Types.TIME:
+                                        value = !isString || NumberUtils.isCreatable((String) value) ? new Time(toLongObj(value)) : value;
+                                        sqlParamListInner.add("'" + value.toString() + "'");
+                                        break;
+                                    default:
+                                        sqlParamListInner.add(value instanceof Number || value instanceof Boolean ? value.toString() : escapeSql(value.toString()));
+                                }
+                            }
+                        } else {
+                            sqlParamListInner.add(value instanceof Number || value instanceof Boolean ? value.toString() : escapeSql(value.toString()));
+                        }
+                    }
+                    sqlParamList.add(sqlParamListInner);
+                }
+            }
+            result.add(sqlInsert +
+                    sqlParamList.stream()
+                            .filter(l -> l.size() >= sqlParams)
+                            .map(l -> {
+                                StringBuilder sb = new StringBuilder();
+                                for (int i = 0; i < sqlParams; i++) {
+                                    sb.append(parts[i]);
+                                    sb.append(l.get(i));
+                                }
+                                sb.append(parts[sqlParams]);
+                                return sb.toString();
+                            })
+                            .collect(Collectors.joining(",")));
+        }
+        return result;
+    }
+
+    public static String escapeSql(String str) {
+        return str != null ? ("'" + StringUtils.replace(str, "'", "''") + "'") : null;
+    }
+
     private long toLong(IMessage message) {
         if (ModuleUtils.isString(message)) {
             return NumberUtils.toLong(ModuleUtils.getString(message));
@@ -712,7 +935,7 @@ public class DB implements Module {
 
     private long toLong(ObjectField field) {
         if (ModuleUtils.isString(field)) {
-            return NumberUtils.toLong(ModuleUtils.getString(field));
+            return NumberUtils.createNumber(ModuleUtils.getString(field)).longValue();
         } else if (ModuleUtils.isBytes(field)) {
             return 0;
         } else if (ModuleUtils.isNumber(field)) {
@@ -940,6 +1163,7 @@ public class DB implements Module {
                     break;
                 case OBJECT:
                 case OBJECT_WITHOUT_NULL:
+                case OBJECT_WITH_NULL_AND_BOOLEAN:
                     externalExecutionContextTool.addMessage(objectArray);
                     break;
             }
@@ -995,20 +1219,25 @@ public class DB implements Module {
     private void executeInTransaction(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId, List<IMessage> messages, boolean isUpdateReturnKeys) throws Exception {
         Connection connection = connections.get(transactionId);
         if (connection != null) {
-            for (int i = 0; i < messages.size(); i++) {
-                IMessage message = messages.get(i);
-                try (Statement stm = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
-                    stm.setQueryTimeout(queryTimeout);
-                    if (isUpdateReturnKeys) {
-                        stm.executeUpdate((String) message.getValue(), Statement.RETURN_GENERATED_KEYS);
-                    } else {
-                        stm.execute((String) message.getValue());
-                    }
-                    printStmResult(externalConfigurationTool, externalExecutionContextTool, stm, isUpdateReturnKeys);
-                } catch (Exception e) {
-                    throw new ModuleException(String.format("%s: %d %s", e.getMessage(), i, message.getValue()), e);
-                }
+            for (int i = 0; i < messages.size(); i++)
+                executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(messages.get(i)));
+        }
+    }
+
+    private void executeSql(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, Connection connection, boolean isUpdateReturnKeys, String sql) {
+        if (sql == null)
+            return;
+        externalConfigurationTool.loggerTrace(sql);
+        try (Statement stm = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+            stm.setQueryTimeout(queryTimeout);
+            if (isUpdateReturnKeys) {
+                stm.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+            } else {
+                stm.execute(sql);
             }
+            printStmResult(externalConfigurationTool, externalExecutionContextTool, stm, isUpdateReturnKeys);
+        } catch (Exception e) {
+            throw new ModuleException(String.format("%s: %s", e.getMessage(), sql), e);
         }
     }
 

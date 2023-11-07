@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.DB</className>
-    <ver>1.1.0</ver>
+    <ver>1.2.0</ver>
     <apiVer>1.4.0</apiVer>
-    <date>23-10-2023</date>
+    <date>07-11-2023</date>
 
     <defaultSettings>
         <value>
@@ -227,11 +227,107 @@ OBJECT_WITH_NULL_AND_BOOLEAN - аналогичен OBJECT, но нулевые 
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Контекст исполнения по умолчанию.</value>
+                    <value>Контекст исполнения по умолчанию.
+формат входящих сообщений:
+    число - тип операциии:
+        1 - исполнение команд в одной транзакции (исполняются либо все команды, либо ни одной),
+        2 - начать новую внешнюю транзакцию,
+        3 - завершить с сохранением внешнюю транзакцию,
+        4 - отклонить и завершить внешнюю транзакцию,
+        5 - исполнять команды во внешней транзакции,
+        6 - исполнять команды без транзакий (каждая команда исполняется сразу),
+        7 - исполнить параметризованные команды,
+        8 - исполнить параметризованные команды во внешней транзакции.
+        9 - аналогичен 7, но принимает массив объектов или массив массивов,
+        10 - аналогичен 8, но принимает массив объектов или массив массивов.
+        11 - аналогичен 1, но предназначен только для INSERT и возвращает сгенерированный ключ
+        12 - аналогичен 5, но предназначен только для INSERT и возвращает сгенерированный ключ
+        13 - аналогичен 6, но предназначен только для INSERT и возвращает сгенерированный ключ
+        14 - аналогичен 7, но предназначен только для INSERT и возвращает сгенерированный ключ
+        15 - аналогичен 8, но предназначен только для INSERT и возвращает сгенерированный ключ
+        16 - аналогичен 9, но предназначен только для INSERT и возвращает сгенерированный ключ
+        17 - аналогичен 10, но предназначен только для INSERT и возвращает сгенерированный ключ
+        18 - аналогичен 9, но предназначен только для INSERT и формирует многострочный INSERT
+        19 - аналогичен 14, но предназначен только для INSERT и формирует многострочный INSERT
+    для 3,4,5,8,10,12,15,17:
+        типа - число - номер внешней транзакции.
+    для 1,5,6,11,12,13 - строка - SQL выражение.
+    для 7,8,14,15:
+        строка - параметризованное SQL выражение (с символами ? для вставки ральных начений).
+        для ситуации если включен режим автоконвертации (useAutoConvert) и базой данных является mysql, то пары значений:
+            либой тип - значения, вставляемые в параметризованное SQL выражение.
+            число - тип параметра. mysql не поддерживает ParameterMetaData. типы указаны в классе java.sql.Types.
+        иначе:
+            либой тип - значения, вставляемые в параметризованное SQL выражение.
+    для 9,10,16,17,18,19:
+        строка - параметризованное SQL выражение (с символами ? для вставки ральных начений).
+        массив - каждый дочерний объект или массив рассматривается как один набор параметров.
+        строка - опционально - имена переменных, разделенные запятой. только для массива объектов. если отсутствует, то используются все имена полей из первого объекта.
+        массив - типы данных для параметров, только если включен режим автоконвертации (useAutoConvert) и базой данных является mysql - она не поддерживает ParameterMetaData. типы указаны в классе java.sql.Types.
+возвращает для типов:
+    для 1,5,6,7,8,9,10,18:
+        для селектов - ответ OBJECT_ARRAY (или в формате сериализации объектов:
+            цифра - 2.
+            цифра - количество строк.
+            цифра - количество столбцов.
+            далее пары значени: имя_столбца:значение.)
+        для остальных типов запросов: цифра - количество измененний.
+    для 11,12,13,14,15,16,17,19:
+        число - сгенерированный ключ
+    для 2,3,4: номер внешней транзакции.
+                    </value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Default execution context.</value>
+                    <value>Default execution context.
+format of incoming messages:
+    number - operation type:
+        1 - execution of commands in one transaction (either all commands are executed, or none),
+        2 - start a new external transaction,
+        3 - complete external transaction with saving,
+        4 - reject and complete the external transaction,
+        5 - execute commands in an external transaction,
+        6 - execute commands without transaction (each command is executed immediately),
+        7 - execute parameterized commands,
+        8 - execute parameterized commands in an external transaction.
+        9 - similar to 7, but accepts an array of objects or an array of arrays,
+        10 - similar to 8, but accepts an array of objects or an array of arrays.
+        11 - similar to 1, but for INSERT only and returns the generated key
+        12 - similar to 5, but for INSERT only and returns the generated key
+        13 - similar to 6, but for INSERT only and returns the generated key
+        14 - similar to 7, but for INSERT only and returns the generated key
+        15 - similar to 8, but for INSERT only and returns the generated key
+        16 - similar to 9, but for INSERT only and returns the generated key
+        17 - similar to 10, but for INSERT only and returns the generated key
+        18 - similar to 9, but intended for INSERT only and forms a multi-line INSERT
+        19 - similar to 14, but intended for INSERT only and forms a multi-line INSERT
+    for 3,4,5,8,10,12,15,17:
+        type - number - external transaction number.
+    for 1,5,6,11,12,13 - line - SQL expression.
+    for 7,8,14,15:
+        string - a parameterized SQL expression (with ? symbols for inserting real values).
+        for the situation if the auto-conversion mode is enabled (useAutoConvert) and the database is mysql, then the pairs of values:
+            either type - values inserted into a parameterized SQL expression.
+            number - parameter type. mysql does not support ParameterMetaData. types are specified in the java.sql.Types class.
+        otherwise:
+            either type - values inserted into a parameterized SQL expression.
+    for 9,10,16,17,18,19:
+        string - a parameterized SQL expression (with ? symbols for inserting real values).
+        array - each child object or array is treated as one set of parameters.
+        string - optional - variable names separated by comma. only for an array of objects. if absent, then all field names from the first object are used.
+        array - data types for parameters, only if autoconversion mode is enabled (useAutoConvert) and the database is mysql - it does not support ParameterMetaData. types are specified in the java.sql.Types class.
+returns for types:
+    for 1,5,6,7,8,9,10,18:
+        for selectors - the answer is OBJECT_ARRAY (or in the object serialization format:
+            number - 2.
+            number - number of lines.
+            number - number of columns.
+            further value pairs: column_name: value.)
+        for other types of requests: number - number of changes.
+    for 11,12,13,14,15,16,17,19:
+        number - generated key
+    for 2,3,4: external transaction number.
+                    </value>
                 </entry>
             </description>
             <minCountSources>1</minCountSources>
@@ -847,6 +943,112 @@ OBJECT_WITH_NULL_AND_BOOLEAN - аналогичен OBJECT, но нулевые 
                                     </element>
                                     <element>
                                         <type>VALUE</type>
+                                        <count>1</count>
+                                        <valueType>OBJECT_ARRAY</valueType>
+                                        <value>[]</value>
+                                    </element>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <optional>true</optional>
+                                            <valueType>STRING</valueType>
+                                            <value>field_name1,field_name2</value>
+                                        </element>
+                                    </elements>
+                                    <element>
+                                        <type>IF</type>
+                                        <checkSetting>type</checkSetting>
+                                        <valueType>STRING</valueType>
+                                        <value>mysqlClient</value>
+                                        <elements>
+                                            <element>
+                                                <type>VALUE</type>
+                                                <count>1</count>
+                                                <valueType>OBJECT_ARRAY</valueType>
+                                                <value>[]</value>
+                                                <description>
+                                                    <entry>
+                                                        <key>ru</key>
+                                                        <value>JDBC Sql типы.</value>
+                                                    </entry>
+                                                    <entry>
+                                                        <key>en</key>
+                                                        <value>JDBC Sql types.</value>
+                                                    </entry>
+                                                </description>
+                                            </element>
+                                        </elements>
+                                    </element>
+                                </elements>
+                            </element>
+                            <element>
+                                <type>IF</type>
+                                <checkValueId>-1</checkValueId>
+                                <valueType>INTEGER</valueType>
+                                <value>18</value>
+                                <elements>
+                                    <element>
+                                        <type>VALUE</type>
+                                        <count>1</count>
+                                        <valueType>STRING</valueType>
+                                        <value>insert into t values (?,?,?)</value>
+                                    </element>
+                                    <element>
+                                        <type>VALUE_ANY</type>
+                                        <count>1</count>
+                                        <valueType>OBJECT_ARRAY</valueType>
+                                        <value>[]</value>
+                                    </element>
+                                    <elements>
+                                        <element>
+                                            <type>VALUE</type>
+                                            <count>1</count>
+                                            <optional>true</optional>
+                                            <valueType>STRING</valueType>
+                                            <value>field_name1,field_name2</value>
+                                        </element>
+                                    </elements>
+                                    <element>
+                                        <type>IF</type>
+                                        <checkSetting>type</checkSetting>
+                                        <valueType>STRING</valueType>
+                                        <value>mysqlClient</value>
+                                        <elements>
+                                            <element>
+                                                <type>VALUE</type>
+                                                <count>1</count>
+                                                <valueType>OBJECT_ARRAY</valueType>
+                                                <value>[]</value>
+                                                <description>
+                                                    <entry>
+                                                        <key>ru</key>
+                                                        <value>JDBC Sql типы.</value>
+                                                    </entry>
+                                                    <entry>
+                                                        <key>en</key>
+                                                        <value>JDBC Sql types.</value>
+                                                    </entry>
+                                                </description>
+                                            </element>
+                                        </elements>
+                                    </element>
+                                </elements>
+                            </element>
+                            <element>
+                                <type>IF</type>
+                                <checkValueId>-1</checkValueId>
+                                <valueType>INTEGER</valueType>
+                                <value>19</value>
+                                <elements>
+                                    <element>
+                                        <type>VALUE</type>
+                                        <count>1</count>
+                                        <valueType>STRING</valueType>
+                                        <value>insert into t values (?,?,?)</value>
+                                    </element>
+                                    <element>
+                                        <type>VALUE_ANY</type>
                                         <count>1</count>
                                         <valueType>OBJECT_ARRAY</valueType>
                                         <value>[]</value>
@@ -2129,6 +2331,188 @@ OBJECT_WITH_NULL_AND_BOOLEAN - аналогичен OBJECT, но нулевые 
                </element>
             </output>
         </type>
+        <type>
+            <type>execute_multiline_insert_in_one_transaction</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>исполнить параметризованные многострочные insert команды.
+на вход передается то же что и execute_with_params_array_in_one_transaction, но перед исполнением происходит генерация нового многострочного инсерта.
+                    </value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>execute parameterized multi-line insert commands.
+The same as execute_with_params_array_in_one_transaction is passed to the input, but before execution a new multi-line insert is generated.
+                    </value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <valueType>STRING</valueType>
+                            <value>insert into t values (?,?,?)</value>
+                        </element>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>1</count>
+                            <valueType>OBJECT_ARRAY</valueType>
+                            <value>[]</value>
+                        </element>
+                        <elements>
+                            <element>
+                                <type>VALUE</type>
+                                <count>1</count>
+                                <optional>true</optional>
+                                <valueType>STRING</valueType>
+                                <value>field_name1,field_name2</value>
+                            </element>
+                        </elements>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>mysqlClient</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE</type>
+                                    <count>1</count>
+                                    <valueType>OBJECT_ARRAY</valueType>
+                                    <value>[]</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>JDBC Sql типы.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>JDBC Sql types.</value>
+                                        </entry>
+                                    </description>
+                                </element>
+                            </elements>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>цифра - количество изменений.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>number - number of changes.</value>
+                        </entry>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>execute_multiline_insert_in_one_transaction_return_generated_key</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Аналогичен execute_multiline_insert_in_one_transaction, но возвращает сгенерированный ключ.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Similar to execute_multiline_insert_in_one_transaction, but returns the generated key.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <valueType>STRING</valueType>
+                            <value>insert into t values (?,?,?)</value>
+                        </element>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>1</count>
+                            <valueType>OBJECT_ARRAY</valueType>
+                            <value>[]</value>
+                        </element>
+                        <elements>
+                            <element>
+                                <type>VALUE</type>
+                                <count>1</count>
+                                <optional>true</optional>
+                                <valueType>STRING</valueType>
+                                <value>field_name1,field_name2</value>
+                            </element>
+                        </elements>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>mysqlClient</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE</type>
+                                    <count>1</count>
+                                    <valueType>OBJECT_ARRAY</valueType>
+                                    <value>[]</value>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>JDBC Sql типы.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>JDBC Sql types.</value>
+                                        </entry>
+                                    </description>
+                                </element>
+                            </elements>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>цифры - сгенерированные ключи.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>numbers - generated keys.</value>
+                        </entry>
+                    </description>
+                </element>
+            </output>
+        </type>
     </types>
 
     <useStorage>true</useStorage>
@@ -2150,102 +2534,14 @@ OBJECT_WITH_NULL_AND_BOOLEAN - аналогичен OBJECT, но нулевые 
         <entry>
             <key>en</key>
             <value>represents the implementation of the client to the database. while the database itself, in some cases, can also be created.
-format of incoming messages:
-    number - operation type:
-        1 - execution of commands in one transaction (either all commands are executed, or none),
-        2 - start a new external transaction,
-        3 - complete external transaction with saving,
-        4 - reject and complete the external transaction,
-        5 - execute commands in an external transaction,
-        6 - execute commands without transaction (each command is executed immediately),
-        7 - execute parameterized commands,
-        8 - execute parameterized commands in an external transaction.
-        9 - similar to 7, but accepts an array of objects or an array of arrays,
-        10 - similar to 8, but accepts an array of objects or an array of arrays.
-        11 - similar to 1, but for INSERT only and returns the generated key
-        12 - similar to 5, but for INSERT only and returns the generated key
-        13 - similar to 6, but for INSERT only and returns the generated key
-        14 - similar to 7, but for INSERT only and returns the generated key
-        15 - similar to 8, but for INSERT only and returns the generated key
-        16 - similar to 9, but for INSERT only and returns the generated key
-        17 - similar to 10, but for INSERT only and returns the generated key
-    for 3,4,5,8,10,12,15,17:
-        type - number - external transaction number.
-    for 1,5,6,11,12,13 - string - SQL expression.
-    for 7,8,14,15:
-        string - parameterized SQL expression (with symbols ? to insert real meanings).
-        for the situation if the autoconvert mode is enabled (useAutoConvert) and the database is mysql, then the pairs of values:
-             either type - values inserted into the parameterized SQL expression.
-             number - parameter type. mysql does not support ParameterMetaData. the types are specified in the java.sql.Types class.
-        otherwise:
-            either type - values inserted into the parameterized SQL expression.
-    for 9,10,16,17:
-        string - parameterized SQL expression (with symbols ? to insert real meanings).
-        array - each child object or array is treated as one set of parameters.
-        string - optional - comma-separated variable names. only for an array of objects. if absent, all field names from the first object are used.
-        array - data types for parameters, only if autoconvert (useAutoConvert) mode is enabled and the database is mysql - it does not support ParameterMetaData. the types are specified in the java.sql.Types class.
-returns for types:
-    for 1,5,6,7,8,9,10,11,12,13,14,15,16,17:
-        for selects - response OBJECT_ARRAY (or in object serialization format:
-            digit - 2.
-            digit - number of lines.
-            digit - number of columns.
-            further value pairs: column_name: value.)
-        for other types of requests: digit - the number of changes.
-    for 2,3,4: external transaction number.
 if the install.sql file is in the working directory, at startup it tries to execute commands in it in one transaction. in this case, if errors occur, displays a message in the console but allows you to continue to work - does not stop working with an error.
-</value>
+            </value>
         </entry>
         <entry>
             <key>ru</key>
             <value>представляет собой реализацию клиента к бд. при этом сама бд, в некоторых случаях, так же может быть создана.
-формат входящих сообщений:
-    число - тип операциии:
-        1 - исполнение команд в одной транзакции (исполняются либо все команды, либо ни одной),
-        2 - начать новую внешнюю транзакцию,
-        3 - завершить с сохранением внешнюю транзакцию,
-        4 - отклонить и завершить внешнюю транзакцию,
-        5 - исполнять команды во внешней транзакции,
-        6 - исполнять команды без транзакий (каждая команда исполняется сразу),
-        7 - исполнить параметризованные команды,
-        8 - исполнить параметризованные команды во внешней транзакции.
-        9 - аналогичен 7, но принимает массив объектов или массив массивов,
-        10 - аналогичен 8, но принимает массив объектов или массив массивов.
-        11 - аналогичен 1, но предназначен только для INSERT и возвращает сгенерированный ключ
-        12 - аналогичен 5, но предназначен только для INSERT и возвращает сгенерированный ключ
-        13 - аналогичен 6, но предназначен только для INSERT и возвращает сгенерированный ключ
-        14 - аналогичен 7, но предназначен только для INSERT и возвращает сгенерированный ключ
-        15 - аналогичен 8, но предназначен только для INSERT и возвращает сгенерированный ключ
-        16 - аналогичен 9, но предназначен только для INSERT и возвращает сгенерированный ключ
-        17 - аналогичен 10, но предназначен только для INSERT и возвращает сгенерированный ключ
-    для 3,4,5,8,10,12,15,17:
-        типа - число - номер внешней транзакции.
-    для 1,5,6,11,12,13 - строка - SQL выражение.
-    для 7,8,14,15:
-        строка - параметризованное SQL выражение (с символами ? для вставки ральных начений).
-        для ситуации если включен режим автоконвертации (useAutoConvert) и базой данных является mysql, то пары значений:
-            либой тип - значения, вставляемые в параметризованное SQL выражение.
-            число - тип параметра. mysql не поддерживает ParameterMetaData. типы указаны в классе java.sql.Types.
-        иначе:
-            либой тип - значения, вставляемые в параметризованное SQL выражение.
-    для 9,10,16,17:
-        строка - параметризованное SQL выражение (с символами ? для вставки ральных начений).
-        массив - каждый дочерний объект или массив рассматривается как один набор параметров.
-        строка - опционально - имена переменных, разделенные запятой. только для массива объектов. если отсутствует, то используются все имена полей из первого объекта.
-        массив - типы данных для параметров, только если включен режим автоконвертации (useAutoConvert) и базой данных является mysql - она не поддерживает ParameterMetaData. типы указаны в классе java.sql.Types.
-возвращает для типов:
-    для 1,5,6,7,8,9,10:
-        для селектов - ответ OBJECT_ARRAY (или в формате сериализации объектов:
-            цифра - 2.
-            цифра - количество строк.
-            цифра - количество столбцов.
-            далее пары значени: имя_столбца:значение.)
-        для остальных типов запросов: цифра - количество измененний.
-    для 11,12,13,14,15,16,17:
-        число - сгенерированный ключ
-    для 2,3,4: номер внешней транзакции.
 если в рабочей директории есть файл install.sql, при старте пытается исполнить команды в нем в одной транзакции. при этом если возникают ошибки, выводит сообщение в консоль но позволяет работать дальше - не прекращает работу с ошибкой.
-</value>
+            </value>
         </entry>
     </help>
 

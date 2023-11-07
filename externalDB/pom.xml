@@ -12,8 +12,8 @@
     <artifactId>externalDB</artifactId>
 
     <properties>
-        <derby.ver>10.11.1.1</derby.ver>
-        <postresql.ver>42.2.4</postresql.ver>
+        <derby.ver>10.14.2.0</derby.ver>
+        <postresql.ver>42.2.24</postresql.ver>
         <mysql.ver>8.0.33</mysql.ver>
         <oracle.ver>21.1.0.0</oracle.ver>
         <db2.ver>11.5.5.0</db2.ver>

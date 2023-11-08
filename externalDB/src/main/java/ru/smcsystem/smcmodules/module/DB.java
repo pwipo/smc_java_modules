@@ -221,6 +221,7 @@ public class DB implements Module {
     }
 
     private void process(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, OperationType operationType, LinkedList<IMessage> messages) throws Exception {
+        externalConfigurationTool.loggerDebug(operationType.name());
         switch (operationType) {
             case EXECUTE_IN_ONE_TRANSACTION:
                 execute(externalConfigurationTool, externalExecutionContextTool, messages, true, false);
@@ -374,11 +375,10 @@ public class DB implements Module {
     }
 
     private void executePreparedStatement(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, LinkedList<IMessage> messages, Connection connection, boolean needRollback, boolean isArray, boolean isUpdateReturnKeys) throws Exception {
-        externalConfigurationTool.loggerTrace("executePreparedStatement");
         int elementId = 0;
         while (!messages.isEmpty()) {
             String sql = ModuleUtils.getString(messages.poll());
-            externalConfigurationTool.loggerTrace(sql);
+            externalConfigurationTool.loggerDebug(sql);
             if (!isArray) {
                 try (PreparedStatement stm = isUpdateReturnKeys ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                     stm.setQueryTimeout(queryTimeout);
@@ -706,11 +706,10 @@ public class DB implements Module {
     }
 
     private List<String> buildInsertMultiline(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, LinkedList<IMessage> messages, Connection connection) throws Exception {
-        externalConfigurationTool.loggerTrace("buildInsertMultiline");
         List<String> result = new LinkedList<>();
         while (!messages.isEmpty()) {
             String sql = ModuleUtils.getString(messages.poll());
-            externalConfigurationTool.loggerTrace(sql);
+            externalConfigurationTool.loggerDebug(sql);
             ObjectArray objectArray = ModuleUtils.deserializeToObject(messages);
             if (objectArray.size() == 0) {
                 externalExecutionContextTool.addError("need ObjectArray params");

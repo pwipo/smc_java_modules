@@ -29,7 +29,7 @@ public class CommandGetter implements Module {
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
         if (Objects.equals(executionContextTool.getType(), "default")) {
-            ModuleUtils.processMessages(configurationTool, executionContextTool, (i, messages) -> {
+            ModuleUtils.processMessages(configurationTool, executionContextTool, 0, (i, messages) -> {
                 while (!messages.isEmpty()) {
                     Type type = Type.values()[ModuleUtils.getNumber(messages.poll()).intValue() - 1];
                     process(executionContextTool, type, messages, 1);

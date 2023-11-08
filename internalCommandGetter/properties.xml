@@ -7,7 +7,7 @@
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
     <className>ru.smcsystem.smcmodules.module.message.getter.CommandGetter</className>
-    <ver>1.1.0</ver>
+    <ver>1.1.1</ver>
     <categories>Java, Utils</categories>
     <copyrightAndLicense>
         <entry>

@@ -944,6 +944,13 @@ public class File implements Module {
         long fileSize = srcFile.length();
         long startPosition = Math.max(0, offset >= 0 ? offset : fileSize + offset);
         int newSize = size > 0 ? size : (int) (fileSize - startPosition);
+        if (newSize == 0) {
+            return;
+        } else if (newSize < 0) {
+            newSize = (int) fileSize;
+            if (newSize < 0)
+                newSize = Integer.MAX_VALUE - 1;
+        }
         if (isText) {
             /*
             if (size == 0) {

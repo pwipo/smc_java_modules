@@ -7,7 +7,7 @@
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
     <className>ru.smcsystem.smcmodules.module.File</className>
-    <ver>1.5.0</ver>
+    <ver>1.5.1</ver>
     <apiVer>1.4.0</apiVer>
     <date>19-10-2023</date>
     <categories>Java, File</categories>

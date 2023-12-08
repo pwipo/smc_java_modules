@@ -433,6 +433,10 @@ public class ValueTypeConverter implements Module {
             return jsonObject;
         objectElement.getFields().forEach(objectField -> {
             String name = objectField.getName();
+            if (objectField.getType() == null) {
+                jsonObject.put(name, (String) null);
+                return;
+            }
             switch (objectField.getType()) {
                 case OBJECT_ARRAY:
                     jsonObject.put(name, toJson((ObjectArray) objectField.getValue(), forceArray));

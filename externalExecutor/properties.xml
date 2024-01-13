@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Executor</className>
-    <ver>1.1.0</ver>
+    <ver>1.1.1</ver>
     <apiVer>1.4.0</apiVer>
     <date>23-10-2023</date>
 
@@ -34,7 +34,8 @@ The program is supplied as is. For problems arising during the operation or inst
         <value>
             <name>commandPath</name>
             <type>STRING</type>
-            <value> </value>
+            <value></value>
+            <subType>STRING</subType>
             <description>
                 <entry>
                     <key>ru</key>
@@ -49,7 +50,8 @@ The program is supplied as is. For problems arising during the operation or inst
         <value>
             <name>workDirectory</name>
             <type>STRING</type>
-            <value> </value>
+            <value></value>
+            <subType>STRING</subType>
             <description>
                 <entry>
                     <key>ru</key>
@@ -64,7 +66,8 @@ The program is supplied as is. For problems arising during the operation or inst
         <value>
             <name>args</name>
             <type>STRING</type>
-            <value> </value>
+            <value></value>
+            <subType>STRING</subType>
             <description>
                 <entry>
                     <key>ru</key>
@@ -80,6 +83,7 @@ The program is supplied as is. For problems arising during the operation or inst
             <name>encoding</name>
             <type>STRING</type>
             <value>UTF-8</value>
+            <subType>STRING</subType>
             <description>
                 <entry>
                     <key>ru</key>

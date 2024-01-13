@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Cycle</className>
-    <ver>1.3.0</ver>
+    <ver>1.3.1</ver>
     <apiVer>1.4.0</apiVer>
     <date>22-10-2023</date>
 
@@ -83,7 +83,8 @@ FOR_EACH_ALL - similar to FOR_EACH, but if the amount of remaining data is less 
         <value>
             <name>idForBreak</name>
             <type>STRING</type>
-            <value> </value>
+            <value></value>
+            <subType>STRING</subType>
             <description>
                 <entry>
                     <key>en</key>
@@ -98,7 +99,8 @@ FOR_EACH_ALL - similar to FOR_EACH, but if the amount of remaining data is less 
         <value>
             <name>idForContinue</name>
             <type>STRING</type>
-            <value> </value>
+            <value></value>
+            <subType>STRING</subType>
             <description>
                 <entry>
                     <key>en</key>

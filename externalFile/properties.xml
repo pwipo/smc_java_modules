@@ -7,7 +7,7 @@
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
     <className>ru.smcsystem.smcmodules.module.File</className>
-    <ver>1.5.1</ver>
+    <ver>1.5.2</ver>
     <apiVer>1.4.0</apiVer>
     <date>19-10-2023</date>
     <categories>Java, File</categories>
@@ -35,6 +35,7 @@ The program is supplied as is. For problems arising during the operation or inst
             <name>rootFolder</name>
             <type>STRING</type>
             <value></value>
+            <subType>STRING</subType>
             <description>
                 <entry>
                     <key>ru</key>

@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Dialogs</className>
-    <ver>1.1.0</ver>
+    <ver>1.1.1</ver>
     <apiVer>1.4.0</apiVer>
     <date>19-10-2023</date>
 
@@ -83,6 +83,7 @@ dialog box type:
             <name>title</name>
             <type>STRING</type>
             <value>[[title]]!</value>
+            <subType>STRING</subType>
             <description>
                 <entry>
                     <key>en</key>

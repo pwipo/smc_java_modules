@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Window</className>
-    <ver>1.1.0</ver>
+    <ver>1.1.1</ver>
     <apiVer>1.4.0</apiVer>
     <date>22-10-2023</date>
 
@@ -118,7 +118,9 @@ The program is supplied as is. For problems arising during the operation or inst
                         <button id="buttonSouth" text="[[button]]"/>
                     </panel>
 
-                </frame>]]></value>
+                </frame>]]>
+            </value>
+            <subType>XML</subType>
             <description>
                 <entry>
                     <key>ru</key>
@@ -225,6 +227,7 @@ The program is supplied as is. For problems arising during the operation or inst
             <name>defaultButton</name>
             <type>STRING</type>
             <value></value>
+            <subType>STRING</subType>
             <description>
                 <entry>
                     <key>ru</key>

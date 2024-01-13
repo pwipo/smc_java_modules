@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.configurationControllerChangeSettingString.ChangeSetting</className>
-    <ver>1.1.0</ver>
+    <ver>1.1.1</ver>
     <apiVer>1.4.0</apiVer>
     <date>23-10-2023</date>
 
@@ -35,6 +35,7 @@ The program is supplied as is. For problems arising during the operation or inst
             <name>key</name>
             <type>STRING</type>
             <value>address</value>
+            <subType>STRING</subType>
             <description>
                 <entry>
                     <key>en</key>
@@ -50,6 +51,7 @@ The program is supplied as is. For problems arising during the operation or inst
             <name>value</name>
             <type>STRING</type>
             <value>8.8.8.8</value>
+            <subType>STRING</subType>
             <description>
                 <entry>
                     <key>en</key>

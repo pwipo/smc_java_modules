@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Get implements Module {
-
     enum ProcessingType {
         EACH_ACTION,
         EACH_SOURCE,
@@ -65,13 +64,11 @@ public class Get implements Module {
     }
 
     private ValueTypes valueType;
-
     private List<List<Integer>> elementIds;
-
     private DefaultValueType defaultValueType;
     private List<Object> defaultValues;
-
     private Pattern base64;
+    private Boolean outputErrorAsData;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -81,6 +78,7 @@ public class Get implements Module {
         String elements = (String) configurationTool.getSetting("ids").orElseThrow(() -> new ModuleException("ids setting not found")).getValue();
         defaultValueType = DefaultValueType.valueOf((String) configurationTool.getSetting("defaultValueType").orElseThrow(() -> new ModuleException("defaultValueType setting")).getValue());
         String defaultValuesStr = (String) configurationTool.getSetting("defaultValues").orElseThrow(() -> new ModuleException("defaultValues setting not found")).getValue();
+        outputErrorAsData = (Boolean) configurationTool.getSetting("outputErrorAsData").orElseThrow(() -> new ModuleException("outputErrorAsData setting not found")).getValue();
         elementIds = new ArrayList<>();
         if (StringUtils.isNotBlank(elements)) {
             for (String element : elements.split(",")) {
@@ -267,7 +265,17 @@ public class Get implements Module {
                 if (messages.isEmpty() && defaultValues.size() > i) {
                     executionContextTool.addMessage(List.of(getFromDefault(i, messagesInput)));
                 } else {
-                    executionContextTool.addMessage(messages.stream().map(IValue::getValue).collect(Collectors.toList()));
+                    if (outputErrorAsData) {
+                        executionContextTool.addMessage(messages.stream().map(IValue::getValue).collect(Collectors.toList()));
+                    } else {
+                        messages.forEach(m -> {
+                            if (MessageType.ERROR.equals(m.getMessageType()) || MessageType.ACTION_ERROR.equals(m.getMessageType())) {
+                                executionContextTool.addError(List.of(m.getValue()));
+                            } else {
+                                executionContextTool.addMessage(List.of(m.getValue()));
+                            }
+                        });
+                    }
                 }
             }
         } else {
@@ -275,7 +283,17 @@ public class Get implements Module {
                 for (int i = 0; i < defaultValues.size(); i++)
                     executionContextTool.addMessage(List.of(getFromDefault(i, messagesInput)));
             } else {
-                executionContextTool.addMessage(messagesInput.stream().map(IValue::getValue).collect(Collectors.toList()));
+                if (outputErrorAsData) {
+                    executionContextTool.addMessage(messagesInput.stream().map(IValue::getValue).collect(Collectors.toList()));
+                } else {
+                    messagesInput.forEach(m -> {
+                        if (MessageType.ERROR.equals(m.getMessageType()) || MessageType.ACTION_ERROR.equals(m.getMessageType())) {
+                            executionContextTool.addError(List.of(m.getValue()));
+                        } else {
+                            executionContextTool.addMessage(List.of(m.getValue()));
+                        }
+                    });
+                }
             }
         }
     }

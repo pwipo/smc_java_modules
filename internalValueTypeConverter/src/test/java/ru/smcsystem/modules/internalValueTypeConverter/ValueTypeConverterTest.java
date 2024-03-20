@@ -1035,7 +1035,7 @@ public class ValueTypeConverterTest {
     }
 
     @Test
-    public void test16() {
+    public void testFromXMLSimple() {
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -1067,6 +1067,11 @@ public class ValueTypeConverterTest {
                                                         "        <nickname>mkyong</nickname>\n" +
                                                         "        <salary>100000</salary>\n" +
                                                         "    </Staff>\n" +
+                                                        "    <requiredModules>\n" +
+                                                        "        <module>CollectionUtils , 1.3.2</module>\n" +
+                                                        "        <module>GoogleSheets , 1.5.1</module>\n" +
+                                                        "        <module>ValueTransformer , 1.1.0</module>\n" +
+                                                        "    </requiredModules>" +
                                                         "</company>"))
                                         ),
                                         ActionType.EXECUTE

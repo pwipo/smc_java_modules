@@ -19,6 +19,7 @@ import ru.smcsystem.api.dto.*;
 import ru.smcsystem.api.enumeration.ActionType;
 import ru.smcsystem.api.enumeration.MessageType;
 import ru.smcsystem.api.enumeration.ValueType;
+import ru.smcsystem.smc.utils.ModuleUtils;
 import ru.smcsystem.test.Process;
 import ru.smcsystem.test.emulate.*;
 
@@ -270,6 +271,7 @@ public class ServerTest {
         settings.put("allowMultipartParsing", new Value("true"));
         settings.put("virtualServerSettings", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
         settings.put("requestType", new Value("OBJECT"));
+        settings.put("fileResponsePieceSize", new Value(1048576));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -355,16 +357,16 @@ public class ServerTest {
     public void process4() throws InterruptedException {
         Map<String, IValue> settings = new HashMap<>(Map.of(
                 "port", new Value(8080),
-                "requestTimeout", new Value( 20000),
+                "requestTimeout", new Value(20000),
                 "countThreads", new Value(10),
-                "backlog", new Value( 0),
+                "backlog", new Value(0),
                 // "mode", new Value(ValueType.STRING, "PASSIVE"),
                 "protocol", new Value("HTTP"),
-                "availablePaths", new Value( ".*"),
-                "keyStoreFileName", new Value( " "),
+                "availablePaths", new Value(".*"),
+                "keyStoreFileName", new Value(" "),
                 "keyStorePass", new Value(" "),
                 "keyPass", new Value(" "),
-                "keyAlias", new Value( " ")
+                "keyAlias", new Value(" ")
         ));
         settings.put("bindAddress", new Value(ValueType.STRING, " "));
         settings.put("sessionTimeout", new Value(ValueType.INTEGER, 30));
@@ -372,6 +374,7 @@ public class ServerTest {
         settings.put("allowMultipartParsing", new Value("true"));
         settings.put("virtualServerSettings", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
         settings.put("requestType", new Value("OBJECT"));
+        settings.put("fileResponsePieceSize", new Value(1048576));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -456,13 +459,13 @@ public class ServerTest {
                 "backlog", new Value(0),
                 // "mode", new Value(ValueType.STRING, "PASSIVE"),
                 "protocol", new Value("VIRTUAL"),
-                "availablePaths", new Value( ".*::https://localhost:8081/test::https://service.smcsystem.ru:8082/store"),
-                "keyStoreFileName", new Value( ""),
-                "keyStorePass", new Value( ""),
+                "availablePaths", new Value(".*::https://localhost:8081/test::https://service.smcsystem.ru:8082/store"),
+                "keyStoreFileName", new Value(""),
+                "keyStorePass", new Value(""),
                 "keyPass", new Value(""),
                 "keyAlias", new Value("")
         ));
-        settings.put("bindAddress", new Value( ""));
+        settings.put("bindAddress", new Value(""));
         settings.put("sessionTimeout", new Value(30));
         settings.put("maxPostSize", new Value(10485760));
         settings.put("allowMultipartParsing", new Value("true"));
@@ -505,6 +508,7 @@ public class ServerTest {
                         , new ObjectField("bindAddress", "")
                 )
         )));
+        settings.put("fileResponsePieceSize", new Value(1048576));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -584,6 +588,172 @@ public class ServerTest {
         thread.join();
 
         process.stop();
+    }
+
+    @Test
+    public void testFastResp() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+        Map<String, IValue> settings = new HashMap<>(Map.of(
+                "port", new Value(8080),
+                "requestTimeout", new Value(20000),
+                "countThreads", new Value(10),
+                "backlog", new Value(0),
+                // "mode", new Value(ValueType.STRING, "PASSIVE"),
+                "protocol", new Value("HTTP"),
+                "availablePaths", new Value(".*::https://localhost:8081/test::https://service.smcsystem.ru:8082/store"),
+                "keyStoreFileName", new Value(""),
+                "keyStorePass", new Value(""),
+                "keyPass", new Value(""),
+                "keyAlias", new Value("")
+        ));
+        settings.put("bindAddress", new Value(""));
+        settings.put("sessionTimeout", new Value(30));
+        settings.put("maxPostSize", new Value(10485760));
+        settings.put("allowMultipartParsing", new Value("true"));
+        settings.put("requestType", new Value("OBJECT"));
+        settings.put("virtualServerSettings", new Value(new ObjectArray()));
+        settings.put("fileResponsePieceSize", new Value(1048576));
+
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        settings,
+                        null,
+                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
+                ),
+                new Server()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                null,
+                null,
+                null,
+                List.of(
+                        (lst) -> {
+                            ObjectElement objectElement = (ObjectElement) ((ObjectArray) lst.get(0)).get(0);
+                            String uri = objectElement.findField("uri").map(ModuleUtils::toString).orElse("");
+                            Long reqId = objectElement.findField("reqId").map(ModuleUtils::getNumber).map(Number::longValue).orElse(-1L);
+                            if(uri.equals("/hello")) {
+                                sendFastResp(process, List.of(
+                                        new Message(MessageType.DATA, new Date(), new Value(reqId)),
+                                        new Message(MessageType.DATA, new Date(), new Value(new ObjectArray(new ObjectElement(new ObjectField("result", "success")))))
+                                ));
+                            }else if(uri.equals("/file")){
+                                sendFastResp(process, List.of(
+                                        new Message(MessageType.DATA, new Date(), new Value(reqId)),
+                                        new Message(MessageType.DATA, new Date(), new Value("file.txt"))
+                                ));
+                            }else{
+                                sendFastResp(process, List.of(
+                                        new Message(MessageType.DATA, new Date(), new Value(reqId)),
+                                        // new Message(MessageType.DATA, new Date(), new Value("success")),
+                                        new Message(MessageType.ERROR, new Date(), new Value("error")),
+                                        new Message(MessageType.ERROR, new Date(), new Value(10))
+                                ));
+                            }
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(200))
+                                            , new Message(MessageType.DATA, new Date(), new Value("hi".getBytes()))
+                                    ),
+                                    ActionType.EXECUTE);
+                        }
+
+                ),
+                "default", "start");
+
+        Thread thread = new Thread(() -> {
+            process.execute(executionContextTool);
+            executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+            executionContextTool.getOutput().clear();
+        });
+        thread.start();
+
+        try {
+            Thread.sleep(1000);
+            System.out.println("Response: " + sendingGetRequest(HttpClientBuilder.create(), "http://localhost:8080/hello"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.sleep(1000);
+            System.out.println("Response: " + sendingGetRequest(HttpClientBuilder.create(), "http://localhost:8080/file"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.sleep(1000);
+            System.out.println("Response: " + sendingGetRequest(HttpClientBuilder.create(), "http://localhost:8080/hello2"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        ExecutionContextToolImpl executionContextTool2 = new ExecutionContextToolImpl(null, null, null, null, "default", "stop");
+        process.execute(executionContextTool2);
+
+        thread.join();
+
+        process.stop();
+    }
+
+    private void sendFastResp(Process process, List<IMessage> messages) {
+        ExecutionContextToolImpl executionContextToolFastResp = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(MessageType.DATA, new Date(), new Value("errorCode")),
+                                                new Message(MessageType.DATA, new Date(), new Value("errorText")),
+                                                new Message(MessageType.DATA, new Date(), new Value("data"))
+                                        ),
+                                        ActionType.EXECUTE)
+                        ),
+                        List.of(
+                                new Action(
+                                        messages,
+                                        ActionType.EXECUTE)
+                        )),
+                null,
+                null,
+                List.of(
+                        list -> {
+                            System.out.println("func1");
+                            System.out.println(list);
+                            ObjectElement objectElement = (ObjectElement) ((ObjectArray) list.get(0)).get(0);
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(String.format("{\"errorCode\":%d,\"errorText\":\"%s\",\"data\":\"%s\"}",
+                                                    objectElement.findField("errorCode").map(ModuleUtils::toNumber).map(Number::intValue).orElse(500),
+                                                    objectElement.findField("errorText").map(ModuleUtils::toString).orElse(""),
+                                                    objectElement.findField("data").map(ModuleUtils::toString).orElse(""))))
+                                    ),
+                                    ActionType.EXECUTE);
+                        },
+                        list -> {
+                            System.out.println("func2");
+                            System.out.println(list);
+                            String path = (String) list.get(0);
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(String.format("generated file for path=%s", path).getBytes()))
+                                    ),
+                                    ActionType.EXECUTE);
+                        }
+                ),
+                "default", "fast_response"
+        );
+        process.execute(executionContextToolFastResp);
+        executionContextToolFastResp.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextToolFastResp.getOutput().clear();
     }
 
 }

@@ -7,4 +7,5 @@ module ru.smcsystem.modules.externalHttpServer {
     requires tomcat.embed.core;
     requires java.management;
     requires ru.smcsystem.utils;
+    requires activation;
 }

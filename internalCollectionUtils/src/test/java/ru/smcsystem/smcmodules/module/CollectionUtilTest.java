@@ -2,9 +2,10 @@ package ru.smcsystem.smcmodules.module;
 
 import org.junit.Test;
 import ru.smcsystem.api.dto.ObjectArray;
+import ru.smcsystem.api.dto.ObjectElement;
+import ru.smcsystem.api.dto.ObjectField;
 import ru.smcsystem.api.enumeration.ActionType;
 import ru.smcsystem.api.enumeration.MessageType;
-import ru.smcsystem.api.enumeration.ValueType;
 import ru.smcsystem.test.Process;
 import ru.smcsystem.test.emulate.*;
 
@@ -669,7 +670,7 @@ public class CollectionUtilTest {
                 ),
                 List.of(
                         params -> {
-                            if (params.size() > 7 || params.size()==1 && params.get(0) instanceof ObjectArray) {
+                            if (params.size() > 7 || params.size() == 1 && params.get(0) instanceof ObjectArray) {
                                 return new Action(
                                         List.of(
                                                 new Message(MessageType.DATA, new Date(), new Value(1))
@@ -897,4 +898,53 @@ public class CollectionUtilTest {
         executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
     }
 
+    @Test
+    public void processFieldValues() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "type", new Value("SIZE")
+                                , "value", new Value("")
+                        ),
+                        null,
+                        null
+                ),
+                new CollectionUtil()
+        );
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(MessageType.DATA, new Date(), new Value(new ObjectArray(new ObjectElement(
+                                                        new ObjectField("field1", "value1"),
+                                                        new ObjectField("field2", 2),
+                                                        new ObjectField("field3", new ObjectElement(
+                                                                new ObjectField("field1", "value11"),
+                                                                new ObjectField("field2", "value21")
+                                                        ))
+                                                ))))
+                                        ),
+                                        ActionType.EXECUTE
+                                )),
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(MessageType.DATA, new Date(), new Value("field1")),
+                                                new Message(MessageType.DATA, new Date(), new Value("field3.field2")),
+                                                new Message(MessageType.DATA, new Date(), new Value("field4;;3"))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))
+                ), null, null, null, "default", "object_field_value");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
+        process.stop();
+    }
 }

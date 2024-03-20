@@ -13,10 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.AbstractProtocol;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
-import ru.smcsystem.api.dto.IValue;
-import ru.smcsystem.api.dto.ObjectArray;
-import ru.smcsystem.api.dto.ObjectElement;
-import ru.smcsystem.api.dto.ObjectField;
+import ru.smcsystem.api.dto.*;
 import ru.smcsystem.api.enumeration.CommandType;
 import ru.smcsystem.api.enumeration.ObjectType;
 import ru.smcsystem.api.exceptions.ModuleException;
@@ -25,23 +22,25 @@ import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.api.tools.execution.ExecutionContextTool;
 import ru.smcsystem.smc.utils.ModuleUtils;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Exchanger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,6 +68,16 @@ public class Server implements Module {
     private Map<String, VirtualServerInfo> virtualServerInfoMap;
     private Protocol protocol;
     private RequestType requestType;
+    private AtomicLong reqIdGenerator;
+    private Map<Long, ResponseObj> mapFastResponse;
+    private Map<Long, HttpServletResponse> mapResponseObj;
+
+    private enum Type {
+        START, STOP, FAST_RESPONSE, FILE_FAST_RESPONSE
+    }
+
+    private Integer fileResponsePieceSize;
+    private MimetypesFileTypeMap mimetypesFileTypeMap;
 
     @Override
     public void start(ConfigurationTool externalConfigurationTool) throws ModuleException {
@@ -86,11 +95,16 @@ public class Server implements Module {
         Integer maxPostSize = (Integer) externalConfigurationTool.getSetting("maxPostSize").orElseThrow(() -> new ModuleException("maxPostSize setting")).getValue();
         Boolean allowMultipartParsing = Boolean.valueOf((String) externalConfigurationTool.getSetting("allowMultipartParsing").orElseThrow(() -> new ModuleException("allowMultipartParsing setting")).getValue());
         String strAddress = (String) externalConfigurationTool.getSetting("bindAddress").orElseThrow(() -> new ModuleException("bindAddress setting")).getValue();
+        fileResponsePieceSize = (Integer) externalConfigurationTool.getSetting("fileResponsePieceSize").orElseThrow(() -> new ModuleException("fileResponsePieceSize setting")).getValue();
         List<String> availablePathsList = Arrays.stream(availablePaths.split("::"))
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.toList());
         ObjectArray virtualServerSettings = (ObjectArray) externalConfigurationTool.getSetting("virtualServerSettings").orElseThrow(() -> new ModuleException("virtualServerSettings setting")).getValue();
         requestType = RequestType.valueOf((String) externalConfigurationTool.getSetting("requestType").orElseThrow(() -> new ModuleException("requestType setting")).getValue());
+        reqIdGenerator = new AtomicLong();
+        reqIdGenerator.compareAndSet(Long.MAX_VALUE, 0);
+        mapFastResponse = new ConcurrentHashMap<>();
+        mapResponseObj = new ConcurrentHashMap<>();
 
         virtualServerInfoMap = new HashMap<>();
         if (protocol == Protocol.VIRTUAL) {
@@ -155,6 +169,23 @@ public class Server implements Module {
         // requestCounter = new AtomicLong();
         requestMap = new ConcurrentHashMap<>(countThreads * 10);
         newRequests = new LinkedList<>();
+
+        mimetypesFileTypeMap = (MimetypesFileTypeMap) MimetypesFileTypeMap.getDefaultFileTypeMap();
+        // if (!mimetypesFileTypeMap.getContentType("1.css").trim().equals("text/css")) {
+        mimetypesFileTypeMap.addMimeTypes("text/csv csv CSV");
+        mimetypesFileTypeMap.addMimeTypes("text/php php PHP");
+        mimetypesFileTypeMap.addMimeTypes("text/css css CSS");
+        mimetypesFileTypeMap.addMimeTypes("application/javascript js JS");
+        mimetypesFileTypeMap.addMimeTypes("application/json json JSON");
+        mimetypesFileTypeMap.addMimeTypes("application/pdf pdf PDF");
+        mimetypesFileTypeMap.addMimeTypes("application/postscript ps PS");
+        mimetypesFileTypeMap.addMimeTypes("application/zip zip ZIP");
+        mimetypesFileTypeMap.addMimeTypes("application/gzip gzip GZIP");
+        mimetypesFileTypeMap.addMimeTypes("application/xml xml XML");
+        mimetypesFileTypeMap.addMimeTypes("audio/ogg ogg OGG");
+        mimetypesFileTypeMap.addMimeTypes("video/webm webm WEBM");
+        mimetypesFileTypeMap.addMimeTypes("image/svg+xml svg SVG");
+        // }
     }
 
     private VirtualServerInfo buildVirtualInfo(ConfigurationTool externalConfigurationTool, String urlOrigin, URL url,
@@ -192,42 +223,57 @@ public class Server implements Module {
     }
 
     @Override
-    public void process(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool) throws ModuleException {
-        int countManagedExecutionContexts = externalExecutionContextTool.getFlowControlTool().countManagedExecutionContexts();
-        if (countManagedExecutionContexts == 0) {
-            if (tomcat != null) {
-                stopServer();
-                externalExecutionContextTool.addMessage("stop server");
-                synchronized (this) {
-                    this.notifyAll();
+    public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
+        ModuleUtils.executor(configurationTool, executionContextTool, -1, null, (ignore, ignore2) -> {
+            if (Objects.equals(executionContextTool.getType(), "default")) {
+                int countManagedExecutionContexts = executionContextTool.getFlowControlTool().countManagedExecutionContexts();
+                if (countManagedExecutionContexts == 0) {
+                    stop(configurationTool, executionContextTool);
+                } else {
+                    start(configurationTool, executionContextTool);
                 }
             } else {
-                externalExecutionContextTool.addError("server already stopped");
-            }
-        } else {
-            if (tomcat != null) {
-                externalExecutionContextTool.addError("server already exist");
-                return;
-            }
-
-            startServer(externalConfigurationTool, externalExecutionContextTool);
-
-            while (tomcat != null) {
-                synchronized (this) {
-                    try {
-                        this.wait(500);
-                    } catch (Exception e) {
-                        // stopServer();
-                        // e.printStackTrace();
-                        // externalExecutionContextTool.addMessage("force stop server");
-                        // break;
-                    }
+                Type type = Type.valueOf(executionContextTool.getType().toUpperCase());
+                switch (type) {
+                    case START:
+                        start(configurationTool, executionContextTool);
+                        break;
+                    case STOP:
+                        stop(configurationTool, executionContextTool);
+                        break;
+                    case FAST_RESPONSE:
+                        fastResponse(configurationTool, executionContextTool);
+                        break;
+                    case FILE_FAST_RESPONSE:
+                        fileFastResponse(configurationTool, executionContextTool);
+                        break;
                 }
-                if (externalExecutionContextTool.isNeedStop()) {
-                    stopServer();
-                    externalExecutionContextTool.addMessage("force stop server");
-                    break;
+            }
+        });
+    }
+
+    private void start(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) {
+        if (tomcat != null) {
+            executionContextTool.addError("server already exist");
+            return;
+        }
+        startServer(configurationTool, executionContextTool);
+        while (tomcat != null) {
+            synchronized (this) {
+                try {
+                    this.wait(500);
+                } catch (Exception e) {
+                    // stopServer();
+                    // e.printStackTrace();
+                    // externalExecutionContextTool.addMessage("force stop server");
+                    // break;
                 }
+            }
+            if (executionContextTool.isNeedStop()) {
+                stopServer();
+                executionContextTool.addMessage("force stop server");
+                break;
+            }
                 /*
                 try {
                     Thread.sleep(100);
@@ -238,9 +284,209 @@ public class Server implements Module {
                     break;
                 }
                 */
+        }
+    }
+
+    private void stop(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) {
+        if (tomcat != null) {
+            stopServer();
+            executionContextTool.addMessage("stop server");
+            synchronized (this) {
+                this.notifyAll();
+            }
+        } else {
+            executionContextTool.addError("server already stopped");
+        }
+    }
+
+    private void fastResponse(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) {
+        if (tomcat == null) {
+            executionContextTool.addError("server not started");
+            return;
+        }
+        Optional<LinkedList<IMessage>> names = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(0));
+        if (names.isEmpty() || names.get().size() < 3) {
+            executionContextTool.addError("need 3 field names");
+            return;
+        }
+        String fieldErrorCode = ModuleUtils.getString(names.get().get(0));
+        String fieldErrorText = ModuleUtils.getString(names.get().get(1));
+        String fieldData = ModuleUtils.getString(names.get().get(2));
+        if (fieldErrorCode == null || fieldErrorText == null || fieldData == null) {
+            executionContextTool.addError("wrong field names");
+            return;
+        }
+        Long reqId = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(1)).map(l -> ModuleUtils.getNumber(l.poll())).map(Number::longValue).orElse(null);
+        if (reqId == null) {
+            executionContextTool.addError("need reqId");
+            return;
+        }
+        IAction a = ModuleUtils.getLastActionExecuteWithMessagesFromCommands(executionContextTool.getCommands(2)).orElse(null);
+
+        int errorCode = 0;
+        String errorText = null;
+        ObjectField data = null;
+        String mimeType = "application/json";
+        byte[] content = null;
+        String path = null;
+
+        boolean errors = false;
+        // if (a == null) {
+        //     executionContextTool.addError("no data");
+        //     return;
+        // }
+
+        List<IMessage> lst = ModuleUtils.getErrors(a);
+        errors = !lst.isEmpty();
+        if (errors) {
+            errorText = ModuleUtils.toString(lst.get(0));
+            errorCode = -1;
+            if (lst.size() > 1 && ModuleUtils.isNumber(lst.get(1)))
+                errorCode = ModuleUtils.getNumber(lst.get(1)).intValue();
+        } else {
+            lst = ModuleUtils.getData(a);
+            if (!lst.isEmpty()) {
+                IMessage m = lst.get(0);
+                if (ModuleUtils.isObjectArray(m)) {
+                    data = new ObjectField(fieldData, ModuleUtils.getObjectArray(m));
+                } else if (ModuleUtils.isBytes(m)) {
+                    content = ModuleUtils.getBytes(m);
+                    mimeType = "application/octet-stream";
+                    try (ByteArrayInputStream bais = new ByteArrayInputStream((byte[]) content); InputStream is = new BufferedInputStream(bais)) {
+                        String mimeTypeNew = URLConnection.guessContentTypeFromStream(is);
+                        if (mimeTypeNew != null)
+                            mimeType = mimeTypeNew;
+                    } catch (Exception e) {
+                        configurationTool.loggerWarn("error while get mime type fore bytes" + e.getMessage());
+                    }
+                } else if (lst.size() == 1 && ModuleUtils.isString(m)) {
+                    path = ModuleUtils.getString(m);
+                    mimeType = URLConnection.guessContentTypeFromName(path);
+                    if (mimeType == null) {
+                        mimeType = mimetypesFileTypeMap.getContentType(path);
+                        if (mimeType == null)
+                            mimeType = "text/plain";
+                    }
+                } else {
+                    data = new ObjectField(fieldData, new ObjectArray(
+                            lst.stream()
+                                    .filter(m2 -> !ModuleUtils.isObjectArray(m2))
+                                    .collect(Collectors.toList()),
+                            ObjectType.VALUE_ANY
+                    ));
+                }
+            } else {
+                errorCode = -1;
+                errorText = "no data";
             }
         }
 
+        int resultCode = errors ? 500 : 200;
+        String headerContentType = "Content-Type=" + mimeType;
+        if (content == null && path == null) {
+            ObjectElement objectElement = new ObjectElement(new ObjectField(fieldErrorCode, errorCode));
+            if (errorText != null)
+                objectElement.getFields().add(new ObjectField(fieldErrorText, errorText));
+            if (data != null)
+                objectElement.getFields().add(data);
+            Optional<byte[]> optResult = ModuleUtils.executeAndGetMessages(executionContextTool, 0, List.of(new ObjectArray(objectElement)))
+                    .map(l -> {
+                        IMessage m = l.get(0);
+                        byte[] result = ModuleUtils.getBytes(m);
+                        if (result == null)
+                            result = ModuleUtils.toString(m).getBytes();
+                        return result;
+                    });
+            if (optResult.isPresent()) {
+                content = optResult.get();
+            } else {
+                resultCode = 500;
+                headerContentType = null;
+                content = "error convert response".getBytes();
+            }
+        }
+        List<String> headers = executionContextTool.countSource() > 3 ?
+                ModuleUtils.getLastActionExecuteWithMessagesFromCommands(executionContextTool.getCommands(3))
+                        .map(IAction::getMessages)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .filter(ModuleUtils::isString)
+                        .map(ModuleUtils::getString)
+                        .flatMap(s -> Arrays.stream(s.split("\n")))
+                        .map(String::trim)
+                        .filter(s -> !s.isBlank())
+                        .collect(Collectors.toList()) :
+                new ArrayList<>();
+        if (headerContentType != null)
+            headers.add(headerContentType);
+        fastResponse(configurationTool, executionContextTool, reqId, resultCode, headers, content, path, mimeType, 1);
+    }
+
+    private void fastResponse(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, long reqId, int resultCode, List<String> headers, byte[] content, String path, String mimeType, int startEcId) {
+        ResponseObj responseObj = new ResponseObj(reqId, resultCode, headers, content, path, executionContextTool, startEcId);
+        try {
+            HttpServletResponse resp = mapResponseObj.get(reqId);
+            if (resp != null) {
+                mapFastResponse.put(reqId, responseObj);
+                try {
+                    resultCode = handleResponse(resp, responseObj);
+                } catch (Exception e) {
+                    configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+                }
+            }
+            configurationTool.loggerTrace(String.format("reqId=%d, code=%d, content-type=%s, path=%s", reqId, resultCode, mimeType, path));
+            executionContextTool.addMessage(resultCode);
+            headers.forEach(executionContextTool::addMessage);
+            if (path != null) {
+                executionContextTool.addMessage(path);
+            } else {
+                executionContextTool.addMessage(content);
+            }
+        } finally {
+            responseObj.setWork(false);
+        }
+    }
+
+    private void fileFastResponse(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) {
+        if (tomcat == null) {
+            executionContextTool.addError("server not started");
+            return;
+        }
+        Long reqId = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(0)).map(l -> ModuleUtils.getNumber(l.poll())).map(Number::longValue).orElse(null);
+        if (reqId == null) {
+            executionContextTool.addError("need reqId");
+            return;
+        }
+        String path = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(1)).map(l -> ModuleUtils.getString(l.poll())).orElse(null);
+
+        String mimeType = "application/json";
+        byte[] content = null;
+        List<String> headers = new ArrayList<>();
+        if (path != null) {
+            mimeType = URLConnection.guessContentTypeFromName(path);
+            if (mimeType == null) {
+                mimeType = mimetypesFileTypeMap.getContentType(path);
+                if (mimeType == null)
+                    mimeType = "text/plain";
+            }
+            if (executionContextTool.countSource() > 2) {
+                headers.addAll(ModuleUtils.getLastActionExecuteWithMessagesFromCommands(executionContextTool.getCommands(2))
+                        .map(IAction::getMessages)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .filter(ModuleUtils::isString)
+                        .map(ModuleUtils::getString)
+                        .flatMap(s -> Arrays.stream(s.split("\n")))
+                        .map(String::trim)
+                        .filter(s -> !s.isBlank())
+                        .collect(Collectors.toList()));
+            }
+            headers.add("Content-Type=" + mimeType);
+        } else {
+            content = "File not found".getBytes();
+        }
+        int resultCode = path != null ? 200 : 500;
+        fastResponse(configurationTool, executionContextTool, reqId, resultCode, headers, content, path, mimeType, 0);
     }
 
     @Override
@@ -252,6 +498,8 @@ public class Server implements Module {
         requestMap = null;
         stopServer();
         virtualServerInfoMap = null;
+        mapFastResponse = null;
+        reqIdGenerator = null;
     }
 
     private void addServlet(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, VirtualServerInfo virtualServerInfo, Method createDefaultRealm) throws InvocationTargetException, IllegalAccessException {
@@ -312,13 +560,12 @@ public class Server implements Module {
         Set<Map.Entry<Integer, Pattern>> patternEntries = virtualServerInfo.getPatterns() != null ? virtualServerInfo.getPatterns().entrySet() : null;
         HttpServlet servlet = new HttpServlet() {
             protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-                List<Object> response = null;
+                ResponseObj responseObj = null;
+                long reqId = 0;
                 try {
                     // req.getSession().setMaxInactiveInterval(requestTimeout);
                     // System.out.println(req.getSession().getMaxInactiveInterval());
-
                     long startTime = System.currentTimeMillis();
-
                     List<Integer> idsForExecute = null;
                     if (patternEntries != null) {
                         String s = req.getRequestURI();
@@ -333,40 +580,76 @@ public class Server implements Module {
                                 .collect(Collectors.toList());
                     }
                     if (idsForExecute == null) {
-                        handleResponse(resp, List.of(404, "Page not found"));
+                        responseObj = new ResponseObj(null, 404, null, "Page not found".getBytes(), null, null, 1);
                         return;
                     }
                     int idForGetResponse = idsForExecute.get(idsForExecute.size() - 1);
 
-                    List<Object> request = createRequest(req, virtualServerInfo.getRequestType());
+                    Map.Entry<Long, List<Object>> requestEntry = createRequest(req, virtualServerInfo.getRequestType());
+                    reqId = requestEntry.getKey();
+                    mapResponseObj.put(reqId, resp);
                     long threadId = externalExecutionContextTool.getFlowControlTool().executeParallel(
                             CommandType.EXECUTE,
                             idsForExecute,
-                            request,
+                            requestEntry.getValue(),
                             null,
                             virtualServerInfo.getRequestTimeout());
+                    boolean mapFastResponseArrived = false;
                     try {
                         do {
-                            synchronized (this) {
-                                try {
-                                    this.wait(25);
-                                } catch (InterruptedException e) {
-                                }
+                            try {
+                                Thread.sleep(50);
+                            } catch (InterruptedException ignore) {
                             }
-                        } while (!externalExecutionContextTool.isNeedStop() &&
-                                externalExecutionContextTool.getFlowControlTool().isThreadActive(threadId) &&
-                                (virtualServerInfo.getRequestTimeout() <= 0 || virtualServerInfo.getRequestTimeout() > System.currentTimeMillis() - startTime));
-                        response = externalExecutionContextTool.getFlowControlTool().getMessagesFromExecuted(threadId, idForGetResponse).stream()
-                                .flatMap(a -> a.getMessages().stream().map(IValue::getValue))
-                                .collect(Collectors.toList());
+                        } while (externalExecutionContextTool.getFlowControlTool().isThreadActive(threadId) &&
+                                !externalExecutionContextTool.isNeedStop() &&
+                                (virtualServerInfo.getRequestTimeout() <= 0 || virtualServerInfo.getRequestTimeout() > System.currentTimeMillis() - startTime) &&
+                                !mapFastResponse.containsKey(reqId));
+                        if (mapFastResponse.containsKey(reqId)) {
+                            mapFastResponseArrived = true;
+                            responseObj = mapFastResponse.remove(reqId);
+                            if (responseObj != null && !externalExecutionContextTool.isNeedStop() &&
+                                    (virtualServerInfo.getRequestTimeout() <= 0 || virtualServerInfo.getRequestTimeout() > System.currentTimeMillis() - startTime))
+                                responseObj.waitWork();
+                        } else {
+                            List<IMessage> response = externalExecutionContextTool.getFlowControlTool().getMessagesFromExecuted(threadId, idForGetResponse).stream()
+                                    .flatMap(a -> a.getMessages().stream()/*.map(IValue::getValue)*/)
+                                    .collect(Collectors.toList());
+                            if (response.size() < 2) {
+                                responseObj = new ResponseObj(null, 500, null, null, null, null, 1);
+                            } else {
+                                Number codeObject = ModuleUtils.getNumber(response.get(0));
+                                int code = codeObject != null ? codeObject.intValue() : 500;
+                                IMessage responseBodyObject = response.get(response.size() - 1);
+                                byte[] responseBody = ModuleUtils.isString(responseBodyObject) ?
+                                        (ModuleUtils.getString(responseBodyObject)).getBytes() :
+                                        (ModuleUtils.isBytes(responseBodyObject) ? ModuleUtils.getBytes(responseBodyObject) : null);
+                                List<String> headers = new ArrayList<>(response.size());
+                                for (int i = 1; i < response.size() - 1; i++)
+                                    headers.add(response.get(i).toString());
+                                responseObj = new ResponseObj(null, code, headers, responseBody, null, null, 1);
+                            }
+                        }
                     } finally {
-                        externalExecutionContextTool.getFlowControlTool().releaseThread(threadId);
+                        mapFastResponse.remove(reqId);
+                        if (!mapFastResponseArrived) {
+                            externalExecutionContextTool.getFlowControlTool().releaseThread(threadId);
+                        } else {
+                            externalExecutionContextTool.getFlowControlTool().releaseThreadCache(threadId);
+                        }
                     }
                 } catch (Exception e) {
                     externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                     // externalExecutionContextTool.addError(e.getLocalizedMessage());
                 } finally {
-                    handleResponse(resp, response);
+                    if (mapResponseObj.remove(reqId) != null && (responseObj == null || !responseObj.isFastResponse())) {
+                        try {
+                            handleResponse(resp, responseObj);
+                        } catch (Exception e) {
+                            externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+                        }
+                    }
+                    externalConfigurationTool.loggerTrace("End response " + reqId);
                 }
             }
         };
@@ -417,7 +700,6 @@ public class Server implements Module {
         } finally {
             // thread.setContextClassLoader(contextClassLoader);
         }
-
     }
 
     private void stopServer() {
@@ -432,7 +714,7 @@ public class Server implements Module {
         }
     }
 
-    private List<Object> createRequest(HttpServletRequest req, RequestType requestType) throws IOException, ServletException {
+    private Map.Entry<Long, List<Object>> createRequest(HttpServletRequest req, RequestType requestType) throws IOException, ServletException {
         List<Object> request = new LinkedList<>();
 
         List<Map.Entry<String, String>> parameters = new LinkedList<>();
@@ -450,6 +732,7 @@ public class Server implements Module {
             mainHeaders.put(headerName, req.getHeader(headerName));
         }
 
+        long reqId = -1;
         if (requestType == RequestType.LIST) {
             request.add(req.getMethod());
             request.add(req.getRequestURI());
@@ -467,12 +750,9 @@ public class Server implements Module {
             if (ServletFileUpload.isMultipartContent(req)) {
                 request.add(req.getParts().size());
                 for (Part part : req.getParts()) {
-
                     Map<String, String> headers = new HashMap<>();
-                    for (String headerName : part.getHeaderNames()) {
+                    for (String headerName : part.getHeaderNames())
                         headers.put(headerName, part.getHeader(headerName));
-                    }
-
                     byte[] bytes = IOUtils.toByteArray(part.getInputStream());
                     if (bytes != null && bytes.length > 0) {
                         request.add(headers.size());
@@ -486,11 +766,13 @@ public class Server implements Module {
                     request.add(bytes);
             }
         } else {
+            reqId = reqIdGenerator.incrementAndGet();
             ObjectElement objectElement = new ObjectElement(
                     new ObjectField("method", req.getMethod())
                     , new ObjectField("uri", req.getRequestURI())
                     , new ObjectField("remoteAddr", req.getRemoteAddr())
                     , new ObjectField("sessionId", req.getSession().getId())
+                    , new ObjectField("reqId", reqId)
             );
             if (!parameters.isEmpty())
                 objectElement.getFields().add(new ObjectField("params",
@@ -502,61 +784,94 @@ public class Server implements Module {
                         new ObjectElement(mainHeaders.entrySet().stream()
                                 .map(e -> new ObjectField(e.getKey(), e.getValue()))
                                 .collect(Collectors.toList()))));
+            byte[] bytes = null;
             if (ServletFileUpload.isMultipartContent(req)) {
                 List<ObjectElement> parts = new ArrayList<>(req.getParts().size());
                 for (Part part : req.getParts()) {
                     Map<String, String> headers = new HashMap<>();
                     for (String headerName : part.getHeaderNames())
                         headers.put(headerName, part.getHeader(headerName));
-
-                    byte[] bytes = IOUtils.toByteArray(part.getInputStream());
+                    bytes = IOUtils.toByteArray(part.getInputStream());
                     if (bytes != null && bytes.length > 0) {
-                        ObjectElement objectElementPart = new ObjectElement(new ObjectField("data", bytes));
-                        if (!headers.isEmpty())
+                        ObjectElement objectElementPart = new ObjectElement();
+                        objectElementPart.getFields().add(new ObjectField("name", part.getName()));
+                        objectElementPart.getFields().add(new ObjectField("contentType", part.getContentType()));
+                        if (!headers.isEmpty()) {
                             objectElementPart.getFields().add(new ObjectField("headers",
                                     new ObjectElement(headers.entrySet().stream()
                                             .map(e -> new ObjectField(e.getKey(), e.getValue()))
                                             .collect(Collectors.toList()))));
+                        }
+                        objectElementPart.getFields().add(new ObjectField("data", bytes));
                         parts.add(objectElementPart);
                     }
                 }
                 if (!parts.isEmpty())
-                    objectElement.getFields().add(new ObjectField("data", new ObjectArray((List) parts, ObjectType.OBJECT_ELEMENT)));
+                    objectElement.getFields().add(new ObjectField("multipart", new ObjectArray((List) parts, ObjectType.OBJECT_ELEMENT)));
             } else {
-                byte[] bytes = IOUtils.toByteArray(req.getInputStream());
-                if (bytes != null && bytes.length > 0)
-                    objectElement.getFields().add(new ObjectField("data", bytes));
+                bytes = IOUtils.toByteArray(req.getInputStream());
             }
-
+            if (bytes != null && bytes.length > 0)
+                objectElement.getFields().add(new ObjectField("data", bytes));
             request.add(new ObjectArray(objectElement));
         }
 
-        return request;
+        return Map.entry(reqId, request);
     }
 
-    private void handleResponse(HttpServletResponse resp, List<Object> response) throws IOException {
-        if (response == null || response.size() < 2)
-            response = List.of(500, "");
-
-        Object codeObject = response.get(0);
-        int code = codeObject instanceof Number ? ((Number) codeObject).intValue() : 500;
-
-        Object responseBodyObject = response.get(response.size() - 1);
-        byte[] responseBody = responseBodyObject instanceof byte[] ? (byte[]) responseBodyObject : (responseBodyObject instanceof String ? ((String) responseBodyObject).getBytes() : "".getBytes());
-
-        for (int i = 1; i < response.size() - 1; i++) {
-            String headerText = (String) response.get(i);
+    private int handleResponse(HttpServletResponse resp, ResponseObj responseObj) throws IOException {
+        if (responseObj == null) {
+            resp.setStatus(500);
+            return 500;
+        }
+        int code = responseObj.getResultCode();
+        responseObj.getHeaders().forEach(headerText -> {
             String[] split = headerText.split("=", 2);
             // h.getResponseHeaders().add(split[0].trim(), split[1].trim());
             if (split.length > 1)
                 resp.setHeader(split[0].trim(), split[1].trim());
+        });
+        if (responseObj.getPath() != null) {
+            byte[] bytes = responseObj.getBytes(0, fileResponsePieceSize);
+            Long size;
+            if (bytes != null && bytes.length == fileResponsePieceSize) {
+                size = responseObj.getSize();
+                if (size != null) {
+                    resp.setContentLengthLong(size);
+                } else {
+                    size = Long.MAX_VALUE;
+                }
+                try {
+                    ServletOutputStream outputStream = resp.getOutputStream();
+                    outputStream.write(bytes);
+                    for (long position = fileResponsePieceSize; position < size; position += fileResponsePieceSize) {
+                        bytes = responseObj.getBytes(position, fileResponsePieceSize);
+                        if (bytes == null)
+                            break;
+                        outputStream.write(bytes);
+                        if (bytes.length != fileResponsePieceSize)
+                            break;
+                    }
+                    outputStream.flush();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (bytes != null) {
+                writeBytesResponse(resp, bytes);
+            } else {
+                code = 404;
+            }
+        } else {
+            writeBytesResponse(resp, responseObj.getContent());
         }
-
-        //Set the response header status and length
         resp.setStatus(code);
+        return code;
+    }
 
+    private void writeBytesResponse(HttpServletResponse resp, byte[] responseBody) throws IOException {
+        if (responseBody == null || responseBody.length == 0)
+            return;
         resp.setContentLength(responseBody.length);
-
         ServletOutputStream outputStream = resp.getOutputStream();
         outputStream.write(responseBody);
         outputStream.flush();

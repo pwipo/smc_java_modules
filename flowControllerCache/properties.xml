@@ -3,7 +3,7 @@
 
     <uuid>Cache</uuid>
     <provider>java</provider>
-    <ver>1.1.0</ver>
+    <ver>1.2.0</ver>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
@@ -103,11 +103,101 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Контекст исполнения по умолчанию.</value>
+                    <value>Контекст исполнения по умолчанию.
+Работает в двух режимах: как обычный кеш и как кеширующий прокси для другого модуля. Эти два режима можно использовать одновременно.
+Для работы в качестве кеширующего прокси необходимо подключить 1 управляемый контекст исполнения (кешируемый объект).
+Алгоритм следующий - для поступающего набора данных от каждого источника (каждого действия) ищется соответствие в кэше, далее:
+    если находится, возвращается результат из него,
+    если нет, то вызывается первый управляемый контекст исполнения, после исполнения, его результаты заносятся в кэш и возвращаются в виде ответа.
+Если нет управляемых контекстов, то работает в качестве обычного кеша.
+
+Все поступающие значения воспринимает как команды для управления кэшем:
+    полечить или загрузить.
+        Параметры:
+            цифра 0 (опционально, не указывается если есть контекст).
+            значения - ключ
+        Если значения в кеше нет, то вызывает первый контекст.
+        Возвращает:
+            значения
+    возвращает количество данных в кэше.
+        Параметры:
+            цифра 1
+    удаляет кэш.
+        Параметры:
+            цифра 2
+        Возвращает:
+            старый размер.
+            новый размер (0).
+    Получить значение элемента.
+        Параметры:
+            цифра 3
+            строка - ключ
+        Возвращает:
+            значения
+    Установить значение элемента.
+        Параметры:
+            цифра 4
+            строка - ключ
+            остальные значения действия рассматриваются как значение элемента
+    Удалить элемент.
+        Параметры:
+            цифра 5
+            строка - ключ
+    Получить все ключи.
+        Параметры:
+            цифра 6
+        Возвращает (для каждого элемента в кэше):
+            строка ключ.
+                    </value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Default execution context.</value>
+                    <value>Default execution context.
+Works in two modes: as a normal cache and as a caching proxy for another module. these two modes can be used simultaneously.
+To work as a caching proxy, you need to connect 1 managed execution context (cached object).
+The algorithm is as follows - for an incoming data set from each source (each action), a match is sought in the cache, then:
+    if found, the result is returned from it,
+    if not, then the first managed execution context is called, after execution, its results are cached and returned as a response.
+If there are no managed contexts, then it works as a regular cache.
+
+All incoming values are treated as commands for managing the cache:
+    treat or load.
+         Options:
+             number 0 (optional, not specified if there is a context).
+             values - key
+         If the value is not in the cache, then the first context is called.
+         Returns:
+             values
+    returns the amount of data in the cache.
+        Parameters:
+            digit 1
+    deletes the cache.
+        Parameters:
+            digit 2
+        Returns:
+            old size.
+            new size (0).
+    Get the value of an item.
+        Parameters:
+            digit 3
+            string - key
+        Returns:
+            meaning
+    Set the value of the element.
+        Parameters:
+            digit 4
+            string - key
+            the rest of the action values are treated as the element value
+    Remove item.
+        Parameters:
+            digit 5
+            string - key
+    Get all the keys.
+        Parameters:
+            digit 6
+        Returns (for each item in the cache):
+            string key.
+                    </value>
                 </entry>
             </description>
             <minCountSources>1</minCountSources>
@@ -334,6 +424,116 @@ The program is supplied as is. For problems arising during the operation or inst
                 </element>
             </output>
         </type>
+        <type>
+            <type>get_or_load_file_part</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Аналогичен контексту исполнения по умолчанию, но ключом является первый параметр.
+Только для байтовых массивов (файлов) и как правило работает в связки с модулем файл.
+Получает параметры: путь, позицию в байтовом массиве (опционально) и размер (опционально).
+Они используются для получения части файла.
+Если в кеше нет данных, то вызывается первый контекст которому дублируются входящие параметры. Ожидает байтовый массив.
+                    </value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Similar to the default execution context, but the key is the first parameter.
+Only for byte arrays (files) and usually works in conjunction with the file module.
+Receives the parameters: path, position in the byte array (optional) and size (optional).
+They are used to get part of a file.
+If there is no data in the cache, then the first context is called and the incoming parameters are duplicated. Expects a byte array.
+                    </value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>1</maxCountSources>
+            <minCountManagedExecutionContexts>1</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>1</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>1</count>
+                            <valueType>STRING</valueType>
+                            <value>file.txt</value>
+                        </element>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <optional>true</optional>
+                            <valueType>LONG</valueType>
+                            <value>0</value>
+                        </element>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <optional>true</optional>
+                            <valueType>INTEGER</valueType>
+                            <value>1024</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <valueType>BYTES</valueType>
+                    <value>AQIDBAU=</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>get_size</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Получить размер байтового массива (значения).
+Если в кеше нет данных, то вызывается первый контекст (если есть) которому передается входящий параметр (путь).
+Получает число, которое передает в качестве результата.
+                    </value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Get the size of the byte array (values).
+If there is no data in the cache, then the first context (if any) is called, to which the incoming parameter (path) is passed.
+Gets a number that is passed as a result.
+                    </value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>1</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <valueType>STRING</valueType>
+                            <value>key</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <valueType>LONG</valueType>
+                    <value>1024</value>
+                </element>
+            </output>
+        </type>
     </types>
 
     <useStorage>false</useStorage>
@@ -356,43 +556,6 @@ The program is supplied as is. For problems arising during the operation or inst
             <key>en</key>
             <value>The module provides a caching function.
 Stores pairs: key and list of values.
-Works in two modes: as a normal cache and as a caching proxy for another module. these two modes can be used simultaneously.
-To work as a caching proxy, you need to connect 1 managed execution context (cached object).
-The algorithm is as follows - for an incoming data set from each source (each action), a match is sought in the cache, then:
-    if found, the result is returned from it,
-    if not, then the first managed execution context is called, after execution, its results are cached and returned as a response.
-If there are no managed contexts, then it works as a regular cache.
-all incoming values are treated as commands for managing the cache:
-    returns the amount of data in the cache.
-        Parameters:
-            digit 1
-    deletes the cache.
-        Parameters:
-            digit 2
-        Returns:
-            old size.
-            new size (0).
-    Get the value of an item.
-        Parameters:
-            digit 3
-            string - key
-        Returns:
-            meaning
-    Set the value of the element.
-        Parameters:
-            digit 4
-            string - key
-            the rest of the action values are treated as the element value
-    Remove item.
-        Parameters:
-            digit 5
-            string - key
-    Get all the keys.
-        Parameters:
-            digit 6
-        Returns (for each item in the cache):
-            string key.
-
 if the items in the cache become more cacheSize, then the oldest are deleted (as a rule).
 if expireTime is greater than zero, then the expiration time limit is used. old items are removed.
 The age of elements is determined by the time when they were last accessed.
@@ -401,49 +564,12 @@ if cacheNull is set, then null (empty) values are also saved.
         </entry>
         <entry>
             <key>ru</key>
-            <value>Модуль предостувляет собой кеш.
+            <value>Модуль представляет собой кеш.
 Хранит пары: ключ и список значений.
-Работает в двух режимах: как обычный кеш и как кеширующий прокси для другого модуля. эти два режима можно использовать одновременно.
-Для работы в качестве кеширующего прокси необходимо подключить 1 управляемый контекст исполнения (кешируемый объект).
-Алгоритм следующий - для поступающего набора данных от каждого источника (каждого действия) ищется соответствие в кэше, далее:
-    если находится, возвращается результат из него,
-    если нет, то вызывается первый управляемый контекст исполнения, после исполнения, его результаты заносятся в кэш и возвращаются в виде ответа.
-Если нет управляемых контекстов то работает в качестве обычного кеша.
-все поступающие значения воспринимает как команды для управления кэшем:
-    возвращает количество данных в кэше.
-        Параметры:
-            цифра 1
-    удаляет кэш.
-        Параметры:
-            цифра 2
-        Возвращает:
-            старый размер.
-            новый размер (0).
-    Получить значение элемента.
-        Параметры:
-            цифра 3
-            строка - ключ
-        Возвращает:
-            значения
-    Установить значение элемента.
-        Параметры:
-            цифра 4
-            строка - ключ
-            остальные значения действия рассматриваются как значение элемента
-    Удалить элемент.
-        Параметры:
-            цифра 5
-            строка - ключ
-    Получить все ключи.
-        Параметры:
-            цифра 6
-        Возвращает (для каждого елемента в кэше):
-            строка ключ.
-
-если элементов в кэше становится больше cacheSize то удаляются самые старые (как правило).
-если expireTime больше нуля то используется ограничение по времени жизни. старые элементы удаляются.
+Если элементов в кэше становится больше cacheSize, то удаляются самые старые (как правило).
+Если expireTime больше нуля, то используется ограничение по времени жизни. Старые элементы удаляются.
 Старость элементов определяются по тому когда последний раз к ним обращались.
-если установлен cacheNull, то нулевые (пустые) значения так же сохраняются.
+Если установлен cacheNull, то нулевые (пустые) значения так же сохраняются.
             </value>
         </entry>
     </help>
@@ -709,5 +835,6 @@ if cacheNull is set, then null (empty) values are also saved.
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAArklEQVR4nO2VQQpCMQwF5xIK3v8mlq7c6cLjPBEUumjTfmxSFx0IZFH40yQ/hY1NBtSJhCMaiGuEwDJUCPTacQPOngIaiCdw8RaocQLuHhIaFOBT/kfRjnCBr8TUwVVDIBv7IEQgGfsgRMBiqkBq3CysBSVLWtCqxoxzVXJRSu/80NDJIa/eXkFRrYKCwyy/J1tAuwX8+xBq1W+YAj/efCv0w2o9mndfsuScb3jzAveCObNhYc6LAAAAAElFTkSuQmCC</icon>
 
 </properties>

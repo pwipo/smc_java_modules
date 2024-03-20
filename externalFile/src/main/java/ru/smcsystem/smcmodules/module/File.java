@@ -87,7 +87,8 @@ public class File implements Module {
         dirNamesSortDate,
         removeOrWait,
         readOrWait,
-        writeOrWait
+        writeOrWait,
+        size
     }
 
     private Type type;
@@ -271,8 +272,12 @@ public class File implements Module {
                         case dirNamesSortDate:
                             dir(externalExecutionContextTool, rootFolder, false, type == Type.dirNamesSortDate);
                             break;
+                        case createPath:
+                            break;
                         case parent:
                             parent(externalExecutionContextTool, rootFolder);
+                            break;
+                        case rename:
                             break;
                         case readTextNew:
                             readNew(externalExecutionContextTool, rootFolder, true);
@@ -290,6 +295,9 @@ public class File implements Module {
                             write(externalExecutionContextTool, rootFolder, paramLong, paramStr, true, StandardCharsets.UTF_8, false, false);
                         case writeTextBOM:
                             write(externalExecutionContextTool, rootFolder, paramLong, paramStr, true, StandardCharsets.UTF_8, true, false);
+                            break;
+                        case size:
+                            size(externalExecutionContextTool, rootFolder);
                             break;
                     }
                 }
@@ -496,6 +504,9 @@ public class File implements Module {
                     break;
                 write(externalExecutionContextTool, getFile(messages), 0, messages.poll().getValue(), true,
                         !messages.isEmpty() && ModuleUtils.isString(messages.peek()) ? Charset.forName(ModuleUtils.getString(messages.poll())) : null, true, false);
+                break;
+            case size:
+                size(externalExecutionContextTool, getFile(messages));
                 break;
         }
     }
@@ -793,6 +804,14 @@ public class File implements Module {
             }
         });
         */
+    }
+
+    private void size(ExecutionContextTool externalExecutionContextTool, java.io.File srcFile) {
+        if (!srcFile.exists()) {
+            externalExecutionContextTool.addError("file not exist " + srcFile.getName());
+            return;
+        }
+        externalExecutionContextTool.addMessage(srcFile.length());
     }
 
     private void write(ExecutionContextTool externalExecutionContextTool, java.io.File srcFile, long offset, Object value, boolean rewrite, Charset charset, boolean useBom, boolean wait) throws IOException {

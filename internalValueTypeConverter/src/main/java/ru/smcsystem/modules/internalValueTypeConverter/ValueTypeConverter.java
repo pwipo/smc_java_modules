@@ -985,7 +985,18 @@ public class ValueTypeConverter implements Module {
                 }
             }
             if (!childElements.isEmpty()) {
-                objectField.setValue(fromXMLSimple(childElements));
+                ObjectElement objectElement = fromXMLSimple(childElements);
+                if (objectElement.getFields().size() > 1) {
+                    String nameField = objectElement.getFields().get(0).getName();
+                    ObjectType typeField = objectElement.getFields().get(0).getType();
+                    if (objectElement.getFields().stream().allMatch(f -> Objects.equals(f.getName(), nameField) && f.getType() == typeField)) {
+                        objectField.setValue(new ObjectArray(objectElement.getFields().stream().map(ObjectField::getValue).collect(Collectors.toList()), typeField));
+                    } else {
+                        objectField.setValue(objectElement);
+                    }
+                } else {
+                    objectField.setValue(objectElement);
+                }
             } else {
                 Object value = fromString(sb.toString(), base64, true, true);
                 objectField.setValue(ModuleUtils.getObjectType(value), value);
@@ -1089,12 +1100,20 @@ public class ValueTypeConverter implements Module {
         return objectElement.getFields().stream()
                 .map(f -> {
                     Element element = doc.createElement(f.getName());
-                    if (ModuleUtils.isObjectArray(f) && ModuleUtils.isArrayContainObjectElements((ObjectArray) f.getValue())) {
+                    if (ModuleUtils.isObjectArray(f)) {
                         ObjectArray objectArray = (ObjectArray) f.getValue();
-                        List<Element> innerElements = new ArrayList<>();
-                        for (int i = 0; i < objectArray.size(); i++)
-                            innerElements.addAll(toXMLSimple((ObjectElement) objectArray.get(i), doc));
-                        innerElements.forEach(element::appendChild);
+                        if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
+                            List<Element> innerElements = new ArrayList<>();
+                            for (int i = 0; i < objectArray.size(); i++)
+                                innerElements.addAll(toXMLSimple((ObjectElement) objectArray.get(i), doc));
+                            innerElements.forEach(element::appendChild);
+                        } else if (objectArray.isSimple()) {
+                            for (int i = 0; i < objectArray.size(); i++) {
+                                Element elementInner = doc.createElement("value");
+                                elementInner.appendChild(doc.createTextNode(objectArray.get(i).toString()));
+                                element.appendChild(elementInner);
+                            }
+                        }
                     } else if (ModuleUtils.isObjectElement(f)) {
                         toXMLSimple((ObjectElement) f.getValue(), doc).forEach(element::appendChild);
                     } else if (f.getValue() != null) {

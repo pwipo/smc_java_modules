@@ -113,7 +113,8 @@ public class Example implements Module {
                 IModule moduleMain = configurationManaged.getModule();
                 // add first execution context of created configuration to execution context list of first execution context first managed configuration
                 if ((moduleMain.getMinCountExecutionContexts() <= ec.countExecutionContexts() + 1) && (moduleMain.getMaxCountExecutionContexts() == -1 || moduleMain.getMaxCountExecutionContexts() > ec.countExecutionContexts())) {
-                    IExecutionContextManaged iExecutionContextManaged = configuration.getExecutionContext(0).get();
+                    IExecutionContextManaged iExecutionContextManaged = configuration.createExecutionContext("default", configurationManaged.getModule().getTypeName(0), -1);
+                    // IExecutionContextManaged iExecutionContextManaged = configuration.getExecutionContext(0).get();
                     ec.insertExecutionContext(ec.countExecutionContexts(), iExecutionContextManaged);
                     executionContextTool.addMessage(String.format("add %s.%s to %s.%s", configuration.getName(), iExecutionContextManaged.getName(), configurationManaged.getName(), ec.getName()));
                 }

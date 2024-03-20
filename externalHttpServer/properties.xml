@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Server</className>
-    <ver>1.2.1</ver>
+    <ver>1.3.0</ver>
     <apiVer>1.4.0</apiVer>
     <date>22-10-2023</date>
 
@@ -312,16 +312,18 @@ LIST - list of simple values:
          otherwise - a byte array - the body of the request.
 OBJECT - in the form of OBJECT_ARRAY containing 1 object, which contains the following fields:
      method - string - method
+     reqId - number - request number
      uri - string - URL address
      remoteAddr - string - client address
      sessionId - string - session ID
      params - an object with fields for each parameter
      headers - an object with fields for each header
-     data:
-         if the type is multipart - an array of objects, each of which contains fields:
-             headers - an object with fields for each header
-             data - byte array - contains the data itself.
-         otherwise, a byte array contains the data itself.
+     multipart - yes, if the multipart type is an array of objects, each of which contains fields:
+         name - name.
+         contentType - type.
+         headers - an object with fields for each header.
+         data - byte array - contains the data itself.
+     data - if there is byte data (for multipart the latter is duplicated) - byte array - contains the data itself.
                     </value>
                 </entry>
                 <entry>
@@ -346,17 +348,34 @@ LIST - список простых значений:
         иначе - байтовый массив - тело запроса.
 OBJECT - в виде OBJECT_ARRAY содержащем 1 объект, в котором содержаться поля:
     method - строка - метод
+    reqId - число - номер запроса
     uri - строка - URL адрес
     remoteAddr - строка - адрес клиента
     sessionId - строка - ид сессии
     params - объект с полями для каждого параметра
     headers - объект с полями для каждого заголовка
-    data:
-        если тип - multipart - массив объектов, каждый из которых содержит поля:
-            headers - объект с полями для каждого заголовка
-            data - байтовый массив - содержит сами данные.
-        иначе - байтовый массив - содержит сами данные.
+    multipart - есть, если тип multipart - массив объектов, каждый из которых содержит поля:
+        name - имя.
+        contentType - тип.
+        headers - объект с полями для каждого заголовка.
+        data - байтовый массив - содержит сами данные.
+    data - если есть байтовые данные (для multipart дублируется последний) - байтовый массив - содержит сами данные.
                     </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>fileResponsePieceSize</name>
+            <type>INTEGER</type>
+            <value>1048576</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Размер куска данных (в байтах), которые читаются при подготовке ответа (fast_response).</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>The size of a piece of data (in bytes) that is read when preparing a response (fast_response).</value>
                 </entry>
             </description>
         </value>
@@ -368,11 +387,35 @@ OBJECT - в виде OBJECT_ARRAY содержащем 1 объект, в кот
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Контекст исполнения по умолчанию.</value>
+                    <value>Если есть контексты исполнения, запускает веб сервер, иначе останавливает.
+При поступлении запроса:
+    если список разрешенных адресов не пуст и если указанный путь находится в списке разрешенных, то запускается только контекст находящийся на той же позиции в списке.
+    если список разрешенных адресов пуст, последовательно запускает все контексты исполнения.
+Контексты запускаются с данными запроса в качестве параметров от сервера (аналог вызова функции), поэтому у запускаемых контекстов должен быть настроен источник на сервер.
+После исполнения, данные от последнего исполненного контекста (если запускалось несколько) используются в качестве ответа.
+
+Формат запроса зависит от настройки requestType. Описание формата описано в ней.
+Формат ответа от контекста:
+    1 - число - сообщение код ответа (200),
+    остальные кроме последнего - строки - заголовки в формате ключ=значение,
+    последнее - байтовый массив или строка - тело ответа.
+                    </value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Default execution context.</value>
+                    <value>If there are execution contexts, it starts the web server, otherwise it stops.
+When a request is received:
+     if the list of allowed addresses is not empty and if the specified path is in the list of allowed addresses, then only the context located at the same position in the list is launched.
+     if the list of allowed addresses is empty, starts all execution contexts sequentially.
+Contexts are launched with request data as parameters from the server (analogous to a function call), so the launched contexts must have a server source configured.
+After execution, data from the last executed context (if several were launched) is used as a response.
+
+The request format depends on the requestType setting. The format is described there.
+Response format from context:
+     1 - number - message response code (200),
+     the rest except the last one are lines - headers in the key=value format,
+     the latter is a byte array or a string - the body of the response.
+                    </value>
                 </entry>
             </description>
             <minCountSources>0</minCountSources>
@@ -390,6 +433,324 @@ OBJECT - в виде OBJECT_ARRAY содержащем 1 объект, в кот
                     <value>stop server</value>
                 </element>
             </output>
+        </type>
+        <type>
+            <type>fast_response</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Подготавливает ответ в формате json с ошибками. Формат удобно использовать для передачи ошибок.
+Так же, удобен для передачи больших файлов.
+Тип ответа - application/json, объект - с полями: код_ошибки, текст_ошибки, данные.
+код_ошибки если 0 то нет ошибки.  текст_ошибки заполняется только если ошибка. данные заполняются только если нет ошибки.
+Если ответ - ошибка (строка или строка и число), то он воспринимается как ошибка и поле данных не будет заполняться. Если передано число вторым параметром, то оно будет указано как код ошибки, иначе -1.
+Если ответ - данные, то вставляет их в поле с данными. Код ошибки 0 и текста ошибки нет.
+В конце, если результатом является объект - конвертирует его в строку (json), для чего вызывает первый контекст.
+Если данными является байтовый массив, то передает его напрямую, без создания объекта и конвертации. При этом старается угадать тип контента.
+Если данными является строка, то предполагает что это путь до файла, в этом случае вызывает 2 и 3 контексты для скачивания файла (опционально).
+Второй контекст используется для получения части файла, передает 3 параметра: путь, начальная позиция, размер. ожидает получить байтовый массив.
+Третий контекст используется для получения размера файла передает 1 параметр: путь, получает число - размер в байтах.
+                    </value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Prepares a response in json format with errors. The format is convenient to use for transmitting errors.
+Also convenient for transferring large files.
+Response type - application/json, object - with fields: error_code, error_text, data.
+error_code if 0 then no error. error_text is filled in only if there is an error. The data is filled in only if there is no error.
+If the response is an error (a string or a string and a number), then it is perceived as an error and the data field will not be filled in. If a number is passed as the second parameter, then it will be indicated as an error code, otherwise -1.
+If the answer is data, then inserts it into the data field. Error code 0 and no error text.
+At the end, if the result is an object, it converts it into a string (json), for which it calls the first context.
+If the data is a byte array, then passes it directly, without creating an object or converting it. At the same time, it tries to guess the type of content.
+If the data is a string, then it assumes that this is the path to the file, in this case it calls contexts 2 and 3 to download the file (optional).
+The second context is used to receive part of the file, passing 3 parameters: path, starting position, size. expects to receive a byte array.
+The third context is used to get the file size, passes 1 parameter: path, receives a number - size in bytes.
+                    </value>
+                </entry>
+            </description>
+            <minCountSources>3</minCountSources>
+            <maxCountSources>4</maxCountSources>
+            <minCountManagedExecutionContexts>1</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>3</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                     <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Имена полей объекта-ответа задаются первыми 3 входящими значениями: код_ошибки, текст_ошибки, данные.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>The field names of the response object are specified by the first 3 incoming values: error_code, error_text, data.</value>
+                        </entry>
+                    </description>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <valueType>STRING</valueType>
+                            <value>errorCode</value>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Имя поля кода ошибки.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Error code field name.</value>
+                                </entry>
+                            </description>
+                        </element>
+                        <element>
+                            <type>VALUE</type>
+                            <valueType>STRING</valueType>
+                            <value>errorText</value>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Имя поля текста ошибки.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Error text field name.</value>
+                                </entry>
+                            </description>
+                        </element>
+                        <element>
+                            <type>VALUE</type>
+                            <valueType>STRING</valueType>
+                            <value>data</value>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Имя поля для данных.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Data field name.</value>
+                                </entry>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Номер запроса.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>The request number.</value>
+                                </entry>
+                            </description>
+                            <valueType>LONG</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE_ANY</type>
+                            <count>-1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Ответ, который нужно обработать, могут быть: данными или ошибкой.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Response to be processed can be: data or error.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>success</value>
+                        </element>
+                    </elements>
+                </source>
+                <source>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Заголовки в формате имя=значение.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Headers in the format name=value.</value>
+                        </entry>
+                    </description>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>Content-Type=text</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>200</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>file_fast_response</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Передает файл в качестве ответа. Аналогичен fast_response, но отправляет только файлы.
+Ожидает путь до файла, в этом случае вызывает 1 и 2 контексты для скачивания файла.
+Первый контекст используется для получения части файла, передает 3 параметра: путь, начальная позиция, размер. Ожидает получить байтовый массив.
+Второй контекст используется для получения размера файла передает 1 параметр: путь, получает число - размер в байтах.
+                    </value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Sends a file as a response. Similar to fast_response, but only sends files.
+Waits for the path to the file, in this case calls contexts 1 and 2 to download the file.
+The first context is used to receive part of the file, passing 3 parameters: path, starting position, size. Expects to receive a byte array.
+The second context is used to get the file size, passes 1 parameter: path, receives a number - size in bytes.
+                    </value>
+                </entry>
+            </description>
+            <minCountSources>2</minCountSources>
+            <maxCountSources>3</maxCountSources>
+            <minCountManagedExecutionContexts>2</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>2</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Номер запроса.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>The request number.</value>
+                                </entry>
+                            </description>
+                            <valueType>LONG</valueType>
+                            <value>1</value>
+                        </element>
+                    </elements>
+                </source>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Путь до файла.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>Path to the file.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>/path/file.txt</value>
+                        </element>
+                    </elements>
+                </source>
+                <source>
+                    <count>1</count>
+                    <optional>true</optional>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Заголовки в формате имя=значение.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Headers in the format name=value.</value>
+                        </entry>
+                    </description>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>Content-Type=text</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>INTEGER</valueType>
+                    <value>200</value>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>stop</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Остановить сервер.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Stop the server.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>0</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources/>
+            <output/>
+        </type>
+        <type>
+            <type>start</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Запустить сервер.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Start the server.</value>
+                </entry>
+            </description>
+            <minCountSources>0</minCountSources>
+            <maxCountSources>0</maxCountSources>
+            <minCountManagedExecutionContexts>1</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>-1</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources/>
+            <output/>
         </type>
     </types>
 
@@ -411,41 +772,18 @@ OBJECT - в виде OBJECT_ARRAY содержащем 1 объект, в кот
     <help>
         <entry>
             <key>en</key>
-            <value>The module provides the functionality of a web server.
-if there are execution contexts, it starts. listens on the specified connection. upon receipt of the request,
-sequentially runs execution contexts with the request data as a shell last set of data from the server. therefore, run
-the source must be configured on the server. (analogue to calling a function). after execution, data from all contexts are combined and used as an answer
-(the format is similar to the previous one, except for 1).
-if there are no sources. regarded as a stop command.
-if the HTTPS protocol is used, it is necessary to load the key (RSA) into the working directory of the configuration.
-you can also use the virtual servers mode (VIRTUAL). in this case, you can set your own settings for each server loco.
-command to generate: keytool -genkeypair -keyalg RSA -alias self_signed -keypass simulator -keystore lic.key -storepass pass
-
-response format:
-    1 - number - message response code,
-    the rest except the last - strings - headers in the format key = value,
-    the last is a byte array or string is the response body.
-The request format depends on the requestType setting. a description of the format is described there.
+            <value>The module provides web server functionality.
+You can use the virtual servers mode (VIRTUAL), in which case you can set your own settings for each server.
+If the HTTPS protocol is used, you need to upload a key (RSA) to the working configuration directory.
+Command to generate a key: keytool -genkeypair -keyalg RSA -alias self_signed -keypass simulator -keystore lic.key -storepass simulator
             </value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Модуль предоставляет функцилональность веб сервера.
-если есть контексты исполнения, запускается. прослушавает указанное соединение. при поступлении запроса,
-если список разрешенных адресов не пуст и если указаннй путь находится в списке разрешенных, то запускается только контекст находящийся на той же позиции в списке.
-если список разрешенных адресов пуст, последовательно запускает все контексты исполнения.
-контексты запускаются с данными запроса в качестве подставного последнего набора данных от сервера. поэтому у запускаемых должен быть настроен источник на сервер
-(аналог вызова функции). после исполнения, данные от последнего исполненго контекста (если запускалось несколько) используются в качестве ответа.
-если нет источников. рассматривается как команду на остановку.
-если используется протокол HTTPS, необходимо в рабочую директорию конфигурации загрузить ключ (RSA).
-так же можно использовать режимвиртуальных серверов (VIRTUAL). в этом случае для каждлоко сервера можно выставить свои настройки.
-команда для генерации: keytool -genkeypair -keyalg RSA -alias self_signed -keypass simulator -keystore lic.key -storepass simulator
-
-формат ответа:
-    1 - число - сообщение код ответа,
-    остальные кроме последнего - строки - заголовки в формате ключ=значение,
-    последнее - байтовоый массив или строка - тело ответа.
-формат запроса зависит от настройки requestType. описание формата описано в ней.
+            <value>Модуль предоставляет функциональность веб сервера.
+Можно использовать режим виртуальных серверов (VIRTUAL), в этом случае для каждого сервера можно выставить свои настройки.
+Если используется протокол HTTPS, необходимо в рабочую директорию конфигурации загрузить ключ (RSA).
+Команда для генерации ключа: keytool -genkeypair -keyalg RSA -alias self_signed -keypass simulator -keystore lic.key -storepass simulator
             </value>
         </entry>
     </help>
@@ -540,5 +878,6 @@ c одним управляемым контекстом исполнения о
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAADNElEQVR4nO2aS2sUQRCAv5jdaDAaMahJfEbQYwRRUFAPOSmCngQvgv4AyU0RRBNBQQ+CJCgoCnoy+LgEUdR48g+oYA6ixhdqjCJKNBsfKw2zMFSq15nZndnZTX9Ql+2aqa7amemq6gaHw+FwOBwOh8PhCE89sBE4AtwAhoFPwF/gDzAGPAFuAgeBDUAdNUAHcBL4AORDymvgBLCYKqQVuABMRnBcSg7oB1qoEvYCX8rguJTPwC5SzCzgUgiH7gDLgOXA3RDXnQMypIzZwH3LhL8qvw0BM0XwHgS81sgtoJGU0GCZvHl3DwM94vdxYIXlgzkudHu8lSOn3H8QyJICriiTewms9R7VN2LsaJF79SorgbnHOmBEsXOWCrNPmdQjoM0b71KeCrNC2GhVVg5zD0O7lytIe7upEO3ANzGZF8LBfjE+EOC+A+KaPt9Ym2fDPz4KzKcCXI5hqYsqJtCJ0gH8ToHjBZlIOmM8kwKnpRxPyvkM8DEFDkt5BcxIIgBdypd9boBvRHcIG93i2nuWCnNM6K0nAXqVlFZjSOjtCGFjp7j2qUXvqtA7QALcFkb3W/SGhV5nCBtrxLVmubUVXn69ayTAM2F0k0VvVOgVS4C0HEO+41oB1KkkYbHzQxhdZdGTSVJzCBvNSgDmKHrzhI7pMsVKndfG8hs1laDGrwD/oI2sEoAFAfRMPhAr9UoAmiy6MqfPhqwwZQC0jlCj0PlJAnyP+ApoS6WNFiUAJiiSJULnPQnwXBjdbNGTjdBChVhgO/A2pqSoHGLK+G2aY4NlWgZlnyCNYvoRUzgmlEw/T0O2yExy4ydfJTKFLUJh0rLE/S8VrtoAZGMqhtJCoHmdnu4BWKkkOtMqAIaLMQfgnUXP1AnFaoYwYmxEDsAiZQvMLBtLfTp9RZqiVR8ArRzNe63r9iLNk4W1FAAs+4Ej3mZGxnsq/GNmp6emAtBg2dzMec7KrTFTTq+OYighIs2ryevb5QNucD6stQAUnoRSVoa0UPK89sR0QKJSEgnTvTlfpiMylZaSMCdAThX5oldlOVzKMblDwHXgsXfmRzv4kCbnt0by1uFwOBwOh8PhcFAr/AODmX0gfDWeUAAAAABJRU5ErkJggg==</icon>
 
 </properties>

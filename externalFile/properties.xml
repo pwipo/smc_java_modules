@@ -7,7 +7,7 @@
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
     <className>ru.smcsystem.smcmodules.module.File</className>
-    <ver>1.5.2</ver>
+    <ver>1.6.0</ver>
     <apiVer>1.4.0</apiVer>
     <date>19-10-2023</date>
     <categories>Java, File</categories>
@@ -88,6 +88,7 @@ The program is supplied as is. For problems arising during the operation or inst
                 <value>readOrWait</value>
                 <value>writeOrWait</value>
                 <value>createPath</value>
+                <value>size</value>
             </validValues>
             <description>
                 <entry>
@@ -129,6 +130,7 @@ removeOrWait - similar to remove, but if it fails, it tries again at the specifi
 readOrWait - similar to read, but if it fails, it tries again at the specified interval. in the arguments setting, 2 values are specified separated by commas: the maximum timeout in milliseconds, the interval between attempts in milliseconds. if it's empty, it doesn't wait.
 writeOrWait - similar to write, but if it fails, it tries again at the specified interval. in the arguments setting, 2 values are specified separated by commas: the maximum timeout in milliseconds, the interval between attempts in milliseconds. if it's empty, it doesn't wait.
 createPath - joins two parts of a path into one, takes 2 strings, returns the resulting path.
+size - return file length.
                     </value>
                 </entry>
                 <entry>
@@ -170,6 +172,7 @@ removeOrWait - аналогичен remove, но если не получает�
 readOrWait - аналогичен read, но если не получается выполнить, то пытается снова с указанным интервалом. в настройке arguments указаны 2 значения через запятую: максимальное время ожидания в милисекундах, интервал между попытками в милисекундах. если пусто то не ждет.
 writeOrWait - аналогичен write, но если не получается выполнить, то пытается снова с указанным интервалом. в настройке arguments указаны 2 значения через запятую: максимальное время ожидания в милисекундах, интервал между попытками в милисекундах. если пусто то не ждет.
 createPath - соединяет две части пути в один, принимает 2 строки, возвращает результирующий путь.
+size - возвращает размер файла.
                     </value>
                 </entry>
             </description>
@@ -1532,15 +1535,11 @@ createPath - соединяет две части пути в один, прин
                                                     <description>
                                                         <entry>
                                                             <key>ru</key>
-                                                            <value>Путь до файла, может быть абсолютным или
-                                                                относительным, в этом случае используется рабочая папка.
-                                                            </value>
+                                                            <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
                                                         </entry>
                                                         <entry>
                                                             <key>en</key>
-                                                            <value>The path to the file can be absolute or relative, in
-                                                                this case the working folder is used.
-                                                            </value>
+                                                            <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
                                                         </entry>
                                                     </description>
                                                     <valueType>STRING</valueType>
@@ -1552,15 +1551,11 @@ createPath - соединяет две части пути в один, прин
                                                     <description>
                                                         <entry>
                                                             <key>ru</key>
-                                                            <value>Значение, которое будет записано, может быть байтовым
-                                                                массивом или текстом.
-                                                            </value>
+                                                            <value>Значение, которое будет записано, может быть байтовым массивом или текстом.</value>
                                                         </entry>
                                                         <entry>
                                                             <key>en</key>
-                                                            <value>The value to be written can be a byte array or
-                                                                text.
-                                                            </value>
+                                                            <value>The value to be written can be a byte array or text.</value>
                                                         </entry>
                                                     </description>
                                                     <valueType>STRING</valueType>
@@ -1582,6 +1577,30 @@ createPath - соединяет две части пути в один, прин
                                                     </description>
                                                     <valueType>STRING</valueType>
                                                     <value>UTF-8</value>
+                                                </element>
+                                            </elements>
+                                        </element>
+                                        <element>
+                                            <type>IF</type>
+                                            <checkValueId>-1</checkValueId>
+                                            <valueType>STRING</valueType>
+                                            <value>size</value>
+                                            <elements>
+                                                <element>
+                                                    <type>VALUE</type>
+                                                    <count>1</count>
+                                                    <description>
+                                                        <entry>
+                                                            <key>ru</key>
+                                                            <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
+                                                        </entry>
+                                                        <entry>
+                                                            <key>en</key>
+                                                            <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
+                                                        </entry>
+                                                    </description>
+                                                    <valueType>STRING</valueType>
+                                                    <value>/test/file.txt</value>
                                                 </element>
                                             </elements>
                                         </element>
@@ -2865,6 +2884,30 @@ createPath - соединяет две части пути в один, прин
                                 </element>
                             </elements>
                         </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>size</value>
+                            <elements>
+                                <element>
+                                    <type>VALUE</type>
+                                    <count>1</count>
+                                    <description>
+                                        <entry>
+                                            <key>ru</key>
+                                            <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
+                                        </entry>
+                                        <entry>
+                                            <key>en</key>
+                                            <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
+                                        </entry>
+                                    </description>
+                                    <valueType>STRING</valueType>
+                                    <value>/test/file.txt</value>
+                                </element>
+                            </elements>
+                        </element>
                     </elements>
                 </source>
             </sources>
@@ -2892,16 +2935,11 @@ createPath - соединяет две части пути в один, прин
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>выдает информацию о файле (или всех файлах в указанной директории): путь, размер, дата
-                        последнего изменения, уровень доступа (2-на запись,1-на чтение,0-нет доступа), тип (1- файл,
-                        0-директория).
-                    </value>
+                    <value>выдает информацию о файле (или всех файлах в указанной директории): путь, размер, дата последнего изменения, уровень доступа (2-на запись,1-на чтение,0-нет доступа), тип (1- файл,0-директория).</value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>gives information about the file (or all files in the specified directory): path, size, date
-                        of the last change, access level (2-write, 1-read, 0-no access), type (1- file, 0-directory).
-                    </value>
+                    <value>gives information about the file (or all files in the specified directory): path, size, date of the last change, access level (2-write, 1-read, 0-no access), type (1- file, 0-directory).</value>
                 </entry>
             </description>
             <minCountSources>1</minCountSources>
@@ -2920,15 +2958,11 @@ createPath - соединяет две части пути в один, прин
                             <description>
                                 <entry>
                                     <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае
-                                        используется рабочая папка.
-                                    </value>
+                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
                                 </entry>
                                 <entry>
                                     <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working
-                                        folder is used.
-                                    </value>
+                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
                                 </entry>
                             </description>
                             <valueType>STRING</valueType>
@@ -5733,6 +5767,66 @@ createPath - соединяет две части пути в один, прин
                 </element>
             </output>
         </type>
+        <type>
+            <type>size</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Возвращает размер файла.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Return file size.</value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
+                                </entry>
+                            </description>
+                            <valueType>STRING</valueType>
+                            <value>/test/file.txt</value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Размер.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Size.</value>
+                        </entry>
+                    </description>
+                    <valueType>LONG</valueType>
+                    <value>10</value>
+                </element>
+            </output>
+        </type>
     </types>
 
     <useStorage>true</useStorage>
@@ -6031,6 +6125,6 @@ fully dynamic - both the command and the arguments are transmitted by incoming m
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
-    <icon>iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAAfElEQVRIie3VPQrCQBAG0EeOJQmKlXr/E2QtTOcN1iIBFf8yknTzwXTL95bdYnjOCQV15lyxFUjBJnC+YoggNXKb6XyLC/ZrASJIFChTOezMeK4ocETv9eMXA352NAsUfk0CCSSQQAJrAGf3DfVPOuOW+5h3GyoyPQ6PhTfZ1zSh6WD4jAAAAABJRU5ErkJggg==</icon>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAaUlEQVR4nO3VQQqAMAxE0X88j+XSc9aDjAi6EcFJqlKqA9k1edAsAj1mAGZAFzVmgWIMVw2yNztvBExPA4oiGUARJAvIRWoA3QWc5cOAzD9vF3DTLqB/B6/voAQOjg619lonM4OUrbezLMRKo6v0kDuFAAAAAElFTkSuQmCC</icon>
 
 </properties>

@@ -7,7 +7,9 @@ import ru.smcsystem.api.enumeration.ValueType;
 import ru.smcsystem.test.Process;
 import ru.smcsystem.test.emulate.*;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class GetTest {
 
@@ -272,5 +274,41 @@ public class GetTest {
         executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
     }
 
+    @Test
+    public void processErrors() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "processingType", new Value(ValueType.STRING, "EACH_ACTION"),
+                                "type", new Value(ValueType.STRING, "DATA_AND_ERROR"),
+                                "valueType", new Value(ValueType.STRING, "ALL"),
+                                "ids", new Value(ValueType.STRING, ""),
+                                "defaultValues", new Value(""),
+                                "defaultValueType", new Value("STATIC"),
+                                "outputErrorAsData", new Value(false)
+                        ),
+                        null,
+                        null
+                ),
+                new Get()
+        );
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(List.of(
+                List.of(
+                        new Action(
+                                List.of(
+                                        new Message(MessageType.DATA, new Date(), new Value(ValueType.INTEGER, 1)),
+                                        new Message(MessageType.ERROR, new Date(), new Value(ValueType.INTEGER, 2)),
+                                        new Message(MessageType.DATA, new Date(), new Value(ValueType.INTEGER, 3)),
+                                        new Message(MessageType.ERROR, new Date(), new Value(ValueType.INTEGER, 4))
+                                ),
+                                ActionType.EXECUTE
+                        ))),
+                null,
+                null);
+        process.fullLifeCycle(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+    }
 
 }

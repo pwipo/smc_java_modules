@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Get</className>
-    <ver>1.1.0</ver>
+    <ver>1.2.0</ver>
     <apiVer>1.4.0</apiVer>
     <date>22-10-2023</date>
 
@@ -214,6 +214,21 @@ Not used for SOURCE_ID and SOURCE_ID_EMPTY_OR_ERRORS.
     Если ids не пусто, то для каждого id (одного или пары), если нет входного значения, ищется соответствующее значение по умолчанию (в той же позиции). если найдено, возвращает его.
 Не используется для SOURCE_ID и SOURCE_ID_EMPTY_OR_ERRORS.
                     </value>
+                </entry>
+            </description>
+        </value>
+       <value>
+            <name>outputErrorAsData</name>
+            <type>BOOLEAN</type>
+            <value>true</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Determines whether incoming errors should be sent as data or as errors.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Определяет, нужно ли входящие ошибки отправлять как данные или как ошибки.</value>
                 </entry>
             </description>
         </value>

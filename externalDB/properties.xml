@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.DB</className>
-    <ver>1.2.2</ver>
+    <ver>1.2.3</ver>
     <apiVer>1.4.0</apiVer>
     <date>07-11-2023</date>
 
@@ -142,17 +142,17 @@ db2Client - //имя_или_ип_сервера[:порт]/имя_бд.
                 <entry>
                     <key>en</key>
                     <value>only for parameterized SQL expressions (types: 7,8).
-determines whether autoconversion of parameters should be performed.
-if enabled, it allows you to transfer the types BOOLEAN, TIMESTAMP, DATE, TIME.
-converts a NULL string to a null value, converts an array (ObjectArray) to the corresponding array.
+Determines whether autoconversion of parameters should be performed.
+If enabled, it allows you to transfer the types BOOLEAN, TIMESTAMP, DATE, TIME.
+Converts a NULL string to a null value.
                     </value>
                 </entry>
                 <entry>
                     <key>ru</key>
                     <value>только для параметризованных SQL выражений (типы: 7,8).
-определяет нужно ли проводить автоконвертацию параметров.
-если включено то позволяет передавать типы BOOLEAN, TIMESTAMP, DATE, TIME.
-конвертирует строку NULL в нулевое значение, конвертирует массив (ObjectArray) в соответствующий массив.
+Определяет нужно ли проводить автоконвертацию параметров.
+Если включено, то позволяет передавать типы BOOLEAN, TIMESTAMP, DATE, TIME.
+Конвертирует строку NULL в нулевое значение.
                     </value>
                 </entry>
             </description>
@@ -597,15 +597,13 @@ returns for types:
                                         <valueType>OBJECT_ARRAY</valueType>
                                         <value>[]</value>
                                     </element>
-                                    <elements>
-                                        <element>
-                                            <type>VALUE</type>
-                                            <count>1</count>
-                                            <optional>true</optional>
-                                            <valueType>STRING</valueType>
-                                            <value>field_name1,field_name2</value>
-                                        </element>
-                                    </elements>
+                                    <element>
+                                        <type>VALUE</type>
+                                        <count>1</count>
+                                        <optional>true</optional>
+                                        <valueType>STRING</valueType>
+                                        <value>field_name1,field_name2</value>
+                                    </element>
                                     <element>
                                         <type>IF</type>
                                         <checkSetting>type</checkSetting>
@@ -656,15 +654,13 @@ returns for types:
                                         <valueType>OBJECT_ARRAY</valueType>
                                         <value>[]</value>
                                     </element>
-                                    <elements>
-                                        <element>
-                                            <type>VALUE</type>
-                                            <count>1</count>
-                                            <optional>true</optional>
-                                            <valueType>STRING</valueType>
-                                            <value>field_name1,field_name2</value>
-                                        </element>
-                                    </elements>
+                                    <element>
+                                        <type>VALUE</type>
+                                        <count>1</count>
+                                        <optional>true</optional>
+                                        <valueType>STRING</valueType>
+                                        <value>field_name1,field_name2</value>
+                                    </element>
                                     <element>
                                         <type>IF</type>
                                         <checkSetting>type</checkSetting>
@@ -891,15 +887,13 @@ returns for types:
                                         <valueType>OBJECT_ARRAY</valueType>
                                         <value>[]</value>
                                     </element>
-                                    <elements>
-                                        <element>
-                                            <type>VALUE</type>
-                                            <count>1</count>
-                                            <optional>true</optional>
-                                            <valueType>STRING</valueType>
-                                            <value>field_name1,field_name2</value>
-                                        </element>
-                                    </elements>
+                                    <element>
+                                        <type>VALUE</type>
+                                        <count>1</count>
+                                        <optional>true</optional>
+                                        <valueType>STRING</valueType>
+                                        <value>field_name1,field_name2</value>
+                                    </element>
                                     <element>
                                         <type>IF</type>
                                         <checkSetting>type</checkSetting>
@@ -950,15 +944,13 @@ returns for types:
                                         <valueType>OBJECT_ARRAY</valueType>
                                         <value>[]</value>
                                     </element>
-                                    <elements>
-                                        <element>
-                                            <type>VALUE</type>
-                                            <count>1</count>
-                                            <optional>true</optional>
-                                            <valueType>STRING</valueType>
-                                            <value>field_name1,field_name2</value>
-                                        </element>
-                                    </elements>
+                                    <element>
+                                        <type>VALUE</type>
+                                        <count>1</count>
+                                        <optional>true</optional>
+                                        <valueType>STRING</valueType>
+                                        <value>field_name1,field_name2</value>
+                                    </element>
                                     <element>
                                         <type>IF</type>
                                         <checkSetting>type</checkSetting>
@@ -1003,15 +995,13 @@ returns for types:
                                         <valueType>OBJECT_ARRAY</valueType>
                                         <value>[]</value>
                                     </element>
-                                    <elements>
-                                        <element>
-                                            <type>VALUE</type>
-                                            <count>1</count>
-                                            <optional>true</optional>
-                                            <valueType>STRING</valueType>
-                                            <value>field_name1,field_name2</value>
-                                        </element>
-                                    </elements>
+                                    <element>
+                                        <type>VALUE</type>
+                                        <count>1</count>
+                                        <optional>true</optional>
+                                        <valueType>STRING</valueType>
+                                        <value>field_name1,field_name2</value>
+                                    </element>
                                     <element>
                                         <type>IF</type>
                                         <checkSetting>type</checkSetting>
@@ -1056,15 +1046,13 @@ returns for types:
                                         <valueType>OBJECT_ARRAY</valueType>
                                         <value>[]</value>
                                     </element>
-                                    <elements>
-                                        <element>
-                                            <type>VALUE</type>
-                                            <count>1</count>
-                                            <optional>true</optional>
-                                            <valueType>STRING</valueType>
-                                            <value>field_name1,field_name2</value>
-                                        </element>
-                                    </elements>
+                                    <element>
+                                        <type>VALUE</type>
+                                        <count>1</count>
+                                        <optional>true</optional>
+                                        <valueType>STRING</valueType>
+                                        <value>field_name1,field_name2</value>
+                                    </element>
                                     <element>
                                         <type>IF</type>
                                         <checkSetting>type</checkSetting>
@@ -1638,15 +1626,13 @@ returns for types:
                             <valueType>OBJECT_ARRAY</valueType>
                             <value>[]</value>
                         </element>
-                        <elements>
-                            <element>
-                                <type>VALUE</type>
-                                <count>1</count>
-                                <optional>true</optional>
-                                <valueType>STRING</valueType>
-                                <value>field_name1,field_name2</value>
-                            </element>
-                        </elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <optional>true</optional>
+                            <valueType>STRING</valueType>
+                            <value>field_name1,field_name2</value>
+                        </element>
                         <element>
                             <type>IF</type>
                             <checkSetting>type</checkSetting>
@@ -1733,15 +1719,13 @@ returns for types:
                             <valueType>OBJECT_ARRAY</valueType>
                             <value>[]</value>
                         </element>
-                        <elements>
-                            <element>
-                                <type>VALUE</type>
-                                <count>1</count>
-                                <optional>true</optional>
-                                <valueType>STRING</valueType>
-                                <value>field_name1,field_name2</value>
-                            </element>
-                        </elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <optional>true</optional>
+                            <valueType>STRING</valueType>
+                            <value>field_name1,field_name2</value>
+                        </element>
                         <element>
                             <type>IF</type>
                             <checkSetting>type</checkSetting>
@@ -2184,15 +2168,13 @@ returns for types:
                             <valueType>OBJECT_ARRAY</valueType>
                             <value>[]</value>
                         </element>
-                        <elements>
-                            <element>
-                                <type>VALUE</type>
-                                <count>1</count>
-                                <optional>true</optional>
-                                <valueType>STRING</valueType>
-                                <value>field_name1,field_name2</value>
-                            </element>
-                        </elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <optional>true</optional>
+                            <valueType>STRING</valueType>
+                            <value>field_name1,field_name2</value>
+                        </element>
                         <element>
                             <type>IF</type>
                             <checkSetting>type</checkSetting>
@@ -2279,15 +2261,13 @@ returns for types:
                             <valueType>OBJECT_ARRAY</valueType>
                             <value>[]</value>
                         </element>
-                        <elements>
-                            <element>
-                                <type>VALUE</type>
-                                <count>1</count>
-                                <optional>true</optional>
-                                <valueType>STRING</valueType>
-                                <value>field_name1,field_name2</value>
-                            </element>
-                        </elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <optional>true</optional>
+                            <valueType>STRING</valueType>
+                            <value>field_name1,field_name2</value>
+                        </element>
                         <element>
                             <type>IF</type>
                             <checkSetting>type</checkSetting>
@@ -2372,15 +2352,13 @@ The same as execute_with_params_array_in_one_transaction is passed to the input,
                             <valueType>OBJECT_ARRAY</valueType>
                             <value>[]</value>
                         </element>
-                        <elements>
-                            <element>
-                                <type>VALUE</type>
-                                <count>1</count>
-                                <optional>true</optional>
-                                <valueType>STRING</valueType>
-                                <value>field_name1,field_name2</value>
-                            </element>
-                        </elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <optional>true</optional>
+                            <valueType>STRING</valueType>
+                            <value>field_name1,field_name2</value>
+                        </element>
                         <element>
                             <type>IF</type>
                             <checkSetting>type</checkSetting>
@@ -2461,15 +2439,13 @@ The same as execute_with_params_array_in_one_transaction is passed to the input,
                             <valueType>OBJECT_ARRAY</valueType>
                             <value>[]</value>
                         </element>
-                        <elements>
-                            <element>
-                                <type>VALUE</type>
-                                <count>1</count>
-                                <optional>true</optional>
-                                <valueType>STRING</valueType>
-                                <value>field_name1,field_name2</value>
-                            </element>
-                        </elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>1</count>
+                            <optional>true</optional>
+                            <valueType>STRING</valueType>
+                            <value>field_name1,field_name2</value>
+                        </element>
                         <element>
                             <type>IF</type>
                             <checkSetting>type</checkSetting>
@@ -2511,6 +2487,62 @@ The same as execute_with_params_array_in_one_transaction is passed to the input,
                         <entry>
                             <key>en</key>
                             <value>numbers - generated keys.</value>
+                        </entry>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type>
+            <type>execute_raw_script</type>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Исполняет sql выражения. В одном сообщении (строке) может быть много операций, разделенных символом ; и новой строкой.
+Каждое сообщение исполняется в своей транзакции.
+                    </value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Executes sql expressions. There can be many operations in one message (line), separated by the symbol ; and a new line.
+Each message is executed in its own transaction.
+                    </value>
+                </entry>
+            </description>
+            <minCountSources>1</minCountSources>
+            <maxCountSources>1</maxCountSources>
+            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
+            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
+            <minCountManagedConfigurations>0</minCountManagedConfigurations>
+            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element>
+                            <type>VALUE</type>
+                            <count>-1</count>
+                            <valueType>STRING</valueType>
+                            <value>insert into t values (1,2,3);
+                                insert into t values (4,5,6);
+                            </value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE_ANY</type>
+                    <count>-1</count>
+                    <valueType>OBJECT_ARRAY</valueType>
+                    <value>[]</value>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>для селектов - OBJECT_ARRAY (напрямую или в формате сериализации), для остальных типов запросов: цифра - количество изменений.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>for selects - OBJECT_ARRAY (directly or in serialization format), for other types of queries: number - number of changes.</value>
                         </entry>
                     </description>
                 </element>

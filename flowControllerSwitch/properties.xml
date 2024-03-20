@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.flowControllerSwitch.Switch</className>
-    <ver>1.1.0</ver>
+    <ver>1.2.0</ver>
     <apiVer>1.4.0</apiVer>
     <date>22-10-2023</date>
 
@@ -57,11 +57,36 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>en</key>
-                    <value>a list of regular expressions. if not empty then compares input values and regular expressions. the sequence number of the first matched regular expression is used as the number of the executable context for the subsequent transition. value format: string1 :: string2 :: string3 ...</value>
+                    <value>List of regular expressions. If not empty, it compares the incoming values and regular expressions.
+The sequence number of the first matching regular expression pack (determined by countPatternsInPack) is used as the executable context number for the subsequent transition.
+Value format: string1::string2::string3...
+                    </value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>список регулярных выражений. если не пусто то производит сравнение входящих значений и регулярных выражений. порядковый номер первого совпавшего регуляроного выражения используется как номер исполняемого контекста для последующего перехода.формат value: строка1::строка2::строка3...</value>
+                    <value>Список регулярных выражений. Если не пусто, то производит сравнение входящих значений и регулярных выражений.
+Порядковый номер первой совпавшей пачки регулярных выражений (определяется countPatternsInPack) используется как номер исполняемого контекста для последующего перехода.
+Формат value: строка1::строка2::строка3...
+                    </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>countPatternsInPack</name>
+            <type>INTEGER</type>
+            <value>1</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Determines the number of incoming values to be processed at a time, and also determines the size of the pack of regular expressions that will process these values.
+For example, if the value is 2, then the number of regular expressions must be at least 2 regular expressions in patterns must be a multiple of 2 (2,4,6 and so on) and the input values must be at least 2.
+                    </value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Определяет количество входящих значений, обрабатываем за раз, так же определяет размер пачки регулярных выражений, которые будут обрабатывать эти значения.
+Например, если значение равно 2, то количество регулярных выражений нужно минимум 2 в patterns и должно быть кратно 2 (2,4,6 и так далее) и входящих значений должно быть минимум 2.
+                    </value>
                 </entry>
             </description>
         </value>
@@ -73,11 +98,21 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Контекст исполнения по умолчанию.</value>
+                    <value>В цикле смотрит все входящие сообщения.
+Если поле patterns пусто, то получает только цифровые сообщения.
+Иначе сравнивает входящие значения с регулярными выражениями, порядковый номер первой совпавшей пачки регулярных выражений используется в дальнейшем.
+Если полученное число соответствует какому-либо управляемому контексту исполнения, то запускает его.
+Если установлен isNeedReturnDataFromLast, возвращает ответ от исполненного контекста.
+                    </value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Default execution context.</value>
+                    <value>It looks at all incoming messages in a loop.
+If the patterns field is empty, then only digital messages are received.
+Otherwise, it compares incoming values with regular expressions, the serial number of the first matching pack of regular expressions is used in the future.
+If the resulting number matches any managed execution context, it runs it.
+If isNeedReturnDataFromLast is set, returns the response from the executed context.
+                    </value>
                 </entry>
             </description>
             <minCountSources>1</minCountSources>
@@ -113,32 +148,22 @@ The program is supplied as is. For problems arising during the operation or inst
     <description>
         <entry>
             <key>en</key>
-            <value>A module works like a switch.</value>
+            <value>The module works like a switch in programming languages.</value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Модуль работает подобно switch.</value>
+            <value>Модуль работает подобно switch в языках программирования.</value>
         </entry>
     </description>
 
     <help>
         <entry>
             <key>en</key>
-            <value>A module works like a switch.
-Looks through all incoming messages in a loop.
-If the patterns field is empty, only digital messages are received. otherwise, it compares the input values with regular expressions; the ordinal of the first matched regular expression is used later.
-If the number corresponds to any managed execution context, then it starts it.
-If isNeedReturnDataFromLast is set, returns the response from the executed context.
-            </value>
+            <value>The module works like a switch in programming languages.</value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Модуль работает подобно switch.
-В цикле смотрит все входящие сообшения.
-Если поле patterns пусто то получает только цифровые сообщения. иначе сравнивает входящие значения с регулярными выражениями, порядковый номер первого совпавшего регуляроного выражения используется в дальнейшем.
-Если число соответствует какому либо управляемому контексту исполнения, то запускает его.
-Если установлен isNeedReturnDataFromLast, возвращает ответ от испольненного контекста.
-            </value>
+            <value>Модуль работает подобно switch в языках программирования.</value>
         </entry>
     </help>
 

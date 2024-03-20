@@ -32,3 +32,4 @@
 /externalHttpClient/target/
 /internalValueTransformer/target/
 /internalValueTypeConverter/target/
+/externalHttpServer/tomcat.8080/

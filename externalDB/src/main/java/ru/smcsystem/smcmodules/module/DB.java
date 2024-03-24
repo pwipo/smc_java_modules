@@ -521,6 +521,7 @@ public class DB implements Module {
                                     } else {
                                         switch (parameterType) {
                                             case Types.BOOLEAN:
+                                            case Types.BIT:
                                                 value = toBoolean(f);
                                                 break;
                                             case Types.TIMESTAMP:
@@ -605,6 +606,7 @@ public class DB implements Module {
                                         boolean isString = value instanceof String;
                                         switch (parameterType) {
                                             case Types.BOOLEAN:
+                                            case Types.BIT:
                                                 value = toBooleanObj(value);
                                                 break;
                                             case Types.TIMESTAMP:
@@ -783,6 +785,7 @@ public class DB implements Module {
                             } else {
                                 switch (parameterType) {
                                     case Types.BOOLEAN:
+                                    case Types.BIT:
                                         value = toBoolean(f);
                                         sqlParamListInner.add(value.toString());
                                         break;
@@ -853,6 +856,7 @@ public class DB implements Module {
                                 boolean isString = value instanceof String;
                                 switch (parameterType) {
                                     case Types.BOOLEAN:
+                                    case Types.BIT:
                                         value = toBooleanObj(value);
                                         sqlParamListInner.add(value.toString());
                                         break;
@@ -1041,7 +1045,7 @@ public class DB implements Module {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
                     fieldType = ObjectType.LONG;
                     value = rs.getLong(column_name);
-                } else if (columnType == java.sql.Types.BOOLEAN) {
+                } else if (columnType == java.sql.Types.BOOLEAN || columnType == Types.BIT) {
                     // externalExecutionContextTool.addMessage(BooleanUtils.toStringTrueFalse(rs.getBoolean(column_name)));
                     if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
                         fieldType = ObjectType.STRING;

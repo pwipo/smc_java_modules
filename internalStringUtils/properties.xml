@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.StringUtil</className>
-    <ver>1.1.0</ver>
+    <ver>1.1.1</ver>
     <apiVer>1.4.0</apiVer>
     <date>21-10-2023</date>
 
@@ -59,6 +59,8 @@ The program is supplied as is. For problems arising during the operation or inst
                 <value>SUBSTRING</value>
                 <value>TRIM</value>
                 <value>REPLACE_REGEXP_MULTILINE</value>
+                <value>PLACEHOLDERS_DYNAMIC</value>
+                <value>PLACEHOLDERS_DYNAMIC_OR_EMPTY</value>
             </validValues>
             <value>JOIN</value>
             <description>
@@ -89,6 +91,8 @@ FILTER_ACTION - Similar to FILTER, but returns all messages of the action in whi
 SUBSTRING - gets a substring from the value of each incoming message (numbers are converted to text). The returned substring starts at the start position and ends before the end position (if not specified, it returns to the end). value stores the starting and ending positions (may not be specified) separated by ::, for example, 1::4. positions can be negative.
 TRIM - removes whitespace at the beginning and end of each message.
 REPLACE_REGEXP_MULTILINE - Similar to REPLACE_REGEXP, but MULTILINE mode is used.
+PLACEHOLDERS_DYNAMIC - similar to PLACEHOLDERS, but the template is taken not from the parameter, but from the first message of the first source. takes values only from the second source.
+PLACEHOLDERS_DYNAMIC_OR_EMPTY - similar to PLACEHOLDERS_OR_EMPTY but for PLACEHOLDERS_DYNAMIC.
                     </value>
                 </entry>
                 <entry>
@@ -118,6 +122,8 @@ FILTER_ACTION - аналогично FILTER, но возвращает все с
 SUBSTRING - получает подстроку из значения каждого входящего сообщеня (числа преобразуются в текст). Возвращенная подстрока начинается с символа в начальной позиции и заканчивается перед конечной позицией (если не задана, то возвращает до конца). в value хранятся начальная и конечная позиция (может быть не задана) раздаленные :: , пример - 1::4. позиции могут быть отрицательными.
 TRIM - удаляет пробельные символы в начале и в конце каждого сообщения.
 REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но используются режим MULTILINE.
+PLACEHOLDERS_DYNAMIC - аналогичен PLACEHOLDERS, но шаблон берет не из параметра, а из первого сообщения.
+PLACEHOLDERS_DYNAMIC_OR_EMPTY - аналогичен PLACEHOLDERS_OR_EMPTY но для PLACEHOLDERS_DYNAMIC.
                     </value>
                 </entry>
             </description>
@@ -140,8 +146,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="0" maxS="-1" minEC="0" maxEC="1" minC="0" maxC="0">
             <description>
                 <entry>
                     <key>ru</key>
@@ -152,12 +157,6 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                     <value>Default execution context. The result depends on the setting type.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>1</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
@@ -168,12 +167,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>JOIN</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -182,12 +176,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>JOIN_INNER_WITH_TIME</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -196,12 +185,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>SPLIT</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -210,12 +194,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>SPLIT_REGEXP</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -224,12 +203,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>APPEND</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -238,12 +212,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>APPEND_FIRST</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -252,12 +221,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>REPLACE</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -266,12 +230,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>REPLACE_REGEXP</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -280,12 +239,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>REPLACE_REGEXP_GROUP_ONE</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -294,12 +248,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>CONTAIN</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -308,12 +257,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>MATCH</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -322,12 +266,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>PLACEHOLDERS</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -336,12 +275,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>PLACEHOLDERS_OR_EMPTY</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -350,12 +284,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>FILTER_SIZE</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -364,12 +293,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>REGEXP_GROUP_ONE</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -378,12 +302,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>ESCAPE_SQL</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -392,12 +311,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>SIZE</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -406,12 +320,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>IS_BLANK</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -420,12 +329,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>IS_NOT_BLANK</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -434,12 +338,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>FILTER</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -448,12 +347,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>FILTER_ACTION</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -462,12 +356,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>SUBSTRING</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -476,12 +365,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>TRIM</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                         <element>
@@ -490,12 +374,25 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                             <valueType>STRING</valueType>
                             <value>REPLACE_REGEXP_MULTILINE</value>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>PLACEHOLDERS_DYNAMIC</value>
+                            <elements>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>PLACEHOLDERS_DYNAMIC_OR_EMPTY</value>
+                            <elements>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                     </elements>
@@ -542,22 +439,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -582,12 +469,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
@@ -596,12 +478,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                     <type>FOR</type>
                     <countStatic>-1</countStatic>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE" c="1" vt="STRING" v="str"/>
                         <element>
                             <type>VALUE</type>
                             <count>1</count>
@@ -634,22 +511,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -674,22 +541,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -714,22 +571,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -754,22 +601,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -794,22 +631,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -834,22 +661,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -874,22 +691,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -914,22 +721,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>INTEGER</valueType>
-                    <value>1</value>
-                </element>
+                <element t="VALUE" c="-1" vt="INTEGER" v="1"/>
             </output>
         </type>
         <type>
@@ -954,26 +751,15 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>INTEGER</valueType>
-                    <value>1</value>
-                </element>
+                <element t="VALUE" c="-1" vt="INTEGER" v="1"/>
             </output>
         </type>
-        <type>
-            <type>placeholders</type>
+        <type t="placeholders" minS="0" maxS="-1" minEC="0" maxEC="0" minC="0" maxC="0">
             <description>
                 <entry>
                     <key>ru</key>
@@ -984,36 +770,19 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                     <value>substitutes the input values into the template (value). the format used is the MessageFormat format. example: something there {0} somehow there {1}. for the place {0} the first input value is substituted, for the place {1} the second.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="1" vt="STRING" v="str"/>
             </output>
         </type>
-        <type>
-            <type>placeholders_or_empty</type>
+        <type t="placeholders_or_empty" minS="0" maxS="-1" minEC="0" maxEC="0" minC="0" maxC="0">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1024,33 +793,16 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                     <value>similar to PLACEHOLDERS, but if the input values are less than expected, nothing will be returned.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <optional>true</optional>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="1" o="true" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -1075,22 +827,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -1115,22 +857,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -1155,22 +887,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -1195,12 +917,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
@@ -1235,22 +952,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>INTEGER</valueType>
-                    <value>1</value>
-                </element>
+                <element t="VALUE" c="-1" vt="INTEGER" v="1"/>
             </output>
         </type>
         <type>
@@ -1275,22 +982,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>INTEGER</valueType>
-                    <value>1</value>
-                </element>
+                <element t="VALUE" c="-1" vt="INTEGER" v="1"/>
             </output>
         </type>
         <type>
@@ -1315,22 +1012,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -1355,12 +1042,7 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
@@ -1369,22 +1051,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                     <type>FOR</type>
                     <countStatic>-1</countStatic>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <valueType>INTEGER</valueType>
-                            <value>1</value>
-                        </element>
+                        <element t="VALUE" c="1" vt="INTEGER" v="1"/>
                         <element>
                             <type>FOR</type>
                             <countValueId>-1</countValueId>
                             <elements>
-                                <element>
-                                    <type>VALUE_ANY</type>
-                                    <count>-1</count>
-                                    <valueType>STRING</valueType>
-                                    <value>str</value>
-                                </element>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
                         </element>
                     </elements>
@@ -1413,22 +1085,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -1453,22 +1115,12 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
             </output>
         </type>
         <type>
@@ -1493,22 +1145,58 @@ REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но испол�
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>STRING</valueType>
-                            <value>str</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
+                <element t="VALUE" c="-1" vt="STRING" v="str"/>
+            </output>
+        </type>
+        <type t="placeholders_dynamic" minS="1" maxS="-1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>подставляет в шаблон (value) входящие значения. в качестве формата используется MessageFormat формат. пример: что то там {0} как то там {1}. за место {0} подставляется первое входящее значение, за место {1} второе.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>substitutes the input values into the template (value). the format used is the MessageFormat format. example: something there {0} somehow there {1}. for the place {0} the first input value is substituted, for the place {1} the second.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
                     <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>str</value>
-                </element>
+                    <elements>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="STRING" v="str"/>
+            </output>
+        </type>
+        <type t="placeholders_dynamic_or_empty" minS="1" maxS="-1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>аналогичен PLACEHOLDERS, но если входящих значений будет меньше ожидаемых, ничего не вернет.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>similar to PLACEHOLDERS, but if the input values are less than expected, nothing will be returned.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" o="true" vt="STRING" v="str"/>
             </output>
         </type>
     </types>

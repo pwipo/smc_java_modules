@@ -2,6 +2,7 @@ package ru.smcsystem.smcmodules.module;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import ru.smcsystem.api.dto.IMessage;
 import ru.smcsystem.api.dto.IValue;
 import ru.smcsystem.api.enumeration.CommandType;
 import ru.smcsystem.api.exceptions.ModuleException;
@@ -46,7 +47,9 @@ public class StringUtil implements Module {
         FILTER_ACTION,
         SUBSTRING,
         TRIM,
-        REPLACE_REGEXP_MULTILINE
+        REPLACE_REGEXP_MULTILINE,
+        PLACEHOLDERS_DYNAMIC,
+        PLACEHOLDERS_DYNAMIC_OR_EMPTY,
     }
 
     private Type type;
@@ -129,6 +132,7 @@ public class StringUtil implements Module {
                 break;
         }
     }
+
     @Override
     public void update(ConfigurationTool configurationTool) throws ModuleException {
         stop(configurationTool);
@@ -447,6 +451,36 @@ public class StringUtil implements Module {
                         .map(ModuleUtils::toString)
                         .forEach(s -> executionContextTool.addMessage(StringUtils.trim(s)));
                 break;
+            case PLACEHOLDERS_DYNAMIC: {
+                LinkedList<IMessage> messages = new LinkedList<>(ModuleUtils.getMessagesJoin(executionContextTool));
+                String template = ModuleUtils.getString(messages.poll());
+                if (template == null) {
+                    executionContextTool.addError("need template");
+                    break;
+                }
+                executionContextTool.addMessage(
+                        new MessageFormat(template).format(
+                                messages.stream()
+                                        .map(ModuleUtils::toString)
+                                        .toArray())
+                );
+                break;
+            }
+            case PLACEHOLDERS_DYNAMIC_OR_EMPTY: {
+                LinkedList<IMessage> messages = new LinkedList<>(ModuleUtils.getMessagesJoin(executionContextTool));
+                String template = ModuleUtils.getString(messages.poll());
+                if (template == null) {
+                    executionContextTool.addError("need template");
+                    break;
+                }
+                String result = new MessageFormat(template).format(
+                        messages.stream()
+                                .map(ModuleUtils::toString)
+                                .toArray());
+                if (!result.matches("(?s).*\\{\\d+\\}.*"))
+                    executionContextTool.addMessage(result);
+                break;
+            }
         }
 
     }

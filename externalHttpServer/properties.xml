@@ -269,14 +269,14 @@ if VIRTUAL is selected, protocol, host, and port must be specified for each path
                     <key>ru</key>
                     <value>Набор параметров для виртуальных серверов. Используется только для режима VIRTUAL.
 Каждый объект представляет собой отдельный виртуальный сервре. Поля объекта соответствуют именам настроек, при этом если какое-то поле отсутствует, то берется соответсвующее значение из настройки. пример:
-[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false"}]
+[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false","headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type"]}]
                     </value>
                 </entry>
                 <entry>
                     <key>en</key>
                     <value>A set of parameters for virtual servers. Used only for VIRTUAL mode.
 Each object is a separate virtual server. The fields of the object correspond to the names of the settings, and if a field is missing, then the corresponding value is taken from the settings. example:
-[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false"}]
+[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false","headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type"]}]
                     </value>
                 </entry>
             </description>
@@ -376,6 +376,27 @@ OBJECT - в виде OBJECT_ARRAY содержащем 1 объект, в кот
                 <entry>
                     <key>en</key>
                     <value>The size of a piece of data (in bytes) that is read when preparing a response (fast_response).</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>headers</name>
+            <type>OBJECT_ARRAY</type>
+            <value>[]</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Заголовки по умолчанию, которые будут добавляться к каждому ответу.
+Формат: массив строк, каждая строка должна содержать имя и значение разделенные символом =.
+Примеры: ["Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"]
+                    </value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Default headers that will be added to each response.
+Format: array of strings, each line must contain a name and value separated by the = symbol.
+Examples: ["Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"]
+                    </value>
                 </entry>
             </description>
         </value>

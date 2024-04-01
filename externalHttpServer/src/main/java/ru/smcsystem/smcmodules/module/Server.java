@@ -69,8 +69,7 @@ public class Server implements Module {
     private Protocol protocol;
     private RequestType requestType;
     private AtomicLong reqIdGenerator;
-    private Map<Long, ResponseObj> mapFastResponse;
-    private Map<Long, HttpServletResponse> mapResponseObj;
+    private Map<Long, Response> mapResponse;
 
     private enum Type {
         START, STOP, FAST_RESPONSE, FILE_FAST_RESPONSE
@@ -96,6 +95,7 @@ public class Server implements Module {
         Boolean allowMultipartParsing = Boolean.valueOf((String) externalConfigurationTool.getSetting("allowMultipartParsing").orElseThrow(() -> new ModuleException("allowMultipartParsing setting")).getValue());
         String strAddress = (String) externalConfigurationTool.getSetting("bindAddress").orElseThrow(() -> new ModuleException("bindAddress setting")).getValue();
         fileResponsePieceSize = (Integer) externalConfigurationTool.getSetting("fileResponsePieceSize").orElseThrow(() -> new ModuleException("fileResponsePieceSize setting")).getValue();
+        ObjectArray headersArr = (ObjectArray) externalConfigurationTool.getSetting("headers").orElseThrow(() -> new ModuleException("headers setting")).getValue();
         List<String> availablePathsList = Arrays.stream(availablePaths.split("::"))
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.toList());
@@ -103,8 +103,7 @@ public class Server implements Module {
         requestType = RequestType.valueOf((String) externalConfigurationTool.getSetting("requestType").orElseThrow(() -> new ModuleException("requestType setting")).getValue());
         reqIdGenerator = new AtomicLong();
         reqIdGenerator.compareAndSet(Long.MAX_VALUE, 0);
-        mapFastResponse = new ConcurrentHashMap<>();
-        mapResponseObj = new ConcurrentHashMap<>();
+        mapResponse = new ConcurrentHashMap<>();
 
         virtualServerInfoMap = new HashMap<>();
         if (protocol == Protocol.VIRTUAL) {
@@ -126,6 +125,7 @@ public class Server implements Module {
                 Integer sessionTimeoutVar = objectElement.findField("sessionTimeout").map(ModuleUtils::getNumber).map(Number::intValue).orElse(sessionTimeout);
                 Integer maxPostSizeVar = objectElement.findField("maxPostSize").map(ModuleUtils::getNumber).map(Number::intValue).orElse(maxPostSize);
                 Boolean allowMultipartParsingVar = objectElement.findField("allowMultipartParsing").map(ModuleUtils::getString).map(Boolean::parseBoolean).orElse(allowMultipartParsing);
+                ObjectArray headersArrVar = objectElement.findField("headers").map(ModuleUtils::toObjectArray).orElse(headersArr);
                 RequestType requestTypeVar = objectElement.findField("requestType").map(ModuleUtils::getString).map(RequestType::valueOf).orElse(requestType);
                 URL url = null;
                 try {
@@ -147,7 +147,7 @@ public class Server implements Module {
                 }
                 VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, urlHeader, url, keyStoreFileNameVar, keyStorePassVar,
                         keyAliasVar, keyPassVar, strAddressVar, paths, requestTimeoutVar, countThreadsVar, backlogVar, sessionTimeoutVar, maxPostSizeVar,
-                        allowMultipartParsingVar, requestTypeVar);
+                        allowMultipartParsingVar, headersArrVar, requestTypeVar);
                 virtualServerInfoMap.put(virtualServerInfo.getUrlHeader(), virtualServerInfo);
             }
         } else {
@@ -159,7 +159,7 @@ public class Server implements Module {
                         .forEach(id -> paths.put(id, availablePathsList.get(id)));
                 VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, hostname, new URL(protocol.name().toLowerCase(), hostname, port, ""),
                         keyStoreFileName, keyStorePass, keyAlias, keyPass, strAddress, paths, requestTimeout, countThreads, backlog, sessionTimeout,
-                        maxPostSize, allowMultipartParsing, requestType);
+                        maxPostSize, allowMultipartParsing, headersArr, requestType);
                 virtualServerInfoMap = Map.of(virtualServerInfo.getUrlHeader(), virtualServerInfo);
             } catch (Exception e) {
                 throw new ModuleException("error", e);
@@ -192,7 +192,7 @@ public class Server implements Module {
                                                String keyStoreFileName, String keyStorePass, String keyAlias, String keyPass,
                                                String strAddress, Map<Integer, String> paths, Integer requestTimeout, Integer countThreads,
                                                Integer backlog, Integer sessionTimeout, Integer maxPostSize, Boolean allowMultipartParsing,
-                                               RequestType requestTypeVar) {
+                                               ObjectArray headersArr, RequestType requestTypeVar) {
         File keyStore = null;
         if (StringUtils.isNotBlank(keyStoreFileName)) {
             keyStore = new File(externalConfigurationTool.getWorkDirectory(), keyStoreFileName);
@@ -212,8 +212,14 @@ public class Server implements Module {
                     .filter(e -> StringUtils.isNotBlank(e.getValue()))
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> Pattern.compile(e.getValue())));
         }
+        List<String> headers = null;
+        if (headersArr != null && headersArr.size() > 0 && headersArr.isSimple()) {
+            headers = new ArrayList<>();
+            for (int i = 0; i < headersArr.size(); i++)
+                headers.add(headersArr.get(i).toString());
+        }
         return new VirtualServerInfo(urlOrigin, url, keyStore, keyStorePass, keyAlias, keyPass, address, patterns,
-                requestTimeout, countThreads, backlog, sessionTimeout, maxPostSize, allowMultipartParsing, requestTypeVar);
+                requestTimeout, countThreads, backlog, sessionTimeout, maxPostSize, allowMultipartParsing, headers, requestTypeVar);
     }
 
     @Override
@@ -425,11 +431,12 @@ public class Server implements Module {
     private void fastResponse(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, long reqId, int resultCode, List<String> headers, byte[] content, String path, String mimeType, int startEcId) {
         ResponseObj responseObj = new ResponseObj(reqId, resultCode, headers, content, path, executionContextTool, startEcId);
         try {
-            HttpServletResponse resp = mapResponseObj.get(reqId);
+            Response response = mapResponse.get(reqId);
+            HttpServletResponse resp = response != null ? response.getHttpServletResponse() : null;
             if (resp != null) {
-                mapFastResponse.put(reqId, responseObj);
+                response.setResponseObj(responseObj);
                 try {
-                    resultCode = handleResponse(resp, responseObj);
+                    resultCode = handleResponse(resp, responseObj, response.getVirtualServerInfo().getHeaders());
                 } catch (Exception e) {
                     configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                 }
@@ -498,7 +505,7 @@ public class Server implements Module {
         requestMap = null;
         stopServer();
         virtualServerInfoMap = null;
-        mapFastResponse = null;
+        mapResponse = null;
         reqIdGenerator = null;
     }
 
@@ -587,7 +594,8 @@ public class Server implements Module {
 
                     Map.Entry<Long, List<Object>> requestEntry = createRequest(req, virtualServerInfo.getRequestType());
                     reqId = requestEntry.getKey();
-                    mapResponseObj.put(reqId, resp);
+                    Response responseMain = new Response(reqId, resp, virtualServerInfo);
+                    mapResponse.put(reqId, responseMain);
                     long threadId = externalExecutionContextTool.getFlowControlTool().executeParallel(
                             CommandType.EXECUTE,
                             idsForExecute,
@@ -604,10 +612,10 @@ public class Server implements Module {
                         } while (externalExecutionContextTool.getFlowControlTool().isThreadActive(threadId) &&
                                 !externalExecutionContextTool.isNeedStop() &&
                                 (virtualServerInfo.getRequestTimeout() <= 0 || virtualServerInfo.getRequestTimeout() > System.currentTimeMillis() - startTime) &&
-                                !mapFastResponse.containsKey(reqId));
-                        if (mapFastResponse.containsKey(reqId)) {
+                                (mapResponse.containsKey(reqId) && responseMain.getResponseObj() == null));
+                        if (responseMain.getResponseObj() != null) {
                             mapFastResponseArrived = true;
-                            responseObj = mapFastResponse.remove(reqId);
+                            responseObj = responseMain.getResponseObj();
                             if (responseObj != null && !externalExecutionContextTool.isNeedStop() &&
                                     (virtualServerInfo.getRequestTimeout() <= 0 || virtualServerInfo.getRequestTimeout() > System.currentTimeMillis() - startTime))
                                 responseObj.waitWork();
@@ -631,7 +639,6 @@ public class Server implements Module {
                             }
                         }
                     } finally {
-                        mapFastResponse.remove(reqId);
                         if (!mapFastResponseArrived) {
                             externalExecutionContextTool.getFlowControlTool().releaseThread(threadId);
                         } else {
@@ -642,9 +649,9 @@ public class Server implements Module {
                     externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                     // externalExecutionContextTool.addError(e.getLocalizedMessage());
                 } finally {
-                    if (mapResponseObj.remove(reqId) != null && (responseObj == null || !responseObj.isFastResponse())) {
+                    if (mapResponse.remove(reqId) != null && (responseObj == null || !responseObj.isFastResponse())) {
                         try {
-                            handleResponse(resp, responseObj);
+                            handleResponse(resp, responseObj, virtualServerInfo.getHeaders());
                         } catch (Exception e) {
                             externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                         }
@@ -819,7 +826,7 @@ public class Server implements Module {
         return Map.entry(reqId, request);
     }
 
-    private int handleResponse(HttpServletResponse resp, ResponseObj responseObj) throws IOException {
+    private int handleResponse(HttpServletResponse resp, ResponseObj responseObj, List<String> headers) throws IOException {
         if (responseObj == null) {
             resp.setStatus(500);
             return 500;
@@ -831,6 +838,14 @@ public class Server implements Module {
             if (split.length > 1)
                 resp.setHeader(split[0].trim(), split[1].trim());
         });
+        if (headers != null) {
+            headers.forEach(headerText -> {
+                String[] split = headerText.split("=", 2);
+                // h.getResponseHeaders().add(split[0].trim(), split[1].trim());
+                if (split.length > 1)
+                    resp.setHeader(split[0].trim(), split[1].trim());
+            });
+        }
         if (responseObj.getPath() != null) {
             byte[] bytes = responseObj.getBytes(0, fileResponsePieceSize);
             Long size;

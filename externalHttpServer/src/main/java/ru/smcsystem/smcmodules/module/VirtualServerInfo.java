@@ -6,6 +6,7 @@ import org.apache.catalina.core.StandardHost;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -25,12 +26,13 @@ public class VirtualServerInfo {
     private final Integer sessionTimeout;
     private final Integer maxPostSize;
     private final Boolean allowMultipartParsing;
+    private final List<String> headers;
     private Server.RequestType requestType;
 
     public VirtualServerInfo(String urlHeader, URL url, File keyStore, String keyStorePass, String keyAlias, String keyPass,
                              InetAddress address, Map<Integer, Pattern> patterns, Integer requestTimeout, Integer countThreads,
                              Integer backlog, Integer sessionTimeout, Integer maxPostSize, Boolean allowMultipartParsing,
-                             Server.RequestType requestType) {
+                             List<String> headers, Server.RequestType requestType) {
         this.urlHeader = urlHeader;
         this.url = url;
         this.keyStore = keyStore;
@@ -47,7 +49,8 @@ public class VirtualServerInfo {
         this.allowMultipartParsing = allowMultipartParsing;
         this.host = new StandardHost();
         host.setName(url.getHost());
-        this.requestType=requestType;
+        this.headers = headers;
+        this.requestType = requestType;
     }
 
     public String getUrlHeader() {
@@ -108,6 +111,10 @@ public class VirtualServerInfo {
 
     public Boolean getAllowMultipartParsing() {
         return allowMultipartParsing;
+    }
+
+    public List<String> getHeaders() {
+        return headers;
     }
 
     public Server.RequestType getRequestType() {

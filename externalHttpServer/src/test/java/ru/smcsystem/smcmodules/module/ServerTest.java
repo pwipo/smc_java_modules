@@ -1,5 +1,6 @@
 package ru.smcsystem.smcmodules.module;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -18,6 +19,7 @@ import org.junit.Test;
 import ru.smcsystem.api.dto.*;
 import ru.smcsystem.api.enumeration.ActionType;
 import ru.smcsystem.api.enumeration.MessageType;
+import ru.smcsystem.api.enumeration.ObjectType;
 import ru.smcsystem.api.enumeration.ValueType;
 import ru.smcsystem.smc.utils.ModuleUtils;
 import ru.smcsystem.test.Process;
@@ -272,6 +274,7 @@ public class ServerTest {
         settings.put("virtualServerSettings", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
         settings.put("requestType", new Value("OBJECT"));
         settings.put("fileResponsePieceSize", new Value(1048576));
+        settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -342,6 +345,7 @@ public class ServerTest {
             request.addHeader(HttpHeaders.USER_AGENT, HttpHeaders.USER_AGENT);
 
             try (CloseableHttpResponse response = client.execute(request)) {
+                Header[] allHeaders = response.getAllHeaders();
                 HttpEntity entity = response.getEntity();
                 // token = IOUtils.toString(entity.getContent());
                 token = EntityUtils.toString(entity);
@@ -375,6 +379,7 @@ public class ServerTest {
         settings.put("virtualServerSettings", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
         settings.put("requestType", new Value("OBJECT"));
         settings.put("fileResponsePieceSize", new Value(1048576));
+        settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -509,6 +514,7 @@ public class ServerTest {
                 )
         )));
         settings.put("fileResponsePieceSize", new Value(1048576));
+        settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -612,6 +618,7 @@ public class ServerTest {
         settings.put("requestType", new Value("OBJECT"));
         settings.put("virtualServerSettings", new Value(new ObjectArray()));
         settings.put("fileResponsePieceSize", new Value(1048576));
+        settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -635,19 +642,14 @@ public class ServerTest {
                             ObjectElement objectElement = (ObjectElement) ((ObjectArray) lst.get(0)).get(0);
                             String uri = objectElement.findField("uri").map(ModuleUtils::toString).orElse("");
                             Long reqId = objectElement.findField("reqId").map(ModuleUtils::getNumber).map(Number::longValue).orElse(-1L);
-                            if(uri.equals("/hello")) {
-                                sendFastResp(process, List.of(
-                                        new Message(MessageType.DATA, new Date(), new Value(reqId)),
-                                        new Message(MessageType.DATA, new Date(), new Value(new ObjectArray(new ObjectElement(new ObjectField("result", "success")))))
-                                ));
-                            }else if(uri.equals("/file")){
-                                sendFastResp(process, List.of(
-                                        new Message(MessageType.DATA, new Date(), new Value(reqId)),
-                                        new Message(MessageType.DATA, new Date(), new Value("file.txt"))
-                                ));
-                            }else{
-                                sendFastResp(process, List.of(
-                                        new Message(MessageType.DATA, new Date(), new Value(reqId)),
+                            if (uri.equals("/hello")) {
+                                sendFastResp(process, reqId,
+                                        List.of(new Message(MessageType.DATA, new Date(), new Value(new ObjectArray(new ObjectElement(new ObjectField("result", "success")))))));
+                            } else if (uri.equals("/file")) {
+                                sendFastResp(process, reqId,
+                                        List.of(new Message(MessageType.DATA, new Date(), new Value("file.txt"))));
+                            } else {
+                                sendFastResp(process, reqId, List.of(
                                         // new Message(MessageType.DATA, new Date(), new Value("success")),
                                         new Message(MessageType.ERROR, new Date(), new Value("error")),
                                         new Message(MessageType.ERROR, new Date(), new Value(10))
@@ -705,7 +707,7 @@ public class ServerTest {
         process.stop();
     }
 
-    private void sendFastResp(Process process, List<IMessage> messages) {
+    private void sendFastResp(Process process, Long reqId, List<IMessage> messages) {
         ExecutionContextToolImpl executionContextToolFastResp = new ExecutionContextToolImpl(
                 List.of(
                         List.of(
@@ -715,6 +717,11 @@ public class ServerTest {
                                                 new Message(MessageType.DATA, new Date(), new Value("errorText")),
                                                 new Message(MessageType.DATA, new Date(), new Value("data"))
                                         ),
+                                        ActionType.EXECUTE)
+                        ),
+                        List.of(
+                                new Action(
+                                        List.of(new Message(MessageType.DATA, new Date(), new Value(reqId))),
                                         ActionType.EXECUTE)
                         ),
                         List.of(

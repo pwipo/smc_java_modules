@@ -569,10 +569,10 @@ public class Server implements Module {
             protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
                 ResponseObj responseObj = null;
                 long reqId = 0;
+                long startTime = System.currentTimeMillis();
                 try {
                     // req.getSession().setMaxInactiveInterval(requestTimeout);
                     // System.out.println(req.getSession().getMaxInactiveInterval());
-                    long startTime = System.currentTimeMillis();
                     List<Integer> idsForExecute = null;
                     if (patternEntries != null) {
                         String s = req.getRequestURI();
@@ -640,6 +640,8 @@ public class Server implements Module {
                         }
                     } finally {
                         if (!mapFastResponseArrived) {
+                            // if (externalExecutionContextTool.getFlowControlTool().isThreadActive(threadId))
+                            //     externalConfigurationTool.loggerWarn(String.format("Thread %d steel work. Time left=%d, getRequestTimeout=%d, mapResponse contaik key=%s, getResponseObj is null=%s", threadId, System.currentTimeMillis() - startTime, virtualServerInfo.getRequestTimeout(), mapResponse.containsKey(reqId), responseMain.getResponseObj() == null));
                             externalExecutionContextTool.getFlowControlTool().releaseThread(threadId);
                         } else {
                             externalExecutionContextTool.getFlowControlTool().releaseThreadCache(threadId);
@@ -739,7 +741,7 @@ public class Server implements Module {
             mainHeaders.put(headerName, req.getHeader(headerName));
         }
 
-        long reqId = -1;
+        long reqId = reqIdGenerator.incrementAndGet();
         if (requestType == RequestType.LIST) {
             request.add(req.getMethod());
             request.add(req.getRequestURI());
@@ -773,7 +775,6 @@ public class Server implements Module {
                     request.add(bytes);
             }
         } else {
-            reqId = reqIdGenerator.incrementAndGet();
             ObjectElement objectElement = new ObjectElement(
                     new ObjectField("method", req.getMethod())
                     , new ObjectField("uri", req.getRequestURI())

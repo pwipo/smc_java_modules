@@ -31,6 +31,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ServerTest {
 
@@ -346,6 +347,7 @@ public class ServerTest {
 
             try (CloseableHttpResponse response = client.execute(request)) {
                 Header[] allHeaders = response.getAllHeaders();
+                System.out.println("headers: " + Arrays.stream(allHeaders).map(h->h.getName() + "=" + h.getValue()).collect(Collectors.joining(", ")));
                 HttpEntity entity = response.getEntity();
                 // token = IOUtils.toString(entity.getContent());
                 token = EntityUtils.toString(entity);
@@ -761,6 +763,89 @@ public class ServerTest {
         process.execute(executionContextToolFastResp);
         executionContextToolFastResp.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
         executionContextToolFastResp.getOutput().clear();
+    }
+
+    @Test
+    public void testBytesWithHeaders() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+        Map<String, IValue> settings = new HashMap<>(Map.of(
+                "port", new Value(8080),
+                "requestTimeout", new Value(20000),
+                "countThreads", new Value(10),
+                "backlog", new Value(0),
+                // "mode", new Value(ValueType.STRING, "PASSIVE"),
+                "protocol", new Value("HTTP"),
+                "availablePaths", new Value(".*::https://localhost:8081/test::https://service.smcsystem.ru:8082/store"),
+                "keyStoreFileName", new Value(""),
+                "keyStorePass", new Value(""),
+                "keyPass", new Value(""),
+                "keyAlias", new Value("")
+        ));
+        settings.put("bindAddress", new Value(""));
+        settings.put("sessionTimeout", new Value(30));
+        settings.put("maxPostSize", new Value(10485760));
+        settings.put("allowMultipartParsing", new Value("true"));
+        settings.put("requestType", new Value("OBJECT"));
+        settings.put("virtualServerSettings", new Value(new ObjectArray()));
+        settings.put("fileResponsePieceSize", new Value(1048576));
+        settings.put("headers", new Value(new ObjectArray(List.of(), ObjectType.STRING)));
+
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        settings,
+                        null,
+                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
+                ),
+                new Server()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                null,
+                null,
+                null,
+                List.of(
+                        (lst) -> {
+                            System.out.println("func1");
+                            System.out.println(lst);
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(200))
+                                            , new Message(MessageType.DATA, new Date(), new Value("Content-Type=application/json".getBytes()))
+                                            , new Message(MessageType.DATA, new Date(), new Value("Access-Control-Allow-Origin=*".getBytes()))
+                                            , new Message(MessageType.DATA, new Date(), new Value("Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS".getBytes()))
+                                            , new Message(MessageType.DATA, new Date(), new Value("Access-Control-Allow-Headers=Content-Type".getBytes()))
+                                            , new Message(MessageType.DATA, new Date(), new Value("Content-Disposition=attachment;filename=data.zip".getBytes()))
+                                            , new Message(MessageType.DATA, new Date(), new Value("hi".getBytes()))
+                                    ),
+                                    ActionType.EXECUTE);
+                        }
+
+                ),
+                "default", "start");
+
+        Thread thread = new Thread(() -> {
+            process.execute(executionContextTool);
+            executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+            executionContextTool.getOutput().clear();
+        });
+        thread.start();
+
+        try {
+            Thread.sleep(1000);
+            System.out.println("Response: " + sendingGetRequest(HttpClientBuilder.create(), "http://localhost:8080/hello"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        ExecutionContextToolImpl executionContextTool2 = new ExecutionContextToolImpl(null, null, null, null, "default", "stop");
+        process.execute(executionContextTool2);
+
+        thread.join();
+
+        process.stop();
     }
 
 }

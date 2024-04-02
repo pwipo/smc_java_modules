@@ -631,10 +631,12 @@ public class Server implements Module {
                                 IMessage responseBodyObject = response.get(response.size() - 1);
                                 byte[] responseBody = ModuleUtils.isString(responseBodyObject) ?
                                         (ModuleUtils.getString(responseBodyObject)).getBytes() :
-                                        (ModuleUtils.isBytes(responseBodyObject) ? ModuleUtils.getBytes(responseBodyObject) : null);
+                                        (ModuleUtils.isBytes(responseBodyObject) ?
+                                                ModuleUtils.getBytes(responseBodyObject) :
+                                                ModuleUtils.toString(responseBodyObject).getBytes());
                                 List<String> headers = new ArrayList<>(response.size());
                                 for (int i = 1; i < response.size() - 1; i++)
-                                    headers.add(response.get(i).toString());
+                                    headers.add(ModuleUtils.toString(response.get(i)));
                                 responseObj = new ResponseObj(null, code, headers, responseBody, null, null, 1);
                             }
                         }

@@ -43,7 +43,8 @@ public class CollectionUtil implements Module {
         OBJECT_LIST_JOIN_ARRAYS,
         OBJECT_FIELDS_JOIN,
         TRANSFORM_OBJECT_FIELD,
-        OBJECT_FIELD_VALUE
+        OBJECT_FIELD_VALUE,
+        OBJECT_FIELD_VALUE_AUTO_CONVERT
     }
 
     private Type type;
@@ -78,7 +79,7 @@ public class CollectionUtil implements Module {
         if (Type.MAP_GET_VALUE.equals(type) || Type.MAP_GET_VALUE_EXT.equals(type) ||
                 Type.MAP_GET_VALUE_OBJECT_LIST.equals(type) || Type.MAP_GET_VALUE_OBJECT_LIST_PATH.equals(type)
                 || Type.MAP_GET_VALUE_OBJECT_LIST_SIMPLE.equals(type) || Type.MAP_GET_VALUE_OBJECT_LIST_PATH_SIMPLE.equals(type)
-                || Type.OBJECT_FIELD_VALUE.equals(type)) {
+                || Type.OBJECT_FIELD_VALUE.equals(type) || Type.OBJECT_FIELD_VALUE_AUTO_CONVERT.equals(type)) {
             strParams = new ArrayList<>();
             values = new ArrayList<>();
             Arrays.stream(value.split("::"))
@@ -807,7 +808,8 @@ public class CollectionUtil implements Module {
                     executionContextTool.addMessage(result);
                     break;
                 }
-                case OBJECT_FIELD_VALUE: {
+                case OBJECT_FIELD_VALUE:
+                case OBJECT_FIELD_VALUE_AUTO_CONVERT: {
                     if (executionContextTool.countSource() < 2) {
                         executionContextTool.addError("need 2 sources");
                         break;
@@ -832,7 +834,11 @@ public class CollectionUtil implements Module {
                                 }
                                 List<Object> lst = ModuleUtils.findFields(objectArray, List.of(path)).stream()
                                         .flatMap(Collection::stream)
-                                        .map(f -> f.getType() == ObjectType.OBJECT_ELEMENT ? new ObjectArray((ObjectElement) f.getValue()) : f.getValue())
+                                        .map(f -> f.getType() == ObjectType.OBJECT_ELEMENT ?
+                                                new ObjectArray((ObjectElement) f.getValue()) :
+                                                (type == Type.OBJECT_FIELD_VALUE_AUTO_CONVERT && ModuleUtils.isString(f) ?
+                                                        fromString(ModuleUtils.getString(f), base64) :
+                                                        f.getValue()))
                                         .collect(Collectors.toList());
                                 return (!lst.isEmpty() ? lst : (defaultValueStr != null ? List.of(defaultValueStr) : List.of())).stream();
                             })

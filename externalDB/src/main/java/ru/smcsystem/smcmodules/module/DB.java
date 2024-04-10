@@ -1066,7 +1066,7 @@ public class DB implements Module {
                     // externalExecutionContextTool.addMessage(convertNull(rs.getBytes(column_name)));
                     fieldType = ObjectType.BYTES;
                     byte[] bytes = rs.getBytes(column_name);
-                    if (Base64.isBase64(bytes))
+                    if (bytes != null && Base64.isBase64(bytes))
                         bytes = Base64.decodeBase64(bytes);
                     if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
                         value = convertNull(bytes);
@@ -1076,7 +1076,7 @@ public class DB implements Module {
                 } else if (columnType == Types.BINARY) {
                     fieldType = ObjectType.BYTES;
                     byte[] bytes = rs.getBytes(column_name);
-                    if (Base64.isBase64(bytes))
+                    if (bytes != null && Base64.isBase64(bytes))
                         bytes = Base64.decodeBase64(bytes);
                     if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
                         value = convertNull(bytes);

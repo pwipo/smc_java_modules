@@ -6,4 +6,5 @@ module ru.smcsystem.modules.externalDB {
     requires org.apache.commons.io;
     requires java.management;
     requires ru.smcsystem.utils;
+    requires org.apache.commons.codec;
 }

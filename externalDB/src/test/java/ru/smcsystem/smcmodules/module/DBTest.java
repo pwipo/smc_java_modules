@@ -6,6 +6,7 @@ import ru.smcsystem.api.dto.ObjectElement;
 import ru.smcsystem.api.dto.ObjectField;
 import ru.smcsystem.api.enumeration.ActionType;
 import ru.smcsystem.api.enumeration.MessageType;
+import ru.smcsystem.api.enumeration.ObjectType;
 import ru.smcsystem.api.enumeration.ValueType;
 import ru.smcsystem.test.Process;
 import ru.smcsystem.test.emulate.*;
@@ -453,6 +454,51 @@ public class DBTest {
                         ))),
                 null,
                 null
+        );
+
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
+        process.stop();
+    }
+
+    @Test
+    public void processSelectParams() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of("type", new Value(ValueType.STRING, "postgreeClient"),
+                                "connection_params", new Value(ValueType.STRING, "localhost:5432/DB"),
+                                "login", new Value(ValueType.STRING, "postgres"),
+                                "password", new Value(ValueType.STRING, "pass"),
+                                "useAutoConvert", new Value("true"),
+                                "resultFormat", new Value("OBJECT_WITH_NULL_AND_BOOLEAN"),
+                                "resultSetColumnNameToUpperCase", new Value("true"),
+                                "queryTimeout", new Value(0)
+                        ),
+                        null,
+                        "C:\\Users\\user\\Documents\\tmp\\12"
+                ),
+                new DB()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(List.of(
+                List.of(
+                        new Action(
+                                List.of(
+                                        new Message(MessageType.DATA, new Date(), new Value("select * from IMAGE where id = ANY (?)")),
+                                        new Message(MessageType.DATA, new Date(), new Value(new ObjectArray(List.of(1, 2), ObjectType.LONG)))
+                                ),
+                                ActionType.EXECUTE
+                        ))),
+                null,
+                null,
+                null,
+                "default", "execute_with_params_in_one_transaction"
         );
 
         process.execute(executionContextTool);

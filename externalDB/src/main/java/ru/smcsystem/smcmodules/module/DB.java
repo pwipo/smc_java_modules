@@ -1,5 +1,6 @@
 package ru.smcsystem.smcmodules.module;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -395,35 +396,8 @@ public class DB implements Module {
                     for (int i = 1; i <= parameterCount; i++) {
                         IMessage message = messages.poll();
                         Object value = message.getValue();
-                        if (useAutoConvert) {
-                            int parameterType;
-                            if (type == Type.mysqlClient) {
-                                parameterType = ModuleUtils.getNumber(messages.poll()).intValue();
-                            } else {
-                                parameterType = parameterMetaData.getParameterType(i);
-                            }
-                            if ("NULL".equals(value)) {
-                                stm.setNull(i, parameterType);
-                            } else {
-                                switch (parameterType) {
-                                    case Types.BOOLEAN:
-                                    case Types.BIT:
-                                        value = toBoolean(message);
-                                        break;
-                                    case Types.TIMESTAMP:
-                                        value = !ModuleUtils.isString(message) || NumberUtils.isCreatable(ModuleUtils.getString(message)) ? new Timestamp(toLong(message)) : message.getValue();
-                                        break;
-                                    case Types.DATE:
-                                        value = !ModuleUtils.isString(message) || NumberUtils.isCreatable(ModuleUtils.getString(message)) ? new java.sql.Date(toLong(message)) : message.getValue();
-                                        break;
-                                    case Types.TIME:
-                                        value = !ModuleUtils.isString(message) || NumberUtils.isCreatable(ModuleUtils.getString(message)) ? new Time(toLong(message)) : message.getValue();
-                                        break;
-                                }
-                                stm.setObject(i, value);
-                            }
-                            // System.out.println(i + " " + parameterType + " " + value);
-                        } else if (value instanceof ObjectArray) {
+
+                        if (value instanceof ObjectArray) {
                             ObjectArray objectArrayValue = (ObjectArray) value;
                             if (objectArrayValue.isSimple()) {
                                 Array array;
@@ -455,6 +429,34 @@ public class DB implements Module {
                                 }
                                 stm.setNull(i, parameterType);
                             }
+                        } else if (useAutoConvert) {
+                            int parameterType;
+                            if (type == Type.mysqlClient) {
+                                parameterType = ModuleUtils.getNumber(messages.poll()).intValue();
+                            } else {
+                                parameterType = parameterMetaData.getParameterType(i);
+                            }
+                            if ("NULL".equals(value)) {
+                                stm.setNull(i, parameterType);
+                            } else {
+                                switch (parameterType) {
+                                    case Types.BOOLEAN:
+                                    case Types.BIT:
+                                        value = toBoolean(message);
+                                        break;
+                                    case Types.TIMESTAMP:
+                                        value = !ModuleUtils.isString(message) || NumberUtils.isCreatable(ModuleUtils.getString(message)) ? new Timestamp(toLong(message)) : message.getValue();
+                                        break;
+                                    case Types.DATE:
+                                        value = !ModuleUtils.isString(message) || NumberUtils.isCreatable(ModuleUtils.getString(message)) ? new java.sql.Date(toLong(message)) : message.getValue();
+                                        break;
+                                    case Types.TIME:
+                                        value = !ModuleUtils.isString(message) || NumberUtils.isCreatable(ModuleUtils.getString(message)) ? new Time(toLong(message)) : message.getValue();
+                                        break;
+                                }
+                                stm.setObject(i, value);
+                            }
+                            // System.out.println(i + " " + parameterType + " " + value);
                         } else {
                             stm.setObject(i, value);
                         }
@@ -513,30 +515,6 @@ public class DB implements Module {
                                 Object value = f.getValue();
                                 if (value == null) {
                                     stm.setNull(j, parameterTypes.get(jj));
-                                } else if (useAutoConvert) {
-                                    int parameterType = parameterTypes.get(jj);
-                                    // String parameterClassName = parameterMetaData.getParameterClassName(j);
-                                    if (ModuleUtils.isString(f) && "NULL".equals(value)) {
-                                        stm.setNull(i, parameterType);
-                                    } else {
-                                        switch (parameterType) {
-                                            case Types.BOOLEAN:
-                                            case Types.BIT:
-                                                value = toBoolean(f);
-                                                break;
-                                            case Types.TIMESTAMP:
-                                                value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new Timestamp(toLong(f)) : f.getValue();
-                                                break;
-                                            case Types.DATE:
-                                                value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new java.sql.Date(toLong(f)) : f.getValue();
-                                                break;
-                                            case Types.TIME:
-                                                value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new Time(toLong(f)) : f.getValue();
-                                                break;
-                                        }
-                                        stm.setObject(j, value);
-                                    }
-                                    // System.out.println(j + " " + f.getName() + " " + parameterType + " " + parameterClassName + " " + value);
                                 } else if (ModuleUtils.isObjectArray(f)) {
                                     ObjectArray objectArrayValue = ModuleUtils.getObjectArray(f);
                                     if (objectArrayValue.isSimple()) {
@@ -563,6 +541,30 @@ public class DB implements Module {
                                     } else {
                                         stm.setNull(j, parameterTypes.get(jj));
                                     }
+                                } else if (useAutoConvert) {
+                                    int parameterType = parameterTypes.get(jj);
+                                    // String parameterClassName = parameterMetaData.getParameterClassName(j);
+                                    if (ModuleUtils.isString(f) && "NULL".equals(value)) {
+                                        stm.setNull(i, parameterType);
+                                    } else {
+                                        switch (parameterType) {
+                                            case Types.BOOLEAN:
+                                            case Types.BIT:
+                                                value = toBoolean(f);
+                                                break;
+                                            case Types.TIMESTAMP:
+                                                value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new Timestamp(toLong(f)) : f.getValue();
+                                                break;
+                                            case Types.DATE:
+                                                value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new java.sql.Date(toLong(f)) : f.getValue();
+                                                break;
+                                            case Types.TIME:
+                                                value = !ModuleUtils.isString(f) || NumberUtils.isCreatable(ModuleUtils.getString(f)) ? new Time(toLong(f)) : f.getValue();
+                                                break;
+                                        }
+                                        stm.setObject(j, value);
+                                    }
+                                    // System.out.println(j + " " + f.getName() + " " + parameterType + " " + parameterClassName + " " + value);
                                 } else {
                                     stm.setObject(j, value);
                                 }
@@ -598,30 +600,7 @@ public class DB implements Module {
                             for (int j = 1; j <= parameterCount; j++) {
                                 int jj = j - 1;
                                 Object value = objectArray1.get(jj);
-                                if (useAutoConvert) {
-                                    int parameterType = parameterTypes.get(jj);
-                                    if ("NULL".equals(value)) {
-                                        stm.setNull(j, parameterType);
-                                    } else {
-                                        boolean isString = value instanceof String;
-                                        switch (parameterType) {
-                                            case Types.BOOLEAN:
-                                            case Types.BIT:
-                                                value = toBooleanObj(value);
-                                                break;
-                                            case Types.TIMESTAMP:
-                                                value = !isString || NumberUtils.isCreatable((String) value) ? new Timestamp(toLongObj(value)) : value;
-                                                break;
-                                            case Types.DATE:
-                                                value = !isString || NumberUtils.isCreatable((String) value) ? new java.sql.Date(toLongObj(value)) : value;
-                                                break;
-                                            case Types.TIME:
-                                                value = !isString || NumberUtils.isCreatable((String) value) ? new Time(toLongObj(value)) : value;
-                                                break;
-                                        }
-                                        stm.setObject(j, value);
-                                    }
-                                } else if (value instanceof ObjectArray) {
+                                if (value instanceof ObjectArray) {
                                     ObjectArray objectArrayValue = (ObjectArray) value;
                                     if (objectArrayValue.isSimple()) {
                                         Array array;
@@ -646,6 +625,29 @@ public class DB implements Module {
                                         stm.setArray(j, array);
                                     } else {
                                         stm.setNull(j, parameterTypes.get(jj));
+                                    }
+                                } else if (useAutoConvert) {
+                                    int parameterType = parameterTypes.get(jj);
+                                    if ("NULL".equals(value)) {
+                                        stm.setNull(j, parameterType);
+                                    } else {
+                                        boolean isString = value instanceof String;
+                                        switch (parameterType) {
+                                            case Types.BOOLEAN:
+                                            case Types.BIT:
+                                                value = toBooleanObj(value);
+                                                break;
+                                            case Types.TIMESTAMP:
+                                                value = !isString || NumberUtils.isCreatable((String) value) ? new Timestamp(toLongObj(value)) : value;
+                                                break;
+                                            case Types.DATE:
+                                                value = !isString || NumberUtils.isCreatable((String) value) ? new java.sql.Date(toLongObj(value)) : value;
+                                                break;
+                                            case Types.TIME:
+                                                value = !isString || NumberUtils.isCreatable((String) value) ? new Time(toLongObj(value)) : value;
+                                                break;
+                                        }
+                                        stm.setObject(j, value);
                                     }
                                 } else {
                                     stm.setObject(j, value);
@@ -778,6 +780,30 @@ public class DB implements Module {
                         Object value = f.getValue();
                         if (value == null) {
                             sqlParamListInner.add("null");
+                        } else if (ModuleUtils.isObjectArray(f)) {
+                            ObjectArray objectArrayValue = ModuleUtils.getObjectArray(f);
+                            if (objectArrayValue.isSimple()) {
+                                if (objectArrayValue.getType() != ObjectType.VALUE_ANY && ModuleUtils.isArrayContainNumber(objectArrayValue)) {
+                                    if (objectArrayValue.getType() == ObjectType.FLOAT || objectArrayValue.getType() == ObjectType.DOUBLE || objectArrayValue.getType() == ObjectType.BIG_DECIMAL) {
+                                        List<Float> lst = new ArrayList<>(objectArrayValue.size());
+                                        for (int k = 0; k < objectArrayValue.size(); k++)
+                                            lst.add(((Number) objectArrayValue.get(k)).floatValue());
+                                        sqlParamListInner.add("(" + lst.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
+                                    } else {
+                                        List<Long> lst = new ArrayList<>(objectArrayValue.size());
+                                        for (int k = 0; k < objectArrayValue.size(); k++)
+                                            lst.add(((Number) objectArrayValue.get(k)).longValue());
+                                        sqlParamListInner.add("(" + lst.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
+                                    }
+                                } else {
+                                    List<String> lst = new ArrayList<>(objectArrayValue.size());
+                                    for (int k = 0; k < objectArrayValue.size(); k++)
+                                        lst.add(escapeSql(objectArrayValue.get(k).toString()));
+                                    sqlParamListInner.add("(" + String.join(",", lst) + ")");
+                                }
+                            } else {
+                                sqlParamListInner.add("null");
+                            }
                         } else if (useAutoConvert) {
                             int parameterType = parameterTypes.get(jj);
                             if (ModuleUtils.isString(f) && "NULL".equals(value)) {
@@ -805,8 +831,27 @@ public class DB implements Module {
                                         sqlParamListInner.add(ModuleUtils.isNumber(f) || ModuleUtils.isBoolean(f) ? f.getValue().toString() : escapeSql(f.getValue().toString()));
                                 }
                             }
-                        } else if (ModuleUtils.isObjectArray(f)) {
-                            ObjectArray objectArrayValue = ModuleUtils.getObjectArray(f);
+                        } else {
+                            sqlParamListInner.add(ModuleUtils.isNumber(f) || ModuleUtils.isBoolean(f) ? f.getValue().toString() : escapeSql(f.getValue().toString()));
+                        }
+                    }
+                    sqlParamList.add(sqlParamListInner);
+                }
+            } else if (ModuleUtils.isArrayContainArrays(objectArray)) {
+                for (int i = 0; i < objectArray.size(); i++) {
+                    ObjectArray objectArray1 = (ObjectArray) objectArray.get(i);
+                    if (objectArray1.size() == 0)
+                        continue;
+                    if (objectArray1.size() < parameterCount) {
+                        externalExecutionContextTool.addError("need " + parameterCount + " params");
+                        return null;
+                    }
+                    List<String> sqlParamListInner = new ArrayList<>(parameterCount);
+                    for (int j = 1; j <= parameterCount; j++) {
+                        int jj = j - 1;
+                        Object value = objectArray1.get(jj);
+                        if (value instanceof ObjectArray) {
+                            ObjectArray objectArrayValue = (ObjectArray) value;
                             if (objectArrayValue.isSimple()) {
                                 if (objectArrayValue.getType() != ObjectType.VALUE_ANY && ModuleUtils.isArrayContainNumber(objectArrayValue)) {
                                     if (objectArrayValue.getType() == ObjectType.FLOAT || objectArrayValue.getType() == ObjectType.DOUBLE || objectArrayValue.getType() == ObjectType.BIG_DECIMAL) {
@@ -829,26 +874,7 @@ public class DB implements Module {
                             } else {
                                 sqlParamListInner.add("null");
                             }
-                        } else {
-                            sqlParamListInner.add(ModuleUtils.isNumber(f) || ModuleUtils.isBoolean(f) ? f.getValue().toString() : escapeSql(f.getValue().toString()));
-                        }
-                    }
-                    sqlParamList.add(sqlParamListInner);
-                }
-            } else if (ModuleUtils.isArrayContainArrays(objectArray)) {
-                for (int i = 0; i < objectArray.size(); i++) {
-                    ObjectArray objectArray1 = (ObjectArray) objectArray.get(i);
-                    if (objectArray1.size() == 0)
-                        continue;
-                    if (objectArray1.size() < parameterCount) {
-                        externalExecutionContextTool.addError("need " + parameterCount + " params");
-                        return null;
-                    }
-                    List<String> sqlParamListInner = new ArrayList<>(parameterCount);
-                    for (int j = 1; j <= parameterCount; j++) {
-                        int jj = j - 1;
-                        Object value = objectArray1.get(jj);
-                        if (useAutoConvert) {
+                        } else if (useAutoConvert) {
                             int parameterType = parameterTypes.get(jj);
                             if ("NULL".equals(value)) {
                                 sqlParamListInner.add("null");
@@ -875,30 +901,6 @@ public class DB implements Module {
                                     default:
                                         sqlParamListInner.add(value instanceof Number || value instanceof Boolean ? value.toString() : escapeSql(value.toString()));
                                 }
-                            }
-                        } else if (value instanceof ObjectArray) {
-                            ObjectArray objectArrayValue = (ObjectArray) value;
-                            if (objectArrayValue.isSimple()) {
-                                if (objectArrayValue.getType() != ObjectType.VALUE_ANY && ModuleUtils.isArrayContainNumber(objectArrayValue)) {
-                                    if (objectArrayValue.getType() == ObjectType.FLOAT || objectArrayValue.getType() == ObjectType.DOUBLE || objectArrayValue.getType() == ObjectType.BIG_DECIMAL) {
-                                        List<Float> lst = new ArrayList<>(objectArrayValue.size());
-                                        for (int k = 0; k < objectArrayValue.size(); k++)
-                                            lst.add(((Number) objectArrayValue.get(k)).floatValue());
-                                        sqlParamListInner.add("(" + lst.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
-                                    } else {
-                                        List<Long> lst = new ArrayList<>(objectArrayValue.size());
-                                        for (int k = 0; k < objectArrayValue.size(); k++)
-                                            lst.add(((Number) objectArrayValue.get(k)).longValue());
-                                        sqlParamListInner.add("(" + lst.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")");
-                                    }
-                                } else {
-                                    List<String> lst = new ArrayList<>(objectArrayValue.size());
-                                    for (int k = 0; k < objectArrayValue.size(); k++)
-                                        lst.add(escapeSql(objectArrayValue.get(k).toString()));
-                                    sqlParamListInner.add("(" + String.join(",", lst) + ")");
-                                }
-                            } else {
-                                sqlParamListInner.add("null");
                             }
                         } else {
                             sqlParamListInner.add(value instanceof Number || value instanceof Boolean ? value.toString() : escapeSql(value.toString()));
@@ -1063,10 +1065,23 @@ public class DB implements Module {
                     */
                     // externalExecutionContextTool.addMessage(convertNull(rs.getBytes(column_name)));
                     fieldType = ObjectType.BYTES;
+                    byte[] bytes = rs.getBytes(column_name);
+                    if (Base64.isBase64(bytes))
+                        bytes = Base64.decodeBase64(bytes);
                     if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
-                        value = convertNull(rs.getBytes(column_name));
+                        value = convertNull(bytes);
                     } else {
-                        value = rs.getBytes(column_name);
+                        value = bytes;
+                    }
+                } else if (columnType == Types.BINARY) {
+                    fieldType = ObjectType.BYTES;
+                    byte[] bytes = rs.getBytes(column_name);
+                    if (Base64.isBase64(bytes))
+                        bytes = Base64.decodeBase64(bytes);
+                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
+                        value = convertNull(bytes);
+                    } else {
+                        value = bytes;
                     }
                 } else if (columnType == java.sql.Types.CLOB) {
                     Clob clob = rs.getClob(i);
@@ -1077,6 +1092,10 @@ public class DB implements Module {
                     } else {
                         value = clob != null && clob.length() > 0 ? IOUtils.toString(clob.getCharacterStream()) : null;
                     }
+                } else if (columnType == Types.REAL) {
+                    // externalExecutionContextTool.addMessage(rs.getDouble(column_name));
+                    fieldType = ObjectType.FLOAT;
+                    value = rs.getFloat(column_name);
                 } else if (columnType == java.sql.Types.DOUBLE) {
                     // externalExecutionContextTool.addMessage(rs.getDouble(column_name));
                     fieldType = ObjectType.DOUBLE;
@@ -1109,6 +1128,14 @@ public class DB implements Module {
                     } else {
                         value = rs.getString(column_name);
                     }
+                } else if (columnType == Types.CHAR) {
+                    // externalExecutionContextTool.addMessage(convertNull(rs.getString(column_name)));
+                    fieldType = ObjectType.STRING;
+                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
+                        value = convertNull(rs.getString(column_name));
+                    } else {
+                        value = rs.getString(column_name);
+                    }
                 } else if (columnType == java.sql.Types.TINYINT) {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
                     fieldType = ObjectType.SHORT;
@@ -1117,6 +1144,10 @@ public class DB implements Module {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
                     fieldType = ObjectType.SHORT;
                     value = rs.getShort(column_name);
+                } else if (columnType == Types.NUMERIC) {
+                    // externalExecutionContextTool.addMessage(rs.getInt(column_name));
+                    fieldType = ObjectType.LONG;
+                    value = rs.getLong(column_name);
                 } else if (columnType == java.sql.Types.DATE) {
                     Date date = rs.getDate(column_name);
                     // externalExecutionContextTool.addMessage(date != null ? date.getTime() : "NULL");

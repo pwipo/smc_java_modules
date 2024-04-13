@@ -907,7 +907,21 @@ public class ValueTypeConverter implements Module {
                     } catch (Exception e) {
                         executionContextTool.addError(e.getClass().getSimpleName() + ": " + e.getMessage());
                     }
-                    ObjectArray objectArray = useSimple && element != null ? new ObjectArray(fromXMLSimple(List.of(element))) : new ObjectArray(fromXML(element));
+                    ObjectArray objectArray;
+                    if (useSimple && element != null) {
+                        NodeList childNodes = element.getChildNodes();
+                        List<Element> childElements = new LinkedList<>();
+                        if (childNodes != null && childNodes.getLength() > 0) {
+                            for (int i = 0; i < childNodes.getLength(); i++) {
+                                Node node = childNodes.item(i);
+                                if (Node.ELEMENT_NODE == node.getNodeType())
+                                    childElements.add((Element) node);
+                            }
+                        }
+                        objectArray = new ObjectArray(fromXMLSimple(childElements));
+                    } else {
+                        objectArray = new ObjectArray(fromXML(element));
+                    }
                     executionContextTool.addMessage(objectArray);
                 }));
     }

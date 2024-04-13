@@ -1,6 +1,5 @@
 package ru.smcsystem.smcmodules.module;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -1056,7 +1055,7 @@ public class DB implements Module {
                         fieldType = ObjectType.BOOLEAN;
                         value = rs.getBoolean(column_name);
                     }
-                } else if (columnType == java.sql.Types.BLOB) {
+                } else if (columnType == java.sql.Types.BLOB || columnType == Types.BINARY) {
                     /*
                     Blob blob = rs.getBlob("SomeDatabaseField");
                     int blobLength = (int) blob.length();
@@ -1066,18 +1065,8 @@ public class DB implements Module {
                     // externalExecutionContextTool.addMessage(convertNull(rs.getBytes(column_name)));
                     fieldType = ObjectType.BYTES;
                     byte[] bytes = rs.getBytes(column_name);
-                    if (bytes != null && Base64.isBase64(bytes))
-                        bytes = Base64.decodeBase64(bytes);
-                    if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
-                        value = convertNull(bytes);
-                    } else {
-                        value = bytes;
-                    }
-                } else if (columnType == Types.BINARY) {
-                    fieldType = ObjectType.BYTES;
-                    byte[] bytes = rs.getBytes(column_name);
-                    if (bytes != null && Base64.isBase64(bytes))
-                        bytes = Base64.decodeBase64(bytes);
+                    // if (bytes != null && Base64.isBase64(bytes))
+                    //     bytes = Base64.decodeBase64(bytes);
                     if (resultFormat != ResultFormat.OBJECT_WITH_NULL_AND_BOOLEAN) {
                         value = convertNull(bytes);
                     } else {

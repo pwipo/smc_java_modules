@@ -112,19 +112,19 @@ public class Example implements Module {
             configurationManaged.getExecutionContext(0).ifPresent(ec -> {
                 IModule moduleMain = configurationManaged.getModule();
                 // add first execution context of created configuration to execution context list of first execution context first managed configuration
-                if ((moduleMain.getMinCountExecutionContexts() <= ec.countExecutionContexts() + 1) && (moduleMain.getMaxCountExecutionContexts() == -1 || moduleMain.getMaxCountExecutionContexts() > ec.countExecutionContexts())) {
+                if ((moduleMain.getMinCountExecutionContexts(0) <= ec.countExecutionContexts() + 1) && (moduleMain.getMaxCountExecutionContexts(0) == -1 || moduleMain.getMaxCountExecutionContexts(0) > ec.countExecutionContexts())) {
                     IExecutionContextManaged iExecutionContextManaged = configuration.createExecutionContext("default", configurationManaged.getModule().getTypeName(0), -1);
                     // IExecutionContextManaged iExecutionContextManaged = configuration.getExecutionContext(0).get();
                     ec.insertExecutionContext(ec.countExecutionContexts(), iExecutionContextManaged);
                     executionContextTool.addMessage(String.format("add %s.%s to %s.%s", configuration.getName(), iExecutionContextManaged.getName(), configurationManaged.getName(), ec.getName()));
                 }
                 // add created configuration to managed configuration list of first execution context first managed configuration
-                if ((moduleMain.getMinCountManagedConfigurations() <= ec.countManagedConfigurations() + 1) && (moduleMain.getMaxCountManagedConfigurations() == -1 || moduleMain.getMaxCountManagedConfigurations() > ec.countManagedConfigurations())) {
+                if ((moduleMain.getMinCountManagedConfigurations(0) <= ec.countManagedConfigurations() + 1) && (moduleMain.getMaxCountManagedConfigurations(0) == -1 || moduleMain.getMaxCountManagedConfigurations(0) > ec.countManagedConfigurations())) {
                     ec.insertManagedConfiguration(ec.countManagedConfigurations(), configuration);
                     executionContextTool.addMessage(String.format("add %s to %s.%s", configuration.getName(), configurationManaged.getName(), ec.getName()));
                 }
                 // add first execution context of created configuration as source to first execution context first managed configuration
-                if ((moduleMain.getMinCountSources() <= ec.countSource() + 1) && (moduleMain.getMaxCountSources() == -1 || moduleMain.getMaxCountSources() > ec.countSource())) {
+                if ((moduleMain.getMinCountSources(0) <= ec.countSource() + 1) && (moduleMain.getMaxCountSources(0) == -1 || moduleMain.getMaxCountSources(0) > ec.countSource())) {
                     IExecutionContextManaged iExecutionContextManaged = configuration.getExecutionContext(0).get();
                     ISourceManaged sourceManaged = ec.createSource(iExecutionContextManaged, SourceGetType.NEW, 0, false);
                     sourceManaged.createFilter(false, List.of(0, -1), 0, 0, 0);

@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Executor</className>
-    <ver>1.1.1</ver>
+    <ver>1.1.2</ver>
     <apiVer>1.4.0</apiVer>
     <date>23-10-2023</date>
 
@@ -98,8 +98,7 @@ The program is supplied as is. For problems arising during the operation or inst
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="0" maxS="-1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -110,12 +109,6 @@ The program is supplied as is. For problems arising during the operation or inst
                     <value>Default execution context.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
@@ -206,8 +199,8 @@ The program is supplied as is. For problems arising during the operation or inst
         <entry>
             <key>en</key>
             <value>The module runs external executable files.
-It waits for completion and returns a completion code and text output.
-works in two modes:
+It waits for completion and returns a completion code and text output. Always tries to close the process.
+Works in two modes:
     static: runs without data sources. in this case, the settings are used.
     dynamic: runs with data sources. in this case, processing occurs in the cycle of each action.
              all messages in action are considered as the path to the executable file (1 message) and arguments (all subsequent messages).
@@ -217,8 +210,8 @@ works in two modes:
         <entry>
             <key>ru</key>
             <value>Модуль запускает внешние исполняемые файлы.
-Ждет завершения и возвращает код завершения и текстовый вывод.
-работает в двух режимах:
+Ждет завершения и возвращает код завершения и текстовый вывод. Всегда пытается закрыть процесс.
+Работает в двух режимах:
     статический: запускается без источников данных. в этом случае используются настройки.
     динамический: запускается с источниками данных. в этом случае происходит обработка в цикле каждого действия.
                   все сообщения в действии рассматриваются как путь до исполняемого файла (1 сообщение) и аргументы (все последующие сообщения).

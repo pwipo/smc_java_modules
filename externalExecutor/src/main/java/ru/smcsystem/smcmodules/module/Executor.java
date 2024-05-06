@@ -90,27 +90,37 @@ public class Executor implements Module {
     }
 
     private void execute(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, ProcessBuilder processBuilder) {
+        Process process = null;
         try {
-            Process process = processBuilder.start();
+            process = processBuilder.start();
 
             int i = process.waitFor();
             executionContextTool.addMessage(i);
-
-            try (InputStreamReader isr = new InputStreamReader(process.getInputStream(), encoding); BufferedReader br = new BufferedReader(isr)) {
-                String result = br.lines().collect(Collectors.joining("\n"));
-                if (StringUtils.isNotBlank(result))
-                    executionContextTool.addMessage(result);
-            }
-
-            try (InputStreamReader isr = new InputStreamReader(process.getErrorStream(), encoding); BufferedReader br = new BufferedReader(isr)) {
-                String result = br.lines().collect(Collectors.joining("\n"));
-                if (StringUtils.isNotBlank(result))
-                    executionContextTool.addError(result);
-            }
         } catch (Exception e) {
             // throw new ModuleException("error", e);
             executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
             configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+            if (process != null && process.isAlive())
+                process.destroy();
+        }
+        if (process != null) {
+            try {
+                try (InputStreamReader isr = new InputStreamReader(process.getInputStream(), encoding); BufferedReader br = new BufferedReader(isr)) {
+                    String result = br.lines().collect(Collectors.joining("\n"));
+                    if (StringUtils.isNotBlank(result))
+                        executionContextTool.addMessage(result);
+                }
+
+                try (InputStreamReader isr = new InputStreamReader(process.getErrorStream(), encoding); BufferedReader br = new BufferedReader(isr)) {
+                    String result = br.lines().collect(Collectors.joining("\n"));
+                    if (StringUtils.isNotBlank(result))
+                        executionContextTool.addError(result);
+                }
+            } catch (Exception e) {
+                // throw new ModuleException("error", e);
+                executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
+                configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+            }
         }
     }
 

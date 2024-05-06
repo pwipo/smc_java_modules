@@ -3,7 +3,7 @@
 
     <uuid>ExampleJava</uuid>
     <provider>java</provider>
-    <ver>1.1.2</ver>
+    <ver>1.1.3</ver>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
@@ -62,8 +62,7 @@ The module is supplied as is. For problems arising during the operation or insta
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="0" maxS="-1" minEc="0" maxEC="-1" minC="0" maxC="-1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -74,22 +73,11 @@ The module is supplied as is. For problems arising during the operation or insta
                     <value>Default execution context.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>-1</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>-1</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>INTEGER</valueType>
-                            <value>1</value>
-                        </element>
+                        <element vt="VALUE_ANY" c="-1" t="INTEGER" v="1"/>
                     </elements>
                 </source>
             </sources>
@@ -110,24 +98,14 @@ The module is supplied as is. For problems arising during the operation or insta
                         </entry>
                     </description>
                 </element>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <valueType>STRING</valueType>
-                    <value>value</value>
-                </element>
+                <element vt="VALUE" c="1" t="STRING" v="value"/>
                 <element>
                     <type>VALUE</type>
                     <count>1</count>
                     <valueType>STRING</valueType>
                     <value>fileTextValue</value>
                 </element>
-                <element>
-                    <type>VALUE_ANY</type>
-                    <count>-1</count>
-                    <valueType>INTEGER</valueType>
-                    <value>1</value>
-                </element>
+                <element vt="VALUE_ANY" c="-1" t="INTEGER" v="1"/>
             </output>
         </type>
     </types>
@@ -150,7 +128,7 @@ The module is supplied as is. For problems arising during the operation or insta
     <help>
         <entry>
             <key>en</key>
-            <value>Example module.
+            <value><![CDATA[Example module.
 Shows how to perform basic operations:
     prints the call counter.
     gets the setting value at startup and prints this value on each execution.
@@ -159,11 +137,11 @@ Shows how to perform basic operations:
     starts managed execution contexts with parameter passing (setting: param), if contexts return data, then print it.
     prints the names of the managed configurations.
     on each call, creates a new configuration of a random type and inserts it into the first execution context of the first managed configuration (if possible, into each of those list types).
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Пример модуля.
+            <value><![CDATA[Пример модуля.
 Показывает, как выполнять основные операции:
     печатает счетчтик вызовов.
     получает значение настройки при старте и печатает это значение при каждом исполнении.
@@ -172,7 +150,7 @@ Shows how to perform basic operations:
     запускает управляемые контексты исполнения с передачей параметра (настройка: param), если контексты возвращают данные, то печатает их.
     печатает имена управляемых конфигураций.
     при каждом вызове создает новую конфигурацию случайного типа и вставляет её в первый контекст исполнения первой управляемой конфигурации (если возможно, в каждый из тех типов списков).
-            </value>
+            ]]></value>
         </entry>
     </help>
 
@@ -192,18 +170,9 @@ Shows how to perform basic operations:
             <variables/>
             <sources/>
             <output>
-                <message>
-                    <type>INTEGER</type>
-                    <value>1</value>
-                </message>
-                <message>
-                    <type>STRING</type>
-                    <value>Hello world</value>
-                </message>
-                <message>
-                    <type>STRING</type>
-                    <value>test message</value>
-                </message>
+                <message t="INTEGER" v="1"/>
+                <message t="STRING" v="Hello world"/>
+                <message t="STRING" v="test message"/>
             </output>
             <countManagedExecutionContexts>0</countManagedExecutionContexts>
             <countManagedConfigurations>0</countManagedConfigurations>
@@ -240,34 +209,13 @@ Shows how to perform basic operations:
                 </source>
             </sources>
             <output>
-                <message>
-                    <type>INTEGER</type>
-                    <value>1</value>
-                </message>
-                <message>
-                    <type>STRING</type>
-                    <value>Hello world</value>
-                </message>
-                <message>
-                    <type>STRING</type>
-                    <value>test message</value>
-                </message>
-                <message>
-                    <type>INTEGER</type>
-                    <value>1</value>
-                </message>
-                <message>
-                    <type>STRING</type>
-                    <value>text</value>
-                </message>
-                <message>
-                    <type>INTEGER</type>
-                    <value>5</value>
-                </message>
-                <message>
-                    <type>STRING</type>
-                    <value>test</value>
-                </message>
+                <message t="INTEGER" v="1"/>
+                <message t="STRING" v="Hello world"/>
+                <message t="STRING" v="test message"/>
+                <message t="INTEGER" v="1"/>
+                <message t="STRING" v="text"/>
+                <message t="INTEGER" v="5"/>
+                <message t="STRING" v="test"/>
             </output>
             <countManagedExecutionContexts>1</countManagedExecutionContexts>
             <countManagedConfigurations>1</countManagedConfigurations>

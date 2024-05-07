@@ -24,6 +24,7 @@ public class Executor implements Module {
     private ProcessBuilder pb;
     private String encoding;
     private Integer maxWorkTime;
+    private Integer sleepTimeInterval;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -32,6 +33,7 @@ public class Executor implements Module {
         String strArgs = (String) configurationTool.getSetting("args").orElseThrow(() -> new ModuleException("args setting")).getValue();
         encoding = (String) configurationTool.getSetting("encoding").orElseThrow(() -> new ModuleException("args encoding")).getValue();
         maxWorkTime = (Integer) configurationTool.getSetting("maxWorkTime").orElseThrow(() -> new ModuleException("maxWorkTime setting")).getValue();
+        sleepTimeInterval = (Integer) configurationTool.getSetting("sleepTimeInterval").orElseThrow(() -> new ModuleException("sleepTimeInterval setting")).getValue();
 
         pb = null;
         if (StringUtils.isNotBlank(commandPath)) {
@@ -100,7 +102,7 @@ public class Executor implements Module {
             long startTime = System.currentTimeMillis();
             do {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(sleepTimeInterval);
                 } catch (Exception ignore) {
                 }
                 try {

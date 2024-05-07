@@ -46,7 +46,8 @@ public class ExecutorTest {
                                 "workDirectory", new Value(" "),
                                 "args", new Value("8.8.8.8"),
                                 "encoding", new Value("cp866"),
-                                "maxWorkTime", new Value(10000)
+                                "maxWorkTime", new Value(10000),
+                                "sleepTimeInterval", new Value(50)
                         ),
                         null,
                         null

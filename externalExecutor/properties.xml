@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Executor</className>
-    <ver>1.2.0</ver>
+    <ver>1.2.1</ver>
     <apiVer>1.4.0</apiVer>
     <date>23-10-2023</date>
 
@@ -107,6 +107,21 @@ The program is supplied as is. For problems arising during the operation or inst
                 <entry>
                     <key>en</key>
                     <value>The maximum time the process can run, in milliseconds. If -1, then there is no limit.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>sleepTimeInterval</name>
+            <type>INTEGER</type>
+            <value>50</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Время ожидания между проверками состояния, в миллисекундах.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Timeout between status checks, in milliseconds.</value>
                 </entry>
             </description>
         </value>

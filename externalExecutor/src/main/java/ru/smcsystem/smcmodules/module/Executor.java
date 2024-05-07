@@ -23,6 +23,7 @@ public class Executor implements Module {
 
     private ProcessBuilder pb;
     private String encoding;
+    private Integer maxWorkTime;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -30,6 +31,7 @@ public class Executor implements Module {
         String workDirectory = (String) configurationTool.getSetting("workDirectory").orElseThrow(() -> new ModuleException("workDirectory setting")).getValue();
         String strArgs = (String) configurationTool.getSetting("args").orElseThrow(() -> new ModuleException("args setting")).getValue();
         encoding = (String) configurationTool.getSetting("encoding").orElseThrow(() -> new ModuleException("args encoding")).getValue();
+        maxWorkTime = (Integer) configurationTool.getSetting("maxWorkTime").orElseThrow(() -> new ModuleException("maxWorkTime setting")).getValue();
 
         pb = null;
         if (StringUtils.isNotBlank(commandPath)) {
@@ -94,8 +96,21 @@ public class Executor implements Module {
         try {
             process = processBuilder.start();
 
-            int i = process.waitFor();
-            executionContextTool.addMessage(i);
+            Integer exitValue = null;
+            long startTime = System.currentTimeMillis();
+            do {
+                try {
+                    Thread.sleep(100);
+                } catch (Exception ignore) {
+                }
+                try {
+                    exitValue = process.exitValue();
+                } catch (Exception ignore) {
+                }
+            } while (exitValue == null && !executionContextTool.isNeedStop() &&
+                    (maxWorkTime == -1 || maxWorkTime > (System.currentTimeMillis() - startTime)));
+
+            executionContextTool.addMessage(exitValue != null ? exitValue : -1);
         } catch (Exception e) {
             // throw new ModuleException("error", e);
             executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
@@ -128,6 +143,7 @@ public class Executor implements Module {
     public void stop(ConfigurationTool configurationTool) throws ModuleException {
         pb = null;
         encoding = null;
+        maxWorkTime = null;
     }
 
 }

@@ -22,7 +22,8 @@ public class ExecutorTest {
                                 "commandPath", new Value("C:\\Users\\user\\Documents\\tmp\\test.bat"),
                                 "workDirectory", new Value(" "),
                                 "args", new Value("test1::test2::test3"),
-                                "encoding", new Value("cp866")
+                                "encoding", new Value("cp866"),
+                                "maxWorkTime", new Value(-1)
                         ),
                         null,
                         null
@@ -44,7 +45,8 @@ public class ExecutorTest {
                                 "commandPath", new Value("C:\\Windows\\System32\\ping.exe"),
                                 "workDirectory", new Value(" "),
                                 "args", new Value("8.8.8.8"),
-                                "encoding", new Value("cp866")
+                                "encoding", new Value("cp866"),
+                                "maxWorkTime", new Value(10000)
                         ),
                         null,
                         null
@@ -66,7 +68,8 @@ public class ExecutorTest {
                                 "commandPath", new Value(" "),
                                 "workDirectory", new Value(" "),
                                 "args", new Value(" "),
-                                "encoding", new Value("cp866")
+                                "encoding", new Value("cp866"),
+                                "maxWorkTime", new Value(-1)
                         ),
                         null,
                         null
@@ -100,7 +103,8 @@ public class ExecutorTest {
                                 "commandPath", new Value("C:\\Program Files\\MetaTrader 5\\terminal64.exe"),
                                 "workDirectory", new Value("C:\\Program Files\\MetaTrader 5"),
                                 "args", new Value("/config:C:\\tmp\\auto_mt5.ini"),
-                                "encoding", new Value("cp866")
+                                "encoding", new Value("cp866"),
+                                "maxWorkTime", new Value(-1)
                         ),
                         null,
                         null

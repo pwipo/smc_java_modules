@@ -433,33 +433,33 @@ public class ValueTypeConverter implements Module {
             return jsonObject;
         objectElement.getFields().forEach(objectField -> {
             String name = objectField.getName();
-            if (objectField.getType() == null) {
-                jsonObject.put(name, (String) null);
-                return;
-            }
-            switch (objectField.getType()) {
-                case OBJECT_ARRAY:
-                    jsonObject.put(name, toJson((ObjectArray) objectField.getValue(), forceArray));
-                    break;
-                case OBJECT_ELEMENT:
-                    jsonObject.put(name, toJson((ObjectElement) objectField.getValue(), forceArray));
-                    break;
-                case VALUE_ANY:
-                case STRING:
-                case BYTE:
-                case SHORT:
-                case INTEGER:
-                case LONG:
-                case FLOAT:
-                case DOUBLE:
-                case BIG_INTEGER:
-                case BIG_DECIMAL:
-                case BOOLEAN:
-                    jsonObject.put(name, objectField.getValue());
-                    break;
-                case BYTES:
-                    jsonObject.put(name, objectField.getValue() != null ? Base64.getEncoder().encodeToString((byte[]) objectField.getValue()) : null);
-                    break;
+            if (objectField.getValue() != null && objectField.getType() != null) {
+                switch (objectField.getType()) {
+                    case OBJECT_ARRAY:
+                        jsonObject.put(name, toJson((ObjectArray) objectField.getValue(), forceArray));
+                        break;
+                    case OBJECT_ELEMENT:
+                        jsonObject.put(name, toJson((ObjectElement) objectField.getValue(), forceArray));
+                        break;
+                    case VALUE_ANY:
+                    case STRING:
+                    case BYTE:
+                    case SHORT:
+                    case INTEGER:
+                    case LONG:
+                    case FLOAT:
+                    case DOUBLE:
+                    case BIG_INTEGER:
+                    case BIG_DECIMAL:
+                    case BOOLEAN:
+                        jsonObject.put(name, objectField.getValue());
+                        break;
+                    case BYTES:
+                        jsonObject.put(name, objectField.getValue() != null ? Base64.getEncoder().encodeToString((byte[]) objectField.getValue()) : null);
+                        break;
+                }
+            } else {
+                jsonObject.put(name, JSONObject.NULL);
             }
         });
         return jsonObject;
@@ -609,26 +609,28 @@ public class ValueTypeConverter implements Module {
         jsonObject.keySet()//.stream()
                 // .filter(k -> jsonObject.get(k) instanceof String)
                 .forEach(k -> {
-                    Object o = jsonObject.get(k);
-                    // executionContextTool.addMessage(k);
                     ObjectField objectField = new ObjectField(k);
-                    if (o instanceof JSONArray) {
-                        // executionContextTool.addMessage(start);
-                        objectField.setValue(fromJSONString((JSONArray) o, withNewFuncs));
-                        // executionContextTool.addMessage(end);
-                    } else if (o instanceof JSONObject) {
-                        // executionContextTool.addMessage(start);
-                        objectField.setValue(fromJSONString((JSONObject) o, withNewFuncs));
-                        // executionContextTool.addMessage(end);
-                    } else if (o != null) {
-                        // executionContextTool.addMessage(o instanceof Number ? o : fromString(o.toString(), base64, false));
-                        ValueType valueType = ModuleUtils.getValueTypeObject(o);
-                        Object value = o;
-                        if (valueType == null || valueType == ValueType.STRING || (!withNewFuncs && valueType == ValueType.BOOLEAN)) {
-                            value = fromString(o.toString(), base64, false, withNewFuncs);
-                            valueType = ModuleUtils.getValueTypeObject(value);
+                    if (jsonObject.has(k) && !jsonObject.isNull(k)) {
+                        Object o = jsonObject.get(k);
+                        // executionContextTool.addMessage(k);
+                        if (o instanceof JSONArray) {
+                            // executionContextTool.addMessage(start);
+                            objectField.setValue(fromJSONString((JSONArray) o, withNewFuncs));
+                            // executionContextTool.addMessage(end);
+                        } else if (o instanceof JSONObject) {
+                            // executionContextTool.addMessage(start);
+                            objectField.setValue(fromJSONString((JSONObject) o, withNewFuncs));
+                            // executionContextTool.addMessage(end);
+                        } else {
+                            // executionContextTool.addMessage(o instanceof Number ? o : fromString(o.toString(), base64, false));
+                            ValueType valueType = ModuleUtils.getValueTypeObject(o);
+                            Object value = o;
+                            if (valueType == null || valueType == ValueType.STRING || (!withNewFuncs && valueType == ValueType.BOOLEAN)) {
+                                value = fromString(o.toString(), base64, false, withNewFuncs);
+                                valueType = ModuleUtils.getValueTypeObject(value);
+                            }
+                            objectField.setValue(ModuleUtils.convertTo(valueType), value);
                         }
-                        objectField.setValue(ModuleUtils.convertTo(valueType), value);
                     } else {
                         if (!withNewFuncs)
                             return;

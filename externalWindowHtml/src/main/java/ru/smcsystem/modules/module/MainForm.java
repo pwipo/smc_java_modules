@@ -36,19 +36,21 @@ public class MainForm {
 
     public final Map<String, FormElement> elements;
     private final Map<String, Integer> elementsToEcId;
+    private String configuration;
 
-    public MainForm(String title, String content, int width, int height) {
+    public MainForm(String title, String configuration, int width, int height) {
         this.executionContextTool = null;
         frame = new JFrame(title);
+        this.configuration = configuration;
+
         $$$setupUI$$$();
 
         elements = new ConcurrentHashMap<>();
         elementsToEcId = new ConcurrentHashMap<>();
-
-        init(content);
+        init();
 
         frame.setContentPane(panel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setPreferredSize(new Dimension(width, height));
         frame.pack();
     }
@@ -58,9 +60,34 @@ public class MainForm {
         window.frame.setVisible(true);
     }
 
-    private void init(String content) {
+    private void init() {
         editorPane.setEditorKit(new CompEditorKit(this)); // install our hook
-        editorPane.setText(content);
+        clean();
+    }
+
+    public void clean() {
+        elements.clear();
+        elementsToEcId.clear();
+        editorPane.setText(configuration);
+    }
+
+    public void start() {
+        frame.setVisible(true);
+        frame.requestFocus();
+        frame.requestFocusInWindow();
+        frame.toFront();
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignore) {
+            }
+            SwingUtilities.invokeLater(() -> {
+                frame.requestFocus();
+                frame.requestFocusInWindow();
+                frame.toFront();
+            });
+        }).start();
     }
 
     public ExecutionContextTool getExecutionContextTool() {

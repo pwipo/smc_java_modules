@@ -19,11 +19,12 @@ public class WindowHtml implements Module {
         SERVER, GET_VALUE, SET_VALUE, GET_ELEMENT, SET_ELEMENT, SET_ATTRIBUTE, COUNT_CHILDS, ADD_CHILD_ELEMENT, REMOVE_CHILD_ELEMENT, SET_CHILD_ATTRIBUTE, SET_POSITION
     }
 
+    private String configuration;
     private List<String> ids;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
-        String configuration = (String) configurationTool.getSetting("configuration").orElseThrow(() -> new ModuleException("configuration setting")).getValue();
+        configuration = (String) configurationTool.getSetting("configuration").orElseThrow(() -> new ModuleException("configuration setting")).getValue();
         Integer width = (Integer) configurationTool.getSetting("width").orElseThrow(() -> new ModuleException("width setting")).getValue();
         Integer height = (Integer) configurationTool.getSetting("height").orElseThrow(() -> new ModuleException("height setting")).getValue();
         String title = (String) configurationTool.getSetting("title").orElseThrow(() -> new ModuleException("title setting")).getValue();
@@ -68,7 +69,7 @@ public class WindowHtml implements Module {
                             mainForm.addEC(idStr, i);
                         }
                     }
-                    mainForm.frame.setVisible(true);
+                    mainForm.start();
                     configurationTool.loggerDebug(String.format("window started, count ids=%d", ids != null ? ids.size() : 0));
                     do {
                         try {
@@ -76,6 +77,7 @@ public class WindowHtml implements Module {
                         } catch (Exception ignore) {
                         }
                     } while (mainForm.frame.isVisible() && !executionContextTool.isNeedStop());
+                    mainForm.clean();
                     configurationTool.loggerDebug("window stopped");
                     break;
                 }
@@ -145,12 +147,10 @@ public class WindowHtml implements Module {
     @Override
     public void stop(ConfigurationTool configurationTool) throws ModuleException {
         if (mainForm != null) {
-            if (mainForm.frame.isVisible()) {
-                try {
-                    mainForm.frame.dispose();
-                } catch (Exception ignore) {
-                }
-            }
+            JFrame frame = mainForm.frame;
+            if (frame.isVisible())
+                frame.setVisible(false);
+            SwingUtilities.invokeLater(frame::dispose);
             mainForm = null;
         }
         ids = null;

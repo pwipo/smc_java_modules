@@ -145,8 +145,12 @@ public class WindowHtml implements Module {
     @Override
     public void stop(ConfigurationTool configurationTool) throws ModuleException {
         if (mainForm != null) {
-            if (mainForm.frame.isVisible())
-                mainForm.frame.dispose();
+            if (mainForm.frame.isVisible()) {
+                try {
+                    mainForm.frame.dispose();
+                } catch (Exception ignore) {
+                }
+            }
             mainForm = null;
         }
         ids = null;

@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>WindowHtml</uuid>
+    <provider>java</provider>
+    <os/>
+    <arch/>
+    <ver>1.0.0</ver>
+    <apiVer>1.4.0</apiVer>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.smcsystem.ru</homePage>
+    <categories>Java, Gui, Window</categories>
+    <className>ru.smcsystem.modules.module.WindowHtml</className>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value>The program is free for use.
+                Forbidden: changing the program code, as well as other actions and rights not explicitly permitted.
+                The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            </value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value>Программа бесплатна для использования.
+                Запрещено: изменение кода программы, а так же иные не разрешенные явно действия и права.
+                Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            </value>
+        </entry>
+    </copyrightAndLicense>
+    <date>27-06-2024</date>
+
+    <defaultSettings>
+        <value>
+            <name>configuration</name>
+            <type>STRING</type>
+            <value><![CDATA[<html><head></head><body><div>Simple text</div></body>]]></value>
+            <subType>HTML</subType>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>HTML конфигурация для окна. Используется версия 3.2 https://www.w3.org/TR/2018/SPSD-html32-20180315</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>HTML configuration for the window. Version 3.2 is used https://www.w3.org/TR/2018/SPSD-html32-20180315</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>width</name>
+            <type>INTEGER</type>
+            <value>300</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Window width.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Ширина окна.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>height</name>
+            <type>INTEGER</type>
+            <value>300</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value>Window height.</value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value>Высота окна.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>title</name>
+            <type>STRING</type>
+            <value>MainForm</value>
+            <subType>STRING</subType>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Заголовок окна.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Window title.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>ids</name>
+            <type>STRING</type>
+            <value></value>
+            <subType>STRING</subType>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Идентификаторы элементов (атрибут id или name), через запятую. Обеспечивают обработку событий.
+Каждый указанный идентификатор привязывается к соответствующему управляемому контексту (тип SERVER), который будет вызываться при появлении события, связанного с указанным идентификатором (например нажатие на кнопку).
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Element identifiers (id or name attribute), separated by commas. Provide event processing.
+Each specified identifier is associated with a corresponding managed context (type SERVER), which will be called when an event associated with the specified identifier occurs (for example, a button click).
+                    ]]></value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <types>
+        <type t="SERVER" minS="0" maxS="0" minEC="0" maxEC="-1" minC="0" maxC="0">
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Ensures that the window starts. Will return control only after closing the window.
+If there are contexts, then when launched, they are linked with the elements specified by the ids setting in the appropriate positions.
+When an event arrives, the corresponding context is called.
+            ]]></value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Обеспечивает запуск окна. Вернет управление только после закрытия окна.
+Если есть контексты, то при запуске происходит связывание их и элементов, указанных настройкой ids, в соответствующих позициях.
+При поступлении события, вызывается соответствующий контекст.
+            ]]></value>
+                </entry>
+            </description>
+            <sources/>
+            <output/>
+            <ecs>
+                <ec>
+                    <count>-1</count>
+                    <description>
+                        <entry>
+                            <key>en</key>
+                            <value><![CDATA[The context is called when an event is received for the specified element.
+The context is passed data that depends on the element type:
+    for the submit and image buttons, all form fields will be passed as an ObjectArray with one object with the corresponding fields.
+    for select, all selected elements will be passed as an ObjectArray with one object with the corresponding fields.
+    for fields, the value will be transmitted - a string.
+    for checkbox and radio the value will be passed - a boolean value.
+    for file, the value will be transmitted - a string.
+    for other elements - their html representation will be transmitted as a string.
+            ]]></value>
+                        </entry>
+                        <entry>
+                            <key>ru</key>
+                            <value><![CDATA[Контекст вызывается при получении события для указанного элемента.
+Контексту передаются данные, которые зависят от типа элемента:
+    для кнопок submit и image будут передаваться все поля формы в виде ObjectArray с одним объектом с соответствующими полями.
+    для select будут передаваться все выбранные элементы в виде ObjectArray с одним объектом с соответствующими полями.
+    для полей будет передаваться значение - строка.
+    для checkbox и radio будет передано значение - логическое значение.
+    для файла будет передаваться значение - строка.
+    для иных элементов - будет передано их html представление в виде строки.
+            ]]></value>
+                        </entry>
+                    </description>
+                    <elements>
+                        <element t="VALUE_ANY" c="-1" vt="OBJECT_ARRAY" v="[]"/>
+                    </elements>
+                </ec>
+            </ecs>
+        </type>
+        <type t="GET_VALUE" minS="1" maxS="1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Getting the element's value:
+    for buttons the value field will be transmitted.
+    for select, all selected elements will be passed as an ObjectArray with one object with the corresponding fields.
+    for fields, the value will be transmitted - a string.
+    for checkbox and radio the value will be passed - a boolean value.
+    the value for the file will be a string.
+    for other elements - their html representation will be transmitted as a string.
+            ]]></value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Получение значения элемента:
+    для кнопок будут передаваться поле value.
+    для select будут передаваться все выбранные элементы в виде ObjectArray с одним объектом с соответствующими полями.
+    для полей будет передаваться значение - строка.
+    для checkbox и radio будет передано значение - логическое значение.
+    для файла будет передаваться значение - строка.
+    для иных элементов - будет передано их html представление в виде строки.
+            ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="field1">
+                            <description>
+                                <entry k="en" v="Element identifier (id or name field)."/>
+                                <entry k="ru" v="Идентификатор элемента (поле id или name)."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE_ANY" c="-1" vt="OBJECT_ARRAY" v="[]"/>
+            </output>
+            <ecs/>
+        </type>
+        <type t="SET_VALUE" minS="1" maxS="1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Setting element value:
+    for buttons you need to pass a string - set the value field.
+    for select you need to pass a number or a string - setting the number or value of the corresponding element to be selected.
+    for fields you need to pass a string - value.
+    for checkbox and radio you need to pass a boolean value.
+    for a file you need to pass a string.
+    for other elements you need to pass a string containing html, this will completely replace the specified element.
+            ]]></value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Установка значения элемента:
+    для кнопок нужно передавать строку - устанавливаться поле value.
+    для select нужно передавать число или строку - установка номер или значение соответствующего элемента, который надо выбрать.
+    для полей нужно передавать строку - значение.
+    для checkbox и radio нужно передавать логическое значение.
+    для файла нужно передавать строку.
+    для иных элементов нужно передавать строку, содержащую html, это полностью заменит указаный элемент.
+            ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="field1">
+                            <description>
+                                <entry k="en" v="Element identifier (id or name field)."/>
+                                <entry k="ru" v="Идентификатор элемента (поле id или name)."/>
+                            </description>
+                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="VALUE"/>
+                    </elements>
+                </source>
+            </sources>
+            <output/>
+            <ecs/>
+        </type>
+        <type t="GET_ELEMENT" minS="1" maxS="1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry k="en" v="Getting the element as HTML."/>
+                <entry k="ru" v="Получение элемента в виде HTML."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="field1">
+                            <description>
+                                <entry k="en" v="Element identifier (id or name field)."/>
+                                <entry k="ru" v="Идентификатор элемента (поле id или name)."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="STRING">
+                    <value><![CDATA[<div></div>]]></value>
+                </element>
+            </output>
+            <ecs/>
+        </type>
+        <type t="SET_ELEMENT" minS="1" maxS="1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry k="en" v="Setting the element as HTML."/>
+                <entry k="ru" v="Установка элемента в виде HTML."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="field1">
+                            <description>
+                                <entry k="en" v="Element identifier (id or name field)."/>
+                                <entry k="ru" v="Идентификатор элемента (поле id или name)."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" c="1" vt="STRING">
+                            <value><![CDATA[<div></div>]]></value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output/>
+            <ecs/>
+        </type>
+        <type t="SET_ATTRIBUTE" minS="1" maxS="1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry k="en" v="Setting the value of an element attribute."/>
+                <entry k="ru" v="Установка значения атрибута элемента."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="field1">
+                            <description>
+                                <entry k="en" v="Element identifier (id or name field)."/>
+                                <entry k="ru" v="Идентификатор элемента (поле id или name)."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" c="1" vt="STRING" v="name">
+                            <description>
+                                <entry k="en" v="Attribute name."/>
+                                <entry k="ru" v="Имя атрибута."/>
+                            </description>
+                        </element>
+                        <element t="VALUE_ANY" c="1" vt="STRING" v="value">
+                            <description>
+                                <entry k="en" v="Attribute value."/>
+                                <entry k="ru" v="Значение атрибута."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output/>
+            <ecs/>
+        </type>
+        <type t="COUNT_CHILDS" minS="1" maxS="1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry k="en" v="Number of child elements."/>
+                <entry k="ru" v="Количество дочерних элементов."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="field1">
+                            <description>
+                                <entry k="en" v="Element identifier (id or name field)."/>
+                                <entry k="ru" v="Идентификатор элемента (поле id или name)."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="INTEGER" v="1"/>
+            </output>
+            <ecs/>
+        </type>
+        <type t="ADD_CHILD_ELEMENT" minS="1" maxS="1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry k="en" v="Adds a child element at the specified position."/>
+                <entry k="ru" v="Добавление дочернего элемента в указанную позицию."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="field1">
+                            <description>
+                                <entry k="en" v="Element identifier (id or name field)."/>
+                                <entry k="ru" v="Идентификатор элемента (поле id или name)."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" c="1" vt="STRING">
+                            <value><![CDATA[<div></div>]]></value>
+                            <description>
+                                <entry k="en" v="The element's value as HTML."/>
+                                <entry k="ru" v="Значение элемента в виде HTML."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" c="1" vt="INTEGER" v="1">
+                            <description>
+                                <entry k="en" v="The position may be negative."/>
+                                <entry k="ru" v="Позиция, может быть отрицательная."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output/>
+            <ecs/>
+        </type>
+        <type t="REMOVE_CHILD_ELEMENT" minS="1" maxS="1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry k="en" v="Removes the child element at the specified position."/>
+                <entry k="ru" v="Удаление дочернего элемента в указанной позиции."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="field1">
+                            <description>
+                                <entry k="en" v="Element identifier (id or name field)."/>
+                                <entry k="ru" v="Идентификатор элемента (поле id или name)."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" c="1" vt="INTEGER" v="1">
+                            <description>
+                                <entry k="en" v="The position may be negative."/>
+                                <entry k="ru" v="Позиция, может быть отрицательная."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output/>
+            <ecs/>
+        </type>
+        <type t="SET_CHILD_ATTRIBUTE" minS="1" maxS="1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry k="en" v="Setting the value of an child element attribute."/>
+                <entry k="ru" v="Установка значения атрибута дочернего элемента."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="field1">
+                            <description>
+                                <entry k="en" v="Element identifier (id or name field)."/>
+                                <entry k="ru" v="Идентификатор элемента (поле id или name)."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" c="1" vt="STRING" v="name">
+                            <description>
+                                <entry k="en" v="Attribute name."/>
+                                <entry k="ru" v="Имя атрибута."/>
+                            </description>
+                        </element>
+                        <element t="VALUE_ANY" c="1" vt="STRING" v="value">
+                            <description>
+                                <entry k="en" v="Attribute value."/>
+                                <entry k="ru" v="Значение атрибута."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" c="1" vt="INTEGER" v="1">
+                            <description>
+                                <entry k="en" v="The position may be negative."/>
+                                <entry k="ru" v="Позиция, может быть отрицательная."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output/>
+            <ecs/>
+        </type>
+        <type t="SET_POSITION" minS="1" maxS="1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry k="en" v="Rewind (position) the window to the specified position. Convenient if the window is large and you need to quickly move to the desired area."/>
+                <entry k="ru" v="Перемотка (позиционирование) окна в указанную позицию. Удобно если окно большое и нужно быстро перейти в нужную область."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="INTEGER" v="1">
+                            <description>
+                                <entry k="en" v="Position (in characters), can be negative."/>
+                                <entry k="ru" v="Позиция (в символах), может быть отрицательная."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output/>
+            <ecs/>
+        </type>
+    </types>
+
+    <useStorage>false</useStorage>
+
+    <threadSafe>true</threadSafe>
+
+    <privateUsage>false</privateUsage>
+
+    <defaultExecutionContext/>
+
+    <description>
+        <entry k="en" v="The module is a simple configurable HTML graphic window."/>
+        <entry k="ru" v="Модуль представляет собой простое конфигурируемое HTML графическое окно."/>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value><![CDATA[The module is a simple HTML configurable graphical window.
+The version used is HTML 3.2 https://www.w3.org/TR/2018/SPSD-html32-20180315
+To start a window, you need to start the context type SERVER.
+            ]]></value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value><![CDATA[Модуль представляет собой простое конфигурируемое HTML графическое окно.
+Используется версия HTML 3.2 https://www.w3.org/TR/2018/SPSD-html32-20180315
+Для запуска окна нужно запустить тип контекста SERVER.
+            ]]></value>
+        </entry>
+    </help>
+
+    <examples>
+        <example t="default" countEC="0" countC="0">
+            <description>
+                <entry k="en" v="Getting the element's value. Context type GET_ELEMENT."/>
+                <entry k="ru" v="Получение значения элемента. Тип контекста GET_ELEMENT."/>
+            </description>
+            <settings>
+                <setting>
+                    <name>configuration</name>
+                    <value><![CDATA[<html>
+   <head>
+   </head>
+   <body>
+     <p id="p_element" style="margin-top: 0">
+       Hello world!
+     </p>
+     <div id="div_element">
+     </div>
+   </body>
+ </html>
+]]></value>
+                </setting>
+            </settings>
+            <variables/>
+            <sources>
+                <source>
+                    <actions>
+                        <action>
+                            <messages>
+                                <message>
+                                    <type>STRING</type>
+                                    <value>p_element</value>
+                                </message>
+                            </messages>
+                        </action>
+                    </actions>
+                </source>
+            </sources>
+            <output>
+                <message t="STRING">
+                    <value><![CDATA[<p id="p_element" style="margin-top: 0">
+                        Hello world!
+                    </p>]]></value>
+                </message>
+            </output>
+        </example>
+    </examples>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAAv0lEQVRoge3ZQQqDMBQE0GkRD1Xs+UzPVXoUc4y2my9uUv9PwTjKPAhmEWGGn10AEREh0QN4AMgAPmRrApAsoysRBPZWihSZ7PAtcrixActkXHPrPbwAPJ19Md9182h13lhC/tqH7TmRiGK+zvnhMNiu1t/WJnJplqJO8aacZiIqwkZF2KgIGxVhoyJsVISNirBRETYqwkZF2KgIm1MXyfYdWgYJuts3r54yR3joGSNFeiszP/gwraqnNxER2dwXI5K6ndppw4AAAAAASUVORK5CYII=</icon>
+
+</properties>

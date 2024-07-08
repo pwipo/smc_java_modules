@@ -47,6 +47,8 @@ public class OrderingExecutor implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTools, ExecutionContextTool executionContextTool) throws ModuleException {
+        if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() == 0)
+            return;
         CommandType type = Objects.equals(executionContextTool.getType(), "default") ? this.type : CommandType.valueOf(executionContextTool.getType().toUpperCase());
         switch (type) {
             case START:

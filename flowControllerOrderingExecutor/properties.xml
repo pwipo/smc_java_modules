@@ -10,23 +10,23 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.flowControllerOrderingExecutor.OrderingExecutor</className>
-    <ver>1.2.0</ver>
+    <ver>1.2.1</ver>
     <apiVer>1.4.0</apiVer>
     <date>22-10-2023</date>
 
@@ -133,8 +133,7 @@ The program is supplied as is. For problems arising during the operation or inst
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="0" maxS="-1" minEC="0" maxEC="-1" minC="0" maxC="0">
             <description>
                 <entry>
                     <key>ru</key>
@@ -145,12 +144,6 @@ The program is supplied as is. For problems arising during the operation or inst
                     <value>Default execution context.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>1</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>-1</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
@@ -173,8 +166,7 @@ The program is supplied as is. For problems arising during the operation or inst
                 </element>
             </output>
         </type>
-        <type>
-            <type>start</type>
+        <type t="start" minS="0" maxS="0" minEC="0" maxEC="-1" minC="0" maxC="0">
             <description>
                 <entry>
                     <key>ru</key>
@@ -185,17 +177,10 @@ The program is supplied as is. For problems arising during the operation or inst
                     <value>Send the START command.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>0</maxCountSources>
-            <minCountManagedExecutionContexts>1</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>-1</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources/>
             <output/>
         </type>
-        <type>
-            <type>stop</type>
+        <type t="stop" minS="0" maxS="0" minEC="0" maxEC="-1" minC="0" maxC="0">
             <description>
                 <entry>
                     <key>ru</key>
@@ -206,17 +191,10 @@ The program is supplied as is. For problems arising during the operation or inst
                     <value>Send the STOP command.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>0</maxCountSources>
-            <minCountManagedExecutionContexts>1</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>-1</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources/>
             <output/>
         </type>
-        <type>
-            <type>update</type>
+        <type t="update" minS="0" maxS="0" minEC="0" maxEC="-1" minC="0" maxC="0">
             <description>
                 <entry>
                     <key>ru</key>
@@ -227,33 +205,20 @@ The program is supplied as is. For problems arising during the operation or inst
                     <value>Send the UPDATE command.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>0</maxCountSources>
-            <minCountManagedExecutionContexts>1</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>-1</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources/>
             <output/>
         </type>
-        <type>
-            <type>execute</type>
+        <type t="execute" minS="0" maxS="-1" minEC="0" maxEC="-1" minC="0" maxC="0">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Передать команду EXECUTE.</value>
+                    <value>Передать команду EXECUTE. Если есть источники, то все входящие данные передает, как свои, при вызове каждому контексту.</value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Send the EXECUTE command.</value>
+                    <value>Send the EXECUTE command. If there are sources, then all incoming data is transferred as if it were its own when called to each context.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>1</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>-1</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
@@ -275,6 +240,14 @@ The program is supplied as is. For problems arising during the operation or inst
                     <value>1</value>
                 </element>
             </output>
+            <ecs>
+                <ec>
+                    <count>-1</count>
+                    <elements>
+                        <element t="VALUE_ANY" c="-1" vt="INTEGER" v="1"/>
+                    </elements>
+                </ec>
+            </ecs>
         </type>
     </types>
 

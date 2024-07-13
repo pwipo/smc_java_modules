@@ -437,6 +437,9 @@ public class Server implements Module {
                 response.setResponseObj(responseObj);
                 try {
                     resultCode = handleResponse(resp, responseObj, response.getVirtualServerInfo().getHeaders());
+                } catch (IOException e) {
+                    configurationTool.loggerWarn(e.getMessage());
+                    configurationTool.loggerTrace(ModuleUtils.getStackTraceAsString(e));
                 } catch (Exception e) {
                     configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                 }
@@ -656,6 +659,9 @@ public class Server implements Module {
                     if (mapResponse.remove(reqId) != null && (responseObj == null || !responseObj.isFastResponse())) {
                         try {
                             handleResponse(resp, responseObj, virtualServerInfo.getHeaders());
+                        } catch (IOException e) {
+                            externalConfigurationTool.loggerWarn(e.getMessage());
+                            externalConfigurationTool.loggerTrace(ModuleUtils.getStackTraceAsString(e));
                         } catch (Exception e) {
                             externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                         }

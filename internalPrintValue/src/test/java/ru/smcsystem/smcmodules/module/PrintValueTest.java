@@ -1,6 +1,9 @@
 package ru.smcsystem.smcmodules.module;
 
 import org.junit.Test;
+import ru.smcsystem.api.dto.ObjectArray;
+import ru.smcsystem.api.dto.ObjectElement;
+import ru.smcsystem.api.dto.ObjectField;
 import ru.smcsystem.api.enumeration.ActionType;
 import ru.smcsystem.api.enumeration.MessageType;
 import ru.smcsystem.api.enumeration.ValueType;
@@ -23,7 +26,8 @@ public class PrintValueTest {
                                 "type", new Value(ValueType.STRING, "STRING"),
                                 "appendType", new Value(ValueType.STRING, "LAST"),
                                 "splitterValues", new Value(ValueType.STRING, "::"),
-                                "value", new Value(ValueType.STRING, "HI")
+                                "value", new Value(ValueType.STRING, "HI"),
+                                "arrayValue", new Value(new ObjectArray(new ObjectElement(new ObjectField("field1", 1), new ObjectField("field2", 2))))
                         ),
                         null,
                         null
@@ -47,7 +51,8 @@ public class PrintValueTest {
                                 "type", new Value(ValueType.STRING, "STRING"),
                                 "appendType", new Value(ValueType.STRING, "PLACEHOLDER"),
                                 "splitterValues", new Value(ValueType.STRING, "::"),
-                                "value", new Value(ValueType.STRING, "START::{0}::MIDDLE::{1}::END")
+                                "value", new Value(ValueType.STRING, "START::{0}::MIDDLE::{1}::END"),
+                                "arrayValue", new Value(new ObjectArray())
                         ),
                         null,
                         null

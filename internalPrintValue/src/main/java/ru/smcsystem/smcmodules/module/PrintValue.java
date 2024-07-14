@@ -3,6 +3,7 @@ package ru.smcsystem.smcmodules.module;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import ru.smcsystem.api.dto.IValue;
+import ru.smcsystem.api.dto.ObjectArray;
 import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
@@ -43,6 +44,7 @@ public class PrintValue implements Module {
     private Type type;
     private AppendType appendType;
     private List<Object> values;
+    private ObjectArray arrayValue;
 
     private class ExecutionContextHolder {
         private int id;
@@ -66,59 +68,61 @@ public class PrintValue implements Module {
         appendType = AppendType.valueOf((String) configurationTool.getSetting("appendType").orElseThrow(() -> new ModuleException("appendType setting")).getValue());
         String textValue = (String) configurationTool.getSetting("value").orElseThrow(() -> new ModuleException("text setting")).getValue();
         String splitterValues = (String) configurationTool.getSetting("splitterValues").orElseThrow(() -> new ModuleException("splitterValues setting")).getValue();
+        arrayValue = (ObjectArray) configurationTool.getSetting("arrayValue").orElseThrow(() -> new ModuleException("arrayValue setting")).getValue();
 
         Pattern base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
 
-        values = Arrays.stream(textValue.split(splitterValues))
-                .map(text -> {
-                    Object value;
-                    switch (type) {
-                        case STRING:
-                            value = text;
-                            break;
-                        case BYTE:
-                            value = Byte.valueOf(text);
-                            break;
-                        case SHORT:
-                            value = Short.valueOf(text);
-                            break;
-                        case INTEGER:
-                            value = Integer.valueOf(text);
-                            break;
-                        case LONG:
-                            value = Long.valueOf(text);
-                            break;
-                        case BIG_INTEGER:
-                            value = new BigInteger(text);
-                            break;
-                        case FLOAT:
-                            value = Float.valueOf(text);
-                            break;
-                        case DOUBLE:
-                            value = Double.valueOf(text);
-                            break;
-                        case BIG_DECIMAL:
-                            value = new BigDecimal(text);
-                            break;
-                        case AUTO:
-                            value = autoConvert(text, base64);
-                            break;
-                        default:
-                            value = null;
-                    }
-                    return value;
-                })
-                .collect(Collectors.toList());
+        values = !textValue.isEmpty() ?
+                Arrays.stream(textValue.split(splitterValues))
+                        .map(text -> {
+                            Object value;
+                            switch (type) {
+                                case STRING:
+                                    value = text;
+                                    break;
+                                case BYTE:
+                                    value = Byte.valueOf(text);
+                                    break;
+                                case SHORT:
+                                    value = Short.valueOf(text);
+                                    break;
+                                case INTEGER:
+                                    value = Integer.valueOf(text);
+                                    break;
+                                case LONG:
+                                    value = Long.valueOf(text);
+                                    break;
+                                case BIG_INTEGER:
+                                    value = new BigInteger(text);
+                                    break;
+                                case FLOAT:
+                                    value = Float.valueOf(text);
+                                    break;
+                                case DOUBLE:
+                                    value = Double.valueOf(text);
+                                    break;
+                                case BIG_DECIMAL:
+                                    value = new BigDecimal(text);
+                                    break;
+                                case AUTO:
+                                    value = autoConvert(text, base64);
+                                    break;
+                                default:
+                                    value = null;
+                            }
+                            return value;
+                        })
+                        .collect(Collectors.toList()) :
+                List.of();
 
-        if (AppendType.PLACEHOLDER.equals(appendType)) {
+        if (AppendType.PLACEHOLDER.equals(appendType) && !values.isEmpty()) {
             Pattern forPlaceholder = Pattern.compile("\\{(\\d*)\\}");
             for (int i = 0; i < values.size(); i++) {
                 Object o = values.get(i);
                 if (o instanceof String) {
                     Matcher matcher = forPlaceholder.matcher(o.toString());
                     if (matcher.matches())
-                        values.set(i, new ExecutionContextHolder(Integer.valueOf(matcher.group(1))));
-
+                        values.set(i, new ExecutionContextHolder(Integer.parseInt(matcher.group(1))));
                 }
             }
         }
@@ -153,6 +157,8 @@ public class PrintValue implements Module {
                 result.add(value);
             }
         });
+        if (arrayValue.size() > 0)
+            result.add(arrayValue);
         executionContextTool.addMessage(result);
 
         if (inputValues != null && AppendType.FIRST.equals(appendType))
@@ -168,7 +174,7 @@ public class PrintValue implements Module {
 
     private Object autoConvert(String value, Pattern base64) {
         Object result;
-        if (NumberUtils.isNumber(value)) {
+        if (NumberUtils.isCreatable(value)) {
             if (!StringUtils.contains(value, ".")) {
                 result = NumberUtils.toLong(value);
             } else {

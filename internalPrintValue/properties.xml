@@ -7,26 +7,26 @@
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
     <className>ru.smcsystem.smcmodules.module.PrintValue</className>
-    <ver>1.1.1</ver>
+    <ver>1.2.0</ver>
     <apiVer>1.4.0</apiVer>
     <date>22-10-2023</date>
     <categories>Java, Utils</categories>
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
-Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
+Запрещено: изменение кода программы, её продажа/перепродажа, а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
 
@@ -70,19 +70,19 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>en</key>
-                    <value>the type of adding items to incoming messages.
+                    <value><![CDATA[the type of adding items to incoming messages.
 FIRST - incoming messages are appended to the end, after their own values.
 LAST - incoming messages are added to the beginning, before their own values.
 PLACEHOLDER - incoming sources are treated as values in the template. format: {source_number}. see example.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>тип добавления элементов к входящим сообщениям.
+                    <value><![CDATA[тип добавления элементов к входящим сообщениям.
 FIRST - входяште сообщения добавляются в конец, после собственных значений.
 LAST - входяште сообщения добавляются в начало, перед собственными значениями.
 PLACEHOLDER - входящие источники рссматриваются как значения в шаблоне. формат: {номер_источника}. смотри пример.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -91,14 +91,8 @@ PLACEHOLDER - входящие источники рссматриваются �
             <type>STRING</type>
             <value>Hello world</value>
             <description>
-                <entry>
-                    <key>en</key>
-                    <value>value.</value>
-                </entry>
-                <entry>
-                    <key>ru</key>
-                    <value>значение.</value>
-                </entry>
+                <entry k="ru" v="Значение, печатается если не пусто. если в тексте встречаются разделители (splitterValues), то разделяет текст на фрагменты. Может произвести конвертацию (type)."/>
+                <entry k="en" v="The value is printed if not empty. if the text contains splitterValues, it splits the text into fragments. Can perform conversion (type)."/>
             </description>
         </value>
         <value>
@@ -117,11 +111,19 @@ PLACEHOLDER - входящие источники рссматриваются �
                 </entry>
             </description>
         </value>
+        <value>
+            <name>arrayValue</name>
+            <type>OBJECT_ARRAY</type>
+            <value>[]</value>
+            <description>
+                <entry k="ru" v="Значение, в виде объекта. Если задан (не пуст), то будет добавляться после значений указанных в value."/>
+                <entry k="en" v="Value, as an object. If specified (not empty), it will be added after the values specified in value."/>
+            </description>
+        </value>
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="0" maxS="-1" minEC="0" maxEC="0" minC="0" maxC="0">
             <description>
                 <entry>
                     <key>ru</key>
@@ -132,12 +134,6 @@ PLACEHOLDER - входящие источники рссматриваются �
                     <value>Default execution context.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
@@ -176,11 +172,11 @@ PLACEHOLDER - входящие источники рссматриваются �
     <help>
         <entry>
             <key>en</key>
-            <value>Sends a message with a given value and type. if there are sources, then it displays its own values and incoming ones (the order is determined by the setting).</value>
+            <value>Sends a message with a given value and type. If there are sources, then it displays its own values and incoming ones (the order is determined by the setting).</value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Отправляет сообщение с заданным значением и типом. если есть источники, то выводит и свои значения и входящие (порядок определяется настройкой).</value>
+            <value>Отправляет сообщение с заданным значением и типом. Если есть источники, то выводит и свои значения и входящие (порядок определяется настройкой).</value>
         </entry>
     </help>
 

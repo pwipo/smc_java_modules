@@ -347,7 +347,7 @@ public class ServerTest {
 
             try (CloseableHttpResponse response = client.execute(request)) {
                 Header[] allHeaders = response.getAllHeaders();
-                System.out.println("headers: " + Arrays.stream(allHeaders).map(h->h.getName() + "=" + h.getValue()).collect(Collectors.joining(", ")));
+                System.out.println("headers: " + Arrays.stream(allHeaders).map(h -> h.getName() + "=" + h.getValue()).collect(Collectors.joining(", ")));
                 HttpEntity entity = response.getEntity();
                 // token = IOUtils.toString(entity.getContent());
                 token = EntityUtils.toString(entity);
@@ -646,10 +646,16 @@ public class ServerTest {
                             Long reqId = objectElement.findField("reqId").map(ModuleUtils::getNumber).map(Number::longValue).orElse(-1L);
                             if (uri.equals("/hello")) {
                                 sendFastResp(process, reqId,
-                                        List.of(new Message(MessageType.DATA, new Date(), new Value(new ObjectArray(new ObjectElement(new ObjectField("result", "success")))))));
+                                        List.of(new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("result", "success")))))));
                             } else if (uri.equals("/file")) {
                                 sendFastResp(process, reqId,
-                                        List.of(new Message(MessageType.DATA, new Date(), new Value("file.txt"))));
+                                        List.of(new Message(new Value("file.txt"))));
+                            } else if (uri.equals("/data")) {
+                                sendFastResp(process, reqId,
+                                        List.of(new Message(new Value(new ObjectArray(new ObjectElement(
+                                                new ObjectField("errorCode", 0),
+                                                new ObjectField("data", new ObjectElement(new ObjectField("result", "success1")))
+                                        ))))));
                             } else {
                                 sendFastResp(process, reqId, List.of(
                                         // new Message(MessageType.DATA, new Date(), new Value("success")),
@@ -697,6 +703,13 @@ public class ServerTest {
         try {
             Thread.sleep(1000);
             System.out.println("Response: " + sendingGetRequest(HttpClientBuilder.create(), "http://localhost:8080/hello2"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.sleep(1000);
+            System.out.println("Response: " + sendingGetRequest(HttpClientBuilder.create(), "http://localhost:8080/data"));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -390,6 +390,24 @@ public class Server implements Module {
         int resultCode = errors ? 500 : 200;
         String headerContentType = "Content-Type=" + mimeType;
         if (content == null && path == null) {
+            if (data != null && ModuleUtils.isArrayContainObjectElements((ObjectArray) data.getValue())) {
+                ObjectArray objectArray = (ObjectArray) data.getValue();
+                if (objectArray.size() == 1) {
+                    ObjectElement objectElementV = (ObjectElement) objectArray.get(0);
+                    if (objectElementV.getFields().size() <= 3) {
+                        Integer errorCodeV = objectElementV.findField(fieldErrorCode).map(ModuleUtils::toNumber).map(Number::intValue).orElse(null);
+                        String errorTextV = objectElementV.findField(fieldErrorText).map(ModuleUtils::toString).orElse(null);
+                        ObjectField dataV = objectElementV.findField(fieldData).orElse(null);
+                        if (errorCodeV != null &&
+                                (errorTextV != null || errorCodeV == 0) &&
+                                (dataV != null || errorCodeV != 0)) {
+                            errorCode = errorCodeV;
+                            errorText = errorTextV;
+                            data = dataV;
+                        }
+                    }
+                }
+            }
             ObjectElement objectElement = new ObjectElement(new ObjectField(fieldErrorCode, errorCode));
             if (errorText != null)
                 objectElement.getFields().add(new ObjectField(fieldErrorText, errorText));

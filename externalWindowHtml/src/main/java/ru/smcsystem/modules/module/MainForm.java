@@ -4,6 +4,7 @@ import ru.smcsystem.api.dto.ObjectArray;
 import ru.smcsystem.api.dto.ObjectElement;
 import ru.smcsystem.api.dto.ObjectField;
 import ru.smcsystem.api.enumeration.CommandType;
+import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.api.tools.execution.ExecutionContextTool;
 import ru.smcsystem.smc.utils.ModuleUtils;
 
@@ -19,11 +20,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.Instant;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MainForm {
+    private ConfigurationTool configurationTool;
     private ExecutionContextTool executionContextTool;
     private JPanel panel;
     public JEditorPane editorPane;
@@ -37,11 +40,14 @@ public class MainForm {
     public final Map<String, FormElement> elements;
     private final Map<String, Integer> elementsToEcId;
     private String configuration;
+    private Instant lastCreatedElement;
 
     public MainForm(String title, String configuration, int width, int height) {
+        this.configurationTool = null;
         this.executionContextTool = null;
         frame = new JFrame(title);
         this.configuration = configuration;
+        this.lastCreatedElement = null;
 
         $$$setupUI$$$();
 
@@ -69,6 +75,25 @@ public class MainForm {
         elements.clear();
         elementsToEcId.clear();
         editorPane.setText(configuration);
+        this.configurationTool = null;
+        this.executionContextTool = null;
+    }
+
+    public void prepare(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) {
+        this.configurationTool = configurationTool;
+        this.executionContextTool = executionContextTool;
+        if (lastCreatedElement == null)
+            lastCreatedElement = Instant.now();
+        do {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ignore) {
+            }
+        } while (lastCreatedElement.plusSeconds(1).isAfter(Instant.now()));
+    }
+
+    public void updateLastCreatedElement() {
+        this.lastCreatedElement = Instant.now();
     }
 
     public void start() {
@@ -90,14 +115,6 @@ public class MainForm {
         }).start();
     }
 
-    public ExecutionContextTool getExecutionContextTool() {
-        return executionContextTool;
-    }
-
-    public void setExecutionContextTool(ExecutionContextTool executionContextTool) {
-        this.executionContextTool = executionContextTool;
-    }
-
     private Element getFormElement(FormElement e) {
         Element elem = e.element;
         while (elem != null) {
@@ -111,7 +128,8 @@ public class MainForm {
     }
 
     public Optional<Object> getValue(String id) {
-        return Optional.ofNullable(elements.get(id)).map(e -> {
+        return Optional.ofNullable(findElement(id, "getValue")).map(e -> {
+            configurationTool.loggerTrace("getValue " + id);
             Object m = e.element.getAttributes().getAttribute(StyleConstants.ModelAttribute);
             switch (e.type) {
                 case SELECT: {
@@ -228,9 +246,10 @@ public class MainForm {
     }
 
     public void setValue(String id, Object value) {
-        FormElement e = elements.get(id);
+        FormElement e = findElement(id, "setValue");
         if (e == null)
             return;
+        configurationTool.loggerTrace("setValue " + id + " " + e.type);
         Object m = e.element.getAttributes().getAttribute(StyleConstants.ModelAttribute);
         switch (e.type) {
             case SELECT: {
@@ -324,11 +343,19 @@ public class MainForm {
         }
     }
 
-    public void addEC(String id, int ecId) {
+    private FormElement findElement(String id, String func) {
         FormElement e = elements.get(id);
+        if (e == null)
+            configurationTool.loggerWarn("Not find element " + id + " for " + func);
+        return e;
+    }
+
+    public void addEC(String id, int ecId) {
+        FormElement e = findElement(id, "addEC");
         if (e == null)
             return;
 
+        configurationTool.loggerTrace("addEC " + id + " " + e.type);
         elementsToEcId.put(id, ecId);
         switch (e.type) {
             case SELECT:
@@ -377,7 +404,7 @@ public class MainForm {
                             } catch (Exception ignore) {
                             }
                         }
-                        processEcCall(ecId, List.of(objectArray));
+                        processEcCall(id, ecId, List.of(objectArray));
                     }
                 });
                 break;
@@ -406,9 +433,10 @@ public class MainForm {
     }
 
     public Optional<String> getElement(String id) {
-        FormElement e = elements.get(id);
+        FormElement e = findElement(id, "getElement");
         if (e == null)
             return Optional.empty();
+        configurationTool.loggerTrace("getElement " + id);
         return getHtml(e.element, e.element);
     }
 
@@ -427,9 +455,10 @@ public class MainForm {
     }
 
     public void setElement(String id, String html) {
-        FormElement e = elements.get(id);
+        FormElement e = findElement(id, "setElement");
         if (e == null || html == null)
             return;
+        configurationTool.loggerTrace("setElement " + id);
         ExtendedHTMLDocument document = (ExtendedHTMLDocument) e.element.getDocument();
         try {
             removeFromCache(e.element);
@@ -448,23 +477,26 @@ public class MainForm {
     }
 
     public void setAttribute(String id, String name, Object value) {
-        FormElement e = elements.get(id);
+        FormElement e = findElement(id, "setAttribute");
         if (e == null)
             return;
+        configurationTool.loggerTrace("setAttribute " + id + " " + name);
         setAttribute(e.element, name, value);
     }
 
     public int countChilds(String id) {
-        FormElement e = elements.get(id);
+        FormElement e = findElement(id, "countChilds");
         if (e == null)
             return -1;
+        configurationTool.loggerTrace("countChilds " + id);
         return e.element.getElementCount();
     }
 
     public void addChildElement(String id, String html, int position) {
-        FormElement e = elements.get(id);
+        FormElement e = findElement(id, "addChildElement");
         if (e == null || html == null)
             return;
+        configurationTool.loggerTrace("addChildElement " + id + " " + position);
         ExtendedHTMLDocument document = (ExtendedHTMLDocument) e.element.getDocument();
         try {
             if (position == 0) {
@@ -486,9 +518,10 @@ public class MainForm {
     }
 
     public void removeChildElement(String id, int position) {
-        FormElement e = elements.get(id);
+        FormElement e = findElement(id, "removeChildElement");
         if (e == null)
             return;
+        configurationTool.loggerTrace("removeChildElement " + id + " " + position);
         ExtendedHTMLDocument document = (ExtendedHTMLDocument) e.element.getDocument();
         try {
             if (position < 0)
@@ -502,7 +535,7 @@ public class MainForm {
 
     /*
     public void clearChilds(String id) {
-        FormElement e = elements.get(id);
+        FormElement e = findElement(id);
         if (e == null)
             return;
         ExtendedHTMLDocument document = (ExtendedHTMLDocument) e.element.getDocument();
@@ -522,9 +555,10 @@ public class MainForm {
     */
 
     public void setChildAttribute(String id, String name, Object value, int position) {
-        FormElement e = elements.get(id);
+        FormElement e = findElement(id, "setChildAttribute");
         if (e == null)
             return;
+        configurationTool.loggerTrace("setChildAttribute " + id + " " + name + " " + position);
         if (position < 0)
             position = Math.max(0, e.element.getElementCount() + position);
         if (position >= e.element.getElementCount())
@@ -542,12 +576,13 @@ public class MainForm {
     }
 
     private void processEcCallWithData(String id, int ecId) {
-        getValue(id).ifPresent(v -> processEcCall(ecId, List.of(v)));
+        getValue(id).ifPresent(v -> processEcCall(id, ecId, List.of(v)));
     }
 
-    private void processEcCall(int ecId, List<Object> values) {
+    private void processEcCall(String id, int ecId, List<Object> values) {
         if (executionContextTool == null)
             return;
+        configurationTool.loggerTrace("processEcCall " + id + " " + ecId);
         long threadId = executionContextTool.getFlowControlTool().executeParallel(CommandType.EXECUTE, List.of(ecId), values, 0, 0);
         executionContextTool.getFlowControlTool().releaseThreadCache(threadId);
     }

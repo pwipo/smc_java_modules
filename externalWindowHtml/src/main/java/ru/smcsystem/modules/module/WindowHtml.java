@@ -60,8 +60,9 @@ public class WindowHtml implements Module {
                         executionContextTool.addError("window already started");
                         break;
                     }
-                    mainForm.setExecutionContextTool(executionContextTool);
+                    mainForm.prepare(configurationTool, executionContextTool);
                     if (ids != null && !ids.isEmpty()) {
+                        configurationTool.loggerTrace(String.format("window started, count ids=%d, ecs=%d", ids.size(), executionContextTool.getFlowControlTool().countManagedExecutionContexts()));
                         for (int i = 0; i < ids.size(); i++) {
                             String idStr = ids.get(i);
                             if (i >= executionContextTool.getFlowControlTool().countManagedExecutionContexts())

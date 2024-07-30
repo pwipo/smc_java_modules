@@ -352,8 +352,30 @@ public class ServerTest {
                 // token = IOUtils.toString(entity.getContent());
                 token = EntityUtils.toString(entity);
                 // Thread.sleep(10000);
+            } finally {
+                request.releaseConnection();
             }
-            request.releaseConnection();
+        }
+        return token;
+    }
+
+    private static String sendPostRequest(HttpClientBuilder builder, String url, HttpEntity entity) throws IOException {
+        String token = null;
+        try (CloseableHttpClient client = builder.build()) {
+            HttpPost request = new HttpPost(url);
+            request.addHeader(HttpHeaders.USER_AGENT, HttpHeaders.USER_AGENT);
+            request.setEntity(entity);
+
+            try (CloseableHttpResponse response = client.execute(request)) {
+                Header[] allHeaders = response.getAllHeaders();
+                System.out.println("headers: " + Arrays.stream(allHeaders).map(h -> h.getName() + "=" + h.getValue()).collect(Collectors.joining(", ")));
+                entity = response.getEntity();
+                // token = IOUtils.toString(entity.getContent());
+                token = EntityUtils.toString(entity);
+                // Thread.sleep(10000);
+            } finally {
+                request.releaseConnection();
+            }
         }
         return token;
     }
@@ -419,32 +441,22 @@ public class ServerTest {
         try {
             Thread.sleep(100);
             HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-            try (CloseableHttpClient client = httpClientBuilder.build()) {
-                HttpPost request = new HttpPost("http://localhost:8080/hello");
-                request.addHeader(HttpHeaders.USER_AGENT, HttpHeaders.USER_AGENT);
-
-                request.setEntity(
-                        MultipartEntityBuilder.create()
-                                .setContentType(ContentType.MULTIPART_FORM_DATA)
-                                .setCharset(Charset.forName("UTF-8"))
-                                .addTextBody("uuid", "uuid")
-                                .addTextBody("provider", "provider")
-                                .addTextBody("author", "author")
-                                .addTextBody("contacts", "contacts")
-                                .addTextBody("homepage", "homepage")
-                                .addTextBody("version", "version")
-                                .addTextBody("api_version", "api_version")
-                                .addTextBody("locale", "locale")
-                                .addTextBody("comment", "comment")
-                                .addBinaryBody("data", new byte[]{1, 2, 3, 4, 5})
-                                .build());
-
-                try (CloseableHttpResponse response = client.execute(request)) {
-                    HttpEntity entity = response.getEntity();
-                    String content = EntityUtils.toString(entity);
-                    System.out.println("Response: " + content);
-                }
-            }
+            String content = sendPostRequest(httpClientBuilder, "http://localhost:8080/hello",
+                    MultipartEntityBuilder.create()
+                            .setContentType(ContentType.MULTIPART_FORM_DATA)
+                            .setCharset(Charset.forName("UTF-8"))
+                            .addTextBody("uuid", "uuid")
+                            .addTextBody("provider", "provider")
+                            .addTextBody("author", "author")
+                            .addTextBody("contacts", "contacts")
+                            .addTextBody("homepage", "homepage")
+                            .addTextBody("version", "version")
+                            .addTextBody("api_version", "api_version")
+                            .addTextBody("locale", "locale")
+                            .addTextBody("comment", "comment")
+                            .addBinaryBody("data", new byte[]{1, 2, 3, 4, 5})
+                            .build());
+            System.out.println("Response: " + content);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -860,5 +872,134 @@ public class ServerTest {
 
         process.stop();
     }
+
+    @Test
+    public void testGetFilePart() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+        Map<String, IValue> settings = new HashMap<>(Map.of(
+                "port", new Value(8080),
+                "requestTimeout", new Value(20000),
+                "countThreads", new Value(10),
+                "backlog", new Value(0),
+                // "mode", new Value(ValueType.STRING, "PASSIVE"),
+                "protocol", new Value("HTTP"),
+                "availablePaths", new Value(".*"),
+                "keyStoreFileName", new Value(""),
+                "keyStorePass", new Value(""),
+                "keyPass", new Value(""),
+                "keyAlias", new Value("")
+        ));
+        settings.put("bindAddress", new Value(""));
+        settings.put("sessionTimeout", new Value(30));
+        settings.put("maxPostSize", new Value(10485760));
+        settings.put("allowMultipartParsing", new Value("true"));
+        settings.put("requestType", new Value("OBJECT"));
+        settings.put("virtualServerSettings", new Value(new ObjectArray()));
+        settings.put("fileResponsePieceSize", new Value(1048576));
+        settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
+        settings.put("maxFileSizeFull", new Value(5));
+
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        settings,
+                        null,
+                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
+                ),
+                new Server()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                null,
+                null,
+                null,
+                List.of(
+                        (lst) -> {
+                            ObjectElement objectElement = (ObjectElement) ((ObjectArray) lst.get(0)).get(0);
+                            Long reqId = objectElement.findField("reqId").map(ModuleUtils::getNumber).map(Number::longValue).orElse(-1L);
+                            long size = objectElement.findField("size").map(ModuleUtils::getNumber).map(Number::longValue).orElse(-1L);
+                            byte[] bytes = objectElement.findField("data").map(ModuleUtils::getBytes).orElse(null);
+                            if (bytes == null && size > 0)
+                                bytes = getFilePart(process, reqId, 0, (int) size + 5);
+                            sendFastResp(process, reqId,
+                                    List.of(new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("result", bytes != null ? bytes.length : 0)))))));
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(200))
+                                            , new Message(MessageType.DATA, new Date(), new Value("hi".getBytes()))
+                                    ),
+                                    ActionType.EXECUTE);
+                        }
+
+                ),
+                "default", "start");
+
+        Thread thread = new Thread(() -> {
+            process.execute(executionContextTool);
+            executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+            executionContextTool.getOutput().clear();
+        });
+        thread.start();
+
+        Thread.sleep(1000);
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+
+        try {
+            System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "http://localhost:8080/hello"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            String content = sendPostRequest(httpClientBuilder, "http://localhost:8080/hello",
+                    MultipartEntityBuilder.create()
+                            .setContentType(ContentType.MULTIPART_FORM_DATA)
+                            .setCharset(Charset.forName("UTF-8"))
+                            .addTextBody("uuid", "uuid")
+                            .addBinaryBody("data", new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12})
+                            .build());
+            System.out.println("Response: " + content);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        ExecutionContextToolImpl executionContextTool2 = new ExecutionContextToolImpl(null, null, null, null, "default", "stop");
+        process.execute(executionContextTool2);
+
+        thread.join();
+
+        process.stop();
+    }
+
+    private byte[] getFilePart(Process process, Long reqId, int fileId, int size) {
+        ExecutionContextToolImpl executionContextToolFastResp = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(reqId)),
+                                                new Message(new Value(fileId)),
+                                                new Message(new Value(size))
+                                        ), ActionType.EXECUTE)
+                        )),
+                null,
+                null,
+                null,
+                "default", "get_file_part"
+        );
+        process.execute(executionContextToolFastResp);
+        // executionContextToolFastResp.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        byte[] result = executionContextToolFastResp.getOutput().stream().filter(ModuleUtils::isBytes).map(ModuleUtils::getBytes).findAny().orElse(null);
+        executionContextToolFastResp.getOutput().clear();
+        return result;
+    }
+
 
 }

@@ -28,11 +28,12 @@ public class VirtualServerInfo {
     private final Boolean allowMultipartParsing;
     private final List<String> headers;
     private Server.RequestType requestType;
+    private Integer maxFileSizeFull;
 
     public VirtualServerInfo(String urlHeader, URL url, File keyStore, String keyStorePass, String keyAlias, String keyPass,
                              InetAddress address, Map<Integer, Pattern> patterns, Integer requestTimeout, Integer countThreads,
                              Integer backlog, Integer sessionTimeout, Integer maxPostSize, Boolean allowMultipartParsing,
-                             List<String> headers, Server.RequestType requestType) {
+                             List<String> headers, Server.RequestType requestType, Integer maxFileSizeFull) {
         this.urlHeader = urlHeader;
         this.url = url;
         this.keyStore = keyStore;
@@ -51,6 +52,7 @@ public class VirtualServerInfo {
         host.setName(url.getHost());
         this.headers = headers;
         this.requestType = requestType;
+        this.maxFileSizeFull = maxFileSizeFull;
     }
 
     public String getUrlHeader() {
@@ -119,5 +121,9 @@ public class VirtualServerInfo {
 
     public Server.RequestType getRequestType() {
         return requestType;
+    }
+
+    public Integer getMaxFileSizeFull() {
+        return maxFileSizeFull;
     }
 }

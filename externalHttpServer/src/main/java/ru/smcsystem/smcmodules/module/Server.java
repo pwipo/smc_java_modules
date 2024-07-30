@@ -72,7 +72,7 @@ public class Server implements Module {
     private Map<Long, Response> mapResponse;
 
     private enum Type {
-        START, STOP, FAST_RESPONSE, FILE_FAST_RESPONSE
+        START, STOP, FAST_RESPONSE, FILE_FAST_RESPONSE, GET_FILE_PART
     }
 
     private Integer fileResponsePieceSize;
@@ -101,6 +101,7 @@ public class Server implements Module {
                 .collect(Collectors.toList());
         ObjectArray virtualServerSettings = (ObjectArray) externalConfigurationTool.getSetting("virtualServerSettings").orElseThrow(() -> new ModuleException("virtualServerSettings setting")).getValue();
         requestType = RequestType.valueOf((String) externalConfigurationTool.getSetting("requestType").orElseThrow(() -> new ModuleException("requestType setting")).getValue());
+        Integer maxFileSizeFull = (Integer) externalConfigurationTool.getSetting("maxFileSizeFull").orElseThrow(() -> new ModuleException("maxFileSizeFull setting")).getValue();
         reqIdGenerator = new AtomicLong();
         reqIdGenerator.compareAndSet(Long.MAX_VALUE, 0);
         mapResponse = new ConcurrentHashMap<>();
@@ -127,6 +128,7 @@ public class Server implements Module {
                 Boolean allowMultipartParsingVar = objectElement.findField("allowMultipartParsing").map(ModuleUtils::getString).map(Boolean::parseBoolean).orElse(allowMultipartParsing);
                 ObjectArray headersArrVar = objectElement.findField("headers").map(ModuleUtils::toObjectArray).orElse(headersArr);
                 RequestType requestTypeVar = objectElement.findField("requestType").map(ModuleUtils::getString).map(RequestType::valueOf).orElse(requestType);
+                Integer maxFileSizeFullVar = objectElement.findField("maxFileSizeFull").map(ModuleUtils::getNumber).map(Number::intValue).orElse(maxFileSizeFull);
                 URL url = null;
                 try {
                     url = new URL(protocolVar.name().toLowerCase(), hostname, portVar, "");
@@ -147,7 +149,7 @@ public class Server implements Module {
                 }
                 VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, urlHeader, url, keyStoreFileNameVar, keyStorePassVar,
                         keyAliasVar, keyPassVar, strAddressVar, paths, requestTimeoutVar, countThreadsVar, backlogVar, sessionTimeoutVar, maxPostSizeVar,
-                        allowMultipartParsingVar, headersArrVar, requestTypeVar);
+                        allowMultipartParsingVar, headersArrVar, requestTypeVar, maxFileSizeFullVar);
                 virtualServerInfoMap.put(virtualServerInfo.getUrlHeader(), virtualServerInfo);
             }
         } else {
@@ -159,7 +161,7 @@ public class Server implements Module {
                         .forEach(id -> paths.put(id, availablePathsList.get(id)));
                 VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, hostname, new URL(protocol.name().toLowerCase(), hostname, port, ""),
                         keyStoreFileName, keyStorePass, keyAlias, keyPass, strAddress, paths, requestTimeout, countThreads, backlog, sessionTimeout,
-                        maxPostSize, allowMultipartParsing, headersArr, requestType);
+                        maxPostSize, allowMultipartParsing, headersArr, requestType, maxFileSizeFull);
                 virtualServerInfoMap = Map.of(virtualServerInfo.getUrlHeader(), virtualServerInfo);
             } catch (Exception e) {
                 throw new ModuleException("error", e);
@@ -192,7 +194,7 @@ public class Server implements Module {
                                                String keyStoreFileName, String keyStorePass, String keyAlias, String keyPass,
                                                String strAddress, Map<Integer, String> paths, Integer requestTimeout, Integer countThreads,
                                                Integer backlog, Integer sessionTimeout, Integer maxPostSize, Boolean allowMultipartParsing,
-                                               ObjectArray headersArr, RequestType requestTypeVar) {
+                                               ObjectArray headersArr, RequestType requestTypeVar, Integer maxFileSizeFullVar) {
         File keyStore = null;
         if (StringUtils.isNotBlank(keyStoreFileName)) {
             keyStore = new File(externalConfigurationTool.getWorkDirectory(), keyStoreFileName);
@@ -219,7 +221,8 @@ public class Server implements Module {
                 headers.add(headersArr.get(i).toString());
         }
         return new VirtualServerInfo(urlOrigin, url, keyStore, keyStorePass, keyAlias, keyPass, address, patterns,
-                requestTimeout, countThreads, backlog, sessionTimeout, maxPostSize, allowMultipartParsing, headers, requestTypeVar);
+                requestTimeout, countThreads, backlog, sessionTimeout, maxPostSize, allowMultipartParsing,
+                headers, requestTypeVar, maxFileSizeFullVar);
     }
 
     @Override
@@ -253,9 +256,48 @@ public class Server implements Module {
                     case FILE_FAST_RESPONSE:
                         fileFastResponse(configurationTool, executionContextTool);
                         break;
+                    case GET_FILE_PART:
+                        getFilePart(configurationTool, executionContextTool);
+                        break;
                 }
             }
         });
+    }
+
+    private void getFilePart(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws IOException {
+        if (tomcat == null) {
+            executionContextTool.addError("server not started");
+            return;
+        }
+        Optional<LinkedList<IMessage>> messagesOpt = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(0));
+        if (messagesOpt.isEmpty() || messagesOpt.get().size() < 3) {
+            executionContextTool.addError("need 3 messages");
+            return;
+        }
+        LinkedList<IMessage> messages = messagesOpt.get();
+        Number number = ModuleUtils.getNumber(messages.poll());
+        Long reqId = number != null ? number.longValue() : null;
+        number = ModuleUtils.getNumber(messages.poll());
+        Integer fileId = number != null ? number.intValue() : null;
+        number = ModuleUtils.getNumber(messages.poll());
+        Integer size = number != null ? number.intValue() : null;
+        if (reqId == null || fileId == null || size == null) {
+            executionContextTool.addError("wrong params");
+            return;
+        }
+        Response response = mapResponse.get(reqId);
+        if (response == null) {
+            executionContextTool.addError("response for reqId not exist");
+            return;
+        }
+        RequestInputStream requestInputStream = response.getRequestInputStreamMap().get(fileId);
+        if (requestInputStream == null) {
+            executionContextTool.addError("requestInputStream not exist");
+            return;
+        }
+        byte[] bytes = requestInputStream.getInputStream().readNBytes(size);
+        if (bytes != null && bytes.length > 0)
+            executionContextTool.addMessage(bytes);
     }
 
     private void start(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) {
@@ -315,9 +357,10 @@ public class Server implements Module {
             executionContextTool.addError("need 3 field names");
             return;
         }
-        String fieldErrorCode = ModuleUtils.getString(names.get().get(0));
-        String fieldErrorText = ModuleUtils.getString(names.get().get(1));
-        String fieldData = ModuleUtils.getString(names.get().get(2));
+        LinkedList<IMessage> messages = names.get();
+        String fieldErrorCode = ModuleUtils.getString(messages.poll());
+        String fieldErrorText = ModuleUtils.getString(messages.poll());
+        String fieldData = ModuleUtils.getString(messages.poll());
         if (fieldErrorCode == null || fieldErrorText == null || fieldData == null) {
             executionContextTool.addError("wrong field names");
             return;
@@ -342,17 +385,20 @@ public class Server implements Module {
         //     return;
         // }
 
-        List<IMessage> lst = ModuleUtils.getErrors(a);
+        LinkedList<IMessage> lst = new LinkedList<>(ModuleUtils.getErrors(a));
         errors = !lst.isEmpty();
         if (errors) {
-            errorText = ModuleUtils.toString(lst.get(0));
+            errorText = ModuleUtils.toString(lst.poll());
             errorCode = -1;
-            if (lst.size() > 1 && ModuleUtils.isNumber(lst.get(1)))
-                errorCode = ModuleUtils.getNumber(lst.get(1)).intValue();
+            if (lst.size() > 1) {
+                IMessage message = lst.poll();
+                if (ModuleUtils.isNumber(message))
+                    errorCode = ModuleUtils.getNumber(message).intValue();
+            }
         } else {
-            lst = ModuleUtils.getData(a);
+            lst = new LinkedList<>(ModuleUtils.getData(a));
             if (!lst.isEmpty()) {
-                IMessage m = lst.get(0);
+                IMessage m = lst.poll();
                 if (ModuleUtils.isObjectArray(m)) {
                     data = new ObjectField(fieldData, ModuleUtils.getObjectArray(m));
                     ObjectArray objectArray = ModuleUtils.getObjectArray(data);
@@ -381,7 +427,7 @@ public class Server implements Module {
                     } catch (Exception e) {
                         configurationTool.loggerWarn("error while get mime type fore bytes" + e.getMessage());
                     }
-                } else if (lst.size() == 1 && ModuleUtils.isString(m)) {
+                } else if (lst.isEmpty() && ModuleUtils.isString(m)) {
                     path = ModuleUtils.getString(m);
                     mimeType = URLConnection.guessContentTypeFromName(path);
                     if (mimeType == null) {
@@ -611,9 +657,10 @@ public class Server implements Module {
                     }
                     int idForGetResponse = idsForExecute.get(idsForExecute.size() - 1);
 
-                    Map.Entry<Long, List<Object>> requestEntry = createRequest(req, virtualServerInfo.getRequestType());
+                    Map<Integer, RequestInputStream> requestInputStreamMap = new HashMap<>();
+                    Map.Entry<Long, List<Object>> requestEntry = createRequest(req, virtualServerInfo.getRequestType(), virtualServerInfo.getMaxFileSizeFull(), requestInputStreamMap);
                     reqId = requestEntry.getKey();
-                    Response responseMain = new Response(reqId, resp, virtualServerInfo);
+                    Response responseMain = new Response(reqId, req, resp, virtualServerInfo, requestInputStreamMap);
                     mapResponse.put(reqId, responseMain);
                     long threadId = externalExecutionContextTool.getFlowControlTool().executeParallel(
                             CommandType.EXECUTE,
@@ -668,11 +715,17 @@ public class Server implements Module {
                             externalExecutionContextTool.getFlowControlTool().releaseThreadCache(threadId);
                         }
                     }
+                } catch (IOException e) {
+                    externalConfigurationTool.loggerWarn(e.getMessage());
+                    externalConfigurationTool.loggerTrace(ModuleUtils.getStackTraceAsString(e));
                 } catch (Exception e) {
                     externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                     // externalExecutionContextTool.addError(e.getLocalizedMessage());
                 } finally {
-                    if (mapResponse.remove(reqId) != null && (responseObj == null || !responseObj.isFastResponse())) {
+                    Response response = mapResponse.remove(reqId);
+                    if (response != null)
+                        response.getRequestInputStreamMap().forEach((k, v) -> v.close());
+                    if (response != null && (responseObj == null || !responseObj.isFastResponse())) {
                         try {
                             handleResponse(resp, responseObj, virtualServerInfo.getHeaders());
                         } catch (IOException e) {
@@ -747,7 +800,7 @@ public class Server implements Module {
         }
     }
 
-    private Map.Entry<Long, List<Object>> createRequest(HttpServletRequest req, RequestType requestType) throws IOException, ServletException {
+    private Map.Entry<Long, List<Object>> createRequest(HttpServletRequest req, RequestType requestType, Integer maxFileSizeFull, Map<Integer, RequestInputStream> requestInputStreamMap) throws IOException, ServletException {
         List<Object> request = new LinkedList<>();
 
         List<Map.Entry<String, String>> parameters = new LinkedList<>();
@@ -781,22 +834,42 @@ public class Server implements Module {
             mainHeaders.forEach((k, v) -> request.add(k + "=" + v));
 
             if (ServletFileUpload.isMultipartContent(req)) {
-                request.add(req.getParts().size());
-                for (Part part : req.getParts()) {
+                ArrayList<Part> parts = new ArrayList<>(req.getParts());
+                request.add(parts.size());
+                for (int i = 0; i < parts.size(); i++) {
+                    Part part = parts.get(i);
                     Map<String, String> headers = new HashMap<>();
                     for (String headerName : part.getHeaderNames())
                         headers.put(headerName, part.getHeader(headerName));
-                    byte[] bytes = IOUtils.toByteArray(part.getInputStream());
-                    if (bytes != null && bytes.length > 0) {
+                    RequestInputStream requestInputStream = new RequestInputStream(part);
+                    long size = requestInputStream.getSize();
+                    if (maxFileSizeFull == -1 || maxFileSizeFull < size) {
+                        byte[] bytes = IOUtils.toByteArray(requestInputStream.getInputStream());
+                        requestInputStream.close();
+                        if (bytes != null && bytes.length > 0) {
+                            request.add(headers.size());
+                            headers.forEach((k, v) -> request.add(k + "=" + v));
+                            request.add(bytes);
+                        }
+                    } else {
                         request.add(headers.size());
                         headers.forEach((k, v) -> request.add(k + "=" + v));
-                        request.add(bytes);
+                        request.add(size);
                     }
+                    requestInputStreamMap.put(i, requestInputStream);
                 }
             } else {
-                byte[] bytes = IOUtils.toByteArray(req.getInputStream());
-                if (bytes != null && bytes.length > 0)
-                    request.add(bytes);
+                RequestInputStream requestInputStream = new RequestInputStream(req);
+                long size = requestInputStream.getSize();
+                if (maxFileSizeFull == -1 || maxFileSizeFull < size) {
+                    byte[] bytes = IOUtils.toByteArray(requestInputStream.getInputStream());
+                    requestInputStream.close();
+                    if (bytes != null && bytes.length > 0)
+                        request.add(bytes);
+                } else {
+                    request.add(size);
+                }
+                requestInputStreamMap.put(0, requestInputStream);
             }
         } else {
             ObjectElement objectElement = new ObjectElement(
@@ -817,34 +890,54 @@ public class Server implements Module {
                                 .map(e -> new ObjectField(e.getKey(), e.getValue()))
                                 .collect(Collectors.toList()))));
             byte[] bytes = null;
+            Long size = null;
             if (ServletFileUpload.isMultipartContent(req)) {
-                List<ObjectElement> parts = new ArrayList<>(req.getParts().size());
-                for (Part part : req.getParts()) {
+                List<ObjectElement> partElements = new ArrayList<>(req.getParts().size());
+                ArrayList<Part> parts = new ArrayList<>(req.getParts());
+                for (int i = 0; i < parts.size(); i++) {
+                    Part part = parts.get(i);
                     Map<String, String> headers = new HashMap<>();
                     for (String headerName : part.getHeaderNames())
                         headers.put(headerName, part.getHeader(headerName));
-                    bytes = IOUtils.toByteArray(part.getInputStream());
-                    if (bytes != null && bytes.length > 0) {
-                        ObjectElement objectElementPart = new ObjectElement();
-                        objectElementPart.getFields().add(new ObjectField("name", part.getName()));
-                        objectElementPart.getFields().add(new ObjectField("contentType", part.getContentType()));
-                        if (!headers.isEmpty()) {
-                            objectElementPart.getFields().add(new ObjectField("headers",
-                                    new ObjectElement(headers.entrySet().stream()
-                                            .map(e -> new ObjectField(e.getKey(), e.getValue()))
-                                            .collect(Collectors.toList()))));
-                        }
-                        objectElementPart.getFields().add(new ObjectField("data", bytes));
-                        parts.add(objectElementPart);
+                    RequestInputStream requestInputStream = new RequestInputStream(part);
+                    size = requestInputStream.getSize();
+                    ObjectElement objectElementPart = new ObjectElement();
+                    objectElementPart.getFields().add(new ObjectField("name", requestInputStream.getName()));
+                    objectElementPart.getFields().add(new ObjectField("contentType", requestInputStream.getContentType()));
+                    if (!headers.isEmpty()) {
+                        objectElementPart.getFields().add(new ObjectField("headers",
+                                new ObjectElement(headers.entrySet().stream()
+                                        .map(e -> new ObjectField(e.getKey(), e.getValue()))
+                                        .collect(Collectors.toList()))));
                     }
+                    objectElementPart.getFields().add(new ObjectField("size", size));
+                    if (maxFileSizeFull == -1 || maxFileSizeFull < size) {
+                        bytes = IOUtils.toByteArray(requestInputStream.getInputStream());
+                        requestInputStream.close();
+                        if (bytes != null && bytes.length > 0) {
+                            objectElementPart.getFields().add(new ObjectField("data", bytes));
+                            partElements.add(objectElementPart);
+                        }
+                    } else {
+                        partElements.add(objectElementPart);
+                    }
+                    requestInputStreamMap.put(i, requestInputStream);
                 }
-                if (!parts.isEmpty())
-                    objectElement.getFields().add(new ObjectField("multipart", new ObjectArray((List) parts, ObjectType.OBJECT_ELEMENT)));
+                if (!partElements.isEmpty())
+                    objectElement.getFields().add(new ObjectField("multipart", new ObjectArray((List) partElements, ObjectType.OBJECT_ELEMENT)));
             } else {
-                bytes = IOUtils.toByteArray(req.getInputStream());
+                RequestInputStream requestInputStream = new RequestInputStream(req);
+                size = requestInputStream.getSize();
+                if (maxFileSizeFull == -1 || maxFileSizeFull < size) {
+                    bytes = IOUtils.toByteArray(req.getInputStream());
+                    requestInputStream.close();
+                }
+                requestInputStreamMap.put(0, requestInputStream);
             }
             if (bytes != null && bytes.length > 0)
                 objectElement.getFields().add(new ObjectField("data", bytes));
+            if (size != null)
+                objectElement.getFields().add(new ObjectField("size", size));
             request.add(new ObjectArray(objectElement));
         }
 

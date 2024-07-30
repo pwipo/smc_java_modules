@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Server</className>
-    <ver>1.3.3</ver>
+    <ver>1.4.0</ver>
     <apiVer>1.4.0</apiVer>
     <date>22-10-2023</date>
 
@@ -269,14 +269,14 @@ if VIRTUAL is selected, protocol, host, and port must be specified for each path
                     <key>ru</key>
                     <value><![CDATA[Набор параметров для виртуальных серверов. Используется только для режима VIRTUAL.
 Каждый объект представляет собой отдельный виртуальный сервре. Поля объекта соответствуют именам настроек, при этом если какое-то поле отсутствует, то берется соответсвующее значение из настройки. пример:
-[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false","headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type"]}]
+[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false","headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type", "maxFileSizeFull": -1]}]
                     ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
                     <value><![CDATA[A set of parameters for virtual servers. Used only for VIRTUAL mode.
 Each object is a separate virtual server. The fields of the object correspond to the names of the settings, and if a field is missing, then the corresponding value is taken from the settings. example:
-[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false","headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type"]}]
+[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false","headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type", "maxFileSizeFull": -1]}]
                     ]]></value>
                 </entry>
             </description>
@@ -308,8 +308,8 @@ LIST - list of simple values:
              further in iteration:
                  number - the number of headers of a piece of data
                  headers of a piece of data (format key=value)
-                 byte array - the data itself.
-         otherwise - a byte array - the body of the request.
+                 byte array - the data itself. or a number - the size if maxFileSizeFull is enabled and the size exceeds it.
+         otherwise - byte array - the request body. or a number - the size if maxFileSizeFull is enabled and the size exceeds it.
 OBJECT - in the form of OBJECT_ARRAY containing 1 object, which contains the following fields:
      method - string - method
      reqId - number - request number
@@ -319,11 +319,13 @@ OBJECT - in the form of OBJECT_ARRAY containing 1 object, which contains the fol
      params - an object with fields for each parameter
      headers - an object with fields for each header
      multipart - yes, if the multipart type is an array of objects, each of which contains fields:
-         name - name.
-         contentType - type.
-         headers - an object with fields for each header.
-         data - byte array - contains the data itself.
-     data - if there is byte data (for multipart the latter is duplicated) - byte array - contains the data itself.
+         name - string - name.
+         contentType - string - type.
+         headers - object - with fields for each header.
+         size - number - size.
+         data - byte array - contains the data itself. Only if maxFileSizeFull is disabled or the size is less than it.
+     size - if there is byte data (for multipart, the last one is duplicated) - number - size.
+     data - if there is byte data (for multipart, the last one is duplicated) - byte array - contains the data itself. Only if maxFileSizeFull is disabled or the size is less than it.
                     ]]></value>
                 </entry>
                 <entry>
@@ -344,8 +346,8 @@ LIST - список простых значений:
             далее в итерации:
                 число - количестово заголовков куска данных
                 заголовки куска данных (формат ключ=значение)
-                байтовый массив - сами данные.
-        иначе - байтовый массив - тело запроса.
+                байтовый массив - сами данные. или число - размер если включен maxFileSizeFull и размер превышает его.
+        иначе - байтовый массив - тело запроса. или число - размер если включен maxFileSizeFull и размер превышает его.
 OBJECT - в виде OBJECT_ARRAY содержащем 1 объект, в котором содержаться поля:
     method - строка - метод
     reqId - число - номер запроса
@@ -355,11 +357,13 @@ OBJECT - в виде OBJECT_ARRAY содержащем 1 объект, в кот
     params - объект с полями для каждого параметра
     headers - объект с полями для каждого заголовка
     multipart - есть, если тип multipart - массив объектов, каждый из которых содержит поля:
-        name - имя.
-        contentType - тип.
-        headers - объект с полями для каждого заголовка.
-        data - байтовый массив - содержит сами данные.
-    data - если есть байтовые данные (для multipart дублируется последний) - байтовый массив - содержит сами данные.
+        name - строка - имя.
+        contentType - строка - тип.
+        headers - объект - с полями для каждого заголовка.
+        size - число - размер.
+        data - байтовый массив - содержит сами данные. Только если maxFileSizeFull выключен или размер меньше его.
+    size - если есть байтовые данные (для multipart дублируется последний) - число - размер.
+    data - если есть байтовые данные (для multipart дублируется последний) - байтовый массив - содержит сами данные. Только если maxFileSizeFull выключен или размер меньше его.
                     ]]></value>
                 </entry>
             </description>
@@ -396,6 +400,29 @@ OBJECT - в виде OBJECT_ARRAY содержащем 1 объект, в кот
                     <value><![CDATA[Default headers that will be added to each response.
 Format: array of strings, each line must contain a name and value separated by the = symbol.
 Examples: ["Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"]
+                    ]]></value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>maxFileSizeFull</name>
+            <type>INTEGER</type>
+            <value>-1</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Максимальный размер мгновенной обработки файла или тела для Post запроса, в байтах.
+Если размер меньше этого значения или равен -1, то сразу читается и отправляется вместе с запросом.
+Иначе в запросе за место байт отправляется только размер, а прочитать сам файл можно через вызов контекста get_file_part.
+Используется для ленивой загрузки больших файлов.
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Maximum size of instant file or body processing for a Post request, in bytes.
+If the size is less than this value or equal to -1, it is immediately read and sent along with the request.
+Otherwise, only the size is sent in place of bytes in the request, and the file itself can be read by calling the get_file_part context.
+Used for lazy loading of large files.
                     ]]></value>
                 </entry>
             </description>
@@ -529,15 +556,11 @@ The third context is used to get the file size, passes 1 parameter: path, receiv
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element t="VALUE" vt="LONG" v="1">
                             <description>
                                 <entry k="ru" v="Номер запроса."/>
                                 <entry k="en" v="The request number."/>
                             </description>
-                            <valueType>LONG</valueType>
-                            <value>1</value>
                         </element>
                     </elements>
                 </source>
@@ -638,21 +661,11 @@ The second context is used to get the file size, passes 1 parameter: path, recei
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element t="VALUE" vt="LONG" v="1">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Номер запроса.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The request number.</value>
-                                </entry>
+                                <entry k="ru" v="Номер запроса."/>
+                                <entry k="en" v="The request number."/>
                             </description>
-                            <valueType>LONG</valueType>
-                            <value>1</value>
                         </element>
                     </elements>
                 </source>
@@ -758,6 +771,59 @@ The second context is used to get the file size, passes 1 parameter: path, recei
             </description>
             <sources/>
             <output/>
+        </type>
+        <type t="get_file_part" minS="1" maxS="1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Читает часть файла/контекста из входного потока.
+Используется совместно с настройкой maxFileSizeFull и только если в запросе нет байтового массива.
+Принимает 3 параметра: идентификатор запроса, номер файла (с нуля), количество байт которые надо прочитать.
+Возвращает массив байт только если есть что читать. По достижении конца файла ничего не возвращает.
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Reads part of a file/context from the input stream.
+Used in conjunction with the maxFileSizeFull setting and only if the request does not contain a byte array.
+Takes 3 parameters: request ID, file number (starting with zero), number of bytes to read.
+Returns a byte array only if there is something to read. Returns nothing when the end of the file is reached.
+                    ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Номер запроса."/>
+                                <entry k="en" v="The request number."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" vt="INTEGER" v="0">
+                            <description>
+                                <entry k="ru" v="Номер файла (с нуля)."/>
+                                <entry k="en" v="File number (starting from zero)."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" vt="INTEGER" v="10">
+                            <description>
+                                <entry k="ru" v="Количество байт которые надо прочитать."/>
+                                <entry k="en" v="The number of bytes to read."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <valueType>BYTES</valueType>
+                    <value>AQIDBAU=</value>
+                </element>
+            </output>
         </type>
     </types>
 

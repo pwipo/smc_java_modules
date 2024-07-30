@@ -390,7 +390,7 @@ public class Server implements Module {
         if (errors) {
             errorText = ModuleUtils.toString(lst.poll());
             errorCode = -1;
-            if (lst.size() > 1) {
+            if (!lst.isEmpty()) {
                 IMessage message = lst.poll();
                 if (ModuleUtils.isNumber(message))
                     errorCode = ModuleUtils.getNumber(message).intValue();

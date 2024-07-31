@@ -3,6 +3,7 @@ package ru.smcsystem.modules.module;
 import org.junit.Test;
 import ru.smcsystem.api.dto.ObjectArray;
 import ru.smcsystem.api.dto.ObjectElement;
+import ru.smcsystem.api.dto.ObjectField;
 import ru.smcsystem.smc.utils.ModuleUtils;
 import ru.smcsystem.test.Process;
 import ru.smcsystem.test.emulate.*;
@@ -215,6 +216,82 @@ public class WindowHtmlTest {
 
         thread.start();
         thread.join();
+    }
+
+    @Test
+    public void testSetValueObjectArray() throws InterruptedException {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "configuration", new Value("<html>\n" +
+                                        "   <head>\n" +
+                                        " \n" +
+                                        "   </head>\n" +
+                                        "   <body>\n" +
+                                        "<select id=\"cars\">\n" +
+                                        "  <option value=\"volvo\">Volvo</option>\n" +
+                                        "  <option value=\"saab\">Saab</option>\n" +
+                                        "  <option value=\"vw\">VW</option>\n" +
+                                        "  <option value=\"audi\" selected>Audi</option>\n" +
+                                        "</select>\n" +
+                                        "   </body>\n" +
+                                        " </html>\n"),
+                                "width", new Value(300),
+                                "height", new Value(100),
+                                "title", new Value("MainForm"),
+                                "ids", new Value("")
+
+                        ),
+                        null,
+                        null
+                ),
+                new WindowHtml()
+        );
+        process.start();
+
+        Thread thread = new Thread(() -> {
+            ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(null, null, null, null, "default", "server");
+            process.execute(executionContextTool);
+            executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        });
+        thread.start();
+
+        Thread.sleep(3000);
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                List.of(List.of(new Action(List.of(new Message(new Value("cars")))))),
+                null, null, null, "default", "get_value");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        Thread.sleep(3000);
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(List.of(new Action(List.of(
+                        new Message(new Value("cars")),
+                        new Message(new Value(new ObjectArray(
+                                new ObjectElement(new ObjectField("label", "volvo1"), new ObjectField("value", new ObjectElement(new ObjectField("result", 1))), new ObjectField("selected", true)),
+                                new ObjectElement(new ObjectField("label", "saab1"), new ObjectField("value", 2)),
+                                new ObjectElement(new ObjectField("label", "vw"), new ObjectField("value", 3))
+                        )))
+                )))),
+                null, null, null, "default", "set_value");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        Thread.sleep(3000);
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(List.of(new Action(List.of(new Message(new Value("cars")))))),
+                null, null, null, "default", "get_value");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        thread.join();
+
+        process.stop();
     }
 
 }

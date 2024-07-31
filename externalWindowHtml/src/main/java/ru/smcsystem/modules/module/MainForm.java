@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MainForm {
+    // public static String ATTR_NAME_VALUE_OBJECT = "valueObject";
     private ConfigurationTool configurationTool;
     private ExecutionContextTool executionContextTool;
     private JPanel panel;
@@ -82,8 +83,11 @@ public class MainForm {
     public void prepare(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) {
         this.configurationTool = configurationTool;
         this.executionContextTool = executionContextTool;
-        if (lastCreatedElement == null)
-            lastCreatedElement = Instant.now();
+        waitCreation();
+    }
+
+    private void waitCreation() {
+        lastCreatedElement = Instant.now();
         do {
             try {
                 Thread.sleep(50);
@@ -138,10 +142,17 @@ public class MainForm {
                         ComboBoxModel<Option> model = (ComboBoxModel) m;
                         Option option = (Option) model.getSelectedItem();
                         if (option != null) {
-                            String value = option.getValue();
+                            JComboBox<Option> component = (JComboBox<Option>) e.component;
+                            Object valueObj = e.cache.get(component.getSelectedIndex()); //option.getAttributes().getAttribute(ATTR_NAME_VALUE_OBJECT);
+                            Object value = valueObj != null ? valueObj : option.getValue();
                             if (value != null) {
-                                JComboBox<Option> component = (JComboBox<Option>) e.component.getComponent(0);
-                                objectArray.add(new ObjectElement(new ObjectField("id", component.getSelectedIndex()), new ObjectField("value", value)));
+                                objectArray.add(
+                                        ModuleUtils.convertToObjectElement(
+                                                new OptionElement(component.getSelectedIndex(),
+                                                        Objects.requireNonNullElse(option.getLabel(), ""),
+                                                        value,
+                                                        true),
+                                                true));
                             }
                         }
                         // return component.getSelectedItem() != null ? java.util.List.of(component.getSelectedIndex(), component.getSelectedItem()) : -1;
@@ -153,7 +164,20 @@ public class MainForm {
                                 // .filter(model::isSelectedIndex)
                                 .mapToObj(i -> new AbstractMap.SimpleEntry<>(i, model2.getElementAt(i)))
                                 .filter(e2 -> e2.getValue() != null && e2.getValue().getValue() != null)
-                                .map(e2 -> new ObjectElement(new ObjectField("id", e2.getKey()), new ObjectField("value", e2.getValue().getValue())))
+                                .map(e2 -> {
+                                    Object valueObj = e.cache.get(e2.getKey()); //e2.getValue().getAttributes().getAttribute(ATTR_NAME_VALUE_OBJECT);
+                                    if (valueObj == null)
+                                        valueObj = e2.getValue().getValue();
+                                    if (valueObj == null)
+                                        return null;
+                                    return ModuleUtils.convertToObjectElement(
+                                            new OptionElement(e2.getKey(),
+                                                    Objects.requireNonNullElse(e2.getValue().getLabel(), ""),
+                                                    valueObj,
+                                                    true),
+                                            true);
+                                })
+                                .filter(Objects::nonNull)
                                 .forEach(objectArray::add);
                         // return component.getSelectedIndex() > -1 ? java.util.List.of(component.getSelectedIndex(), component.getSelectedValue()) : -1;
                     }
@@ -258,6 +282,32 @@ public class MainForm {
                     if (value instanceof Number) {
                         Option option = model.getElementAt(((Number) value).intValue());
                         model.setSelectedItem(option);
+                    } else if (value instanceof ObjectArray) {
+                        ObjectArray objectArray = (ObjectArray) value;
+                        List<OptionElement> optionElements = ModuleUtils.convertFromObjectArray(objectArray, OptionElement.class, true, true);
+                        List<String> htmlList = new ArrayList<>();
+                        for (int i = 0; i < optionElements.size(); i++) {
+                            OptionElement o = optionElements.get(i);
+                            o.setId(i);
+                            htmlList.add(o.toHtml());
+                        }
+                        // setInnerHtml(id, String.join("\n", htmlList));
+                        getElement(id).ifPresent(s -> {
+                            String start = s.split(">")[0];
+                            setElement(id, start + ">\n" + String.join("\n", htmlList) + "\n</select>");
+                            waitCreation();
+                            FormElement e2 = findElement(id, "setValue");
+                            if (e2 != null) {
+                                // e2.cache.clear();
+                                int size = optionElements.size(); //Math.min(model.getSize(), optionElements.size());
+                                for (int i = 0; i < size; i++) {
+                                    // Option elementAt = model.getElementAt(i);
+                                    OptionElement o = optionElements.get(i);
+                                    // ((MutableAttributeSet) elementAt.getAttributes()).addAttribute(ATTR_NAME_VALUE_OBJECT, o.getValue());
+                                    e2.cache.put(i, o.getValue());
+                                }
+                            }
+                        });
                     } else {
                         String valueString = value != null ? value.toString() : "";
                         for (int i = 0; i < model.getSize(); i++) {
@@ -274,6 +324,32 @@ public class MainForm {
                     if (value instanceof Number) {
                         int i = ((Number) value).intValue();
                         model.setSelectionInterval(i, i);
+                    } else if (value instanceof ObjectArray) {
+                        ObjectArray objectArray = (ObjectArray) value;
+                        List<OptionElement> optionElements = ModuleUtils.convertFromObjectArray(objectArray, OptionElement.class, true, true);
+                        List<String> htmlList = new ArrayList<>();
+                        for (int i = 0; i < optionElements.size(); i++) {
+                            OptionElement o = optionElements.get(i);
+                            o.setId(i);
+                            htmlList.add(o.toHtml());
+                        }
+                        // setInnerHtml(id, String.join("\n", htmlList));
+                        getElement(id).ifPresent(s -> {
+                            String start = s.split(">")[0];
+                            setElement(id, start + ">\n" + String.join("\n", htmlList) + "\n</select>");
+                            waitCreation();
+                            FormElement e2 = findElement(id, "setValue");
+                            if (e2 != null) {
+                                // e2.cache.clear();
+                                int size = optionElements.size(); //Math.min(model2.getSize(), optionElements.size());
+                                for (int i = 0; i < size; i++) {
+                                    // Option elementAt = model2.getElementAt(i);
+                                    OptionElement o = optionElements.get(i);
+                                    // ((MutableAttributeSet) elementAt.getAttributes()).addAttribute(ATTR_NAME_VALUE_OBJECT, o.getValue());
+                                    e2.cache.put(i, o.getValue());
+                                }
+                            }
+                        });
                     } else {
                         String valueString = value != null ? value.toString() : "";
                         for (int i = 0; i < model2.getSize(); i++) {
@@ -535,17 +611,18 @@ public class MainForm {
 
     /*
     public void clearChilds(String id) {
-        FormElement e = findElement(id);
+        FormElement e = findElement(id, "clearChilds");
         if (e == null)
             return;
         ExtendedHTMLDocument document = (ExtendedHTMLDocument) e.element.getDocument();
-        if(e.element.getElementCount()>0) {
+        if (e.element.getElementCount() > 0) {
             try {
-                for (int i = e.element.getElementCount() - 1; i >= 0; i--) {
-                    document.removeElement(e.element.getElement(i));
-                    //Element element = e.element.getElement(i);
-                    //document.remove(element.getStartOffset(), element.getEndOffset() - element.getStartOffset());
-                }
+                List<Element> list = new ArrayList<>(e.element.getElementCount());
+                for (int i = e.element.getElementCount() - 1; i >= 0; i--)
+                    list.add(e.element.getElement(i));
+                list.forEach(document::removeElement);
+                //Element element = e.element.getElement(i);
+                //document.remove(element.getStartOffset(), element.getEndOffset() - element.getStartOffset());
                 // Element elementFirst = e.element.getElement(0);
                 // Element elementLast = e.element.getElement(0);
             } catch (Exception ignore) {
@@ -573,6 +650,21 @@ public class MainForm {
         MutableAttributeSet attributeSet = new SimpleAttributeSet();
         attributeSet.addAttribute(name, value);
         doc.setCharacterAttributes(element.getStartOffset(), element.getEndOffset() - element.getStartOffset(), attributeSet, false);
+    }
+
+    public void setInnerHtml(String id, String html) {
+        FormElement e = findElement(id, "setInnerHtml");
+        if (e == null || html == null)
+            return;
+        configurationTool.loggerTrace("setInnerHtml " + id);
+        ExtendedHTMLDocument document = (ExtendedHTMLDocument) e.element.getDocument();
+        try {
+            document.setInnerHTML(e.element, html);
+            Integer ecId = elementsToEcId.get(id);
+            if (ecId != null)
+                addEC(id, ecId);
+        } catch (Exception ignore) {
+        }
     }
 
     private void processEcCallWithData(String id, int ecId) {

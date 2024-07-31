@@ -37,7 +37,9 @@ class CompView extends FormView {
         if (id == null && (t == HTML.Tag.INPUT) ||
                 (t == HTML.Tag.SELECT) ||
                 (t == HTML.Tag.TEXTAREA)) {
-            id = (String) attrs.getAttribute(HTML.Attribute.NAME);
+            String name = (String) attrs.getAttribute(HTML.Attribute.NAME);
+            if (name != null)
+                id = name;
         }
         if (id != null && !mainForm.elements.containsKey(id)) {
             MainForm.ElementType elementType;

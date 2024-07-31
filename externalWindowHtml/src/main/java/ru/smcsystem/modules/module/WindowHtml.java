@@ -16,7 +16,7 @@ public class WindowHtml implements Module {
     private MainForm mainForm;
 
     private enum OperationType {
-        SERVER, GET_VALUE, SET_VALUE, GET_ELEMENT, SET_ELEMENT, SET_ATTRIBUTE, COUNT_CHILDS, ADD_CHILD_ELEMENT, REMOVE_CHILD_ELEMENT, SET_CHILD_ATTRIBUTE, SET_POSITION
+        SERVER, GET_VALUE, SET_VALUE, GET_ELEMENT, SET_ELEMENT, SET_ATTRIBUTE, COUNT_CHILDS, ADD_CHILD_ELEMENT, REMOVE_CHILD_ELEMENT, SET_CHILD_ATTRIBUTE, SET_POSITION, SET_INNER_HTML
     }
 
     private String configuration;
@@ -48,7 +48,7 @@ public class WindowHtml implements Module {
             executionContextTool.addError("window not exist");
             return;
         }
-        OperationType operationType = OperationType.valueOf(executionContextTool.getType());
+        OperationType operationType = OperationType.valueOf(executionContextTool.getType().toUpperCase());
         if (operationType != OperationType.SERVER && !mainForm.frame.isVisible()) {
             executionContextTool.addError("window not started");
             return;
@@ -140,6 +140,12 @@ public class WindowHtml implements Module {
                                 // mainForm.scrollPane.scrollRectToVisible(new Rectangle(0, positionTmp, 1, 1));
                                 mainForm.editorPane.setCaretPosition(positionTmp);
                             }));
+                    break;
+
+                case SET_INNER_HTML:
+                    Optional.ofNullable(ModuleUtils.getString(messages.get(0).poll()))
+                            .ifPresent(idStr -> SwingUtilities.invokeLater(() ->
+                                    mainForm.setInnerHtml(idStr, ModuleUtils.getString(messages.get(0).poll()))));
                     break;
             }
         });

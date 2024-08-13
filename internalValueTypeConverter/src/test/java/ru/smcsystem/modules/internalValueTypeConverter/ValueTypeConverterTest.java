@@ -1072,6 +1072,10 @@ public class ValueTypeConverterTest {
                                                         "        <module>GoogleSheets , 1.5.1</module>\n" +
                                                         "        <module>ValueTransformer , 1.1.0</module>\n" +
                                                         "    </requiredModules>" +
+                                                        "    <description>\n" +
+                                                        "        <entry k=\"ru\" v=\"Найти приложения по параметрам.\"/>\n" +
+                                                        "        <entry k=\"en\" v=\"Найти приложения по параметрам2.\"/>\n" +
+                                                        "    </description>" +
                                                         "</company>"))
                                         ),
                                         ActionType.EXECUTE

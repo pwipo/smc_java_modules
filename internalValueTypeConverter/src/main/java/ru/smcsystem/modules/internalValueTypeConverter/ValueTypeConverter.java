@@ -1000,17 +1000,24 @@ public class ValueTypeConverter implements Module {
                     }
                 }
             }
-            if (!childElements.isEmpty()) {
+            List<ObjectField> fields = new LinkedList<>();
+            NamedNodeMap attributes = element.getAttributes();
+            if (attributes != null && attributes.getLength() > 1) {
+                for (int i = 0; i < attributes.getLength(); i++) {
+                    Node item = attributes.item(i);
+                    fields.add(new ObjectField(item.getNodeName(), item.getNodeValue()));
+                }
+            }
+            if (!childElements.isEmpty() || !fields.isEmpty()) {
                 ObjectElement objectElement = fromXMLSimple(childElements);
                 if (objectElement.getFields().size() > 1) {
                     String nameField = objectElement.getFields().get(0).getName();
                     ObjectType typeField = objectElement.getFields().get(0).getType();
-                    if (objectElement.getFields().stream().allMatch(f -> Objects.equals(f.getName(), nameField) && f.getType() == typeField)) {
+                    if (objectElement.getFields().stream().allMatch(f -> Objects.equals(f.getName(), nameField) && f.getType() == typeField))
                         objectField.setValue(new ObjectArray(objectElement.getFields().stream().map(ObjectField::getValue).collect(Collectors.toList()), typeField));
-                    } else {
-                        objectField.setValue(objectElement);
-                    }
-                } else {
+                }
+                if (objectField.getValue() == null) {
+                    objectElement.getFields().addAll(fields);
                     objectField.setValue(objectElement);
                 }
             } else {

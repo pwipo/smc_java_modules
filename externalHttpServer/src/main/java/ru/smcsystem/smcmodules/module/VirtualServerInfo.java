@@ -18,7 +18,7 @@ public class VirtualServerInfo {
     private final String keyAlias;
     private final String keyPass;
     private final InetAddress address;
-    private final Map<Integer, Pattern> patterns;
+    private final List<Map.Entry<Integer, Pattern>> patterns;
     private final Host host;
     private final Integer requestTimeout;
     private final Integer countThreads;
@@ -31,7 +31,7 @@ public class VirtualServerInfo {
     private Integer maxFileSizeFull;
 
     public VirtualServerInfo(String urlHeader, URL url, File keyStore, String keyStorePass, String keyAlias, String keyPass,
-                             InetAddress address, Map<Integer, Pattern> patterns, Integer requestTimeout, Integer countThreads,
+                             InetAddress address, List<Map.Entry<Integer, Pattern>> patterns, Integer requestTimeout, Integer countThreads,
                              Integer backlog, Integer sessionTimeout, Integer maxPostSize, Boolean allowMultipartParsing,
                              List<String> headers, Server.RequestType requestType, Integer maxFileSizeFull) {
         this.urlHeader = urlHeader;
@@ -50,6 +50,7 @@ public class VirtualServerInfo {
         this.allowMultipartParsing = allowMultipartParsing;
         this.host = new StandardHost();
         host.setName(url.getHost());
+        host.setAppBase(url.getProtocol() + "_" + url.getHost() + "_" + url.getPort());
         this.headers = headers;
         this.requestType = requestType;
         this.maxFileSizeFull = maxFileSizeFull;
@@ -83,7 +84,7 @@ public class VirtualServerInfo {
         return address;
     }
 
-    public Map<Integer, Pattern> getPatterns() {
+    public List<Map.Entry<Integer, Pattern>> getPatterns() {
         return patterns;
     }
 

@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Server</className>
-    <ver>1.4.1</ver>
+    <ver>1.4.2</ver>
     <apiVer>1.4.0</apiVer>
     <date>22-10-2023</date>
 
@@ -119,14 +119,16 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>en</key>
-                    <value><![CDATA[defines a list of available addresses. only they are answered, otherwise it returns 404. if empty, then all sites are accepted.
-if VIRTUAL is selected, protocol, host, and port must be specified for each path, for example: http://localhost:8080/.* . if they are not specified, then this path will be applied to the first server.
+                    <value><![CDATA[Defines a list of available addresses. Only these are responded to, otherwise 404 is returned. If empty, all sites are accepted.
+If VIRTUAL is selected, the protocol, host, and port must be specified for each path, for example: http://localhost:8080^/.*, where http://localhost:8080 identifies the virtual host, and ^/.* is a regular expression.
+If they are not specified, this path will be applied to the first server.
                     ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value><![CDATA[определяет список доступных адресов. только на них происходит ответ, иначе возвращает 404. если пуст - то принимаются все сайты.
-если выбран VIRTUAL, для каждого пути надо указывать протокол, хост и порт, например: http://localhost:8080/.* . если они не указаны, то этот путь будет применен к первому серверу.
+                    <value><![CDATA[Определяет список доступных адресов. Только на них происходит ответ, иначе возвращает 404. Если пуст - то принимаются все сайты.
+Если выбран VIRTUAL, для каждого пути надо указывать протокол, хост и порт, например: http://localhost:8080^/.*, тут http://localhost:8080 - идентифицирует виртуальный хост, а ^/.* - регулярное выражение.
+Если они не указаны, то этот путь будет применен к первому серверу.
                     ]]></value>
                 </entry>
             </description>

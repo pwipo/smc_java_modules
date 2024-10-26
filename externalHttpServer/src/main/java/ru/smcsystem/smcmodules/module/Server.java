@@ -136,15 +136,15 @@ public class Server implements Module {
                     throw new ModuleException("error", e);
                 }
                 String urlHeader = String.format("%s://%s:%d", url.getProtocol(), url.getHost(), url.getPort());
-                Map<Integer, String> paths = new HashMap<>();
+                List<Map.Entry<Integer, String>> paths = new LinkedList<>();
                 for (int j = 0; j < availablePathsList.size(); j++) {
                     String path = availablePathsList.get(j);
                     if (path.isBlank())
                         continue;
                     if (i == 0 && (path.startsWith("/") || path.startsWith("^/") || !path.toUpperCase().startsWith("HTTP"))) {
-                        paths.put(j, path);
+                        paths.add(Map.entry(j, path));
                     } else if (path.toUpperCase().startsWith(urlHeader.toUpperCase())) {
-                        paths.put(j, path.substring(urlHeader.length()));
+                        paths.add(Map.entry(j, path.substring(urlHeader.length())));
                     }
                 }
                 VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, urlHeader, url, keyStoreFileNameVar, keyStorePassVar,
@@ -155,10 +155,10 @@ public class Server implements Module {
         } else {
             String hostname = "localhost";
             try {
-                Map<Integer, String> paths = new HashMap<>();
+                List<Map.Entry<Integer, String>> paths = new LinkedList<>();
                 Stream.iterate(0, n -> n + 1)
                         .limit(availablePathsList.size())
-                        .forEach(id -> paths.put(id, availablePathsList.get(id)));
+                        .forEach(id -> paths.add(Map.entry(id, availablePathsList.get(id))));
                 VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, hostname, new URL(protocol.name().toLowerCase(), hostname, port, ""),
                         keyStoreFileName, keyStorePass, keyAlias, keyPass, strAddress, paths, requestTimeout, countThreads, backlog, sessionTimeout,
                         maxPostSize, allowMultipartParsing, headersArr, requestType, maxFileSizeFull);
@@ -192,7 +192,7 @@ public class Server implements Module {
 
     private VirtualServerInfo buildVirtualInfo(ConfigurationTool externalConfigurationTool, String urlOrigin, URL url,
                                                String keyStoreFileName, String keyStorePass, String keyAlias, String keyPass,
-                                               String strAddress, Map<Integer, String> paths, Integer requestTimeout, Integer countThreads,
+                                               String strAddress, List<Map.Entry<Integer, String>> paths, Integer requestTimeout, Integer countThreads,
                                                Integer backlog, Integer sessionTimeout, Integer maxPostSize, Boolean allowMultipartParsing,
                                                ObjectArray headersArr, RequestType requestTypeVar, Integer maxFileSizeFullVar) {
         File keyStore = null;
@@ -208,11 +208,12 @@ public class Server implements Module {
         } catch (UnknownHostException e) {
             throw new ModuleException("wrong bindAddress");
         }
-        Map<Integer, Pattern> patterns = null;
+        List<Map.Entry<Integer, Pattern>> patterns = null;
         if (paths != null && !paths.isEmpty()) {
-            patterns = paths.entrySet().stream()
+            patterns = paths.stream()
                     .filter(e -> StringUtils.isNotBlank(e.getValue()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> Pattern.compile(e.getValue())));
+                    .map(e -> Map.entry(e.getKey(), Pattern.compile(e.getValue())))
+                    .collect(Collectors.toList());
         }
         List<String> headers = null;
         if (headersArr != null && headersArr.size() > 0 && headersArr.isSimple()) {
@@ -574,8 +575,11 @@ public class Server implements Module {
         reqIdGenerator = null;
     }
 
-    private void addServlet(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, VirtualServerInfo virtualServerInfo, Method createDefaultRealm) throws InvocationTargetException, IllegalAccessException {
+    private void addServlet(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, List<VirtualServerInfo> virtualServerInfos, Method createDefaultRealm) throws InvocationTargetException, IllegalAccessException {
+        if (virtualServerInfos == null || virtualServerInfos.isEmpty())
+            return;
         Connector connector = null;
+        VirtualServerInfo virtualServerInfo = virtualServerInfos.get(0);
         Protocol protocolLocal = protocol == Protocol.VIRTUAL ? Protocol.valueOf(virtualServerInfo.getUrl().getProtocol().toUpperCase()) : protocol;
         switch (protocolLocal) {
             case HTTP: {
@@ -629,7 +633,6 @@ public class Server implements Module {
         String servletName = "servlet-" + virtualServerInfo.getUrlHeader();
 
         int countManagedExecutionContexts = externalExecutionContextTool.getFlowControlTool().countManagedExecutionContexts();
-        Set<Map.Entry<Integer, Pattern>> patternEntries = virtualServerInfo.getPatterns() != null ? virtualServerInfo.getPatterns().entrySet() : null;
         HttpServlet servlet = new HttpServlet() {
             protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
                 ResponseObj responseObj = null;
@@ -638,21 +641,32 @@ public class Server implements Module {
                 try {
                     // req.getSession().setMaxInactiveInterval(requestTimeout);
                     // System.out.println(req.getSession().getMaxInactiveInterval());
+                    VirtualServerInfo virtualServerInfoCur = virtualServerInfos.size() > 1 ?
+                            virtualServerInfos.stream()
+                                    .filter(s -> s.getHost().getName().equals(req.getServerName()))
+                                    .findAny()
+                                    .orElse(null) :
+                            virtualServerInfo;
                     List<Integer> idsForExecute = null;
-                    if (patternEntries != null) {
-                        String s = req.getRequestURI();
-                        idsForExecute = patternEntries.stream()
-                                .filter(e -> e.getValue().matcher(s).find())
-                                .filter(e -> e.getKey() < countManagedExecutionContexts)
-                                .map(e -> List.of(e.getKey()))
-                                .findAny().orElse(null);
-                    } else {
-                        idsForExecute = Stream.iterate(0, n -> n + 1)
-                                .limit(countManagedExecutionContexts)
-                                .collect(Collectors.toList());
+                    if (virtualServerInfoCur != null) {
+                        if (virtualServerInfoCur.getPatterns() != null && !virtualServerInfoCur.getPatterns().isEmpty()) {
+                            String s = req.getRequestURI();
+                            idsForExecute = virtualServerInfoCur.getPatterns().stream()
+                                    .filter(e -> e.getValue().matcher(s).find())
+                                    .filter(e -> e.getKey() < countManagedExecutionContexts)
+                                    .map(e -> List.of(e.getKey()))
+                                    .findFirst()
+                                    .orElse(null);
+                        } else {
+                            // for compatibility
+                            idsForExecute = Stream.iterate(0, n -> n + 1)
+                                    .limit(countManagedExecutionContexts)
+                                    .collect(Collectors.toList());
+                        }
                     }
                     if (idsForExecute == null) {
                         responseObj = new ResponseObj(null, 404, null, "Page not found".getBytes(), null, null, 1);
+                        handleResponse(resp, responseObj, virtualServerInfo.getHeaders());
                         return;
                     }
                     int idForGetResponse = idsForExecute.get(idsForExecute.size() - 1);
@@ -760,7 +774,11 @@ public class Server implements Module {
             Method createDefaultRealm = Tomcat.class.getDeclaredMethod("createDefaultRealm");
             createDefaultRealm.setAccessible(true);
 
-            virtualServerInfoMap.values().forEach(v -> {
+            Map<Integer, List<VirtualServerInfo>> serversList = new HashMap<>();
+            List<VirtualServerInfo> servers = new ArrayList<>(virtualServerInfoMap.values());
+            for (VirtualServerInfo virtualServerInfo : servers)
+                serversList.computeIfAbsent(virtualServerInfo.getUrl().getPort(), k -> new ArrayList<>()).add(virtualServerInfo);
+            serversList.forEach((k, v) -> {
                 try {
                     addServlet(externalConfigurationTool, externalExecutionContextTool, v, createDefaultRealm);
                 } catch (Exception e) {

@@ -34,6 +34,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ServerTest {
+    private static final String WORK_DIR = "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys";
 
     @Test
     public void process() {
@@ -211,7 +212,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
+                        WORK_DIR
                 ),
                 new Server()
         );
@@ -283,7 +284,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
+                        WORK_DIR
                 ),
                 new Server()
         );
@@ -411,7 +412,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
+                        WORK_DIR
                 ),
                 new Server()
         );
@@ -536,7 +537,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
+                        WORK_DIR
                 ),
                 new Server()
         );
@@ -640,7 +641,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
+                        WORK_DIR
                 ),
                 new Server()
         );
@@ -820,7 +821,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
+                        WORK_DIR
                 ),
                 new Server()
         );
@@ -904,7 +905,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        "C:\\Users\\user\\Documents\\tmp\\WebServer\\old\\keys"
+                        WORK_DIR
                 ),
                 new Server()
         );
@@ -999,6 +1000,149 @@ public class ServerTest {
         byte[] result = executionContextToolFastResp.getOutput().stream().filter(ModuleUtils::isBytes).map(ModuleUtils::getBytes).findAny().orElse(null);
         executionContextToolFastResp.getOutput().clear();
         return result;
+    }
+
+    @Test
+    public void processVirtMultipl() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+        Map<String, IValue> settings = new HashMap<>(Map.of(
+                "port", new Value(8080),
+                "requestTimeout", new Value(20000),
+                "countThreads", new Value(10),
+                "backlog", new Value(0),
+                // "mode", new Value(ValueType.STRING, "PASSIVE"),
+                "protocol", new Value("VIRTUAL"),
+                "availablePaths", new Value("https://service.smcsystem.ru:443^/service/store/.*::https://www.smcsystem.ru:443^/.*::http://www.smcsystem.ru:80^/.*"),
+                "keyStoreFileName", new Value(""),
+                "keyStorePass", new Value(""),
+                "keyPass", new Value(""),
+                "keyAlias", new Value("")
+        ));
+        settings.put("bindAddress", new Value(""));
+        settings.put("sessionTimeout", new Value(30));
+        settings.put("maxPostSize", new Value(10485760));
+        settings.put("allowMultipartParsing", new Value("true"));
+        settings.put("requestType", new Value("OBJECT"));
+        settings.put("virtualServerSettings", new Value(new ObjectArray(
+                new ObjectElement(
+                        new ObjectField("protocol", "HTTP")
+                        , new ObjectField("hostname", "www.smcsystem.ru")
+                        , new ObjectField("port", 80)
+                        , new ObjectField("keyStoreFileName", "")
+                        , new ObjectField("keyStorePass", "")
+                        , new ObjectField("keyAlias", "")
+                        , new ObjectField("keyPass", "")
+                        , new ObjectField("bindAddress", "")
+                        , new ObjectField("requestTimeout", 20000)
+                        , new ObjectField("countThreads", 10)
+                        , new ObjectField("backlog", 0)
+                        , new ObjectField("sessionTimeout", 30)
+                        , new ObjectField("maxPostSize", 10485760)
+                        , new ObjectField("allowMultipartParsing", "false")
+                ),
+                new ObjectElement(
+                        new ObjectField("protocol", "HTTPS")
+                        , new ObjectField("hostname", "service.smcsystem.ru")
+                        , new ObjectField("port", 443)
+                        , new ObjectField("keyStoreFileName", "lig2.keystore")
+                        , new ObjectField("keyStorePass", "simulator")
+                        , new ObjectField("keyPass", "simulator")
+                        , new ObjectField("keyAlias", "self_signed")
+                        , new ObjectField("bindAddress", "")
+                )
+                ,
+                new ObjectElement(
+                        new ObjectField("protocol", "HTTPS")
+                        , new ObjectField("hostname", "www.smcsystem.ru")
+                        , new ObjectField("port", 443)
+                        , new ObjectField("keyStoreFileName", "lig2.keystore")
+                        , new ObjectField("keyStorePass", "simulator")
+                        , new ObjectField("keyPass", "simulator")
+                        , new ObjectField("keyAlias", "self_signed")
+                        , new ObjectField("bindAddress", "")
+                )
+        )));
+        settings.put("fileResponsePieceSize", new Value(1048576));
+        settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
+        settings.put("maxFileSizeFull", new Value(5));
+
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        settings,
+                        null,
+                        WORK_DIR
+                ),
+                new Server()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                null,
+                null,
+                null,
+                List.of(
+                        list -> {
+                            System.out.println("func1");
+                            System.out.println(list);
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(200))
+                                            , new Message(MessageType.DATA, new Date(), new Value("hi".getBytes()))
+                                    ),
+                                    ActionType.EXECUTE);
+                        },
+                        list -> {
+                            System.out.println("func2");
+                            System.out.println(list);
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(200))
+                                            , new Message(MessageType.DATA, new Date(), new Value("test".getBytes()))
+                                    ),
+                                    ActionType.EXECUTE);
+                        },
+                        list -> {
+                            System.out.println("func3");
+                            System.out.println(list);
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(200))
+                                            , new Message(MessageType.DATA, new Date(), new Value("store".getBytes()))
+                                    ),
+                                    ActionType.EXECUTE);
+                        }
+                )
+        );
+
+        Thread thread = new Thread(() -> {
+            process.execute(executionContextTool);
+        });
+        thread.start();
+
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create()
+                .setSSLSocketFactory(new SSLConnectionSocketFactory(
+                                SSLContexts.custom()
+                                        .loadTrustMaterial(null, new TrustSelfSignedStrategy())
+                                        .build()
+                                , NoopHostnameVerifier.INSTANCE
+                        )
+                );
+        // .setConnectionReuseStrategy(NoConnectionReuseStrategy.INSTANCE);
+
+        Thread.sleep(1000);
+
+        System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "http://www.smcsystem.ru/hello"));
+        System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "https://www.smcsystem.ru/test"));
+        System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "https://service.smcsystem.ru/service/store/hello"));
+
+        ExecutionContextToolImpl executionContextTool2 = new ExecutionContextToolImpl(null, null, null);
+        process.execute(executionContextTool2);
+
+        thread.join();
+
+        process.stop();
     }
 
 

@@ -21,53 +21,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Get implements Module {
-    enum ProcessingType {
-        EACH_ACTION,
-        EACH_SOURCE,
-        ALL
-    }
-
+    private static final Pattern base64 = Pattern.compile("^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$");
     private ProcessingType processingType;
-
-    enum Type {
-        WORK_DATA,
-        DATA,
-        ERROR,
-        DATA_AND_ERROR,
-        ALL,
-        RANDOM,
-        SOURCE_ID,
-        SOURCE_ID_EMPTY_OR_ERRORS
-    }
-
     private Type type;
-
-    enum ValueTypes {
-        ALL,
-        STRING,
-        BYTE,
-        SHORT,
-        INTEGER,
-        LONG,
-        BIG_INTEGER,
-        FLOAT,
-        DOUBLE,
-        BIG_DECIMAL,
-        BYTES,
-        NUMBER,
-        BYTES_SIZE
-    }
-
-    enum DefaultValueType {
-        STATIC,
-        DYNAMIC
-    }
-
     private ValueTypes valueType;
     private List<List<Integer>> elementIds;
     private DefaultValueType defaultValueType;
     private List<Object> defaultValues;
-    private Pattern base64;
     private Boolean outputErrorAsData;
 
     @Override
@@ -98,11 +58,10 @@ public class Get implements Module {
                 elementIds.add(ids);
             }
         }
-        base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
         defaultValues = new ArrayList<>();
         if (StringUtils.isNotBlank(defaultValuesStr)) {
             for (String element : defaultValuesStr.split("::"))
-                defaultValues.add(DefaultValueType.STATIC.equals(defaultValueType) ? fromString(element, base64) : NumberUtils.toInt(element));
+                defaultValues.add(DefaultValueType.STATIC.equals(defaultValueType) ? fromString(element) : NumberUtils.toInt(element));
         }
     }
 
@@ -355,7 +314,7 @@ public class Get implements Module {
         return false;
     }
 
-    private Object fromString(String value, Pattern base64) {
+    private Object fromString(String value) {
         Object result;
         if (NumberUtils.isNumber(value)) {
             if (!StringUtils.contains(value, ".")) {
@@ -365,7 +324,7 @@ public class Get implements Module {
             }
 
         } else {
-            if (base64.matcher(value).find()) {
+            if (StringUtils.length(value) >= 2 && !value.isBlank() && (value.endsWith("=") || value.length() > 50) && base64.matcher(value).find()) {
                 try {
                     result = Base64.getDecoder().decode(value);
                 } catch (Exception e) {
@@ -386,7 +345,44 @@ public class Get implements Module {
         type = null;
         valueType = null;
         defaultValues = null;
-        base64 = null;
+    }
+
+    enum ProcessingType {
+        EACH_ACTION,
+        EACH_SOURCE,
+        ALL
+    }
+
+    enum Type {
+        WORK_DATA,
+        DATA,
+        ERROR,
+        DATA_AND_ERROR,
+        ALL,
+        RANDOM,
+        SOURCE_ID,
+        SOURCE_ID_EMPTY_OR_ERRORS
+    }
+
+    enum ValueTypes {
+        ALL,
+        STRING,
+        BYTE,
+        SHORT,
+        INTEGER,
+        LONG,
+        BIG_INTEGER,
+        FLOAT,
+        DOUBLE,
+        BIG_DECIMAL,
+        BYTES,
+        NUMBER,
+        BYTES_SIZE
+    }
+
+    enum DefaultValueType {
+        STATIC,
+        DYNAMIC
     }
 
 }

@@ -7,7 +7,7 @@
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
     <className>ru.smcsystem.smcmodules.module.PrintValue</className>
-    <ver>1.2.0</ver>
+    <ver>1.2.1</ver>
     <apiVer>1.4.0</apiVer>
     <date>22-10-2023</date>
     <categories>Java, Utils</categories>

@@ -13,15 +13,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ValueTransformer implements Module {
-
+    private static final Pattern base64 = Pattern.compile("^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$");
     private List<Entity> entities;
-    private Pattern base64;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
         String configMap = (String) configurationTool.getSetting("config").orElseThrow(() -> new ModuleException("config setting")).getValue();
-
-        base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
 
         entities = Arrays.stream(configMap.stripTrailing().split("\\R"))
                 .map(s -> s.split("::"))
@@ -73,7 +70,6 @@ public class ValueTransformer implements Module {
     @Override
     public void stop(ConfigurationTool configurationTool) throws ModuleException {
         entities = null;
-        base64 = null;
     }
 
     private Object autoConvert(String value) {
@@ -86,7 +82,7 @@ public class ValueTransformer implements Module {
             }
 
         } else {
-            if (base64.matcher(value).find()) {
+            if (StringUtils.length(value) >= 2 && !value.isBlank() && (value.endsWith("=") || value.length() > 50) && base64.matcher(value).find()) {
                 try {
                     result = Base64.getDecoder().decode(value);
                 } catch (Exception e) {

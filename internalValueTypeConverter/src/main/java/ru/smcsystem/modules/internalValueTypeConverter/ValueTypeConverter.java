@@ -37,58 +37,35 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ValueTypeConverter implements Module {
-    private static final Pattern base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
-    private Type type;
-    // private String charsetName;
-    private String param;
-    private Long lParam;
-    private List<String> strings;
-
+    private static final Pattern base64 = Pattern.compile("^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$");
     // private String start;
     // private String end;
     private final static String OBJECT_FILED_NAME_NAME = "name";
     private final static String OBJECT_FILED_NAME_VALUE = "value";
     private final static String OBJECT_FILED_VALUE_VALUE_EMPTY = " ";
     private final static String OBJECT_FILED_NAME_CHILD_NODES = "childNodes";
-
-    private enum Type {
-        bytesToNumbers,
-        numbersToBytes,
-        stringToLong,
-        stringToDouble,
-        numberToString,
-        bytesToString,
-        stringToBytes,
-        toJSONArrayString,
-        fromJSONArrayString,
-        auto,
-        fromCsvToValues,
-        fromValuesToCsv,
-        toJSONObjectString,
-        toLong,
-        fromXml,
-        toXml,
-        fromJSONObjectString,
-        toString,
-        base64ToBytes,
-        bytesToBase64,
-        listToObjectArray,
-        objectArrayToList,
-        stringToNumberOrOrigin,
-        objectArrayToMessages,
-        messagesToObjectArray,
-        objectArrayValuesToList,
-        fromJSONArrayStringNew,
-        fromJSONObjectStringNew,
-        fromXmlSimple,
-        toXmlSimple,
-        autoNew,
-        toBoolean,
-        fromCsvToValuesNew
-    }
-
+    private Type type;
+    // private String charsetName;
+    private String param;
+    private Long lParam;
+    private List<String> strings;
     private Charset charset;
+
+    public static ObjectType getSimpleType(List<Object> objects) {
+        ObjectType newType = null;
+        for (int i = 0; i < objects.size(); i++) {
+            Object o = objects.get(i);
+            newType = checkType(newType, ObjectType.valueOf(ModuleUtils.getValueTypeObject(o).name()));
+            if (newType == null)
+                break;
+        }
+        return newType != null ? newType : ObjectType.VALUE_ANY;
+    }
     // private LinkedHashMap<String, ObjectArray> objectArrayCache;
+
+    public static ObjectType checkType(ObjectType newType, ObjectType typeForCheck) {
+        return newType != null && !typeForCheck.equals(newType) ? null : typeForCheck;
+    }
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -427,44 +404,6 @@ public class ValueTypeConverter implements Module {
         return forceArray ? jsonArray : (jsonArray.length() == 1 ? jsonArray.get(0) : jsonArray);
     }
 
-    private JSONObject toJson(ObjectElement objectElement, boolean forceArray) {
-        JSONObject jsonObject = new JSONObject();
-        if (objectElement == null)
-            return jsonObject;
-        objectElement.getFields().forEach(objectField -> {
-            String name = objectField.getName();
-            if (objectField.getValue() != null && objectField.getType() != null) {
-                switch (objectField.getType()) {
-                    case OBJECT_ARRAY:
-                        jsonObject.put(name, toJson((ObjectArray) objectField.getValue(), forceArray));
-                        break;
-                    case OBJECT_ELEMENT:
-                        jsonObject.put(name, toJson((ObjectElement) objectField.getValue(), forceArray));
-                        break;
-                    case VALUE_ANY:
-                    case STRING:
-                    case BYTE:
-                    case SHORT:
-                    case INTEGER:
-                    case LONG:
-                    case FLOAT:
-                    case DOUBLE:
-                    case BIG_INTEGER:
-                    case BIG_DECIMAL:
-                    case BOOLEAN:
-                        jsonObject.put(name, objectField.getValue());
-                        break;
-                    case BYTES:
-                        jsonObject.put(name, objectField.getValue() != null ? Base64.getEncoder().encodeToString((byte[]) objectField.getValue()) : null);
-                        break;
-                }
-            } else {
-                jsonObject.put(name, JSONObject.NULL);
-            }
-        });
-        return jsonObject;
-    }
-
 
 
     /*
@@ -526,6 +465,44 @@ public class ValueTypeConverter implements Module {
     }
     */
 
+    private JSONObject toJson(ObjectElement objectElement, boolean forceArray) {
+        JSONObject jsonObject = new JSONObject();
+        if (objectElement == null)
+            return jsonObject;
+        objectElement.getFields().forEach(objectField -> {
+            String name = objectField.getName();
+            if (objectField.getValue() != null && objectField.getType() != null) {
+                switch (objectField.getType()) {
+                    case OBJECT_ARRAY:
+                        jsonObject.put(name, toJson((ObjectArray) objectField.getValue(), forceArray));
+                        break;
+                    case OBJECT_ELEMENT:
+                        jsonObject.put(name, toJson((ObjectElement) objectField.getValue(), forceArray));
+                        break;
+                    case VALUE_ANY:
+                    case STRING:
+                    case BYTE:
+                    case SHORT:
+                    case INTEGER:
+                    case LONG:
+                    case FLOAT:
+                    case DOUBLE:
+                    case BIG_INTEGER:
+                    case BIG_DECIMAL:
+                    case BOOLEAN:
+                        jsonObject.put(name, objectField.getValue());
+                        break;
+                    case BYTES:
+                        jsonObject.put(name, objectField.getValue() != null ? Base64.getEncoder().encodeToString((byte[]) objectField.getValue()) : null);
+                        break;
+                }
+            } else {
+                jsonObject.put(name, JSONObject.NULL);
+            }
+        });
+        return jsonObject;
+    }
+
     // формат: цифра - количество полей в объекте, далее пары - название поля, значение
     private void fromJSONString(ExecutionContextTool executionContextTool, ConfigurationTool configurationTool, List<IAction> actions, boolean withNewFuncs) {
         actions.forEach(a -> a.getMessages().stream()
@@ -578,7 +555,7 @@ public class ValueTypeConverter implements Module {
                 } else if (!ObjectType.VALUE_ANY.equals(objectType)) {
                     continue;
                 }
-                list.add(obj instanceof Number ? obj : (withNewFuncs && obj instanceof Boolean ? obj : fromString(obj.toString(), base64, false, withNewFuncs)));
+                list.add(obj instanceof Number ? obj : (withNewFuncs && obj instanceof Boolean ? obj : fromString(obj.toString(), false, withNewFuncs)));
             }
         }
         if (objectType != null) {
@@ -587,21 +564,6 @@ public class ValueTypeConverter implements Module {
             objectArray = new ObjectArray(list, objectType);
         }
         return objectArray;
-    }
-
-    public static ObjectType getSimpleType(List<Object> objects) {
-        ObjectType newType = null;
-        for (int i = 0; i < objects.size(); i++) {
-            Object o = objects.get(i);
-            newType = checkType(newType, ObjectType.valueOf(ModuleUtils.getValueTypeObject(o).name()));
-            if (newType == null)
-                break;
-        }
-        return newType != null ? newType : ObjectType.VALUE_ANY;
-    }
-
-    public static ObjectType checkType(ObjectType newType, ObjectType typeForCheck) {
-        return newType != null && !typeForCheck.equals(newType) ? null : typeForCheck;
     }
 
     private ObjectElement fromJSONString(JSONObject jsonObject, boolean withNewFuncs) {
@@ -626,7 +588,7 @@ public class ValueTypeConverter implements Module {
                             ValueType valueType = ModuleUtils.getValueTypeObject(o);
                             Object value = o;
                             if (valueType == null || valueType == ValueType.STRING || (!withNewFuncs && valueType == ValueType.BOOLEAN)) {
-                                value = fromString(o.toString(), base64, false, withNewFuncs);
+                                value = fromString(o.toString(), false, withNewFuncs);
                                 valueType = ModuleUtils.getValueTypeObject(value);
                             }
                             objectField.setValue(ModuleUtils.convertTo(valueType), value);
@@ -652,7 +614,7 @@ public class ValueTypeConverter implements Module {
                 a.getMessages().stream()
                         .map(m -> {
                             if (ModuleUtils.isString(m)) {
-                                return fromString((String) m.getValue(), base64, true, withNewFuncs);
+                                return fromString((String) m.getValue(), true, withNewFuncs);
                             } else if (ModuleUtils.isObjectArray(m)) {
                                 return auto(ModuleUtils.getObjectArray(m), withNewFuncs);
                             } else {
@@ -682,7 +644,7 @@ public class ValueTypeConverter implements Module {
                 for (int i = 0; i < objectArray.size(); i++) {
                     Object value = objectArray.get(i);
                     if (value instanceof String) {
-                        result.addValueAny(fromString((String) value, base64, true, withNewFuncs));
+                        result.addValueAny(fromString((String) value, true, withNewFuncs));
                     } else if (value instanceof byte[]) {
                         result.add(Base64.getEncoder().encodeToString((byte[]) value));
                     } else {
@@ -693,7 +655,7 @@ public class ValueTypeConverter implements Module {
             case STRING:
                 result = new ObjectArray(objectArray.size(), ObjectType.VALUE_ANY);
                 for (int i = 0; i < objectArray.size(); i++)
-                    result.addValueAny(fromString((String) objectArray.get(i), base64, true, withNewFuncs));
+                    result.addValueAny(fromString((String) objectArray.get(i), true, withNewFuncs));
                 break;
             case BYTE:
             case SHORT:
@@ -745,7 +707,7 @@ public class ValueTypeConverter implements Module {
                 case VALUE_ANY: {
                     Object value = f.getValue();
                     if (value instanceof String) {
-                        value = fromString((String) value, base64, true, withNewFuncs);
+                        value = fromString((String) value, true, withNewFuncs);
                         result.getFields().add(new ObjectField(f.getName(), ModuleUtils.convertTo(ModuleUtils.getValueTypeObject(value)), value));
                     } else if (value instanceof byte[]) {
                         result.getFields().add(new ObjectField(f.getName(), Base64.getEncoder().encodeToString((byte[]) value)));
@@ -755,7 +717,7 @@ public class ValueTypeConverter implements Module {
                     break;
                 }
                 case STRING: {
-                    Object value = fromString((String) f.getValue(), base64, true, withNewFuncs);
+                    Object value = fromString((String) f.getValue(), true, withNewFuncs);
                     result.getFields().add(new ObjectField(f.getName(), ModuleUtils.convertTo(ModuleUtils.getValueTypeObject(value)), value));
                     break;
                 }
@@ -800,7 +762,7 @@ public class ValueTypeConverter implements Module {
         return result;
     }
 
-    private Object fromString(String value, Pattern base64, boolean toNumbers, boolean withBoolean) {
+    private Object fromString(String value, boolean toNumbers, boolean withBoolean) {
         Object result;
         if (toNumbers && NumberUtils.isCreatable(value)) {
             result = NumberUtils.createNumber(value);
@@ -809,7 +771,7 @@ public class ValueTypeConverter implements Module {
         } else if (withBoolean && ("true".equals(value) || "false".equals(value))) {
             result = "true".equals(value);
         } else {
-            if (StringUtils.length(value) >= 2 && !value.isBlank() && base64.matcher(value).find()) {
+            if (StringUtils.length(value) >= 2 && !value.isBlank() && (value.endsWith("=") || value.length() > 50) && base64.matcher(value).find()) {
                 try {
                     result = Base64.getDecoder().decode(value);
                 } catch (Exception e) {
@@ -839,7 +801,7 @@ public class ValueTypeConverter implements Module {
                 .map(m -> ModuleUtils.isBytes(m) ? new String((byte[]) m.getValue()) : String.valueOf(m.getValue()))
                 .flatMap(s -> Arrays.stream((s).split("\\R")))
                 .flatMap(s -> Arrays.stream(s.split(param)))
-                .map(value -> fromString(value, base64, true, withNewFuncs))
+                .map(value -> fromString(value, true, withNewFuncs))
                 .collect(Collectors.toList())));
     }
 
@@ -952,7 +914,7 @@ public class ValueTypeConverter implements Module {
         }
         if (textContent == null || textContent.isEmpty())
             textContent = OBJECT_FILED_VALUE_VALUE_EMPTY;
-        Object value = fromString(textContent, base64, true, false);
+        Object value = fromString(textContent, true, false);
         result.getFields().add(new ObjectField(OBJECT_FILED_NAME_VALUE, ModuleUtils.getObjectType(value), value));
 
         NamedNodeMap attributes = element.getAttributes();
@@ -1021,7 +983,7 @@ public class ValueTypeConverter implements Module {
                     objectField.setValue(objectElement);
                 }
             } else {
-                Object value = fromString(sb.toString(), base64, true, true);
+                Object value = fromString(sb.toString(), true, true);
                 objectField.setValue(ModuleUtils.getObjectType(value), value);
             }
             result.getFields().add(objectField);
@@ -1275,6 +1237,42 @@ public class ValueTypeConverter implements Module {
         executionContextTool.addMessage(actions.stream()
                 .map(a -> ModuleUtils.deserializeToObject(new LinkedList<>(a.getMessages())))
                 .collect(Collectors.toList()));
+    }
+
+    private enum Type {
+        bytesToNumbers,
+        numbersToBytes,
+        stringToLong,
+        stringToDouble,
+        numberToString,
+        bytesToString,
+        stringToBytes,
+        toJSONArrayString,
+        fromJSONArrayString,
+        auto,
+        fromCsvToValues,
+        fromValuesToCsv,
+        toJSONObjectString,
+        toLong,
+        fromXml,
+        toXml,
+        fromJSONObjectString,
+        toString,
+        base64ToBytes,
+        bytesToBase64,
+        listToObjectArray,
+        objectArrayToList,
+        stringToNumberOrOrigin,
+        objectArrayToMessages,
+        messagesToObjectArray,
+        objectArrayValuesToList,
+        fromJSONArrayStringNew,
+        fromJSONObjectStringNew,
+        fromXmlSimple,
+        toXmlSimple,
+        autoNew,
+        toBoolean,
+        fromCsvToValuesNew
     }
 
 }

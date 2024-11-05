@@ -21,46 +21,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PrintValue implements Module {
-
-    private enum Type {
-        STRING,
-        BYTE,
-        SHORT,
-        INTEGER,
-        LONG,
-        BIG_INTEGER,
-        FLOAT,
-        DOUBLE,
-        BIG_DECIMAL,
-        AUTO,
-    }
-
-    private enum AppendType {
-        FIRST,
-        LAST,
-        PLACEHOLDER
-    }
-
+    private static final Pattern base64 = Pattern.compile("^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$");
     private Type type;
     private AppendType appendType;
     private List<Object> values;
     private ObjectArray arrayValue;
-
-    private class ExecutionContextHolder {
-        private int id;
-
-        public ExecutionContextHolder(int id) {
-            this.id = id;
-        }
-
-        public void process(ExecutionContextTool executionContextTool, List<Object> list) {
-            list.addAll(
-                    executionContextTool.getMessages(id).stream()
-                            .flatMap(a -> a.getMessages().stream())
-                            .map(IValue::getValue)
-                            .collect(Collectors.toList()));
-        }
-    }
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -69,8 +34,6 @@ public class PrintValue implements Module {
         String textValue = (String) configurationTool.getSetting("value").orElseThrow(() -> new ModuleException("text setting")).getValue();
         String splitterValues = (String) configurationTool.getSetting("splitterValues").orElseThrow(() -> new ModuleException("splitterValues setting")).getValue();
         arrayValue = (ObjectArray) configurationTool.getSetting("arrayValue").orElseThrow(() -> new ModuleException("arrayValue setting")).getValue();
-
-        Pattern base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
 
         values = !textValue.isEmpty() ?
                 Arrays.stream(textValue.split(splitterValues))
@@ -105,7 +68,7 @@ public class PrintValue implements Module {
                                     value = new BigDecimal(text);
                                     break;
                                 case AUTO:
-                                    value = autoConvert(text, base64);
+                                    value = autoConvert(text);
                                     break;
                                 default:
                                     value = null;
@@ -172,7 +135,7 @@ public class PrintValue implements Module {
         values = null;
     }
 
-    private Object autoConvert(String value, Pattern base64) {
+    private Object autoConvert(String value) {
         Object result;
         if (NumberUtils.isCreatable(value)) {
             if (!StringUtils.contains(value, ".")) {
@@ -182,7 +145,7 @@ public class PrintValue implements Module {
             }
 
         } else {
-            if (base64.matcher(value).find()) {
+            if (StringUtils.length(value) >= 2 && !value.isBlank() && (value.endsWith("=") || value.length() > 50) && base64.matcher(value).find()) {
                 try {
                     result = Base64.getDecoder().decode(value);
                 } catch (Exception e) {
@@ -194,6 +157,41 @@ public class PrintValue implements Module {
             }
         }
         return result;
+    }
+
+    private enum Type {
+        STRING,
+        BYTE,
+        SHORT,
+        INTEGER,
+        LONG,
+        BIG_INTEGER,
+        FLOAT,
+        DOUBLE,
+        BIG_DECIMAL,
+        AUTO,
+    }
+
+    private enum AppendType {
+        FIRST,
+        LAST,
+        PLACEHOLDER
+    }
+
+    private class ExecutionContextHolder {
+        private int id;
+
+        public ExecutionContextHolder(int id) {
+            this.id = id;
+        }
+
+        public void process(ExecutionContextTool executionContextTool, List<Object> list) {
+            list.addAll(
+                    executionContextTool.getMessages(id).stream()
+                            .flatMap(a -> a.getMessages().stream())
+                            .map(IValue::getValue)
+                            .collect(Collectors.toList()));
+        }
     }
 
 }

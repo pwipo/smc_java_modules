@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Comparator implements Module {
-
+    private static final Pattern base64 = Pattern.compile("^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$");
     private Object moreResult;
     private Object lessResult;
     private Object equalsResult;
@@ -26,17 +26,16 @@ public class Comparator implements Module {
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
-        Pattern base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
-        moreResult = autoConvert((String) configurationTool.getSetting("moreResult").orElseThrow(() -> new ModuleException("moreResult setting not found")).getValue(), base64);
-        lessResult = autoConvert((String) configurationTool.getSetting("lessResult").orElseThrow(() -> new ModuleException("lessResult setting not found")).getValue(), base64);
-        equalsResult = autoConvert((String) configurationTool.getSetting("equalsResult").orElseThrow(() -> new ModuleException("equalsResult setting not found")).getValue(), base64);
+        moreResult = autoConvert((String) configurationTool.getSetting("moreResult").orElseThrow(() -> new ModuleException("moreResult setting not found")).getValue());
+        lessResult = autoConvert((String) configurationTool.getSetting("lessResult").orElseThrow(() -> new ModuleException("lessResult setting not found")).getValue());
+        equalsResult = autoConvert((String) configurationTool.getSetting("equalsResult").orElseThrow(() -> new ModuleException("equalsResult setting not found")).getValue());
         Boolean useValue = Boolean.valueOf((String) configurationTool.getSetting("useValue").orElseThrow(() -> new ModuleException("useValue setting not found")).getValue());
         value = null;
         if (useValue)
-            value = autoConvert((String) configurationTool.getSetting("value").orElseThrow(() -> new ModuleException("value setting not found")).getValue(), base64);
+            value = autoConvert((String) configurationTool.getSetting("value").orElseThrow(() -> new ModuleException("value setting not found")).getValue());
     }
 
-    private Object autoConvert(String value, Pattern base64) {
+    private Object autoConvert(String value) {
         Object result;
         if (NumberUtils.isNumber(value)) {
             if (!StringUtils.contains(value, ".")) {
@@ -46,7 +45,7 @@ public class Comparator implements Module {
             }
 
         } else {
-            if (base64.matcher(value).find()) {
+            if (StringUtils.length(value) >= 2 && !value.isBlank() && (value.endsWith("=") || value.length() > 50) && base64.matcher(value).find()) {
                 try {
                     result = Base64.getDecoder().decode(value);
                 } catch (Exception e) {

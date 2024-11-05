@@ -19,40 +19,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CollectionUtil implements Module {
-
-    enum Type {
-        SIZE,
-        INDEX_OF,
-        SUB_LIST,
-        SUB_LIST_EXT,
-        LIST_ARRAY_GET,
-        SUBTRACT,
-        MAP_GET_VALUE,
-        MAP_GET_VALUE_EXT,
-        MAP_GET_VALUE_EXT_REGEXP,
-        MAP_GET_VALUE_OBJECT_LIST,
-        MAP_GET_VALUE_OBJECT_LIST_PATH,
-        MAP_GET_VALUE_OBJECT_LIST_SIMPLE,
-        MAP_GET_VALUE_OBJECT_LIST_PATH_SIMPLE,
-        TRANSFORM,
-        INDEX_OF_VALUE_REGEXP,
-        INDEX_OF_OR_NULL,
-        FILTER_OBJECT_LIST,
-        OBJECT_LIST_SET_FIELD,
-        OBJECT_LIST_JOIN,
-        OBJECT_LIST_JOIN_ARRAYS,
-        OBJECT_FIELDS_JOIN,
-        TRANSFORM_OBJECT_FIELD,
-        OBJECT_FIELD_VALUE,
-        OBJECT_FIELD_VALUE_AUTO_CONVERT
-    }
-
+    private static final Pattern base64 = Pattern.compile("^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$");
     private Type type;
     private List<Long> params;
     private List<String> strParams;
     private List<Object> values;
     private int countValuesInObject;
-    private Pattern base64;
     private List<Pattern> searchs;
     // private String start;
     // private String end;
@@ -64,7 +36,6 @@ public class CollectionUtil implements Module {
         type = Type.valueOf((String) configurationTool.getSetting("type").orElseThrow(() -> new ModuleException("type setting")).getValue());
         typeBase = type;
         value = (String) configurationTool.getSetting("value").orElseThrow(() -> new ModuleException("value setting")).getValue();
-        base64 = Pattern.compile("/^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$/");
         // start = (String) configurationTool.getSetting("start").orElseThrow(() -> new ModuleException("start setting")).getValue();
         // end = (String) configurationTool.getSetting("end").orElseThrow(() -> new ModuleException("end setting")).getValue();
         updateSettings();
@@ -93,7 +64,7 @@ public class CollectionUtil implements Module {
                             values.add(null);
                         } else {
                             strParams.add(arr[0]);
-                            values.add(fromString(arr[1], base64));
+                            values.add(fromString(arr[1]));
                         }
                     });
         } else if (Type.MAP_GET_VALUE_EXT_REGEXP.equals(type)) {
@@ -110,7 +81,7 @@ public class CollectionUtil implements Module {
                             values.add(null);
                         } else {
                             searchs.add(Pattern.compile(arr[0]));
-                            values.add(fromString(arr[1], base64));
+                            values.add(fromString(arr[1]));
                         }
                     });
         } else if (Type.SUBTRACT.equals(type) && !value.isBlank()) {
@@ -362,7 +333,7 @@ public class CollectionUtil implements Module {
                             for (int i = 0; i < inputs.size(); i++) {
                                 String[] e = inputs.get(i);
                                 if (param.equalsIgnoreCase(e[0]))
-                                    values2.add(fromString(e[1], base64));
+                                    values2.add(fromString(e[1]));
                             }
                             if (!values2.isEmpty()) {
                                 result.addAll(values2);
@@ -378,8 +349,8 @@ public class CollectionUtil implements Module {
                             for (int i = 0; i < inputs.size(); i++) {
                                 String[] e = inputs.get(i);
                                 if (pattern.matcher(e[0]).matches()) {
-                                    values2.add(fromString(e[0], base64));
-                                    values2.add(fromString(e[1], base64));
+                                    values2.add(fromString(e[0]));
+                                    values2.add(fromString(e[1]));
                                 }
                             }
                             if (!values2.isEmpty()) {
@@ -830,14 +801,14 @@ public class CollectionUtil implements Module {
                                 if (path.contains(";;")) {
                                     String[] split = path.split(";;", 2);
                                     path = split[0];
-                                    defaultValueStr = fromString(split[1], base64);
+                                    defaultValueStr = fromString(split[1]);
                                 }
                                 List<Object> lst = ModuleUtils.findFields(objectArray, List.of(path)).stream()
                                         .flatMap(Collection::stream)
                                         .map(f -> f.getType() == ObjectType.OBJECT_ELEMENT ?
                                                 new ObjectArray((ObjectElement) f.getValue()) :
                                                 (type == Type.OBJECT_FIELD_VALUE_AUTO_CONVERT && ModuleUtils.isString(f) ?
-                                                        fromString(ModuleUtils.getString(f), base64) :
+                                                        fromString(ModuleUtils.getString(f)) :
                                                         f.getValue()))
                                         .collect(Collectors.toList());
                                 return (!lst.isEmpty() ? lst : (defaultValueStr != null ? List.of(defaultValueStr) : List.of())).stream();
@@ -851,12 +822,12 @@ public class CollectionUtil implements Module {
         });
     }
 
-    private Object fromString(String value, Pattern base64) {
+    private Object fromString(String value) {
         Object result;
         if (NumberUtils.isCreatable(value)) {
             result = NumberUtils.createNumber(value);
         } else {
-            if (StringUtils.length(value) >= 4 && base64.matcher(value).find()) {
+            if (StringUtils.length(value) >= 2 && !value.isBlank() && (value.endsWith("=") || value.length() > 50) && base64.matcher(value).find()) {
                 try {
                     result = Base64.getDecoder().decode(value);
                 } catch (Exception e) {
@@ -876,8 +847,34 @@ public class CollectionUtil implements Module {
         params = null;
         strParams = null;
         countValuesInObject = 1;
-        base64 = null;
         searchs = null;
+    }
+
+    enum Type {
+        SIZE,
+        INDEX_OF,
+        SUB_LIST,
+        SUB_LIST_EXT,
+        LIST_ARRAY_GET,
+        SUBTRACT,
+        MAP_GET_VALUE,
+        MAP_GET_VALUE_EXT,
+        MAP_GET_VALUE_EXT_REGEXP,
+        MAP_GET_VALUE_OBJECT_LIST,
+        MAP_GET_VALUE_OBJECT_LIST_PATH,
+        MAP_GET_VALUE_OBJECT_LIST_SIMPLE,
+        MAP_GET_VALUE_OBJECT_LIST_PATH_SIMPLE,
+        TRANSFORM,
+        INDEX_OF_VALUE_REGEXP,
+        INDEX_OF_OR_NULL,
+        FILTER_OBJECT_LIST,
+        OBJECT_LIST_SET_FIELD,
+        OBJECT_LIST_JOIN,
+        OBJECT_LIST_JOIN_ARRAYS,
+        OBJECT_FIELDS_JOIN,
+        TRANSFORM_OBJECT_FIELD,
+        OBJECT_FIELD_VALUE,
+        OBJECT_FIELD_VALUE_AUTO_CONVERT
     }
 
 }

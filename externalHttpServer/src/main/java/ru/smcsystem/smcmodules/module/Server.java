@@ -141,12 +141,13 @@ public class Server implements Module {
                     String path = availablePathsList.get(j);
                     if (path.isBlank())
                         continue;
-                    if (i == 0 && (path.startsWith("/") || path.startsWith("^/") || !path.toUpperCase().startsWith("HTTP"))) {
+                    if (path.startsWith("/") || path.startsWith("^/") || !path.toUpperCase().startsWith("HTTP")) {
                         paths.add(Map.entry(j, path));
                     } else if (path.toUpperCase().startsWith(urlHeader.toUpperCase())) {
                         paths.add(Map.entry(j, path.substring(urlHeader.length())));
                     }
                 }
+                externalConfigurationTool.loggerDebug(String.format("add virtualServer=%s, paths=%s", url, paths.stream().map(Map.Entry::getValue).collect(Collectors.joining(","))));
                 VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, urlHeader, url, keyStoreFileNameVar, keyStorePassVar,
                         keyAliasVar, keyPassVar, strAddressVar, paths, requestTimeoutVar, countThreadsVar, backlogVar, sessionTimeoutVar, maxPostSizeVar,
                         allowMultipartParsingVar, headersArrVar, requestTypeVar, maxFileSizeFullVar);
@@ -620,10 +621,12 @@ public class Server implements Module {
         tomcat.getServer().addService(service);
 
         Engine engine = new StandardEngine();
+        // engine.setBackgroundProcessorDelay(-1);
         engine.setName(virtualServerInfo.getUrl().getHost());
         engine.setDefaultHost(virtualServerInfo.getUrl().getHost());
         engine.setRealm((Realm) createDefaultRealm.invoke(tomcat));
         service.setContainer(engine);
+        tomcat.getHost().setAutoDeploy(false);
 
         engine.addChild(virtualServerInfo.getHost());
 

@@ -306,4 +306,44 @@ public class StringUtilTest {
 
         return executionContextTool;
     }
+
+    @Test
+    public void testPlaceHoldersStream() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "type", new Value(ValueType.STRING, "JOIN"),
+                                "value", new Value(ValueType.STRING, " , ")
+                        ),
+                        null,
+                        null
+                ),
+                new StringUtil()
+        );
+
+        process.start();
+
+        execute(
+                process,
+                "PLACEHOLDERS_STREAM",
+                "one {0} two {1}",
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(1)),
+                                                new Message(new Value("2")),
+                                                new Message(new Value(3)),
+                                                new Message(new Value(4)),
+                                                new Message(new Value("5")),
+                                                new Message(new Value(6))
+                                        ),
+                                        ActionType.EXECUTE)
+                        )
+                ));
+
+        process.stop();
+    }
 }

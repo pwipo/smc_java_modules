@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.StringUtil</className>
-    <ver>1.1.1</ver>
+    <ver>1.1.2</ver>
     <apiVer>1.4.0</apiVer>
     <date>21-10-2023</date>
 
@@ -1197,6 +1197,33 @@ PLACEHOLDERS_DYNAMIC_OR_EMPTY - аналогичен PLACEHOLDERS_OR_EMPTY но 
             </sources>
             <output>
                 <element t="VALUE" c="1" o="true" vt="STRING" v="str"/>
+            </output>
+        </type>
+        <type t="placeholders_stream" minS="0" maxS="-1" minEC="0" maxEC="0" minC="0" maxC="0">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Аналогичен PLACEHOLDERS, но создает не одно сообщение, столько сколько хватит входящих сообщений.
+Пример: если параметров 2, а сообщений 11, то вернет 5 строк.
+                 ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Similar to PLACEHOLDERS, but creates more than one message, as many as there are incoming messages.
+Example: if there are 2 parameters and 11 messages, it will return 5 lines.
+                 ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="-1" o="true" vt="STRING" v="str"/>
             </output>
         </type>
     </types>

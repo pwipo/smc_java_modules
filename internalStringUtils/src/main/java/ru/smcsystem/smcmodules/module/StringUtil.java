@@ -50,6 +50,7 @@ public class StringUtil implements Module {
         REPLACE_REGEXP_MULTILINE,
         PLACEHOLDERS_DYNAMIC,
         PLACEHOLDERS_DYNAMIC_OR_EMPTY,
+        PLACEHOLDERS_STREAM
     }
 
     private Type type;
@@ -479,6 +480,16 @@ public class StringUtil implements Module {
                                 .toArray());
                 if (!result.matches("(?s).*\\{\\d+\\}.*"))
                     executionContextTool.addMessage(result);
+                break;
+            }
+            case PLACEHOLDERS_STREAM: {
+                MessageFormat messageFormat = new MessageFormat(value);
+                int countParams = messageFormat.getFormats().length;
+                List<String> strings = ModuleUtils.getMessagesJoin(executionContextTool).stream()
+                        .map(ModuleUtils::toString)
+                        .collect(Collectors.toList());
+                for (int i = 0; i + countParams <= strings.size(); i += countParams)
+                    executionContextTool.addMessage(messageFormat.format(strings.subList(i, i + countParams).toArray()));
                 break;
             }
         }

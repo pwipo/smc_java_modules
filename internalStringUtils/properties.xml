@@ -10,23 +10,23 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.StringUtil</className>
-    <ver>1.1.2</ver>
+    <ver>1.1.3</ver>
     <apiVer>1.4.0</apiVer>
     <date>21-10-2023</date>
 
@@ -61,12 +61,13 @@ The program is supplied as is. For problems arising during the operation or inst
                 <value>REPLACE_REGEXP_MULTILINE</value>
                 <value>PLACEHOLDERS_DYNAMIC</value>
                 <value>PLACEHOLDERS_DYNAMIC_OR_EMPTY</value>
+                <value>PLACEHOLDERS_STREAM</value>
             </validValues>
             <value>JOIN</value>
             <description>
                 <entry>
                     <key>en</key>
-                    <value>The action:
+                    <value><![CDATA[The action:
 JOIN - combines all input values into one line. value is used as a delimiter.
 JOIN_INNER_WITH_TIME - similar to JOIN, but combines only the values inside the action, returns a list of non-empty strings along with the time (value pairs: string and number)
 SPLIT - splits input values. value is used as a separator if it is empty whitespace characters are used.
@@ -93,11 +94,12 @@ TRIM - removes whitespace at the beginning and end of each message.
 REPLACE_REGEXP_MULTILINE - Similar to REPLACE_REGEXP, but MULTILINE mode is used.
 PLACEHOLDERS_DYNAMIC - similar to PLACEHOLDERS, but the template is taken not from the parameter, but from the first message of the first source. takes values only from the second source.
 PLACEHOLDERS_DYNAMIC_OR_EMPTY - similar to PLACEHOLDERS_OR_EMPTY but for PLACEHOLDERS_DYNAMIC.
-                    </value>
+PLACEHOLDERS_STREAM - Similar to PLACEHOLDERS, but creates more than one message, as many as there are incoming messages. Example: if there are 2 parameters and 11 messages, it will return 5 lines.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>Тип действия:
+                    <value><![CDATA[Тип действия:
 JOIN - объединяет все входящие значения в одну строку. в качестве разделителя используется value.
 JOIN_INNER_WITH_TIME - аналогичен JOIN, но объединяет только значения внутри действия, возвращает список не пустых строк вместе со временем (пары значений: строка и число)
 SPLIT - разделяет входящие значения. в качестве разделителя используется value, если оно пусто используются пробельные символя.
@@ -124,14 +126,15 @@ TRIM - удаляет пробельные символы в начале и в 
 REPLACE_REGEXP_MULTILINE - аналогично REPLACE_REGEXP, но используются режим MULTILINE.
 PLACEHOLDERS_DYNAMIC - аналогичен PLACEHOLDERS, но шаблон берет не из параметра, а из первого сообщения.
 PLACEHOLDERS_DYNAMIC_OR_EMPTY - аналогичен PLACEHOLDERS_OR_EMPTY но для PLACEHOLDERS_DYNAMIC.
-                    </value>
+PLACEHOLDERS_STREAM - Аналогичен PLACEHOLDERS, но создает не одно сообщение, столько сколько хватит входящих сообщений. Пример: если параметров 2, а сообщений 11, то вернет 5 строк.
+                    ]]></value>
                 </entry>
             </description>
         </value>
         <value>
             <name>value</name>
             <type>STRING</type>
-            <value> </value>
+            <value></value>
             <description>
                 <entry>
                     <key>en</key>
@@ -391,6 +394,15 @@ PLACEHOLDERS_DYNAMIC_OR_EMPTY - аналогичен PLACEHOLDERS_OR_EMPTY но 
                             <checkSetting>type</checkSetting>
                             <valueType>STRING</valueType>
                             <value>PLACEHOLDERS_DYNAMIC_OR_EMPTY</value>
+                            <elements>
+                                <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
+                            </elements>
+                        </element>
+                        <element>
+                            <type>IF</type>
+                            <checkSetting>type</checkSetting>
+                            <valueType>STRING</valueType>
+                            <value>PLACEHOLDERS_STREAM</value>
                             <elements>
                                 <element t="VALUE_ANY" c="-1" vt="STRING" v="str"/>
                             </elements>
@@ -1265,7 +1277,7 @@ Example: if there are 2 parameters and 11 messages, it will return 5 lines.
             <settings>
                 <setting>
                     <name>value</name>
-                    <value> , </value>
+                    <value>,</value>
                 </setting>
             </settings>
             <variables/>
@@ -1367,7 +1379,7 @@ Example: if there are 2 parameters and 11 messages, it will return 5 lines.
                 </setting>
                 <setting>
                     <name>value</name>
-                    <value> hi</value>
+                    <value>hi</value>
                 </setting>
             </settings>
             <variables/>
@@ -1643,6 +1655,6 @@ Example: if there are 2 parameters and 11 messages, it will return 5 lines.
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
-    <icon>iVBORw0KGgoAAAANSUhEUgAAADEAAAAxCAYAAABznEEcAAAABmJLR0QA/wD/AP+gvaeTAAAC2ElEQVRoge3aP4gVVxTH8Y/ZFWOiRYIbYdeoKEhSWCgEWbZRiDaCmNYNioWWiiIkTRBhC4UFE6yM1eqaFAFlI4QUohtSqPEPiIWCKBYqaGMsNKiEtTgz7DD79q3z3ux7g7wvXGbm3Dsz58fcf3PuhRuYyKU3GFQtBoVfeV+vd2MN7uJiUvgjfIvVrfezLqvRjVG8TGwbsHaOUHMSO5KMXjzCFYy31s+6rMc69OFxYhvB9u46N61LUuVJRSzEiuT8s+T4Ew613KPpOYi9WIoPE9vCNLNWY5nAUGt9nJEhtf1804X7omHPE/XtGM7jBJ63w9tpuIcXuCmq+VXRyI9nCw0LZT2t9q4gPcLP4dTwQft8KY96vVMtvhTjyGzyP24lx3eiiIgtGCvqUYP8oEDHUkTEouT4s+gMZoP5oitdNFPBLEWrE/xq9kbyT4SIQjQiIkuPzICT4yFeJ+dzsEztjuSVmOY0TDMi1uIfdE2TPy4maPAj9tR51g4xf2uIZkT0CQFjuJPLGxTTg5TPxVc5miv3KXblyham2eoEp/FbzjYgZsNZXuH7nG2VENEUjYj4Bf8pd7zYh50aHHyLiPgbf2FBcv0Mt3G5kRcnPBDVcUnG9gS/F3lIERF3xY9JmbzG1mYf8l7MnToiqkJHRFXoiKgKHRFVoSOiKnREVIWOiKpQxu/pbnyXs/WaXAhJ+VgEhbOMYX+zDpQh4mssx4WM7T7+zFyPmhra+QqbVUQEEQTYWCf/TJKyXBbBsqbptIkM83Ct4D1faDLyl1KGiHMm1/uKcAd/lPD+UkScSlLb6BIhx0ERjukTK5MDoof5t32uTWE5DmCTWLObi5VYzHuwetotqtRZoZJYx74kIn2ldIElkUYe+/E0OR/GN4SakUzhXrUVVyVlA9UjmKjXsKu6t2MKqYh+k4vaabR73NRQfDs5LEQcMbnLpj/NvK72fqdtrfVxRqbd7/QWg0C+WaoeY/0AAAAASUVORK5CYII=</icon>
+    <icon><![CDATA[iVBORw0KGgoAAAANSUhEUgAAADEAAAAxCAYAAABznEEcAAAABmJLR0QA/wD/AP+gvaeTAAAC2ElEQVRoge3aP4gVVxTH8Y/ZFWOiRYIbYdeoKEhSWCgEWbZRiDaCmNYNioWWiiIkTRBhC4UFE6yM1eqaFAFlI4QUohtSqPEPiIWCKBYqaGMsNKiEtTgz7DD79q3z3ux7g7wvXGbm3Dsz58fcf3PuhRuYyKU3GFQtBoVfeV+vd2MN7uJiUvgjfIvVrfezLqvRjVG8TGwbsHaOUHMSO5KMXjzCFYy31s+6rMc69OFxYhvB9u46N61LUuVJRSzEiuT8s+T4Ew613KPpOYi9WIoPE9vCNLNWY5nAUGt9nJEhtf1804X7omHPE/XtGM7jBJ63w9tpuIcXuCmq+VXRyI9nCw0LZT2t9q4gPcLP4dTwQft8KY96vVMtvhTjyGzyP24lx3eiiIgtGCvqUYP8oEDHUkTEouT4s+gMZoP5oitdNFPBLEWrE/xq9kbyT4SIQjQiIkuPzICT4yFeJ+dzsEztjuSVmOY0TDMi1uIfdE2TPy4maPAj9tR51g4xf2uIZkT0CQFjuJPLGxTTg5TPxVc5miv3KXblyham2eoEp/FbzjYgZsNZXuH7nG2VENEUjYj4Bf8pd7zYh50aHHyLiPgbf2FBcv0Mt3G5kRcnPBDVcUnG9gS/F3lIERF3xY9JmbzG1mYf8l7MnToiqkJHRFXoiKgKHRFVoSOiKnREVIWOiKpQxu/pbnyXs/WaXAhJ+VgEhbOMYX+zDpQh4mssx4WM7T7+zFyPmhra+QqbVUQEEQTYWCf/TJKyXBbBsqbptIkM83Ct4D1faDLyl1KGiHMm1/uKcAd/lPD+UkScSlLb6BIhx0ERjukTK5MDoof5t32uTWE5DmCTWLObi5VYzHuwetotqtRZoZJYx74kIn2ldIElkUYe+/E0OR/GN4SakUzhXrUVVyVlA9UjmKjXsKu6t2MKqYh+k4vaabR73NRQfDs5LEQcMbnLpj/NvK72fqdtrfVxRqbd7/QWg0C+WaoeY/0AAAAASUVORK5CYII=]]></icon>
 
 </properties>

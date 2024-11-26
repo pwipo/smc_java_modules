@@ -23,41 +23,10 @@ import java.util.stream.Stream;
 
 public class StringUtil implements Module {
 
-    enum Type {
-        JOIN,
-        JOIN_INNER_WITH_TIME,
-        SPLIT,
-        SPLIT_REGEXP,
-        APPEND,
-        APPEND_FIRST,
-        REPLACE,
-        REPLACE_REGEXP,
-        REPLACE_REGEXP_GROUP_ONE,
-        CONTAIN,
-        MATCH,
-        PLACEHOLDERS,
-        PLACEHOLDERS_OR_EMPTY,
-        FILTER_SIZE,
-        REGEXP_GROUP_ONE,
-        ESCAPE_SQL,
-        SIZE,
-        IS_BLANK,
-        IS_NOT_BLANK,
-        FILTER,
-        FILTER_ACTION,
-        SUBSTRING,
-        TRIM,
-        REPLACE_REGEXP_MULTILINE,
-        PLACEHOLDERS_DYNAMIC,
-        PLACEHOLDERS_DYNAMIC_OR_EMPTY,
-        PLACEHOLDERS_STREAM
-    }
-
     private Type type;
     private String value;
     private List<String> values;
     private List<Number> numberValues;
-
     private List<Pattern> patterns;
     private Integer string_size;
 
@@ -502,6 +471,36 @@ public class StringUtil implements Module {
         value = null;
         values = null;
         patterns = null;
+    }
+
+    enum Type {
+        JOIN,
+        JOIN_INNER_WITH_TIME,
+        SPLIT,
+        SPLIT_REGEXP,
+        APPEND,
+        APPEND_FIRST,
+        REPLACE,
+        REPLACE_REGEXP,
+        REPLACE_REGEXP_GROUP_ONE,
+        CONTAIN,
+        MATCH,
+        PLACEHOLDERS,
+        PLACEHOLDERS_OR_EMPTY,
+        FILTER_SIZE,
+        REGEXP_GROUP_ONE,
+        ESCAPE_SQL,
+        SIZE,
+        IS_BLANK,
+        IS_NOT_BLANK,
+        FILTER,
+        FILTER_ACTION,
+        SUBSTRING,
+        TRIM,
+        REPLACE_REGEXP_MULTILINE,
+        PLACEHOLDERS_DYNAMIC,
+        PLACEHOLDERS_DYNAMIC_OR_EMPTY,
+        PLACEHOLDERS_STREAM
     }
 
 }

@@ -26,8 +26,8 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.flowControllerOrderingExecutor.OrderingExecutor</className>
-    <ver>1.2.1</ver>
-    <apiVer>1.4.0</apiVer>
+    <ver>1.3.0</ver>
+    <apiVer>1.4.1</apiVer>
     <date>22-10-2023</date>
 
     <defaultSettings>
@@ -84,11 +84,15 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>en</key>
-                    <value>If set, then when triggered, returns data from the last managed context.</value>
+                    <value><![CDATA[If set, then when triggered, returns data from the last managed context.
+Works only for now and parallel_wait modes (waits for all threads to complete).
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>Если установлен, то при срабатывании, возвращает данные из последнего управляемого контекста.</value>
+                    <value><![CDATA[Если установлен, то при срабатывании, возвращает данные из последнего управляемого контекста.
+Работает только для режимов now и parallel_wait (ожидает завершения всх потоков).
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -127,6 +131,25 @@ The program is supplied as is. For problems arising during the operation or inst
                 <entry>
                     <key>ru</key>
                     <value>Если установлен и если прошлая конфигурация не вернула данных - прекращать выполнение.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>isNeedBreakAndReturnDataFromAny</name>
+            <type>BOOLEAN</type>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[If set and if the previous configuration returned data - stops execution and returns this value.
+Works only for now and parallel_wait modes (waits for all threads to complete).
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Если установлен и если прошлая конфигурация вернула данных - прекращает выполнение и возвращает это значение.
+Работает только для режимов now и parallel_wait (ожидает завершения всх потоков).
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -293,6 +316,6 @@ The program is supplied as is. For problems arising during the operation or inst
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
-    <icon>iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAACPklEQVRYhb3XTUiUQRgH8F+2WqF2Svo6RJGp0BcEUhoWQqeCLkF171bXrn1cCjp2S4ouQYfoEFEQFEliRlBSdOhkoUHkpSIjlfDtMLPuy7auu+76/uFh3mHmmf//nWc+nqE69ETLYxizmMRrDOAUWqsct2JMRstjCEkJ+42baK+V8DQ+YVesn4iWRjM6cRgX8CYlZBbXsHqpAs7FQQ5U6deBe5iLQkawsVLndpxFY6w3lum7GPZjLIqYwO5KnG5Fh0M1EKexDoMpERsWc9iCM8jVSQA0pUSMYFWpTj3YU0fSYqxTCMfl4sYcpvF5GQUQFvMcfomhWBkb5vAdD/FhGQV8Ebb0XmH7PlpGrgXRKYRhCi3QJ/z51gxFvI0iTjbgII4J05IVHsSyHxqwI0PyPHGCVxnzzqMjCvgGd3EnYwGtUcB0DvsyJv8Pa6JlifkQ5PAnY3LYHMuxBuHWm8DRDAX0xfJdg7ANm9V271eL47F8liHnPLoUHcVZ434UMFDcMKx0hpu3oTqQ9wo37wy2FTeWI0/wokbyNiHDTnC1VIc02VMLpE1LRJPwA4kw0yXHzpN/jeUTrK0DeVuKfFyZpDQvYKdwSST4iO4ayHsVpn1c4YFTVgAhOXkf639xW3XPrC6F1Z7gpQrS8bQAQpwuCslqIqzeQZwXTrL1sU+LkGb14xJGU2PN4IoK11OxgDy24zp+Kr9L0jaFG0pstWKsSH3nX7p9C/RtxRHh7ujGJiHXz+GHEOtRPMfjKGJR/ANnxabWC/VODAAAAABJRU5ErkJggg==</icon>
+    <icon><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAACPklEQVRYhb3XTUiUQRgH8F+2WqF2Svo6RJGp0BcEUhoWQqeCLkF171bXrn1cCjp2S4ouQYfoEFEQFEliRlBSdOhkoUHkpSIjlfDtMLPuy7auu+76/uFh3mHmmf//nWc+nqE69ETLYxizmMRrDOAUWqsct2JMRstjCEkJ+42baK+V8DQ+YVesn4iWRjM6cRgX8CYlZBbXsHqpAs7FQQ5U6deBe5iLQkawsVLndpxFY6w3lum7GPZjLIqYwO5KnG5Fh0M1EKexDoMpERsWc9iCM8jVSQA0pUSMYFWpTj3YU0fSYqxTCMfl4sYcpvF5GQUQFvMcfomhWBkb5vAdD/FhGQV8Ebb0XmH7PlpGrgXRKYRhCi3QJ/z51gxFvI0iTjbgII4J05IVHsSyHxqwI0PyPHGCVxnzzqMjCvgGd3EnYwGtUcB0DvsyJv8Pa6JlifkQ5PAnY3LYHMuxBuHWm8DRDAX0xfJdg7ANm9V271eL47F8liHnPLoUHcVZ434UMFDcMKx0hpu3oTqQ9wo37wy2FTeWI0/wokbyNiHDTnC1VIc02VMLpE1LRJPwA4kw0yXHzpN/jeUTrK0DeVuKfFyZpDQvYKdwSST4iO4ayHsVpn1c4YFTVgAhOXkf639xW3XPrC6F1Z7gpQrS8bQAQpwuCslqIqzeQZwXTrL1sU+LkGb14xJGU2PN4IoK11OxgDy24zp+Kr9L0jaFG0pstWKsSH3nX7p9C/RtxRHh7ujGJiHXz+GHEOtRPMfjKGJR/ANnxabWC/VODAAAAABJRU5ErkJggg==]]></icon>
 
 </properties>

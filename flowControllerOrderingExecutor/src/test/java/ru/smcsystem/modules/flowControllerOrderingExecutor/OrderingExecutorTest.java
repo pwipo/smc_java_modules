@@ -28,6 +28,7 @@ public class OrderingExecutorTest {
                                 , "isNeedReturnDataFromLast", new Value(ValueType.STRING, "false")
                                 , "breakWhenError", new Value(ValueType.STRING, "false")
                                 , "breakWhenNoDataFromPrev", new Value(ValueType.STRING, "false")
+                                , "isNeedBreakAndReturnDataFromAny", new Value(ValueType.STRING, "true")
                         ),
                         null,
                         null

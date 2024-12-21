@@ -1,18 +1,26 @@
 package ru.smcsystem.modules.internalSymbolsGenerator;
 
 import org.apache.commons.lang3.StringUtils;
+import ru.smcsystem.api.dto.IMessage;
 import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.api.tools.execution.ExecutionContextTool;
+import ru.smcsystem.smc.utils.ModuleUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class SymbolsGenerator implements Module {
-
+    static private final int intTypeNumber = 1;
+    static private final int intTypeAlphaUp = 2;
+    static private final int intTypeAlphaLow = 3;
+    static private final int intTypeAlphaAll = 4;
+    static private final int intTypeNumAlpha = 5;
+    static private final int intTypeChars = 6;
+    static private final int intTypeNoneAlpha = 7;
+    private static final Pattern pattern = Pattern.compile("\\{(\\d+)[nsSo]+\\}");
+    final private char[] charNonAlphaNum = {33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96, 123, 124, 125, 126};
     // private Integer type;
     // private Integer size;
     private Integer sizeNumber;
@@ -20,15 +28,6 @@ public class SymbolsGenerator implements Module {
     private Integer sizeAlphaLow;
     private Integer sizeNonAlphaNum;
     private Random rnd;
-
-    static private final int intTypeNumber = 1;
-    static private final int intTypeAlphaUp = 2;
-    static private final int intTypeAlphaLow = 3;
-    static private final int intTypeAlphaAll = 4;
-    static private final int intTypeNumAlpha = 5;
-    static private final int intTypeChars = 6;
-
-    final private char[] charNonAlphaNum = {33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96, 123, 124, 125, 126};
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -49,31 +48,72 @@ public class SymbolsGenerator implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
-        if (executionContextTool.countSource() > 0) {
-            for (int i = 0; i < executionContextTool.countSource(); i++) {
-                executionContextTool.getMessages(i).stream()
-                        .filter(a -> a.getMessages().size() > 3)
-                        .forEach(a -> {
-                            for (int j = 0; j < a.getMessages().size(); j = j + 4) {
-                                executionContextTool.addMessage(
-                                        /*
-                                        genString(
-                                                rnd,
-                                                ((Number) a.getMessages().get(j).getValue()).intValue(),
-                                                ((Number) a.getMessages().get(j + 1).getValue()).intValue())
-                                        */
-                                        genString(
-                                                rnd,
-                                                ((Number) a.getMessages().get(j).getValue()).intValue(),
-                                                ((Number) a.getMessages().get(j + 1).getValue()).intValue(),
-                                                ((Number) a.getMessages().get(j + 2).getValue()).intValue(),
-                                                ((Number) a.getMessages().get(j + 3).getValue()).intValue())
-                                );
-                            }
-                        });
+        ModuleUtils.processMessagesAll(configurationTool, executionContextTool, (i, messages) -> {
+            Type type = Type.valueOf(executionContextTool.getType().toUpperCase());
+            switch (type) {
+                case DEFAULT:
+                    processDefault(executionContextTool, messages);
+                    break;
+                case FORMAT:
+                    processFormat(executionContextTool, messages);
+                    break;
             }
-        } else
-            executionContextTool.addMessage(/*genString(rnd, type, size)*/genString(rnd, sizeNumber, sizeAlphaUp, sizeAlphaLow, sizeNonAlphaNum));
+        });
+    }
+
+    private void processFormat(ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messages) throws ModuleException {
+        messages.get(0).stream()
+                .filter(ModuleUtils::isString)
+                .map(ModuleUtils::toString)
+                .map(s -> pattern.matcher(s).replaceAll(match -> {
+                    int countSymbols = 0;
+                    try {
+                        countSymbols = Integer.parseInt(match.group(1));
+                    } catch (NumberFormatException ignored) {
+                    }
+                    if (countSymbols < 1)
+                        return "";
+                    String str = match.group(0);
+                    boolean number = str.contains("n");
+                    boolean alphaUp = str.contains("s");
+                    boolean alphaLow = str.contains("S");
+                    boolean nonAlphaNum = str.contains("o");
+
+                    StringBuilder result = new StringBuilder();
+                    do {
+                        int intTmp = rnd.nextInt(4);
+                        if (intTmp == 0 && number) {
+                            genString(rnd, intTypeNumber, result);
+                        } else if (intTmp == 1 && alphaUp) {
+                            genString(rnd, intTypeAlphaUp, result);
+                        } else if (intTmp == 2 && alphaLow) {
+                            genString(rnd, intTypeAlphaLow, result);
+                        } else if (intTmp == 3 && nonAlphaNum) {
+                            genString(rnd, intTypeNoneAlpha, result);
+                        }
+                    } while (result.length() < countSymbols);
+                    return result.toString();
+                }))
+                .forEach(executionContextTool::addMessage);
+    }
+
+    private void processDefault(ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messages) throws ModuleException {
+        if (executionContextTool.countSource() > 0) {
+            for (LinkedList<IMessage> messagesList : messages) {
+                while (messagesList.size() >= 4) {
+                    executionContextTool.addMessage(
+                            genString(
+                                    rnd,
+                                    ModuleUtils.getNumber(messagesList.poll()).intValue(),
+                                    ModuleUtils.getNumber(messagesList.poll()).intValue(),
+                                    ModuleUtils.getNumber(messagesList.poll()).intValue(),
+                                    ModuleUtils.getNumber(messagesList.poll()).intValue()
+                            ));
+                }
+            }
+        } else {
+            executionContextTool.addMessage(genString(rnd, sizeNumber, sizeAlphaUp, sizeAlphaLow, sizeNonAlphaNum));
+        }
     }
 
     @Override
@@ -115,62 +155,62 @@ public class SymbolsGenerator implements Module {
 
     private String genString(Random rnd, int type, int size) throws ModuleException {
         StringBuilder result = new StringBuilder();
+        for (int i = 0; i < size; i++)
+            genString(rnd, type, result);
+        return result.toString();
+    }
 
+    private void genString(Random rnd, int type, StringBuilder result) throws ModuleException {
         switch (type) {
             case intTypeNumber:
-                for (int i = 0; i < size; i++)
-                    result.append(randomNumCharacter(rnd));
+                result.append(randomNumCharacter(rnd));
                 //result += Math.round(rnd.nextFloat()*10);
                 break;
             case intTypeAlphaUp:
-                for (int i = 0; i < size; i++)
-                    result.append(randomAlphaUpperCharacter(rnd));
+                result.append(randomAlphaUpperCharacter(rnd));
                 break;
             case intTypeAlphaLow:
-                for (int i = 0; i < size; i++)
+                result.append(randomAlphaLowerCharacter(rnd));
+                break;
+            case intTypeAlphaAll: {
+                int intTmp = rnd.nextInt(2);
+                if (intTmp == 0) {
                     result.append(randomAlphaLowerCharacter(rnd));
-                break;
-            case intTypeAlphaAll:
-                for (int i = 0; i < size; i++) {
-                    int intTmp = rnd.nextInt(2);
-                    if (intTmp == 0) {
-                        result.append(randomAlphaLowerCharacter(rnd));
-                    } else {
-                        result.append(randomAlphaUpperCharacter(rnd));
-                    }
+                } else {
+                    result.append(randomAlphaUpperCharacter(rnd));
                 }
                 break;
-            case intTypeNumAlpha:
-                for (int i = 0; i < size; i++) {
-                    int intTmp = rnd.nextInt(3);
-                    if (intTmp == 0) {
-                        result.append(randomAlphaLowerCharacter(rnd));
-                    } else if (intTmp == 1) {
-                        result.append(randomAlphaUpperCharacter(rnd));
-                    } else {
-                        result.append(randomNumCharacter(rnd));
-                    }
+            }
+            case intTypeNumAlpha: {
+                int intTmp = rnd.nextInt(3);
+                if (intTmp == 0) {
+                    result.append(randomAlphaLowerCharacter(rnd));
+                } else if (intTmp == 1) {
+                    result.append(randomAlphaUpperCharacter(rnd));
+                } else {
+                    result.append(randomNumCharacter(rnd));
                 }
                 break;
-            case intTypeChars:
-                for (int i = 0; i < size; i++) {
-                    int intTmp = rnd.nextInt(4);
-                    if (intTmp == 0) {
-                        result.append(randomAlphaLowerCharacter(rnd));
-                    } else if (intTmp == 1) {
-                        result.append(randomAlphaUpperCharacter(rnd));
-                    } else if (intTmp == 2) {
-                        result.append(randomNumCharacter(rnd));
-                    } else {
-                        result.append(randomNonAlphaNumCharacter(rnd));
-                    }
+            }
+            case intTypeChars: {
+                int intTmp = rnd.nextInt(4);
+                if (intTmp == 0) {
+                    result.append(randomAlphaLowerCharacter(rnd));
+                } else if (intTmp == 1) {
+                    result.append(randomAlphaUpperCharacter(rnd));
+                } else if (intTmp == 2) {
+                    result.append(randomNumCharacter(rnd));
+                } else {
+                    result.append(randomNonAlphaNumCharacter(rnd));
                 }
+                break;
+            }
+            case intTypeNoneAlpha:
+                result.append(randomNonAlphaNumCharacter(rnd));
                 break;
             default:
                 throw new ModuleException("wrong type " + type);
         }
-
-        return result.toString();
     }
 
     private char randomAlphaUpperCharacter(Random r) {
@@ -187,6 +227,10 @@ public class SymbolsGenerator implements Module {
 
     private char randomNonAlphaNumCharacter(Random r) {
         return charNonAlphaNum[r.nextInt(charNonAlphaNum.length)];
+    }
+
+    private enum Type {
+        DEFAULT, FORMAT
     }
 
 }

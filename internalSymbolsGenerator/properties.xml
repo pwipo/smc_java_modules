@@ -10,23 +10,23 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.internalSymbolsGenerator.SymbolsGenerator</className>
-    <ver>1.1.0</ver>
+    <ver>1.2.0</ver>
     <apiVer>1.4.0</apiVer>
     <date>22-10-2023</date>
 
@@ -94,24 +94,25 @@ The program is supplied as is. For problems arising during the operation or inst
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="0" maxS="-1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>Контекст исполнения по умолчанию.</value>
+                <entry k="ru">
+                    <value><![CDATA[Контекст исполнения по умолчанию.
+Укажите размер символов разных типов: цифры, прописные, строчные, другие.
+Если есть входящие данные, то для каждых 4 значений генерирует новую последовательность.
+Формат значений: размер цифр, размер прописных символов, размер строчных символов, размер прочих символов.
+Если нет источника данных, то берет данные из настроек.
+                    ]]></value>
                 </entry>
-                <entry>
-                    <key>en</key>
-                    <value>Default execution context.</value>
+                <entry k="en">
+                    <value><![CDATA[Default execution context.
+Specify the size of characters of different types: digits, uppercase, lowercase, other.
+Can use the input stream to get 4 values: digit size, uppercase size, lowercase size, other character size.
+Value format: size of numbers, size of uppercase characters, size of lowercase characters, size of other characters.
+If there is no data source, then it takes data from the settings.
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
@@ -120,11 +121,11 @@ The program is supplied as is. For problems arising during the operation or inst
                             <type>FOR</type>
                             <countStatic>-1</countStatic>
                             <elements>
-                                <element>
-                                    <type>VALUE</type>
-                                    <count>4</count>
-                                    <valueType>INTEGER</valueType>
-                                    <value>5</value>
+                                <element t="VALUE" c="4" vt="INTEGER" v="5">
+                                    <description>
+                                        <entry k="ru" v="Формат: размер цифр, размер прописных символов, размер строчных символов, размер прочих символов."/>
+                                        <entry k="ru" v="Format: size of numbers, size of uppercase characters, size of lowercase characters, size of other characters."/>
+                                    </description>
                                 </element>
                             </elements>
                         </element>
@@ -132,12 +133,43 @@ The program is supplied as is. For problems arising during the operation or inst
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>dsg345</value>
-                </element>
+                <element t="VALUE" c="-1" vt="STRING" v="dsg345"/>
+            </output>
+        </type>
+        <type t="format" minS="1" maxS="1">
+            <description>
+                <entry k="ru">
+                    <value><![CDATA[Генерирует символы с использованием символов подстановки.
+Позволяет генерировать строги заданного формата.
+На вход получает строки, каждую строку сканирует на предмет наличия символов подстановки и заменяет их на сгенерированные символы.
+Формат символов подстановки: {(\d+)[nsSo]+}
+В фигурных скобках указывается число, далее один или несколько символов, определяющих тип: n - число, s - символ строчный, S - символ заглавный, o-другие символы.
+                    ]]></value>
+                </entry>
+                <entry k="en">
+                    <value><![CDATA[Generates characters using wildcards.
+Allows generating characters of a given format.
+Receives lines as input, scans each line for wildcards and replaces them with generated characters.
+Wildcard format: {(\d+)[nsSo]+}
+The curly brackets contain a number, then one or more characters that define the type: n - number, s - lowercase character, S - uppercase character, o-other characters.
+                    ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="-1" vt="STRING" v="{4sS}-{5n}-{2o}">
+                            <description>
+                                <entry k="ru" v="В фигурных скобках указывается число, далее один или несколько символов, определяющих тип: n - число, s - символ строчный, S - символ заглавный, o-другие символы."/>
+                                <entry k="ru" v="The curly brackets contain a number, then one or more characters that define the type: n - number, s - lowercase character, S - uppercase character, o-other characters."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="-1" vt="STRING" v="eAjG-23330-?["/>
             </output>
         </type>
     </types>
@@ -145,29 +177,35 @@ The program is supplied as is. For problems arising during the operation or inst
     <description>
         <entry>
             <key>en</key>
-            <value>Generates a sequence of characters.
-can use the incoming stream to get 4 values: the size of numbers, the size of uppercase characters, the size of lowercase characters, the size of other characters.</value>
+            <value>Generates a sequence of characters.</value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Генерирует последовательность символов.
-может использовать входящий поток для получения 4 значений: размер цифр, размер прописных символов, размер строчных символов, размер прочих символов.</value>
+            <value>Генерирует последовательность символов.</value>
         </entry>
     </description>
 
     <help>
         <entry>
             <key>en</key>
-            <value>Specify the size of characters of different types: numbers, uppercase, lowercase, other.</value>
+            <value><![CDATA[Generates a sequence of characters.
+Can use the input stream to get 4 values: digit size, uppercase size, lowercase size, other character size.
+Specify the size of characters of different types: digits, uppercase, lowercase, other.
+It can also generate a sequence of characters based on a mask.
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Укажите размер символов разных типов: цифры, прописные, строчные, другие</value>
+            <value><![CDATA[Генерирует последовательность символов.
+Может использовать входящий поток для получения 4 значений: размер цифр, размер прописных символов, размер строчных символов, размер прочих символов.
+Укажите размер символов разных типов: цифры, прописные, строчные, другие.
+Так же может генерировать последовательность символов на основе маски.
+            ]]></value>
         </entry>
     </help>
 
     <examples>
-        <example>
+        <example t="default">
             <description>
                 <entry>
                     <key>en</key>
@@ -207,7 +245,7 @@ can use the incoming stream to get 4 values: the size of numbers, the size of up
             <countManagedExecutionContexts>0</countManagedExecutionContexts>
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
-        <example>
+        <example t="default">
             <description>
                 <entry>
                     <key>en</key>

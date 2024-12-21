@@ -61,4 +61,42 @@ public class SymbolsGeneratorTest {
 
         process.stop();
     }
+
+    @Test
+    public void format() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "split",
+                        null,
+                        Map.of(
+                                // "type", new Value(ValueType.INTEGER, 6),
+                                // "size", new Value(ValueType.INTEGER, 8)
+                                "sizeNumber", new Value(5),
+                                "sizeAlphaUp", new Value(5),
+                                "sizeAlphaLow", new Value(5),
+                                "sizeNonAlphaNum", new Value(2)
+                        ),
+                        null,
+                        null
+                ),
+                new SymbolsGenerator()
+        );
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value("{4sS}-{5n}-{2o}"))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "format", "format");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        process.stop();
+    }
+
 }

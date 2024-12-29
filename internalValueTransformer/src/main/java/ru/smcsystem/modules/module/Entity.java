@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class Entity {
+    private String originPattern;
     private Number patternNumber;
     private Pattern pattern;
     private byte[] patternBytes;
     private List<Object> resultLst;
 
-    public Entity(Number patternNumber, Pattern pattern, byte[] patternBytes, List<Object> resultLst) {
+    public Entity(String originPattern, Number patternNumber, Pattern pattern, byte[] patternBytes, List<Object> resultLst) {
+        this.originPattern = originPattern;
         this.patternNumber = patternNumber;
         this.pattern = pattern;
         this.patternBytes = patternBytes;
@@ -26,7 +28,7 @@ public class Entity {
             return false;
         */
         if (ValueType.BYTES.equals(message.getType())) {
-            return Arrays.equals(patternBytes, (byte[]) message.getValue());
+            return patternBytes != null && Arrays.equals(patternBytes, (byte[]) message.getValue());
         } else if (ValueType.STRING.equals(message.getType())) {
             return pattern != null && pattern.matcher(message.getValue().toString()).find();
         } else {
@@ -37,6 +39,21 @@ public class Entity {
                 return pattern != null && pattern.matcher(number.toString()).find();
             }
         }
+    }
+
+    public String getOriginPattern() {
+        return originPattern;
+    }
+
+    public String getType() {
+        if (patternBytes != null) {
+            return "Bytes";
+        } else if (patternNumber != null) {
+            return "Number";
+        } else if (pattern != null) {
+            return "String";
+        }
+        return "None";
     }
 
     public List<Object> getResultLst() {

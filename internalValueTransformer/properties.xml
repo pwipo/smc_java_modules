@@ -3,7 +3,7 @@
 
     <uuid>ValueTransformer</uuid>
     <provider>java</provider>
-    <ver>1.1.1</ver>
+    <ver>1.2.0</ver>
     <apiVer>1.4.0</apiVer>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
@@ -13,19 +13,19 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <date>22-10-2023</date>
@@ -38,19 +38,40 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>en</key>
-                    <value>configuration. each row contains one transformation element. the first value is a pattern. the rest are values. all elements are separated ::.</value>
+                    <value>Configuration, each line contains one transform element. The first value is the pattern, the rest are values. All elements are separated by ::.</value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>конфигурация. каждая строка содержит один элемент трансформации. первое значение - паттерн. остальные - значения. все элементы разделены ::.</value>
+                    <value>Конфигурация, каждая строка содержит один элемент трансформации. Первое значение - паттерн, остальные - значения. Все элементы разделены ::.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>configObj</name>
+            <type>OBJECT_ARRAY</type>
+            <subType>TABLE</subType>
+            <value><![CDATA[[{"pattern":"2","values":"4::5"}]]]></value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Additional object-based configuration.
+Similar to the config setting, but uses an array of objects with pattern and values fields.
+Value field All values are separated by ::.
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Дополнительная конфигурация на основе объектов.
+Аналогична настройке config, но использует массив объектов с полями pattern и values.
+Поле значения Все значения разделены ::.
+                    ]]></value>
                 </entry>
             </description>
         </value>
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="1" maxS="-1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -61,12 +82,6 @@ The program is supplied as is. For problems arising during the operation or inst
                     <value>Default execution context.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
@@ -102,34 +117,32 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
         <entry>
             <key>ru</key>
-            <value>Модуль позволяет транформировать входящие значения.</value>
+            <value>Модуль позволяет трансформировать входящие значения.</value>
         </entry>
     </description>
 
     <help>
         <entry>
             <key>en</key>
-            <value>The module allows you to transform input values.
-Scheme of work:
-at start, a list of transformation elements is created based on the config setting.
-as any element, you can use numbers, strings and a byte array (Base64 encoding) - the type is automatically detected.
-if a string is passed as a pattern, then it is used to create the regexp expression.
-during operation, for each input value, the first suitable transformation element is searched based on its pattern.
-if it is, the values of the found transformation element are returned.
-otherwise, the original value is returned.
-            </value>
+            <value><![CDATA[The module allows you to transform incoming values.
+At startup, a list of transformation elements is created based on the config and configObj settings.
+Any element can be numbers, strings, or a byte array (Base64 encoding) - the type is automatically determined.
+If a string is passed as a pattern, it is used to create a regexp expression.
+During operation, the first suitable transformation element is searched for for each incoming value based on its pattern.
+    If found, the values of the found transformation element are returned.
+    Otherwise, the original value is returned.
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Модуль позволяет транформировать входящие значения.
-Схема работы:
-при старте создается список элментов трансформации на основе настройки config.
-в качестве любого элемента можно использовать цифры, строки и байтовый массив (кодировка Base64) - происходит автоматическое определение типа.
-если в качестве паттерна передается строка, то она используется для создания regexp выражения.
-при работе, для каждого входящего значения ищется первый подходящий элемент трасформации на основе его паттерна.
-    если находится - возвращаются значения найденного элемента трасформации.
-    иначе - возвращается первоначальное значение.
-            </value>
+            <value><![CDATA[Модуль позволяет трансформировать входящие значения.
+При старте создается список элементов трансформации на основе настройки config и configObj.
+В качестве любого элемента можно использовать цифры, строки и байтовый массив (кодировка Base64) - происходит автоматическое определение типа.
+Если в качестве паттерна передается строка, то она используется для создания regexp выражения.
+При работе, для каждого входящего значения ищется первый подходящий элемент трансформации на основе его паттерна.
+    Если находится - возвращаются значения найденного элемента трансформации.
+    Иначе - возвращается первоначальное значение.
+            ]]></value>
         </entry>
     </help>
 
@@ -149,8 +162,8 @@ otherwise, the original value is returned.
                 <setting>
                     <name>config</name>
                     <value>1::2::three::4
-5::6
-h.*::hello
+                        5::6
+                        h.*::hello
                     </value>
                 </setting>
             </settings>
@@ -219,5 +232,6 @@ h.*::hello
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
+    <image>iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAACWklEQVR4nO2XTWsUQRCGH0EiYjQxkM0pguAX5BIJGEn0lq+rHz/AH6F48e7Gi4gevKnB5B+EsNEV2UVzyN4WRI+C6yGgEg2YgJuRgnegGaanZ5JsAuILxXZXV3W9011d3Qv/sTuUgAZQP6jgTSACVg+CQEPBTX4DH4BF4C5wer8JRCnyChjery1oAkPADWAOWJe+DTwCDneSxCpQS+hPAA+ALRGpAD1FJm0EljfKmfkjwFfZV/OsRMlZ1jxyCHjj9KvSuTgFfNH4w7zBm86kaYjHhlNIpSXeKLAJbGtVUtFwgpc8BM4BU87YS/0+lVj7BXBMMikfw32NL/sIRB6JMQB899hMJYh90xdH8jHfk8AP6S7kJVBzxuekWwP+qP0emHBsJqSLZLOmtvkanql/J4uAD3E2zwP9wBhwFJjVWAsoSzcmmwX52JjhetY2RAECM8CGbB5LV05ZNdMZnqi/IV/Deek+hQi885z7W2ovya6lvn3xlcTXLqlvPjGOS/czRKDuyQcfAQt+dS8J7GYL7LghG98WfCyyBfVEEi4kkrCsr3aTcFw2854krBTZglrgGFqxiWHtlYxj+Fz92yECaQgVoulAIep1CtHZnRBAjkVLcRxsNmv5s0pxluS9jC7p2dbOeiXVCwav6eqtOrrXKdfxoHNcM6/jJLo0YaT73LK+KC4Cn503YuGnWQ/wVhNs6Zj15fDr1Z5vOrXfdDvCET0stzXZum61myoslmzdumKv6ajF2d7Wsu/Jo/Ry4vkVkuVOPcuHgHva05ay+5f+mFRUZM50IjD/JP4C6Yda5+ZGHowAAAAASUVORK5CYII=</image>
 
 </properties>

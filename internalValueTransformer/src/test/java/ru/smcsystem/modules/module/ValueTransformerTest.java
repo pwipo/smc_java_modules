@@ -3,6 +3,9 @@ package ru.smcsystem.modules.module;
 import org.junit.Assert;
 import org.junit.Test;
 import ru.smcsystem.api.dto.IMessage;
+import ru.smcsystem.api.dto.ObjectArray;
+import ru.smcsystem.api.dto.ObjectElement;
+import ru.smcsystem.api.dto.ObjectField;
 import ru.smcsystem.api.enumeration.ActionType;
 import ru.smcsystem.api.enumeration.MessageType;
 import ru.smcsystem.api.enumeration.ValueType;
@@ -26,7 +29,11 @@ public class ValueTransformerTest {
                                 "config", new Value("1::2::three::4\n" +
                                         "5::6\n" +
                                         // "hi::hello\n" +
-                                        "h.*::hello")
+                                        "h.*::hello"),
+                                "configObj", new Value(new ObjectArray(new ObjectElement(
+                                        new ObjectField("pattern", "2"),
+                                        new ObjectField("values", "3::4")
+                                )))
                         ),
                         null,
                         null

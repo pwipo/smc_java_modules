@@ -18,6 +18,10 @@ public class ValueTransformer implements Module {
     private static final Pattern base64 = Pattern.compile("^([A-Za-z0-9+\\/]{4})*([A-Za-z0-9+\\/]{4}|[A-Za-z0-9+\\/]{3}=|[A-Za-z0-9+\\/]{2}==)$");
     private List<Entity> entities;
 
+    private enum Type {
+        DEFAULT, GET_PATTERNS, GET_VALUES_BY_ID
+    }
+
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
         String configMap = (String) configurationTool.getSetting("config").orElseThrow(() -> new ModuleException("config setting")).getValue();
@@ -82,19 +86,30 @@ public class ValueTransformer implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
-        executionContextTool.addMessage(
-                Stream.iterate(0, n -> n + 1)
-                        .limit(executionContextTool.countSource())
-                        .flatMap(i -> executionContextTool.getMessages(i).stream())
-                        .flatMap(a -> a.getMessages().stream())
-                        .map(m -> entities.stream()
-                                .filter(e -> e.match(m))
-                                .findFirst()
-                                .or(() -> Optional.of(new Entity("", null, null, null, List.of(m.getValue()))))
-                                .get())
-                        .flatMap(e -> e.getResultLst().stream())
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList()));
+        Type type = Type.valueOf(executionContextTool.getType().toUpperCase().trim());
+        ModuleUtils.processMessagesAll(configurationTool, executionContextTool, (id, messageList) -> {
+            switch (type) {
+                case DEFAULT:
+                    executionContextTool.addMessage(
+                            messageList.stream()
+                                    .flatMap(Collection::stream)
+                                    .map(m -> entities.stream()
+                                            .filter(e -> e.match(m))
+                                            .findFirst()
+                                            .or(() -> Optional.of(new Entity("", null, null, null, List.of(m.getValue()))))
+                                            .get())
+                                    .flatMap(e -> e.getResultLst().stream())
+                                    .filter(Objects::nonNull)
+                                    .collect(Collectors.toList()));
+                    break;
+                case GET_PATTERNS:
+                    entities.forEach(e -> executionContextTool.addMessage(e.getOriginPattern()));
+                    break;
+                case GET_VALUES_BY_ID:
+                    executionContextTool.addMessage(entities.get(ModuleUtils.toNumber(messageList.get(0).poll()).intValue()).getResultLst());
+                    break;
+            }
+        });
     }
 
     @Override

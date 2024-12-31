@@ -5,7 +5,7 @@
     <provider>java</provider>
     <os/>
     <arch/>
-    <ver>1.1.0</ver>
+    <ver>1.2.0</ver>
     <apiVer>1.4.0</apiVer>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
@@ -176,7 +176,8 @@ The context is passed data that depends on the element type:
                     <key>en</key>
                     <value><![CDATA[Getting the element's value:
     for buttons the value field will be transmitted.
-    for select all selected elements will be passed as an ObjectArray with objects with the fields: id, label, value, selected.
+    for a select list (multiple=true) all selected elements will be transferred as an ObjectArray with objects with the fields: id, label, value, selected.
+    for a select combobox only one selected element will be transferred as an ObjectArray with objects with the fields: id, label, value, selected.
     for fields, the value will be transmitted - a string.
     for checkbox and radio the value will be passed - a boolean value.
     the value for the file will be a string.
@@ -187,7 +188,8 @@ The context is passed data that depends on the element type:
                     <key>ru</key>
                     <value><![CDATA[Получение значения элемента:
     для кнопок будут передаваться поле value.
-    для select будут передаваться все выбранные элементы в виде ObjectArray с объектами с полями: id, label, value, selected.
+    для select списка (multiple=true) будут передаваться все выбранные элементы в виде ObjectArray с объектами с полями: id, label, value, selected.
+    для select выпадающего списка будет передаваться только один выбранный элемент в виде ObjectArray с объектами с полями: id, label, value, selected.
     для полей будет передаваться значение - строка.
     для checkbox и radio будет передано значение - логическое значение.
     для файла будет передаваться значение - строка.
@@ -504,6 +506,33 @@ The context is passed data that depends on the element type:
                         </element>
                         <element t="VALUE" c="1" vt="STRING">
                             <value><![CDATA[<div></div>]]></value>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output/>
+            <ecs/>
+        </type>
+        <type t="SET_SELECT_OPTIONS" minS="1" maxS="1">
+            <description>
+                <entry k="en" v="Set values for the select element. Accepts a list of strings from which options are generated."/>
+                <entry k="ru" v="Установить значения для элемента select. На вход принимает список строк, из которых генерируются опции."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="field1">
+                            <description>
+                                <entry k="en" v="Element identifier (id or name field)."/>
+                                <entry k="ru" v="Идентификатор элемента (поле id или name)."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" c="-1" vt="STRING" v="one">
+                            <description>
+                                <entry k="en" v="A list of string values to be displayed in the list."/>
+                                <entry k="ru" v="Список строковых значений, которые будут отображаться в списке."/>
+                            </description>
                         </element>
                     </elements>
                 </source>

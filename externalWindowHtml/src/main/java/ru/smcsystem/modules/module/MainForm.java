@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class MainForm {
     // public static String ATTR_NAME_VALUE_OBJECT = "valueObject";
@@ -277,6 +278,14 @@ public class MainForm {
         Object m = e.element.getAttributes().getAttribute(StyleConstants.ModelAttribute);
         switch (e.type) {
             case SELECT: {
+                if (value instanceof List) {
+                    List<String> strings = (List<String>) value;
+                    value = ModuleUtils.convertToObjectArray(
+                            strings.stream()
+                                    .map(s -> new OptionElement(null, s, s, false))
+                                    .collect(Collectors.toList()),
+                            OptionElement.class, true);
+                }
                 if (m instanceof ComboBoxModel) {
                     ComboBoxModel<Option> model = (ComboBoxModel) m;
                     if (value instanceof Number) {

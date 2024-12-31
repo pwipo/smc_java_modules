@@ -16,7 +16,8 @@ public class WindowHtml implements Module {
     private MainForm mainForm;
 
     private enum OperationType {
-        SERVER, GET_VALUE, SET_VALUE, GET_ELEMENT, SET_ELEMENT, SET_ATTRIBUTE, COUNT_CHILDS, ADD_CHILD_ELEMENT, REMOVE_CHILD_ELEMENT, SET_CHILD_ATTRIBUTE, SET_POSITION, SET_INNER_HTML
+        SERVER, GET_VALUE, SET_VALUE, GET_ELEMENT, SET_ELEMENT, SET_ATTRIBUTE, COUNT_CHILDS, ADD_CHILD_ELEMENT, REMOVE_CHILD_ELEMENT, SET_CHILD_ATTRIBUTE, SET_POSITION,
+        SET_INNER_HTML, SET_SELECT_OPTIONS
     }
 
     private String configuration;
@@ -141,11 +142,17 @@ public class WindowHtml implements Module {
                                 mainForm.editorPane.setCaretPosition(positionTmp);
                             }));
                     break;
-
                 case SET_INNER_HTML:
                     Optional.ofNullable(ModuleUtils.getString(messages.get(0).poll()))
                             .ifPresent(idStr -> SwingUtilities.invokeLater(() ->
                                     mainForm.setInnerHtml(idStr, ModuleUtils.getString(messages.get(0).poll()))));
+                    break;
+                case SET_SELECT_OPTIONS:
+                    Optional.ofNullable(ModuleUtils.getString(messages.get(0).poll()))
+                            .ifPresent(idStr -> SwingUtilities.invokeLater(() -> {
+                                List<String> strings = messages.get(0).stream().map(ModuleUtils::toString).collect(Collectors.toList());
+                                mainForm.setValue(idStr, strings);
+                            }));
                     break;
             }
         });

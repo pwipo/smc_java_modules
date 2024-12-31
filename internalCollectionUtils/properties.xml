@@ -26,8 +26,8 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.CollectionUtil</className>
-    <ver>1.4.1</ver>
-    <apiVer>1.4.0</apiVer>
+    <ver>1.4.2</ver>
+    <apiVer>1.4.1</apiVer>
     <date>21-10-2023</date>
 
     <defaultSettings>
@@ -59,6 +59,7 @@ The program is supplied as is. For problems arising during the operation or inst
                 <value>TRANSFORM_OBJECT_FIELD</value>
                 <value>OBJECT_FIELD_VALUE</value>
                 <value>OBJECT_FIELD_VALUE_AUTO_CONVERT</value>
+                <value>LIST_OBJECT_GET</value>
             </validValues>
             <value>SIZE</value>
             <description>
@@ -89,6 +90,7 @@ OBJECT_FIELDS_JOIN - Similar to OBJECT_LIST_JOIN, but for the fields of the firs
 TRANSFORM_OBJECT_FIELD - Similar to TRANSFORM, but calls the appropriate context for each found field in the input array of objects. value contains a list of paths (field names separated by dots). each path corresponds to its execution context, the number of paths must be equal to the number of contexts.
 OBJECT_FIELD_VALUE - similar to MAP_GET_VALUE_OBJECT_LIST, but it works only with 1 incoming array of objects, looks for field values in them (the paths are specified by the second source) and outputs them as is, without wrapping them in an array. Each path can contain a default value (separated by ;;), which is substituted if the field is not found. If there is no default value, then nothing is returned.
 OBJECT_FIELD_VALUE_AUTO_CONVERT - similar to OBJECT_FIELD_VALUE, but additionally performs auto-conversion of string values.
+LIST_OBJECT_GET - similar to LIST_ARRAY_GET, but works dynamically: uses 2 sources, takes an array (object) from the first, and a number - position from the second. Works for objects too.
                     </value>
                 </entry>
                 <entry>
@@ -118,6 +120,7 @@ OBJECT_FIELDS_JOIN - аналогичен OBJECT_LIST_JOIN, но для поле
 TRANSFORM_OBJECT_FIELD - аналогичен TRANSFORM, но вызывает соответствующий контекст для каждого найденного поля во входящем массиве объектов. в value находится список путей (имена полей разделенные точкой). каждый путь соответствует своему контексту исполнения, количество путей должно быть равно количеству контекстов.
 OBJECT_FIELD_VALUE - похож на MAP_GET_VALUE_OBJECT_LIST, но работает только с 1 входящим массивом объектов, в них ищет значения полей (пути заданы вторым источником) и выводит их как есть, без обертки в массив. Каждый путь может содержать дефолтное значение (отделенное символами ;;), которое подставляется если поле не найдено. Если дефолтного значения нет, то ничего не возвращается.
 OBJECT_FIELD_VALUE_AUTO_CONVERT - аналогичен OBJECT_FIELD_VALUE, но дополнительно проводит автоконвертацию строковых значений.
+LIST_OBJECT_GET - похож на LIST_ARRAY_GET, но действует динамически: использует 2 источника, из первого берет массив (объект), а из второго число - позицию. Работает и для объектов.
                     </value>
                 </entry>
             </description>

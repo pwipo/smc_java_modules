@@ -210,14 +210,14 @@ public class CollectionUtil implements Module {
                             .collect(Collectors.toCollection(LinkedList::new));
                     if (inputs.isEmpty())
                         break;
-                    int numberValueId = params.get(0).intValue();
                     ObjectArray arrays = ModuleUtils.deserializeToObject(inputs);
                     if (!ModuleUtils.isArrayContainArrays(arrays)) {
                         executionContextTool.addError("need array of arrays");
                         break;
                     }
+                    int numberValueId = params.get(0).intValue();
                     if (arrays.size() < numberValueId) {
-                        executionContextTool.addError("need more arrays");
+                        executionContextTool.addError("need a large array");
                         break;
                     }
                     ObjectArray array = (ObjectArray) arrays.get(numberValueId);
@@ -818,6 +818,28 @@ public class CollectionUtil implements Module {
                         executionContextTool.addMessage(values);
                     break;
                 }
+                case LIST_OBJECT_GET: {
+                    ObjectArray arrays = ModuleUtils.getFirstActionWithDataList(executionContextTool.getMessages(0))
+                            .map(ModuleUtils::deserializeToObject).orElse(null);
+                    if (!ModuleUtils.isArrayContainObjectElements(arrays) && !ModuleUtils.isArrayContainArrays(arrays)) {
+                        executionContextTool.addError("need array of objects");
+                        break;
+                    }
+                    int numberValueId = ModuleUtils.getFirstActionWithDataList(executionContextTool.getMessages(1))
+                            .map(l -> ModuleUtils.toNumber(l.poll()))
+                            .map(Number::intValue)
+                            .orElse(0);
+                    if (arrays.size() < numberValueId) {
+                        executionContextTool.addError("need a large array");
+                        break;
+                    }
+                    if (ModuleUtils.isArrayContainObjectElements(arrays)) {
+                        executionContextTool.addMessage(new ObjectArray((ObjectElement) arrays.get(numberValueId)));
+                    } else {
+                        executionContextTool.addMessage((ObjectArray) arrays.get(numberValueId));
+                    }
+                    break;
+                }
             }
         });
     }
@@ -874,7 +896,8 @@ public class CollectionUtil implements Module {
         OBJECT_FIELDS_JOIN,
         TRANSFORM_OBJECT_FIELD,
         OBJECT_FIELD_VALUE,
-        OBJECT_FIELD_VALUE_AUTO_CONVERT
+        OBJECT_FIELD_VALUE_AUTO_CONVERT,
+        LIST_OBJECT_GET,
     }
 
 }

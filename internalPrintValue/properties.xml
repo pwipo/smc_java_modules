@@ -7,8 +7,8 @@
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
     <className>ru.smcsystem.smcmodules.module.PrintValue</className>
-    <ver>1.2.1</ver>
-    <apiVer>1.4.0</apiVer>
+    <ver>1.2.2</ver>
+    <apiVer>1.4.1</apiVer>
     <date>22-10-2023</date>
     <categories>Java, Utils</categories>
     <copyrightAndLicense>
@@ -114,6 +114,7 @@ PLACEHOLDER - входящие источники рссматриваются �
         <value>
             <name>arrayValue</name>
             <type>OBJECT_ARRAY</type>
+            <subType>TABLE</subType>
             <value>[]</value>
             <description>
                 <entry k="ru" v="Значение, в виде объекта. Если задан (не пуст), то будет добавляться после значений указанных в value."/>

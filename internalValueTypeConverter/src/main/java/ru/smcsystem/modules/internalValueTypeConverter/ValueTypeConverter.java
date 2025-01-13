@@ -81,6 +81,7 @@ public class ValueTypeConverter implements Module {
     }
 
     private void updateSettings() {
+        charset = Charset.defaultCharset();
         if (Type.fromValuesToCsv.equals(type)) {
             String[] split = param.split("::");
             if (split.length < 2)
@@ -96,7 +97,7 @@ public class ValueTypeConverter implements Module {
             lParam = NumberUtils.toLong(split[0].trim());
             strings = split.length - 1 == lParam ? Arrays.asList(Arrays.copyOfRange(split, 1, split.length)) : null;
         } else if (Type.stringToBytes.equals(type) || Type.bytesToString.equals(type)) {
-            charset = StringUtils.isNotBlank(param) ? Charset.forName(param) : Charset.defaultCharset();
+            charset = StringUtils.isNotBlank(param) ? Charset.forName(param) : charset;
         }
     }
 

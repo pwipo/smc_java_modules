@@ -199,7 +199,8 @@ public class Get implements Module {
                 } else if (ids.size() == 2) {
                     Integer idStart = ids.get(0);
                     Integer idStop = ids.get(1);
-                    if (0 <= idStart && idStart < messagesInput.size() && 0 <= idStop && idStop < messagesInput.size()) {
+                    if (0 <= idStart && idStart < messagesInput.size() && 0 <= idStop) {
+                        idStop = Math.min(idStop, messagesInput.size() - 1);
                         if (idStart < idStop) {
                             for (int j = idStart; j <= idStop; j++)
                                 messages.add(messagesInput.get(j));
@@ -215,7 +216,7 @@ public class Get implements Module {
                             for (int j = idStart; j >= idStop; j--)
                                 messages.add(messagesInput.get(messagesInput.size() + j));
                         }
-                    } else if (0 <= idStart && idStart < messagesInput.size() && idStop < 0 && (messagesInput.size() + idStop) >= 0) {
+                    } else if (0 <= idStart && idStart < messagesInput.size() && messagesInput.size() + idStop >= 0) {
                         int idStopReal = messagesInput.size() + idStop;
                         for (int j = idStart; j <= idStopReal; j++)
                             messages.add(messagesInput.get(j));

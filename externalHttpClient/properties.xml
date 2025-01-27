@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Http</className>
-    <ver>1.1.1</ver>
+    <ver>1.2.0</ver>
     <apiVer>1.4.0</apiVer>
-    <date>19-10-2023</date>
+    <date>27-01-2025</date>
 
     <defaultSettings>
         <value>
@@ -111,6 +111,22 @@ The program is supplied as is. For problems arising during the operation or inst
                 <entry>
                     <key>en</key>
                     <value>Encoding for text responses. If empty, it is determined automatically based on the Content-Type header.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>urlPrefix</name>
+            <type>STRING</type>
+            <value></value>
+            <subType>STRING</subType>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Позволяет задавать префикс, для url. Если не пусто и запрос содержит относительный путь (начинается не с http), то префикс дописывается в начало.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Allows you to specify a prefix for the url. If not empty and the request contains a relative path (does not start with http), the prefix is added to the beginning.</value>
                 </entry>
             </description>
         </value>

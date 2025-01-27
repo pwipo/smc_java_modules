@@ -40,7 +40,6 @@ import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.api.tools.execution.ExecutionContextTool;
 import ru.smcsystem.smc.utils.ModuleUtils;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -56,6 +55,7 @@ public class Http implements Module {
     }
 
     private Charset charset;
+    private String urlPrefix;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -64,6 +64,10 @@ public class Http implements Module {
         String username = (String) configurationTool.getSetting("username").orElseThrow(() -> new ModuleException("username setting")).getValue();
         String password = (String) configurationTool.getSetting("password").orElseThrow(() -> new ModuleException("password setting")).getValue();
         String strCharset = (String) configurationTool.getSetting("charset").orElseThrow(() -> new ModuleException("charset setting")).getValue();
+        urlPrefix = (String) configurationTool.getSetting("urlPrefix").orElseThrow(() -> new ModuleException("urlPrefix setting")).getValue();
+        urlPrefix = urlPrefix.trim();
+        if (urlPrefix.isEmpty())
+            urlPrefix = null;
 
         charset = !strCharset.isBlank() ? Charset.forName(strCharset) : null;
 
@@ -124,7 +128,10 @@ public class Http implements Module {
                     if (messages.size() < 2)
                         return;
                     Method method = Method.values()[(getNumber(messages.poll()).intValue())];
-                    String address = getString(messages.poll());
+                    String address = ModuleUtils.toString(messages.poll()).trim();
+                    boolean isRelativePath = address.startsWith("/");
+                    if (urlPrefix != null && (isRelativePath || !address.toLowerCase().startsWith("http")))
+                        address = urlPrefix + (!isRelativePath ? "/" : "") + address;
 
                     HttpRequestBase request = null;
                     switch (method) {
@@ -295,19 +302,13 @@ public class Http implements Module {
         throw new ModuleException("wrong type, need number");
     }
 
-    private String getString(IMessage message) {
-        if (ValueType.STRING.equals(message.getType()))
-            return (String) message.getValue();
-        throw new ModuleException("wrong type, need string");
-    }
-
     @Override
     public void stop(ConfigurationTool configurationTool) throws ModuleException {
         if (client != null) {
             try {
                 client.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
             }
         }
         charset = null;

@@ -23,7 +23,8 @@ public class HttpTest {
                                 "userAuth", new Value("false"),
                                 "username", new Value(" "),
                                 "password", new Value(" "),
-                                "charset", new Value("")
+                                "charset", new Value(""),
+                                "urlPrefix", new Value("")
                         ),
                         null,
                         null
@@ -146,7 +147,8 @@ public class HttpTest {
                                 "userAuth", new Value("false"),
                                 "username", new Value(" "),
                                 "password", new Value(" "),
-                                "charset", new Value("")
+                                "charset", new Value(""),
+                                "urlPrefix", new Value("")
                         ),
                         null,
                         null
@@ -186,7 +188,8 @@ public class HttpTest {
                                 "userAuth", new Value("false"),
                                 "username", new Value(" "),
                                 "password", new Value(" "),
-                                "charset", new Value("")
+                                "charset", new Value(""),
+                                "urlPrefix", new Value("")
                         ),
                         null,
                         null
@@ -225,7 +228,8 @@ public class HttpTest {
                                 "userAuth", new Value("false"),
                                 "username", new Value(" "),
                                 "password", new Value(" "),
-                                "charset", new Value("")
+                                "charset", new Value(""),
+                                "urlPrefix", new Value("")
                         ),
                         null,
                         null
@@ -264,7 +268,8 @@ public class HttpTest {
                                 "userAuth", new Value("false"),
                                 "username", new Value(" "),
                                 "password", new Value(" "),
-                                "charset", new Value("")
+                                "charset", new Value(""),
+                                "urlPrefix", new Value("")
                         ),
                         null,
                         null
@@ -288,6 +293,46 @@ public class HttpTest {
                                                 , new Message(MessageType.DATA, new Date(), new Value(2))
                                                 , new Message(MessageType.DATA, new Date(), new Value("testparam"))
                                                 , new Message(MessageType.DATA, new Date(), new Value("test2"))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null);
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        process.stop();
+    }
+
+    @Test
+    public void process6() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "cookies", new Value(" "),
+                                "userAuth", new Value("false"),
+                                "username", new Value(" "),
+                                "password", new Value(" "),
+                                "charset", new Value(""),
+                                "urlPrefix", new Value("http://www.google.com")
+                        ),
+                        null,
+                        null
+                ),
+                new Http()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool;
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(MessageType.DATA, new Date(), new Value(0)),
+                                                new Message(MessageType.DATA, new Date(), new Value("search?q=httpClient"))
                                         ),
                                         ActionType.EXECUTE
                                 ))),

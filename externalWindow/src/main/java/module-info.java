@@ -5,4 +5,5 @@ module ru.smcsystem.modules.externalWindow {
     requires org.apache.commons.lang3;
     requires org.apache.commons.collections4;
     requires ru.smcsystem.utils;
+    requires jdk.dynalink;
 }

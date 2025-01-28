@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Http</className>
-    <ver>1.2.0</ver>
+    <ver>1.2.1</ver>
     <apiVer>1.4.0</apiVer>
-    <date>27-01-2025</date>
+    <date>28-01-2025</date>
 
     <defaultSettings>
         <value>

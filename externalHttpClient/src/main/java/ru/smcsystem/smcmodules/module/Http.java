@@ -56,6 +56,7 @@ public class Http implements Module {
 
     private Charset charset;
     private String urlPrefix;
+    private boolean urlPrefixEndWithSeparator;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -66,6 +67,7 @@ public class Http implements Module {
         String strCharset = (String) configurationTool.getSetting("charset").orElseThrow(() -> new ModuleException("charset setting")).getValue();
         urlPrefix = (String) configurationTool.getSetting("urlPrefix").orElseThrow(() -> new ModuleException("urlPrefix setting")).getValue();
         urlPrefix = urlPrefix.trim();
+        urlPrefixEndWithSeparator = urlPrefix.endsWith("/");
         if (urlPrefix.isEmpty())
             urlPrefix = null;
 
@@ -128,11 +130,7 @@ public class Http implements Module {
                     if (messages.size() < 2)
                         return;
                     Method method = Method.values()[(getNumber(messages.poll()).intValue())];
-                    String address = ModuleUtils.toString(messages.poll()).trim();
-                    boolean isRelativePath = address.startsWith("/");
-                    if (urlPrefix != null && (isRelativePath || !address.toLowerCase().startsWith("http")))
-                        address = urlPrefix + (!isRelativePath ? "/" : "") + address;
-
+                    String address = getAddress(messages);
                     HttpRequestBase request = null;
                     switch (method) {
                         case GET:
@@ -163,7 +161,7 @@ public class Http implements Module {
                 ModuleUtils.processMessages(configurationTool, executionContextTool, 0, (id, messages) -> {
                     if (messages == null)
                         return;
-                    String address = ModuleUtils.getString(messages.poll());
+                    String address = getAddress(messages);
                     HttpRequestBase request = new HttpGet(address);
                     addHeaders(request, messages);
                     proceessRequest(executionContextTool, request);
@@ -174,7 +172,7 @@ public class Http implements Module {
                 ModuleUtils.processMessages(configurationTool, executionContextTool, 0, (id, messages) -> {
                     if (messages == null)
                         return;
-                    String address = ModuleUtils.getString(messages.poll());
+                    String address = getAddress(messages);
                     HttpRequestBase request = new HttpPost(address);
                     addHeaders(request, messages);
                     Optional<IAction> lastActionWithDataPost = ModuleUtils.getLastActionWithData(executionContextTool.getMessages(1));
@@ -185,6 +183,17 @@ public class Http implements Module {
                 break;
             }
         }
+    }
+
+    private String getAddress(LinkedList<IMessage> messages) {
+        String address = ModuleUtils.toString(messages.poll()).trim();
+        boolean isRelativePath = address.startsWith("/");
+        if (urlPrefix != null && (isRelativePath || !address.toLowerCase().startsWith("http"))) {
+            if (isRelativePath && address.length() > 1)
+                address = address.substring(1);
+            address = urlPrefix + (!urlPrefixEndWithSeparator ? "/" : "") + address;
+        }
+        return address;
     }
 
     private HttpEntity getPost(LinkedList<IMessage> messages, boolean useCounter) throws UnsupportedEncodingException {

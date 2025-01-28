@@ -332,7 +332,7 @@ public class HttpTest {
                                 new Action(
                                         List.of(
                                                 new Message(MessageType.DATA, new Date(), new Value(0)),
-                                                new Message(MessageType.DATA, new Date(), new Value("search?q=httpClient"))
+                                                new Message(MessageType.DATA, new Date(), new Value("/search?q=httpClient"))
                                         ),
                                         ActionType.EXECUTE
                                 ))),

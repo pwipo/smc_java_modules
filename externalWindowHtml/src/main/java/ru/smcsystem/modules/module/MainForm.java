@@ -40,7 +40,7 @@ public class MainForm {
     }
 
     public final Map<String, FormElement> elements;
-    private final Map<String, Integer> elementsToEcId;
+    public final Map<String, Integer> elementsToEcId;
     private String configuration;
     private Instant lastCreatedElement;
 
@@ -454,9 +454,15 @@ public class MainForm {
                 break;
             case SUBMIT:
             case IMAGE: {
+                Element formE = getFormElement(e);
+                if (formE == null) {
+                    configurationTool.loggerWarn("form element for " + id + " " + e.type + " not find");
+                    break;
+                }
                 ((JButton) e.component).addActionListener(e3 -> {
-                    Element formE = getFormElement(e);
-                    if (formE != null) {
+                    try {
+                        if (configurationTool != null)
+                            configurationTool.loggerTrace("Button " + id + " " + e.type + " pressed");
                         ElementIterator it = new ElementIterator(formE);
                         Element next;
                         ObjectElement objectElement = new ObjectElement();
@@ -490,6 +496,9 @@ public class MainForm {
                             }
                         }
                         processEcCall(id, ecId, List.of(objectArray));
+                    } catch (Exception ex) {
+                        if (configurationTool != null)
+                            configurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(ex));
                     }
                 });
                 break;
@@ -677,7 +686,12 @@ public class MainForm {
     }
 
     private void processEcCallWithData(String id, int ecId) {
-        getValue(id).ifPresent(v -> processEcCall(id, ecId, List.of(v)));
+        try {
+            getValue(id).ifPresent(v -> processEcCall(id, ecId, List.of(v)));
+        } catch (Exception ex) {
+            if (configurationTool != null)
+                configurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(ex));
+        }
     }
 
     private void processEcCall(String id, int ecId, List<Object> values) {

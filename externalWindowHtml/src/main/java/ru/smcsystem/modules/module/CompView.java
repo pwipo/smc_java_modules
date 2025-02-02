@@ -41,20 +41,29 @@ class CompView extends FormView {
             if (name != null)
                 id = name;
         }
-        if (id != null && !mainForm.elements.containsKey(id)) {
-            MainForm.ElementType elementType;
-            if (t == HTML.Tag.SELECT) {
-                elementType = MainForm.ElementType.SELECT;
-            } else if (t == HTML.Tag.TEXTAREA) {
-                elementType = MainForm.ElementType.TEXTAREA;
-            } else {
-                try {
-                    elementType = MainForm.ElementType.valueOf(((String) attrs.getAttribute(HTML.Attribute.TYPE)).toUpperCase());
-                } catch (Exception e) {
-                    elementType = MainForm.ElementType.OTHER;
+        if (id != null) {
+            if (mainForm.elements.containsKey(id)) {
+                Integer ecId = mainForm.elementsToEcId.get(id);
+                mainForm.elements.put(id, new FormElement(id, component, mainForm.elements.get(id).type, element));
+                if (ecId != null) {
+                    String idTmp = id;
+                    SwingUtilities.invokeLater(() -> mainForm.addEC(idTmp, ecId));
                 }
+            } else {
+                MainForm.ElementType elementType;
+                if (t == HTML.Tag.SELECT) {
+                    elementType = MainForm.ElementType.SELECT;
+                } else if (t == HTML.Tag.TEXTAREA) {
+                    elementType = MainForm.ElementType.TEXTAREA;
+                } else {
+                    try {
+                        elementType = MainForm.ElementType.valueOf(((String) attrs.getAttribute(HTML.Attribute.TYPE)).toUpperCase());
+                    } catch (Exception e) {
+                        elementType = MainForm.ElementType.OTHER;
+                    }
+                }
+                mainForm.elements.put(id, new FormElement(id, component, elementType, element));
             }
-            mainForm.elements.put(id, new FormElement(id, component, elementType, element));
         }
         return component;
     }

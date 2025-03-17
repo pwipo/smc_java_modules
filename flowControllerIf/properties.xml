@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <properties>
-
     <uuid>If</uuid>
     <provider>javaFlowController</provider>
     <author>Nikolay V. Ulyanov</author>
@@ -10,25 +9,25 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.flowControllerIfInteger.IfInteger</className>
-    <ver>1.2.0</ver>
-    <apiVer>1.4.0</apiVer>
-    <date>22-10-2023</date>
+    <ver>1.2.1</ver>
+    <apiVer>1.4.1</apiVer>
+    <date>17-03-2025</date>
 
     <defaultSettings>
         <value>
@@ -70,12 +69,14 @@ The program is supplied as is. For problems arising during the operation or inst
                 <value>IS_TRUE</value>
                 <value>IS_FALSE</value>
                 <value>HAS_BOOLEANS</value>
+                <value>IS_OBJECT_ARRAY_NOT_EMPTY</value>
+                <value>IS_OBJECT_ARRAY_CONTAINS_OBJECTS</value>
             </validValues>
             <value>NUMBER_EQUAL</value>
             <description>
                 <entry>
                     <key>en</key>
-                    <value>Type of comparison:
+                    <value><![CDATA[Type of comparison:
 EXIST - true if there is data in the sources (in all).
 NOT_EXIST - true if there is no data in the sources (in all).
 EXIST_ANY - similar to EXIST, but if there is at least 1.
@@ -96,11 +97,13 @@ HAS_OBJECT_ARRAY True if there is at least one message of type OBJECT_ARRAY.
 IS_TRUE - if there is at least one message of type BOOLEAN true.
 IS_FALSE - if there is at least one message of type BOOLEAN false or there are no messages.
 HAS_BOOLEANS - true if there is at least one message of type BOOLEAN.
-                    </value>
+IS_OBJECT_ARRAY_NOT_EMPTY - true if there is at least one message of type OBJECT_ARRAY and the array is not empty.
+IS_OBJECT_ARRAY_CONTAINS_OBJECTS - true if there is at least one message of type OBJECT_ARRAY and the array contains objects (not empty).
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>Типы сравнения:
+                    <value><![CDATA[Типы сравнения:
 EXIST - правда, если есть данные в источниках (во всех).
 NOT_EXIST - правда, если есть нет данных в источниках (во всех).
 EXIST_ANY - аналогичен EXIST, правда если есть хотя бы 1.
@@ -121,7 +124,9 @@ HAS_OBJECT_ARRAY - правда, если есть хотя бы одно соо
 IS_TRUE - если есть хотя бы одно сообщение типа BOOLEAN true.
 IS_FALSE - если есть хотя бы одно сообщение типа BOOLEAN false или нет ни одного сообщения.
 HAS_BOOLEANS - правда, если есть хотя бы одно сообщение типа BOOLEAN.
-                    </value>
+IS_OBJECT_ARRAY_NOT_EMPTY - правда, если есть хотя бы одно сообщение типа OBJECT_ARRAY и массив не пуст.
+IS_OBJECT_ARRAY_CONTAINS_OBJECTS - правда, если есть хотя бы одно сообщение типа OBJECT_ARRAY и массив содержит объекты (не пуст).
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -261,7 +266,7 @@ HAS_BOOLEANS - правда, если есть хотя бы одно сообщ
     <help>
         <entry>
             <key>en</key>
-            <value>The module works like an if.
+            <value><![CDATA[The module works like an if.
 compares (the type of comparison is determined by the type setting) the input values.
 if the comparison is positive:
     if hasElse is true - starts the first context
@@ -269,11 +274,11 @@ if the comparison is positive:
 if the comparison is negative:
     if hasElse is true - it starts the second context.
     if hasElse is false - it will not launch anything.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Модуль работает подобно if.
+            <value><![CDATA[Модуль работает подобно if.
 сравнивает (тип сравнения определяеся настройкой type) входящие значения.
 если сравнение положительно:
     если hasElse равно true - запускает первый конетекст
@@ -281,7 +286,7 @@ if the comparison is negative:
 если сравнение отрицательно:
     если hasElse равно true - запускает второй конетекст.
     если hasElse равно false - ничего не запускает.
-            </value>
+            ]]></value>
         </entry>
     </help>
 
@@ -318,6 +323,6 @@ if the comparison is negative:
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
-    <icon>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</icon>
+    <icon><![CDATA[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]]></icon>
 
 </properties>

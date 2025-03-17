@@ -124,7 +124,7 @@ If there is no data source, then it takes data from the settings.
                                 <element t="VALUE" c="4" vt="INTEGER" v="5">
                                     <description>
                                         <entry k="ru" v="Формат: размер цифр, размер прописных символов, размер строчных символов, размер прочих символов."/>
-                                        <entry k="ru" v="Format: size of numbers, size of uppercase characters, size of lowercase characters, size of other characters."/>
+                                        <entry k="en" v="Format: size of numbers, size of uppercase characters, size of lowercase characters, size of other characters."/>
                                     </description>
                                 </element>
                             </elements>

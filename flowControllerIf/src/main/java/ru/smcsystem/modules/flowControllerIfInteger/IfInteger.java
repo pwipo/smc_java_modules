@@ -42,6 +42,8 @@ public class IfInteger implements Module {
         IS_TRUE,
         IS_FALSE,
         HAS_BOOLEANS,
+        IS_OBJECT_ARRAY_NOT_EMPTY,
+        IS_OBJECT_ARRAY_CONTAINS_OBJECTS,
     }
 
     @Override
@@ -71,7 +73,7 @@ public class IfInteger implements Module {
         boolean execute[] = new boolean[]{false};
 
         boolean checkNumbers = Type.NUMBER_EQUAL.equals(type) || Type.NUMBER_MORE_THEN.equals(type) || Type.NUMBER_MORE_THEN_OR_EQUAL.equals(type) || Type.NUMBER_LESS_THEN.equals(type) || Type.NUMBER_LESS_THEN_OR_EQUAL.equals(type);
-        boolean checkType = Type.HAS_STRING.equals(type) || Type.HAS_NUMBER.equals(type) || Type.HAS_BYTES.equals(type) || Type.HAS_OBJECT_ARRAY.equals(type) || Type.HAS_BOOLEANS.equals(type);
+        boolean checkType = Type.HAS_STRING.equals(type) || Type.HAS_NUMBER.equals(type) || Type.HAS_BYTES.equals(type) || Type.HAS_OBJECT_ARRAY.equals(type) || Type.HAS_BOOLEANS.equals(type) || Type.IS_OBJECT_ARRAY_NOT_EMPTY.equals(type) || Type.IS_OBJECT_ARRAY_CONTAINS_OBJECTS.equals(type);
         boolean checkEq = Type.EQUAL.equals(type) || Type.NOT_EQUAL.equals(type) || Type.IS_TRUE.equals(type) || Type.IS_FALSE.equals(type);
         boolean checkError = Type.HAS_ERROR.equals(type) || Type.NO_ERROR.equals(type);
 
@@ -155,6 +157,13 @@ public class IfInteger implements Module {
                             break;
                         case HAS_BOOLEANS:
                             checkResult = iAction.getMessages().stream().anyMatch(ModuleUtils::isBoolean);
+                            break;
+                        case IS_OBJECT_ARRAY_NOT_EMPTY:
+                            checkResult = iAction.getMessages().stream().anyMatch(m -> ModuleUtils.isObjectArray(m) && ModuleUtils.getObjectArray(m).size() > 0);
+                            break;
+                        case IS_OBJECT_ARRAY_CONTAINS_OBJECTS:
+                            checkResult = iAction.getMessages().stream()
+                                    .anyMatch(m -> ModuleUtils.isObjectArray(m) && ModuleUtils.isArrayContainObjectElements(ModuleUtils.getObjectArray(m)));
                             break;
                     }
                     if (checkResult) {

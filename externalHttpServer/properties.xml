@@ -113,9 +113,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </value>
         <value>
             <name>availablePaths</name>
-            <type>TEXT</type>
+            <type>STRING</type>
             <value></value>
-            <subType>STRING</subType>
+            <subType>TEXT</subType>
             <description>
                 <entry>
                     <key>en</key>

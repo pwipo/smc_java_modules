@@ -3,7 +3,7 @@
 
     <uuid>ExampleJava</uuid>
     <provider>java</provider>
-    <ver>1.1.5</ver>
+    <ver>1.1.6</ver>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
@@ -25,8 +25,8 @@ The module is supplied as is. For problems arising during the operation or insta
             ]]></value>
         </entry>
     </copyrightAndLicense>
-    <apiVer>1.4.0</apiVer>
-    <date>23-10-2023</date>
+    <apiVer>1.4.2</apiVer>
+    <date>27-03-2025</date>
 
     <defaultSettings>
         <value>
@@ -91,11 +91,23 @@ The module is supplied as is. For problems arising during the operation or insta
                 </element>
                 <element t="VALUE_ANY" c="-1" vt="INTEGER" v="1"/>
             </output>
+            <ecs>
+                <ec c="-1">
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="param"/>
+                    </elements>
+                    <output>
+                        <element t="VALUE_ANY" c="-1" vt="INTEGER" v="1"/>
+                    </output>
+                </ec>
+            </ecs>
         </type>
     </types>
 
     <useStorage>false</useStorage>
     <threadSafe>true</threadSafe>
+    <useVariables>false</useVariables>
+    <useManagement>true</useManagement>
 
     <description>
         <entry>

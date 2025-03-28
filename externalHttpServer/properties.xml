@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Server</className>
-    <ver>1.4.3</ver>
-    <apiVer>1.4.0</apiVer>
-    <date>22-10-2023</date>
+    <ver>1.4.4</ver>
+    <apiVer>1.4.2</apiVer>
+    <date>27-03-2025</date>
 
     <defaultSettings>
         <value>
@@ -113,7 +113,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </value>
         <value>
             <name>availablePaths</name>
-            <type>STRING</type>
+            <type>TEXT</type>
             <value></value>
             <subType>STRING</subType>
             <description>
@@ -122,6 +122,7 @@ The program is supplied as is. For problems arising during the operation or inst
                     <value><![CDATA[Defines a list of available addresses. Only these are responded to, otherwise 404 is returned. If empty, all sites are accepted.
 If VIRTUAL is selected, the protocol, host, and port must be specified for each path, for example: http://localhost:8080^/.*, where http://localhost:8080 identifies the virtual host, and ^/.* is a regular expression.
 If they are not specified, this path will be applied to the first server.
+The list is separated by :: or newline characters.
                     ]]></value>
                 </entry>
                 <entry>
@@ -129,6 +130,7 @@ If they are not specified, this path will be applied to the first server.
                     <value><![CDATA[Определяет список доступных адресов. Только на них происходит ответ, иначе возвращает 404. Если пуст - то принимаются все сайты.
 Если выбран VIRTUAL, для каждого пути надо указывать протокол, хост и порт, например: http://localhost:8080^/.*, тут http://localhost:8080 - идентифицирует виртуальный хост, а ^/.* - регулярное выражение.
 Если они не указаны, то этот путь будет применен к первому серверу.
+Список разделен символами :: или символом новой строки.
                     ]]></value>
                 </entry>
             </description>
@@ -442,12 +444,6 @@ Used for lazy loading of large files.
     если список разрешенных адресов пуст, последовательно запускает все контексты исполнения.
 Контексты запускаются с данными запроса в качестве параметров от сервера (аналог вызова функции), поэтому у запускаемых контекстов должен быть настроен источник на сервер.
 После исполнения, данные от последнего исполненного контекста (если запускалось несколько) используются в качестве ответа.
-
-Формат запроса зависит от настройки requestType. Описание формата описано в ней.
-Формат ответа от контекста:
-    1 - число - сообщение код ответа (200),
-    остальные кроме последнего - строки - заголовки в формате ключ=значение,
-    последнее - байтовый массив или строка - тело ответа.
                     ]]></value>
                 </entry>
                 <entry>
@@ -458,24 +454,52 @@ When a request is received:
      if the list of allowed addresses is empty, starts all execution contexts sequentially.
 Contexts are launched with request data as parameters from the server (analogous to a function call), so the launched contexts must have a server source configured.
 After execution, data from the last executed context (if several were launched) is used as a response.
-
+                    ]]></value>
+                </entry>
+            </description>
+            <sources/>
+            <output>
+                <element t="VALUE" c="1" vt="STRING" v="stop server"/>
+            </output>
+            <ecs>
+                <ec c="-1">
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value><![CDATA[Вызывается при поступлении запроса по соответствующему путь (URL).
+Формат запроса зависит от настройки requestType. Описание формата описано в ней.
+Формат ответа от контекста:
+    1 - число - сообщение код ответа (200),
+    остальные кроме последнего - строки - заголовки в формате ключ=значение,
+    последнее - байтовый массив или строка - тело ответа.
+                    ]]></value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value><![CDATA[Called when a request is received at the corresponding path (URL).
 The request format depends on the requestType setting. The format is described there.
 Response format from context:
      1 - number - message response code (200),
      the rest except the last one are lines - headers in the key=value format,
      the latter is a byte array or a string - the body of the response.
                     ]]></value>
-                </entry>
-            </description>
-            <sources/>
-            <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <valueType>STRING</valueType>
-                    <value>stop server</value>
-                </element>
-            </output>
+                        </entry>
+                    </description>
+                    <elements>
+                        <element t="VALUE_ANY" c="1" vt="STRING" v="GET">
+                            <description>
+                                <entry k="ru" v="Формат запроса зависит от настройки requestType. Описание формата описано в ней."/>
+                                <entry k="en" v="The request format depends on the requestType setting. The format is described there."/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="INTEGER" v="200"/>
+                        <element t="VALUE" c="-1" vt="STRING" v="key=value"/>
+                        <element t="VALUE_ANY" c="1" vt="STRING" v="hello world"/>
+                    </output>
+                </ec>
+            </ecs>
         </type>
         <type t="fast_response" minS="3" maxS="4" minEC="1" maxEC="3">
             <description>
@@ -617,6 +641,9 @@ The third context is used to get the file size, passes 1 parameter: path, receiv
                             <value>[]</value>
                         </element>
                     </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="STRING" v="[]"/>
+                    </output>
                 </ec>
                 <ec>
                     <description>
@@ -628,6 +655,9 @@ The third context is used to get the file size, passes 1 parameter: path, receiv
                         <element t="VALUE" c="1" vt="LONG" v="0"/>
                         <element t="VALUE" c="1" vt="INTEGER" v="10"/>
                     </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="BYTES" v="AQIDBAU="/>
+                    </output>
                 </ec>
                 <ec>
                     <description>
@@ -637,6 +667,9 @@ The third context is used to get the file size, passes 1 parameter: path, receiv
                     <elements>
                         <element t="VALUE" c="1" vt="STRING" v="/fg/file.txt"/>
                     </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="LONG" v="10"/>
+                    </output>
                 </ec>
             </ecs>
         </type>
@@ -734,6 +767,9 @@ The second context is used to get the file size, passes 1 parameter: path, recei
                         <element t="VALUE" c="1" vt="LONG" v="0"/>
                         <element t="VALUE" c="1" vt="INTEGER" v="10"/>
                     </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="BYTES" v="AQIDBAU="/>
+                    </output>
                 </ec>
                 <ec>
                     <description>
@@ -743,6 +779,9 @@ The second context is used to get the file size, passes 1 parameter: path, recei
                     <elements>
                         <element t="VALUE" c="1" vt="STRING" v="/fg/file.txt"/>
                     </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="LONG" v="10"/>
+                    </output>
                 </ec>
             </ecs>
         </type>
@@ -830,8 +869,9 @@ Returns a byte array only if there is something to read. Returns nothing when th
     </types>
 
     <useStorage>true</useStorage>
-
     <threadSafe>true</threadSafe>
+    <useVariables>false</useVariables>
+    <useManagement>false</useManagement>
 
     <description>
         <entry>
@@ -957,6 +997,7 @@ c одним управляемым контекстом исполнения о
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
-    <icon>iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAADNElEQVR4nO2aS2sUQRCAv5jdaDAaMahJfEbQYwRRUFAPOSmCngQvgv4AyU0RRBNBQQ+CJCgoCnoy+LgEUdR48g+oYA6ixhdqjCJKNBsfKw2zMFSq15nZndnZTX9Ql+2aqa7amemq6gaHw+FwOBwOh8PhCE89sBE4AtwAhoFPwF/gDzAGPAFuAgeBDUAdNUAHcBL4AORDymvgBLCYKqQVuABMRnBcSg7oB1qoEvYCX8rguJTPwC5SzCzgUgiH7gDLgOXA3RDXnQMypIzZwH3LhL8qvw0BM0XwHgS81sgtoJGU0GCZvHl3DwM94vdxYIXlgzkudHu8lSOn3H8QyJICriiTewms9R7VN2LsaJF79SorgbnHOmBEsXOWCrNPmdQjoM0b71KeCrNC2GhVVg5zD0O7lytIe7upEO3ANzGZF8LBfjE+EOC+A+KaPt9Ym2fDPz4KzKcCXI5hqYsqJtCJ0gH8ToHjBZlIOmM8kwKnpRxPyvkM8DEFDkt5BcxIIgBdypd9boBvRHcIG93i2nuWCnNM6K0nAXqVlFZjSOjtCGFjp7j2qUXvqtA7QALcFkb3W/SGhV5nCBtrxLVmubUVXn69ayTAM2F0k0VvVOgVS4C0HEO+41oB1KkkYbHzQxhdZdGTSVJzCBvNSgDmKHrzhI7pMsVKndfG8hs1laDGrwD/oI2sEoAFAfRMPhAr9UoAmiy6MqfPhqwwZQC0jlCj0PlJAnyP+ApoS6WNFiUAJiiSJULnPQnwXBjdbNGTjdBChVhgO/A2pqSoHGLK+G2aY4NlWgZlnyCNYvoRUzgmlEw/T0O2yExy4ydfJTKFLUJh0rLE/S8VrtoAZGMqhtJCoHmdnu4BWKkkOtMqAIaLMQfgnUXP1AnFaoYwYmxEDsAiZQvMLBtLfTp9RZqiVR8ArRzNe63r9iLNk4W1FAAs+4Ej3mZGxnsq/GNmp6emAtBg2dzMec7KrTFTTq+OYighIs2ryevb5QNucD6stQAUnoRSVoa0UPK89sR0QKJSEgnTvTlfpiMylZaSMCdAThX5oldlOVzKMblDwHXgsXfmRzv4kCbnt0by1uFwOBwOh8PhcFAr/AODmX0gfDWeUAAAAABJRU5ErkJggg==</icon>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAADNElEQVR4nO2aS2sUQRCAv5jdaDAaMahJfEbQYwRRUFAPOSmCngQvgv4AyU0RRBNBQQ+CJCgoCnoy+LgEUdR48g+oYA6ixhdqjCJKNBsfKw2zMFSq15nZndnZTX9Ql+2aqa7amemq6gaHw+FwOBwOh8PhCE89sBE4AtwAhoFPwF/gDzAGPAFuAgeBDUAdNUAHcBL4AORDymvgBLCYKqQVuABMRnBcSg7oB1qoEvYCX8rguJTPwC5SzCzgUgiH7gDLgOXA3RDXnQMypIzZwH3LhL8qvw0BM0XwHgS81sgtoJGU0GCZvHl3DwM94vdxYIXlgzkudHu8lSOn3H8QyJICriiTewms9R7VN2LsaJF79SorgbnHOmBEsXOWCrNPmdQjoM0b71KeCrNC2GhVVg5zD0O7lytIe7upEO3ANzGZF8LBfjE+EOC+A+KaPt9Ym2fDPz4KzKcCXI5hqYsqJtCJ0gH8ToHjBZlIOmM8kwKnpRxPyvkM8DEFDkt5BcxIIgBdypd9boBvRHcIG93i2nuWCnNM6K0nAXqVlFZjSOjtCGFjp7j2qUXvqtA7QALcFkb3W/SGhV5nCBtrxLVmubUVXn69ayTAM2F0k0VvVOgVS4C0HEO+41oB1KkkYbHzQxhdZdGTSVJzCBvNSgDmKHrzhI7pMsVKndfG8hs1laDGrwD/oI2sEoAFAfRMPhAr9UoAmiy6MqfPhqwwZQC0jlCj0PlJAnyP+ApoS6WNFiUAJiiSJULnPQnwXBjdbNGTjdBChVhgO/A2pqSoHGLK+G2aY4NlWgZlnyCNYvoRUzgmlEw/T0O2yExy4ydfJTKFLUJh0rLE/S8VrtoAZGMqhtJCoHmdnu4BWKkkOtMqAIaLMQfgnUXP1AnFaoYwYmxEDsAiZQvMLBtLfTp9RZqiVR8ArRzNe63r9iLNk4W1FAAs+4Ej3mZGxnsq/GNmp6emAtBg2dzMec7KrTFTTq+OYighIs2ryevb5QNucD6stQAUnoRSVoa0UPK89sR0QKJSEgnTvTlfpiMylZaSMCdAThX5oldlOVzKMblDwHXgsXfmRzv4kCbnt0by1uFwOBwOh8PhcFAr/AODmX0gfDWeUAAAAABJRU5ErkJggg==
+    </icon>
 
 </properties>

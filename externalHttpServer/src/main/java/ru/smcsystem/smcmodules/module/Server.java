@@ -4,6 +4,7 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Engine;
 import org.apache.catalina.Realm;
 import org.apache.catalina.Service;
+import org.apache.catalina.connector.ClientAbortException;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardEngine;
 import org.apache.catalina.core.StandardService;
@@ -96,7 +97,8 @@ public class Server implements Module {
         String strAddress = (String) externalConfigurationTool.getSetting("bindAddress").orElseThrow(() -> new ModuleException("bindAddress setting")).getValue();
         fileResponsePieceSize = (Integer) externalConfigurationTool.getSetting("fileResponsePieceSize").orElseThrow(() -> new ModuleException("fileResponsePieceSize setting")).getValue();
         ObjectArray headersArr = (ObjectArray) externalConfigurationTool.getSetting("headers").orElseThrow(() -> new ModuleException("headers setting")).getValue();
-        List<String> availablePathsList = Arrays.stream(availablePaths.split("::"))
+        List<String> availablePathsList = Arrays.stream(availablePaths.split("\n"))
+                .flatMap(s -> Arrays.stream(s.split("::")))
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.toList());
         ObjectArray virtualServerSettings = (ObjectArray) externalConfigurationTool.getSetting("virtualServerSettings").orElseThrow(() -> new ModuleException("virtualServerSettings setting")).getValue();
@@ -427,7 +429,7 @@ public class Server implements Module {
                         if (mimeTypeNew != null)
                             mimeType = mimeTypeNew;
                     } catch (Exception e) {
-                        configurationTool.loggerWarn("error while get mime type fore bytes" + e.getMessage());
+                        configurationTool.loggerWarn("error while get mime type fore bytes" + ModuleUtils.getErrorMessageOrClassName(e));
                     }
                 } else if (lst.isEmpty() && ModuleUtils.isString(m)) {
                     path = ModuleUtils.getString(m);
@@ -501,9 +503,11 @@ public class Server implements Module {
                 response.setResponseObj(responseObj);
                 try {
                     resultCode = handleResponse(resp, responseObj, response.getVirtualServerInfo().getHeaders());
+                } catch (ClientAbortException e) {
+                    configurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
                 } catch (IOException e) {
-                    configurationTool.loggerWarn(e.getMessage());
-                    configurationTool.loggerTrace(ModuleUtils.getStackTraceAsString(e));
+                    configurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
+                    // configurationTool.loggerTrace(ModuleUtils.getStackTraceAsString(e));
                 } catch (Exception e) {
                     configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                 }
@@ -732,9 +736,11 @@ public class Server implements Module {
                             externalExecutionContextTool.getFlowControlTool().releaseThreadCache(threadId);
                         }
                     }
+                } catch (ClientAbortException e) {
+                    externalConfigurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
                 } catch (IOException e) {
-                    externalConfigurationTool.loggerWarn(e.getMessage());
-                    externalConfigurationTool.loggerTrace(ModuleUtils.getStackTraceAsString(e));
+                    externalConfigurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
+                    // externalConfigurationTool.loggerTrace(ModuleUtils.getStackTraceAsString(e));
                 } catch (Exception e) {
                     externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                     // externalExecutionContextTool.addError(e.getLocalizedMessage());
@@ -745,9 +751,11 @@ public class Server implements Module {
                     if (response != null && (responseObj == null || !responseObj.isFastResponse())) {
                         try {
                             handleResponse(resp, responseObj, virtualServerInfo.getHeaders());
+                        } catch (ClientAbortException e) {
+                            externalConfigurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
                         } catch (IOException e) {
-                            externalConfigurationTool.loggerWarn(e.getMessage());
-                            externalConfigurationTool.loggerTrace(ModuleUtils.getStackTraceAsString(e));
+                            externalConfigurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
+                            // externalConfigurationTool.loggerTrace(ModuleUtils.getStackTraceAsString(e));
                         } catch (Exception e) {
                             externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                         }
@@ -995,21 +1003,17 @@ public class Server implements Module {
                 } else {
                     size = Long.MAX_VALUE;
                 }
-                try {
-                    ServletOutputStream outputStream = resp.getOutputStream();
+                ServletOutputStream outputStream = resp.getOutputStream();
+                outputStream.write(bytes);
+                for (long position = fileResponsePieceSize; position < size; position += fileResponsePieceSize) {
+                    bytes = responseObj.getBytes(position, fileResponsePieceSize);
+                    if (bytes == null)
+                        break;
                     outputStream.write(bytes);
-                    for (long position = fileResponsePieceSize; position < size; position += fileResponsePieceSize) {
-                        bytes = responseObj.getBytes(position, fileResponsePieceSize);
-                        if (bytes == null)
-                            break;
-                        outputStream.write(bytes);
-                        if (bytes.length != fileResponsePieceSize)
-                            break;
-                    }
-                    outputStream.flush();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    if (bytes.length != fileResponsePieceSize)
+                        break;
                 }
+                outputStream.flush();
             } else if (bytes != null) {
                 writeBytesResponse(resp, bytes);
             } else {

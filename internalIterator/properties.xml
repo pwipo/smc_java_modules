@@ -10,25 +10,25 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Iterator</className>
-    <ver>1.1.0</ver>
-    <apiVer>1.4.0</apiVer>
-    <date>22-10-2023</date>
+    <ver>1.2.0</ver>
+    <apiVer>1.4.2</apiVer>
+    <date>10-08-2025</date>
 
     <defaultSettings>
         <value>
@@ -44,21 +44,21 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>en</key>
-                    <value>defines the cache adjustment strategy:
-FORCE - completely updates the cache with new data. if there is no new data, the cache becomes empty.
-ONY_EXIST - if there is new data, completely updates the cache. if there is no new data, it leaves the old cache.
+                    <value><![CDATA[Defines the cache refresh strategy (when added):
+FORCE - completely updates the cache with new data. If there is no new data, the cache becomes empty.
+ONY_EXIST - if there is new data, completely updates the cache. If there is no new data, it leaves the old cache.
 ADD - always adds data to the cache.
-ADD_CLEAN_ON_GET - always adds data to the cache. upon receipt of data - the cache is reset.
-                    </value>
+ADD_CLEAN_ON_GET - always adds data to the cache. Upon receipt of data - the cache is reset.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>определяет стратегию оюновления кеша:
-FORCE - полностью обновляет кеш новыми данными. если новых данных нет - кеш становится пустым.
-ONY_EXIST - если есть новые данные, полностью обновляет кеш. если новых данных нет - оставляет старый кеш.
+                    <value><![CDATA[Определяет стратегию обновления кэша (при добавлении):
+FORCE - полностью обновляет кеш новыми данными. Если новых данных нет - кеш становится пустым.
+ONY_EXIST - если есть новые данные, полностью обновляет кеш. Если новых данных нет - оставляет старый кеш.
 ADD - всегда добавляет данные в кеш.
-ADD_CLEAN_ON_GET - всегда добавляет данные в кеш. при получении данных - кеш обнуляется.
-                    </value>
+ADD_CLEAN_ON_GET - всегда добавляет данные в кеш. При получении данных - кеш обнуляется.
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -67,14 +67,8 @@ ADD_CLEAN_ON_GET - всегда добавляет данные в кеш. пр�
             <type>INTEGER</type>
             <value>0</value>
             <description>
-                <entry>
-                    <key>en</key>
-                    <value>max cache size. if 0 - not use.</value>
-                </entry>
-                <entry>
-                    <key>ru</key>
-                    <value>максимальный размер кеша. если 0 не используется.</value>
-                </entry>
+                <entry k="en" v="max cache size. if 0 - not use."/>
+                <entry k="ru" v="максимальный размер кеша. если 0 не используется."/>
             </description>
         </value>
         <value>
@@ -82,14 +76,8 @@ ADD_CLEAN_ON_GET - всегда добавляет данные в кеш. пр�
             <type>INTEGER</type>
             <value>1</value>
             <description>
-                <entry>
-                    <key>en</key>
-                    <value>increment.</value>
-                </entry>
-                <entry>
-                    <key>ru</key>
-                    <value>инкрименент.</value>
-                </entry>
+                <entry k="en" v="increment."/>
+                <entry k="ru" v="инкрименент."/>
             </description>
         </value>
         <value>
@@ -97,86 +85,184 @@ ADD_CLEAN_ON_GET - всегда добавляет данные в кеш. пр�
             <type>INTEGER</type>
             <value>1</value>
             <description>
-                <entry>
-                    <key>en</key>
-                    <value>count output values. if less than 0 - returns everything (starting from the current position).</value>
-                </entry>
-                <entry>
-                    <key>ru</key>
-                    <value>количество отдаваемых данных. если меньше 0 - выдает все (начиная с текущей позиции).</value>
-                </entry>
+                <entry k="en" v="count output values. if less than 0 - returns everything (starting from the current position)."/>
+                <entry k="ru" v="количество отдаваемых данных. если меньше 0 - выдает все (начиная с текущей позиции)."/>
             </description>
         </value>
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="0" maxS="-1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Контекст исполнения по умолчанию.</value>
+                    <value><![CDATA[Контекст исполнения по умолчанию.
+Если есть источники, обновляет кэш (добавляет данные), используются настройки: updateCacheStrategy и maxCacheSize.
+Если источников нет - возвращает данные из кеша, используются настройки: incrementValue и outputSize.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Default execution context.</value>
+                    <value><![CDATA[Default execution context.
+If there are sources, updates the cache (adds data), using the settings: updateCacheStrategy and maxCacheSize.
+If there are no sources, returns data from the cache, using the settings: incrementValue and outputSize.
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <valueType>INTEGER</valueType>
-                            <value>1</value>
+                        <element t="VALUE_ANY" c="-1" vt="INTEGER" v="1"/>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE_ANY" c="-1" vt="INTEGER" v="1"/>
+            </output>
+        </type>
+        <type t="add" minS="1" maxS="-1">
+            <description>
+                <entry k="en" v="Updates the cache (adds data), using the settings: updateCacheStrategy and maxCacheSize."/>
+                <entry k="ru" v="Обновляет кэш (добавляет данные), используются настройки: updateCacheStrategy и maxCacheSize."/>
+            </description>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element t="VALUE_ANY" c="-1" vt="INTEGER" v="1"/>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE_ANY" c="1" vt="INTEGER" v="1">
+                    <description>
+                        <entry k="en" v="Returns the current cache size."/>
+                        <entry k="ru" v="Возвращает текущий размер кэша."/>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type t="get">
+            <description>
+                <entry k="en" v="Returns data from the cache, using the settings: incrementValue and outputSize."/>
+                <entry k="ru" v="Возвращает данные из кеша, используются настройки: incrementValue и outputSize."/>
+            </description>
+            <sources/>
+            <output>
+                <element t="VALUE_ANY" c="-1" vt="INTEGER" v="1"/>
+            </output>
+        </type>
+        <type t="get_all">
+            <description>
+                <entry k="en" v="Returns all data from cache. Does not use settings."/>
+                <entry k="ru" v="Возвращает все данные из кеша. Не использует настройки."/>
+            </description>
+            <sources/>
+            <output>
+                <element t="VALUE_ANY" c="-1" vt="INTEGER" v="1"/>
+            </output>
+        </type>
+        <type t="clean">
+            <description>
+                <entry k="en" v="Clears cache."/>
+                <entry k="ru" v="Очищает кэш."/>
+            </description>
+            <sources/>
+            <output/>
+        </type>
+        <type t="update" minS="1" maxS="1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Обновляет данные в кеше использую входящий объект настроек.
+Может ограничивать очередь заданным диапазоном (если превышает, обрезает начало).
+Так же может вставлять в начало и конец очереди подготовленные значения.
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Updates data in the cache using the incoming settings object.
+Can limit the queue to a given range (if it exceeds, truncates the beginning).
+Can also insert prepared values to the beginning and end of the queue.
+                    ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="-1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"maxSize":20, "updateSize":10, "startValues":[1,2], "endValues":[10]}]]]></value>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value><![CDATA[Объект настроек, формат:
+maxSize - максимальное значение очереди, если превышает, то обрезается начало, используя значение updateSize. Значение по умолчанию - 20.
+updateSize - новый размер очереди, если необходимо обрезание. Значение по умолчанию - 10.
+startValues - массив значений, вставляется в начало списка (если необходимо). Если массив содержит объекты, то вставляется весь массив одним значением, иначе значения массива вставляются по отдельности.
+endValues - массив значений, вставляется в конец списка (если необходимо). Если массив содержит объекты, то вставляется весь массив одним значением, иначе значения массива вставляются по отдельности.
+                                    ]]></value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value><![CDATA[Settings object, format:
+maxSize - maximum queue value, if it exceeds, then the beginning is cut off using the updateSize value. The default value is 20.
+updateSize - new queue size, if cutting is necessary. The default value is 10.
+startValues - array of values, inserted at the beginning of the list (if necessary). If the array contains objects, then the entire array is inserted as a single value, otherwise the array values are inserted separately.
+endValues - array of values, inserted at the end of the list (if necessary). If the array contains objects, then the entire array is inserted as a single value, otherwise the array values are inserted separately.
+                                    ]]></value>
+                                </entry>
+                            </description>
                         </element>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE_ANY</type>
-                    <count>-1</count>
-                    <valueType>INTEGER</valueType>
-                    <value>1</value>
+                <element t="VALUE_ANY" c="1" vt="INTEGER" v="1">
+                    <description>
+                        <entry k="en" v="Returns the current cache size."/>
+                        <entry k="ru" v="Возвращает текущий размер кэша."/>
+                    </description>
                 </element>
             </output>
         </type>
     </types>
 
     <useStorage>false</useStorage>
-
     <threadSafe>false</threadSafe>
+    <useVariables>false</useVariables>
+    <useManagement>false</useManagement>
 
     <defaultExecutionContext/>
 
     <description>
         <entry>
             <key>en</key>
-            <value>It is an iterator.</value>
+            <value>The detail is an iterable cache.</value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Представляет собой итератор.</value>
+            <value>Деталь представляет собой итерируемый кеш.</value>
         </entry>
     </description>
 
     <help>
         <entry>
             <key>en</key>
-            <value>It is an iterator. if there are sources, updates the cache. otherwise returns data.</value>
+            <value><![CDATA[The detail is an iterable cache. Allows you to:
+Add data using a strategy (updateCacheStrategy setting).
+Receive a chunk of data (incrementValue and outputSize settings).
+Update the cache, and so on.
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Представляет собой итератор. если есть источники - обновляет кеш. иначе отдает данные.</value>
+            <value><![CDATA[Деталь представляет собой итерируемый кеш. Позволяет:
+Добавлять данные, используя стратегию (настройка updateCacheStrategy).
+Получать порцию данных (настройки incrementValue и outputSize).
+Обновлять кеш и так далее.
+            ]]></value>
         </entry>
     </help>
 

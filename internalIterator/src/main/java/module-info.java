@@ -1,4 +1,5 @@
 module ru.smcsystem.modules.internalIterator {
-    requires ru.smcsystem.api;
     requires org.apache.commons.lang3;
+    requires ru.smcsystem.utils;
+    requires ru.smcsystem.api;
 }

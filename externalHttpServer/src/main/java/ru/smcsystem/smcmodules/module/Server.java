@@ -570,10 +570,14 @@ public class Server implements Module {
     @Override
     public void stop(ConfigurationTool externalConfigurationTool) throws ModuleException {
         // requestCounter = null;
-        newRequests.clear();
-        newRequests = null;
-        requestMap.clear();
-        requestMap = null;
+        if (newRequests != null) {
+            newRequests.clear();
+            newRequests = null;
+        }
+        if (requestMap != null) {
+            requestMap.clear();
+            requestMap = null;
+        }
         stopServer();
         virtualServerInfoMap = null;
         mapResponse = null;

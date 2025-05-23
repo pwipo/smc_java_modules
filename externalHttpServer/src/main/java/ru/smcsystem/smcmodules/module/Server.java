@@ -322,7 +322,7 @@ public class Server implements Module {
                 }
             }
             if (executionContextTool.isNeedStop()) {
-                stopServer();
+                stopServer(configurationTool);
                 executionContextTool.addMessage("force stop server");
                 break;
             }
@@ -341,7 +341,7 @@ public class Server implements Module {
 
     private void stop(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) {
         if (tomcat != null) {
-            stopServer();
+            stopServer(configurationTool);
             executionContextTool.addMessage("stop server");
             synchronized (this) {
                 this.notifyAll();
@@ -568,7 +568,7 @@ public class Server implements Module {
     }
 
     @Override
-    public void stop(ConfigurationTool externalConfigurationTool) throws ModuleException {
+    public void stop(ConfigurationTool configurationTool) throws ModuleException {
         // requestCounter = null;
         if (newRequests != null) {
             newRequests.clear();
@@ -578,7 +578,7 @@ public class Server implements Module {
             requestMap.clear();
             requestMap = null;
         }
-        stopServer();
+        stopServer(configurationTool);
         virtualServerInfoMap = null;
         mapResponse = null;
         reqIdGenerator = null;
@@ -777,7 +777,7 @@ public class Server implements Module {
         rootCtx.addServletMappingDecoded("/*", servletName);
     }
 
-    private void startServer(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool) {
+    private void startServer(ConfigurationTool configurationTool, ExecutionContextTool externalExecutionContextTool) {
         /*
         Thread thread = Thread.currentThread();
         // ClassLoader contextClassLoader = null;//new URLClassLoader(new URL[0], thread.getContextClassLoader());
@@ -795,7 +795,7 @@ public class Server implements Module {
                 serversList.computeIfAbsent(virtualServerInfo.getUrl().getPort(), k -> new ArrayList<>()).add(virtualServerInfo);
             serversList.forEach((k, v) -> {
                 try {
-                    addServlet(externalConfigurationTool, externalExecutionContextTool, v, createDefaultRealm);
+                    addServlet(configurationTool, externalExecutionContextTool, v, createDefaultRealm);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -814,20 +814,26 @@ public class Server implements Module {
             // ((WebappClassLoaderBase) (rootCtx.getLoader()).getClassLoader()).setClearReferencesThreadLocals(false);
 
         } catch (Exception e) {
-            stopServer();
+            stopServer(configurationTool);
             throw new ModuleException("error", e);
         } finally {
             // thread.setContextClassLoader(contextClassLoader);
         }
     }
 
-    private void stopServer() {
+    private void stopServer(ConfigurationTool configurationTool) {
         if (tomcat != null) {
             try {
                 tomcat.stop();
+            } catch (Exception e) {
+                // e.printStackTrace();
+                configurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
+            }
+            try {
                 tomcat.destroy();
             } catch (Exception e) {
-                e.printStackTrace();
+                // e.printStackTrace();
+                configurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
             }
             tomcat = null;
         }

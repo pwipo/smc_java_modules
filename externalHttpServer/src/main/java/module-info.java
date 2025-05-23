@@ -4,7 +4,7 @@ module ru.smcsystem.modules.externalHttpServer {
     requires org.apache.commons.lang3;
     requires org.apache.commons.collections4;
     requires commons.io;
-    requires tomcat.embed.core;
+    requires org.apache.tomcat.embed.core;
     requires java.management;
     requires ru.smcsystem.utils;
     requires activation;

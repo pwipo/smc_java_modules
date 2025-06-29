@@ -945,6 +945,39 @@ public class CollectionUtilTest {
         executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
         executionContextTool.getOutput().clear();
 
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement(
+                                                        new ObjectField("field1", "value1"),
+                                                        new ObjectField("field2", 2),
+                                                        new ObjectField("field3", new ObjectElement(
+                                                                new ObjectField("field1", "value11"),
+                                                                new ObjectField("field2", "value21")
+                                                        ))
+                                                ))))
+                                        ),
+                                        ActionType.EXECUTE
+                                )),
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(
+                                                        new ObjectElement(new ObjectField("path", "field1"), new ObjectField("position", 2)),
+                                                        new ObjectElement(new ObjectField("path", "field3.field2"), new ObjectField("position", 0)),
+                                                        new ObjectElement(new ObjectField("path", "field4"), new ObjectField("position", 1),
+                                                                new ObjectField("default", 3), new ObjectField("type", "DOUBLE"))
+                                                )))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))
+                ), null, null, null, "default", "object_field_value");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
         process.stop();
     }
 }

@@ -7,12 +7,15 @@ import ru.smcsystem.api.dto.*;
 import ru.smcsystem.api.enumeration.ActionType;
 import ru.smcsystem.api.enumeration.CommandType;
 import ru.smcsystem.api.enumeration.ObjectType;
+import ru.smcsystem.api.enumeration.ValueType;
 import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.api.tools.execution.ExecutionContextTool;
 import ru.smcsystem.smc.utils.ModuleUtils;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -790,27 +793,67 @@ public class CollectionUtil implements Module {
                             .orElse(null);
                     List<Object> values = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(1))
                             .stream()
-                            .flatMap(Collection::stream)
-                            .filter(ModuleUtils::isString)
-                            .map(ModuleUtils::getString)
-                            .filter(s -> !s.isBlank())
-                            .flatMap(s -> {
-                                String path = s;
-                                Object defaultValueStr = null;
-                                if (path.contains(";;")) {
-                                    String[] split = path.split(";;", 2);
-                                    path = split[0];
-                                    defaultValueStr = fromString(split[1]);
+                            .flatMap(l -> {
+                                List<ObjectElement> elements;
+                                if (ModuleUtils.isObjectArray(l.peek())) {
+                                    ObjectArray a = ModuleUtils.getObjectArray(l.peek());
+                                    if (!ModuleUtils.isArrayContainObjectElements(a))
+                                        return Stream.empty();
+                                    elements = new ArrayList<>(a.size() + 1);
+                                    for (int i = 0; i < a.size(); i++)
+                                        elements.add((ObjectElement) a.get(i));
+                                    if(elements.stream().anyMatch(o->o.findFieldIgnoreCase("position").isPresent()))
+                                        elements.sort(Comparator.comparing(o -> o.findFieldIgnoreCase("position").map(ModuleUtils::getNumber).map(Number::intValue).orElse(-1)));
+                                } else {
+                                    elements = l.stream()
+                                            .filter(ModuleUtils::isString)
+                                            .map(ModuleUtils::getString)
+                                            .filter(s -> !s.isBlank())
+                                            .map(s -> {
+                                                String path = s;
+                                                String defaultValueStr = null;
+                                                if (path.contains(";;")) {
+                                                    String[] split = path.split(";;", 2);
+                                                    path = split[0];
+                                                    defaultValueStr = split[1];
+                                                }
+                                                return new ObjectElement(
+                                                        new ObjectField("path", path),
+                                                        new ObjectField("default", defaultValueStr)
+                                                );
+                                            })
+                                            .collect(Collectors.toList());
                                 }
+                                return elements.stream();
+                            })
+                            .flatMap(e -> {
+                                String path = e.findFieldIgnoreCase("path").map(ModuleUtils::toString).orElse(null);
+                                if (path == null)
+                                    return Stream.empty();
+                                ValueType vt = e.findFieldIgnoreCase("type").map(ModuleUtils::toString).map(ValueType::valueOf).orElse(null);
+                                List<Object> defaultValue = e.findFieldIgnoreCase("default")
+                                        .map(f -> {
+                                            if (vt != null)
+                                                return convertValueTo(f, vt);
+                                            return ModuleUtils.isString(f) ? fromString(ModuleUtils.toString(f)) : f.getValue();
+                                        })
+                                        .map(List::of)
+                                        .orElse(List.of());
                                 List<Object> lst = ModuleUtils.findFields(objectArray, List.of(path)).stream()
                                         .flatMap(Collection::stream)
-                                        .map(f -> f.getType() == ObjectType.OBJECT_ELEMENT ?
-                                                new ObjectArray((ObjectElement) f.getValue()) :
-                                                (type == Type.OBJECT_FIELD_VALUE_AUTO_CONVERT && ModuleUtils.isString(f) ?
-                                                        fromString(ModuleUtils.getString(f)) :
-                                                        f.getValue()))
+                                        .map(f -> {
+                                            if (f.getType() == ObjectType.OBJECT_ELEMENT)
+                                                return new ObjectArray((ObjectElement) f.getValue());
+                                            if (vt == null && type == Type.OBJECT_FIELD_VALUE_AUTO_CONVERT && ModuleUtils.isString(f))
+                                                return fromString(ModuleUtils.getString(f));
+                                            if (vt == null) {
+                                                return f.getValue();
+                                            } else {
+                                                return convertValueTo(f, vt);
+                                            }
+                                        })
                                         .collect(Collectors.toList());
-                                return (!lst.isEmpty() ? lst : (defaultValueStr != null ? List.of(defaultValueStr) : List.of())).stream();
+                                return (!lst.isEmpty() ? lst : defaultValue).stream();
                             })
                             .collect(Collectors.toList());
                     if (!values.isEmpty())
@@ -860,6 +903,40 @@ public class CollectionUtil implements Module {
             }
         }
         return result;
+    }
+
+    private Object convertValueTo(ObjectField f, ValueType vt){
+        ObjectField field = new ObjectField("f", ModuleUtils.convertTo(vt), null);
+        if (ModuleUtils.isNumber(field)) {
+            Number n = ModuleUtils.toNumber(f);
+            switch (vt) {
+                case BYTE:
+                    return n.byteValue();
+                case SHORT:
+                    return n.shortValue();
+                case INTEGER:
+                    return n.intValue();
+                case LONG:
+                    return n.longValue();
+                case BIG_INTEGER:
+                    return BigInteger.valueOf(n.longValue());
+                case FLOAT:
+                    return n.floatValue();
+                case DOUBLE:
+                    return n.doubleValue();
+                case BIG_DECIMAL:
+                    return BigDecimal.valueOf(n.doubleValue());
+            }
+        } else if (ModuleUtils.isBytes(field)) {
+            return ModuleUtils.isBytes(f) ? ModuleUtils.getBytes(f) : ModuleUtils.toString(f).getBytes();
+        } else if (ModuleUtils.isString(field)) {
+            return ModuleUtils.toString(f);
+        } else if (ModuleUtils.isBoolean(field)) {
+            return ModuleUtils.toBoolean(f);
+        } else if (ModuleUtils.isObjectArray(field)) {
+            return ModuleUtils.toObjectArray(f);
+        }
+        return null;
     }
 
     @Override

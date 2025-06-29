@@ -10,19 +10,19 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.CollectionUtil</className>
@@ -65,7 +65,7 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>en</key>
-                    <value>Type operation.
+                    <value><![CDATA[Type operation.
 SIZE - returns the number of elements.
 INDEX_OF - each message from the first source in the loop compares with all messages from the second. returns the position (in the second source) of the first matched message, or -1. 2 sources are required.
 SUB_LIST - Returns a sublist of incoming messages. value format:start_element::end_element.
@@ -88,14 +88,14 @@ OBJECT_LIST_JOIN - joins arrays of objects (in object serialization format). arr
 OBJECT_LIST_JOIN_ARRAYS - Similar to OBJECT_LIST_JOIN, but for arrays of arrays, not objects.
 OBJECT_FIELDS_JOIN - Similar to OBJECT_LIST_JOIN, but for the fields of the first object in each array. builds an object in which the unique fields of all objects are combined. the value of the first field with the given name is stored.
 TRANSFORM_OBJECT_FIELD - Similar to TRANSFORM, but calls the appropriate context for each found field in the input array of objects. value contains a list of paths (field names separated by dots). each path corresponds to its execution context, the number of paths must be equal to the number of contexts.
-OBJECT_FIELD_VALUE - similar to MAP_GET_VALUE_OBJECT_LIST, but it works only with 1 incoming array of objects, looks for field values in them (the paths are specified by the second source) and outputs them as is, without wrapping them in an array. Each path can contain a default value (separated by ;;), which is substituted if the field is not found. If there is no default value, then nothing is returned. Does not use value.
-OBJECT_FIELD_VALUE_AUTO_CONVERT - similar to OBJECT_FIELD_VALUE, but additionally performs auto-conversion of string values. Does not use value.
+OBJECT_FIELD_VALUE - similar to MAP_GET_VALUE_OBJECT_LIST, but works only with 1 input array of objects, searches for field values in them (paths are specified by the second source) and outputs them as is, without wrapping in an array. Each path can contain a default value (separated by ;; characters), which is substituted if the field is not found. If there is no default value, then nothing is returned. Does not use value. The second source contains paths, these can be string values or an array of objects with the fields: path - path, position - defines the position (optional), default - the default value (optional), type - the type to which to convert (optional).
+OBJECT_FIELD_VALUE_AUTO_CONVERT - similar to OBJECT_FIELD_VALUE, but additionally performs auto-conversion of string values.
 LIST_OBJECT_GET - similar to LIST_ARRAY_GET, but works dynamically: uses 2 sources, takes an array (object) from the first, and a number - position from the second. Works for objects too.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>Типы операции.
+                    <value><![CDATA[Типы операции.
 SIZE - возвращает количество элементов.
 INDEX_OF - каждое сообщение из первого источника в цикле сравнивает со всеми сообщениями из второго. возвращает позицию (во втором источнике) первого совпавшего сообщения или -1. требуется 2 источника.
 SUB_LIST - возвращает подсписок входящщих сообщений. формат value: стартовый_элемент::конечный_элемент.
@@ -118,10 +118,10 @@ OBJECT_LIST_JOIN - объединяет массивы объектов (в фо
 OBJECT_LIST_JOIN_ARRAYS - аналогичен OBJECT_LIST_JOIN, но для массивов массивов, а не объектов.
 OBJECT_FIELDS_JOIN - аналогичен OBJECT_LIST_JOIN, но для полей первого объекта в каждом массиве. строит объект в котором уникальные поля всех объектов объеденины. сохраняется значение первого поля с заданным именем.
 TRANSFORM_OBJECT_FIELD - аналогичен TRANSFORM, но вызывает соответствующий контекст для каждого найденного поля во входящем массиве объектов. в value находится список путей (имена полей разделенные точкой). каждый путь соответствует своему контексту исполнения, количество путей должно быть равно количеству контекстов.
-OBJECT_FIELD_VALUE - похож на MAP_GET_VALUE_OBJECT_LIST, но работает только с 1 входящим массивом объектов, в них ищет значения полей (пути заданы вторым источником) и выводит их как есть, без обертки в массив. Каждый путь может содержать дефолтное значение (отделенное символами ;;), которое подставляется если поле не найдено. Если дефолтного значения нет, то ничего не возвращается. Не использует value.
-OBJECT_FIELD_VALUE_AUTO_CONVERT - аналогичен OBJECT_FIELD_VALUE, но дополнительно проводит автоконвертацию строковых значений. Не использует value.
+OBJECT_FIELD_VALUE - похож на MAP_GET_VALUE_OBJECT_LIST, но работает только с 1 входящим массивом объектов, в них ищет значения полей (пути заданы вторым источником) и выводит их как есть, без обертки в массив. Каждый путь может содержать дефолтное значение (отделенное символами ;;), которое подставляется если поле не найдено. Если дефолтного значения нет, то ничего не возвращается. Не использует value. Второй источник содержит пути, это могут быть строковые значения или массив объектов с полями: path - путь, position - определяет позицию (опционально), default-значение по умолчанию (опционально), type - тип к которому надо сконвертировать (опционально).
+OBJECT_FIELD_VALUE_AUTO_CONVERT - аналогичен OBJECT_FIELD_VALUE, но дополнительно проводит автоконвертацию строковых значений.
 LIST_OBJECT_GET - похож на LIST_ARRAY_GET, но действует динамически: использует 2 источника, из первого берет массив (объект), а из второго число - позицию. Работает и для объектов.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -1064,7 +1064,7 @@ LIST_OBJECT_GET - похож на LIST_ARRAY_GET, но действует дин
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>аналогичен INDEX_OF, но в качестве искомого выступает регулярное выражение из настройки value. если есть совпадение - возвращает позицию,  в противном случае ничего не возвращает. требуется один источник.</value>
+                    <value>аналогичен INDEX_OF, но в качестве искомого выступает регулярное выражение из настройки value. если есть совпадение - возвращает позицию, в противном случае ничего не возвращает. требуется один источник.</value>
                 </entry>
                 <entry>
                     <key>en</key>
@@ -1389,29 +1389,42 @@ LIST_OBJECT_GET - похож на LIST_ARRAY_GET, но действует дин
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Похож на MAP_GET_VALUE_OBJECT_LIST, но работает только с 1 входящим массивом объектов, в них ищет значения полей (пути заданы вторым источником) и выводит их как есть, без обертки в массив.
+                    <value><![CDATA[Похож на MAP_GET_VALUE_OBJECT_LIST, но работает только с 1 входящим массивом объектов, в них ищет значения полей (пути заданы вторым источником)
+и выводит их как есть, без обертки в массив.
 Каждый путь может содержать дефолтное значение (отделенное символами ;;), которое подставляется если поле не найдено. Если дефолтного значения нет, то ничего не возвращается.
-                    </value>
+Не использует value. Второй источник содержит пути, это могут быть строковые значения или массив объектов с полями:
+    path - путь,
+    position - определяет позицию (опционально),
+    default-значение по умолчанию (опционально),
+    type - тип к которому надо сконвертировать (опционально).
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Similar to MAP_GET_VALUE_OBJECT_LIST, but it works only with 1 incoming array of objects, looks for field values in them (the paths are specified by the second source) and outputs them as is, without wrapping them in an array.
-Each path can contain a default value (separated by ;;), which is substituted if the field is not found. If there is no default value, then nothing is returned.
-                    </value>
+                    <value><![CDATA[OBJECT_FIELD_VALUE - similar to MAP_GET_VALUE_OBJECT_LIST, but works only with 1 input array of objects, searches for field values in them
+(paths are specified by the second source) and outputs them as is, without wrapping in an array.
+Each path can contain a default value (separated by ;; characters), which is substituted if the field is not found. If there is no default value, then nothing is returned.
+Does not use value. The second source contains paths, these can be string values or an array of objects with the fields:
+    path - path,
+    position - defines the position (optional),
+    default - the default value (optional),
+    type - the type to which to convert (optional).
+                    ]]></value>
                 </entry>
             </description>
             <sources>
                 <source>
-                    <count>1</count>
                     <elements>
                         <element t="VALUE" c="1" vt="OBJECT_ARRAY" v="[]"/>
                     </elements>
                 </source>
                 <source>
-                    <count>1</count>
-                    <elements>
-                        <element t="VALUE" c="-1" vt="STRING" v="field2.field1;;value1"/>
-                    </elements>
+                    <element t="VALUE_ANY" c="-1" vt="STRING" v="field2.field1;;value1">
+                        <description>
+                            <entry k="ru" v="пути, могут быть в виде строк или массива объектов"/>
+                            <entry k="en" v="paths can be in the form of strings or an array of objects"/>
+                        </description>
+                    </element>
                 </source>
             </sources>
             <output>
@@ -1431,15 +1444,18 @@ Each path can contain a default value (separated by ;;), which is substituted if
             </description>
             <sources>
                 <source>
-                    <count>1</count>
                     <elements>
                         <element t="VALUE" c="1" vt="OBJECT_ARRAY" v="[]"/>
                     </elements>
                 </source>
                 <source>
-                    <count>1</count>
                     <elements>
-                        <element t="VALUE" c="-1" vt="STRING" v="field2.field1;;value1"/>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="field2.field1;;value1">
+                            <description>
+                                <entry k="ru" v="пути, могут быть в виде строк или массива объектов"/>
+                                <entry k="en" v="paths can be in the form of strings or an array of objects"/>
+                            </description>
+                        </element>
                     </elements>
                 </source>
             </sources>

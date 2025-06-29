@@ -48,9 +48,8 @@ public class CollectionUtil implements Module {
         searchs = null;
         values = null;
         if (Type.MAP_GET_VALUE.equals(type) || Type.MAP_GET_VALUE_EXT.equals(type) ||
-                Type.MAP_GET_VALUE_OBJECT_LIST.equals(type) || Type.MAP_GET_VALUE_OBJECT_LIST_PATH.equals(type)
-                || Type.MAP_GET_VALUE_OBJECT_LIST_SIMPLE.equals(type) || Type.MAP_GET_VALUE_OBJECT_LIST_PATH_SIMPLE.equals(type)
-                || Type.OBJECT_FIELD_VALUE.equals(type) || Type.OBJECT_FIELD_VALUE_AUTO_CONVERT.equals(type)) {
+                Type.MAP_GET_VALUE_OBJECT_LIST.equals(type) || Type.MAP_GET_VALUE_OBJECT_LIST_PATH.equals(type) ||
+                Type.MAP_GET_VALUE_OBJECT_LIST_SIMPLE.equals(type) || Type.MAP_GET_VALUE_OBJECT_LIST_PATH_SIMPLE.equals(type)) {
             strParams = new ArrayList<>();
             values = new ArrayList<>();
             Arrays.stream(value.split("::"))

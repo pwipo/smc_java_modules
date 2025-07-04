@@ -802,7 +802,7 @@ public class CollectionUtil implements Module {
                                     elements = new ArrayList<>(a.size() + 1);
                                     for (int i = 0; i < a.size(); i++)
                                         elements.add((ObjectElement) a.get(i));
-                                    if(elements.stream().anyMatch(o->o.findFieldIgnoreCase("position").isPresent()))
+                                    if (elements.stream().anyMatch(o -> o.findFieldIgnoreCase("position").isPresent()))
                                         elements.sort(Comparator.comparing(o -> o.findFieldIgnoreCase("position").map(ModuleUtils::getNumber).map(Number::intValue).orElse(-1)));
                                 } else {
                                     elements = l.stream()
@@ -835,7 +835,7 @@ public class CollectionUtil implements Module {
                                         .map(f -> {
                                             if (vt != null)
                                                 return convertValueTo(f, vt);
-                                            return ModuleUtils.isString(f) ? fromString(ModuleUtils.toString(f)) : f.getValue();
+                                            return ModuleUtils.isString(f) ? fromString(ModuleUtils.getString(f)) : f.getValue();
                                         })
                                         .map(List::of)
                                         .orElse(List.of());
@@ -887,6 +887,8 @@ public class CollectionUtil implements Module {
     }
 
     private Object fromString(String value) {
+        if (value == null)
+            return null;
         Object result;
         if (NumberUtils.isCreatable(value)) {
             result = NumberUtils.createNumber(value);
@@ -905,7 +907,7 @@ public class CollectionUtil implements Module {
         return result;
     }
 
-    private Object convertValueTo(ObjectField f, ValueType vt){
+    private Object convertValueTo(ObjectField f, ValueType vt) {
         ObjectField field = new ObjectField("f", ModuleUtils.convertTo(vt), null);
         if (ModuleUtils.isNumber(field)) {
             Number n = ModuleUtils.toNumber(f);

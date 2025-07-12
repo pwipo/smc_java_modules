@@ -10,25 +10,25 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.DB</className>
-    <ver>1.2.3</ver>
+    <ver>1.2.4</ver>
     <apiVer>1.4.0</apiVer>
-    <date>07-11-2023</date>
+    <date>12-07-2025</date>
 
     <defaultSettings>
         <value>
@@ -46,25 +46,25 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>en</key>
-                    <value>type of intercourse. can be either a connection to an existing external database, or creating your own instance:
+                    <value><![CDATA[type of intercourse. can be either a connection to an existing external database, or creating your own instance:
 derbyInMemory - create your own Derby DBMS instance in memory and connect to it.
 derby - create your own Derby DBMS instance and connect to it.
 postgreeClient - connection to an external PostgreSQL DBMS.
 mysqlClient - connection to an external MySQL DBMS.
 oracleClient - connection to an external Oracle DBMS.
 db2Client - connection to an external DB2 DBMS.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>тип подклечения. может быть как подключение к существующей внешней бд, так и создание своего экземпляра:
+                    <value><![CDATA[тип подклечения. может быть как подключение к существующей внешней бд, так и создание своего экземпляра:
 derbyInMemory - создание своего экземпляра СУБД Derby в памяти и подключение к нему.
 derby - создание своего экземпляра СУБД Derby и подключение к нему.
 postgreeClient - подключение к внешнешней СУБД PostgreSQL.
 mysqlClient - подключение к внешнешней СУБД MySQL.
 oracleClient - подключение к внешнешней СУБД Oracle.
 db2Client - подключение к внешнешней СУБД DB2.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -76,25 +76,25 @@ db2Client - подключение к внешнешней СУБД DB2.
             <description>
                 <entry>
                     <key>en</key>
-                    <value>data to connect. format:
+                    <value><![CDATA[data to connect. format:
 derbyInMemory - db_name.
 derby - db_name.
 postgreeClient - server_name_or_ip:port/db_name.
 mysqlClient - server_name_or_ip:port/db_name.
 oracleClient - @//server_name_or_ip:port/service_name.
 db2Client - //server_name_or_ip[:port]/db_name.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>данные для подключения. формат:
+                    <value><![CDATA[данные для подключения. формат:
 derbyInMemory - имя_бд.
 derby - имя_бд.
 postgreeClientя - имя_или_ип_сервера:порт/имя_бд.
 mysqlClient - имя_или_ип_сервера:порт/имя_бд.
 oracleClient - @//имя_или_ип_сервера:порт/имя_сервиса.
 db2Client - //имя_или_ип_сервера[:порт]/имя_бд.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -141,19 +141,19 @@ db2Client - //имя_или_ип_сервера[:порт]/имя_бд.
             <description>
                 <entry>
                     <key>en</key>
-                    <value>only for parameterized SQL expressions (types: 7,8).
+                    <value><![CDATA[only for parameterized SQL expressions (types: 7,8).
 Determines whether autoconversion of parameters should be performed.
 If enabled, it allows you to transfer the types BOOLEAN, TIMESTAMP, DATE, TIME.
 Converts a NULL string to a null value.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>только для параметризованных SQL выражений (типы: 7,8).
+                    <value><![CDATA[только для параметризованных SQL выражений (типы: 7,8).
 Определяет нужно ли проводить автоконвертацию параметров.
 Если включено, то позволяет передавать типы BOOLEAN, TIMESTAMP, DATE, TIME.
 Конвертирует строку NULL в нулевое значение.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -170,21 +170,21 @@ Converts a NULL string to a null value.
             <description>
                 <entry>
                     <key>en</key>
-                    <value>The type of object returned:
+                    <value><![CDATA[The type of object returned:
 OBJECT_SERIALIZATION - to a list of values in object serialization format
 OBJECT - directly into an object, if there are null values, then it is converted to a NULL string.
 OBJECT_WITHOUT_NULL - directly to an object without null values.
 OBJECT_WITH_NULL_AND_BOOLEAN - similar to OBJECT, but does not convert null values and the BOOLEAN type.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>Тип возвращаемого объекта:
+                    <value><![CDATA[Тип возвращаемого объекта:
 OBJECT_SERIALIZATION - в список значений в формате сериализации объектов
 OBJECT - напрямую в объект, если есть нулевые значения то конвертируется в строку NULL.
 OBJECT_WITHOUT_NULL - напрямую в объект без нулевых значений.
 OBJECT_WITH_NULL_AND_BOOLEAN - аналогичен OBJECT, но нулевые значения и тип BOOLEAN не конвертирует.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -225,12 +225,11 @@ OBJECT_WITH_NULL_AND_BOOLEAN - аналогичен OBJECT, но нулевые 
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Контекст исполнения по умолчанию.
+                    <value><![CDATA[Контекст исполнения по умолчанию.
 формат входящих сообщений:
     число - тип операциии:
         1 - исполнение команд в одной транзакции (исполняются либо все команды, либо ни одной),
@@ -278,11 +277,11 @@ OBJECT_WITH_NULL_AND_BOOLEAN - аналогичен OBJECT, но нулевые 
     для 11,12,13,14,15,16,17,19:
         число - сгенерированный ключ
     для 2,3,4: номер внешней транзакции.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Default execution context.
+                    <value><![CDATA[Default execution context.
 format of incoming messages:
     number - operation type:
         1 - execution of commands in one transaction (either all commands are executed, or none),
@@ -330,15 +329,9 @@ returns for types:
     for 11,12,13,14,15,16,17,19:
         number - generated key
     for 2,3,4: external transaction number.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
@@ -389,12 +382,7 @@ returns for types:
                                 <valueType>INTEGER</valueType>
                                 <value>3</value>
                                 <elements>
-                                    <element>
-                                        <type>VALUE</type>
-                                        <count>1</count>
-                                        <valueType>LONG</valueType>
-                                        <value>1</value>
-                                    </element>
+                                    <element t="VALUE" vt="LONG" v="1"/>
                                 </elements>
                             </element>
                             <element>
@@ -403,12 +391,7 @@ returns for types:
                                 <valueType>INTEGER</valueType>
                                 <value>4</value>
                                 <elements>
-                                    <element>
-                                        <type>VALUE</type>
-                                        <count>1</count>
-                                        <valueType>LONG</valueType>
-                                        <value>1</value>
-                                    </element>
+                                    <element t="VALUE" vt="LONG" v="1"/>
                                 </elements>
                             </element>
                             <element>
@@ -417,12 +400,7 @@ returns for types:
                                 <valueType>INTEGER</valueType>
                                 <value>5</value>
                                 <elements>
-                                    <element>
-                                        <type>VALUE</type>
-                                        <count>1</count>
-                                        <valueType>LONG</valueType>
-                                        <value>1</value>
-                                    </element>
+                                    <element t="VALUE" vt="LONG" v="1"/>
                                     <element>
                                         <type>VALUE</type>
                                         <count>-1</count>
@@ -515,12 +493,7 @@ returns for types:
                                 <valueType>INTEGER</valueType>
                                 <value>8</value>
                                 <elements>
-                                    <element>
-                                        <type>VALUE</type>
-                                        <count>1</count>
-                                        <valueType>LONG</valueType>
-                                        <value>1</value>
-                                    </element>
+                                    <element t="VALUE" vt="LONG" v="1"/>
                                     <element>
                                         <type>VALUE</type>
                                         <count>1</count>
@@ -636,12 +609,7 @@ returns for types:
                                 <valueType>INTEGER</valueType>
                                 <value>10</value>
                                 <elements>
-                                    <element>
-                                        <type>VALUE</type>
-                                        <count>1</count>
-                                        <valueType>LONG</valueType>
-                                        <value>1</value>
-                                    </element>
+                                    <element t="VALUE" vt="LONG" v="1"/>
                                     <element>
                                         <type>VALUE</type>
                                         <count>1</count>
@@ -707,12 +675,7 @@ returns for types:
                                 <valueType>INTEGER</valueType>
                                 <value>12</value>
                                 <elements>
-                                    <element>
-                                        <type>VALUE</type>
-                                        <count>1</count>
-                                        <valueType>LONG</valueType>
-                                        <value>1</value>
-                                    </element>
+                                    <element t="VALUE" vt="LONG" v="1"/>
                                     <element>
                                         <type>VALUE</type>
                                         <count>-1</count>
@@ -805,12 +768,7 @@ returns for types:
                                 <valueType>INTEGER</valueType>
                                 <value>15</value>
                                 <elements>
-                                    <element>
-                                        <type>VALUE</type>
-                                        <count>1</count>
-                                        <valueType>LONG</valueType>
-                                        <value>1</value>
-                                    </element>
+                                    <element t="VALUE" vt="LONG" v="1"/>
                                     <element>
                                         <type>VALUE</type>
                                         <count>1</count>
@@ -926,12 +884,7 @@ returns for types:
                                 <valueType>INTEGER</valueType>
                                 <value>17</value>
                                 <elements>
-                                    <element>
-                                        <type>VALUE</type>
-                                        <count>1</count>
-                                        <valueType>LONG</valueType>
-                                        <value>1</value>
-                                    </element>
+                                    <element t="VALUE" vt="LONG" v="1"/>
                                     <element>
                                         <type>VALUE</type>
                                         <count>1</count>
@@ -1092,8 +1045,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_in_one_transaction</type>
+        <type t="execute_in_one_transaction" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1104,12 +1056,6 @@ returns for types:
                     <value>execution of commands in one transaction (either all commands are executed, or none).</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -1142,146 +1088,75 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>begin_external_transaction</type>
+        <type t="begin_external_transaction" minS="0" max="0">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>начать новую внешнюю транзакцию.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>start a new external transaction.</value>
-                </entry>
+                <entry k="ru" v="Начать новую внешнюю транзакцию. Так же привязывает эту транзакцию к текущему потоку."/>
+                <entry k="en" v="Start a new external transaction. Also binds this transaction to the current thread."/>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>0</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources/>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <valueType>LONG</valueType>
-                    <value>1</value>
+                <element t="VALUE" vt="LONG" v="1">
                     <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>номер внешней транзакции.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>external transaction number.</value>
-                        </entry>
+                        <entry k="ru" v="номер внешней транзакции"/>
+                        <entry k="en" v="external transaction number"/>
                     </description>
                 </element>
             </output>
         </type>
-        <type>
-            <type>end_and_commit_external_transaction</type>
+        <type t="end_and_commit_external_transaction" minS="1" max="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>завершить с сохранением внешнюю транзакцию.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>complete external transaction with saving.</value>
-                </entry>
+                <entry k="ru" v="Завершает, с сохранением, внешнюю транзакцию. Так же отвязывает эту транзакцию от текущего потока."/>
+                <entry k="en" v="Completes, with saving, the outer transaction. Also unbinds this transaction from the current thread."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
-                    <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <valueType>LONG</valueType>
-                            <value>1</value>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Номер транзакции."/>
+                                <entry k="ru" v="Transaction number."/>
+                            </description>
                         </element>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <valueType>LONG</valueType>
-                    <value>1</value>
+                <element t="VALUE" vt="LONG" v="1">
                     <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>номер внешней транзакции.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>external transaction number.</value>
-                        </entry>
+                        <entry k="ru" v="Номер транзакции."/>
+                        <entry k="ru" v="Transaction number."/>
                     </description>
                 </element>
             </output>
         </type>
-        <type>
-            <type>end_and_rollback_external_transaction</type>
+        <type t="end_and_rollback_external_transaction" minS="1" max="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>отклонить и завершить внешнюю транзакцию.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>reject and complete the external transaction.</value>
-                </entry>
+                <entry k="ru" v="Отклонить и завершить внешнюю транзакцию. Так же отвязывает эту транзакцию от текущего потока."/>
+                <entry k="en" v="Reject and complete the outer transaction. Also detaches this transaction from the current thread."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <valueType>LONG</valueType>
-                            <value>1</value>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Номер транзакции."/>
+                                <entry k="ru" v="Transaction number."/>
+                            </description>
                         </element>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <valueType>LONG</valueType>
-                    <value>1</value>
+                <element t="VALUE" vt="LONG" v="1">
                     <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>номер внешней транзакции.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>external transaction number.</value>
-                        </entry>
+                        <entry k="ru" v="Номер транзакции."/>
+                        <entry k="ru" v="Transaction number."/>
                     </description>
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_in_external_transaction</type>
+        <type t="execute_in_external_transaction" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1292,21 +1167,15 @@ returns for types:
                     <value>execute commands in an external transaction.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <valueType>LONG</valueType>
-                            <value>1</value>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Номер транзакции. Если указать в качестве номера транзакции -1, то будет искаться номер транзакции для текущего потока."/>
+                                <entry k="en" v="Transaction number. If you specify -1 as the transaction number, the transaction number for the current thread will be searched for."/>
+                            </description>
                         </element>
                         <element>
                             <type>VALUE</type>
@@ -1336,8 +1205,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_each_in_own_transaction</type>
+        <type t="execute_each_in_own_transaction" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1348,12 +1216,6 @@ returns for types:
                     <value>execute commands without transaction (each command is executed immediately).</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -1386,8 +1248,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_with_params_in_one_transaction</type>
+        <type t="execute_with_params_in_one_transaction" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1398,12 +1259,6 @@ returns for types:
                     <value>execute parameterized commands.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -1486,8 +1341,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_with_params_in_external_transaction</type>
+        <type t="execute_with_params_in_external_transaction" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1498,21 +1352,15 @@ returns for types:
                     <value>execute parameterized commands in an external transaction.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <valueType>LONG</valueType>
-                            <value>1</value>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Номер транзакции. Если указать в качестве номера транзакции -1, то будет искаться номер транзакции для текущего потока."/>
+                                <entry k="en" v="Transaction number. If you specify -1 as the transaction number, the transaction number for the current thread will be searched for."/>
+                            </description>
                         </element>
                         <element>
                             <type>VALUE</type>
@@ -1592,8 +1440,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_with_params_array_in_one_transaction</type>
+        <type t="execute_with_params_array_in_one_transaction" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1604,12 +1451,6 @@ returns for types:
                     <value>similar to 7, but accepts an array of objects or an array of arrays.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -1679,8 +1520,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_with_params_array_in_external_transaction</type>
+        <type t="execute_with_params_array_in_external_transaction" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1691,21 +1531,15 @@ returns for types:
                     <value>similar to 8, but accepts an array of objects or an array of arrays.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <valueType>LONG</valueType>
-                            <value>1</value>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Номер транзакции. Если указать в качестве номера транзакции -1, то будет искаться номер транзакции для текущего потока."/>
+                                <entry k="en" v="Transaction number. If you specify -1 as the transaction number, the transaction number for the current thread will be searched for."/>
+                            </description>
                         </element>
                         <element>
                             <type>VALUE</type>
@@ -1772,8 +1606,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_update_in_one_transaction_return_generated_key</type>
+        <type t="execute_update_in_one_transaction_return_generated_key" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1784,12 +1617,6 @@ returns for types:
                     <value>similar to 1, but for INSERT only and returns the generated key.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -1822,8 +1649,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_update_in_external_transaction_return_generated_key</type>
+        <type t="execute_update_in_external_transaction_return_generated_key" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1834,21 +1660,14 @@ returns for types:
                     <value>similar to 5, but for INSERT only and returns the generated key.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
-                    <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <valueType>LONG</valueType>
-                            <value>1</value>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Номер транзакции. Если указать в качестве номера транзакции -1, то будет искаться номер транзакции для текущего потока."/>
+                                <entry k="en" v="Transaction number. If you specify -1 as the transaction number, the transaction number for the current thread will be searched for."/>
+                            </description>
                         </element>
                         <element>
                             <type>VALUE</type>
@@ -1878,8 +1697,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_update_each_in_own_transaction_return_generated_key</type>
+        <type t="execute_update_each_in_own_transaction_return_generated_key" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1890,12 +1708,6 @@ returns for types:
                     <value>similar to 6, but for INSERT only and returns the generated key.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -1928,8 +1740,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_update_with_params_in_one_transaction_return_generated_key</type>
+        <type t="execute_update_with_params_in_one_transaction_return_generated_key" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1940,12 +1751,6 @@ returns for types:
                     <value>similar to 7, but for INSERT only and returns the generated key.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -2028,8 +1833,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_update_with_params_in_external_transaction_return_generated_key</type>
+        <type t="execute_update_with_params_in_external_transaction_return_generated_key" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -2040,21 +1844,15 @@ returns for types:
                     <value>similar to 8, but for INSERT only and returns the generated key.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <valueType>LONG</valueType>
-                            <value>1</value>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Номер транзакции. Если указать в качестве номера транзакции -1, то будет искаться номер транзакции для текущего потока."/>
+                                <entry k="en" v="Transaction number. If you specify -1 as the transaction number, the transaction number for the current thread will be searched for."/>
+                            </description>
                         </element>
                         <element>
                             <type>VALUE</type>
@@ -2134,8 +1932,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_update_with_params_array_in_one_transaction_return_generated_key</type>
+        <type t="execute_update_with_params_array_in_one_transaction_return_generated_key" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -2146,12 +1943,6 @@ returns for types:
                     <value>similar to 9, but for INSERT only and returns the generated key.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -2221,8 +2012,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_update_with_params_array_in_external_transaction_return_generated_key</type>
+        <type t="execute_update_with_params_array_in_external_transaction_return_generated_key" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -2233,21 +2023,15 @@ returns for types:
                     <value>similar to 10, but for INSERT only and returns the generated key.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <valueType>LONG</valueType>
-                            <value>1</value>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Номер транзакции. Если указать в качестве номера транзакции -1, то будет искаться номер транзакции для текущего потока."/>
+                                <entry k="en" v="Transaction number. If you specify -1 as the transaction number, the transaction number for the current thread will be searched for."/>
+                            </description>
                         </element>
                         <element>
                             <type>VALUE</type>
@@ -2311,31 +2095,24 @@ returns for types:
                             <value>number, generated key.</value>
                         </entry>
                     </description>
-               </element>
+                </element>
             </output>
         </type>
-        <type>
-            <type>execute_multiline_insert_in_one_transaction</type>
+        <type t="execute_multiline_insert_in_one_transaction" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>исполнить параметризованные многострочные insert команды.
+                    <value><![CDATA[исполнить параметризованные многострочные insert команды.
 на вход передается то же что и execute_with_params_array_in_one_transaction, но перед исполнением происходит генерация нового многострочного инсерта.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>execute parameterized multi-line insert commands.
+                    <value><![CDATA[execute parameterized multi-line insert commands.
 The same as execute_with_params_array_in_one_transaction is passed to the input, but before execution a new multi-line insert is generated.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -2405,8 +2182,7 @@ The same as execute_with_params_array_in_one_transaction is passed to the input,
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_multiline_insert_in_one_transaction_return_generated_key</type>
+        <type t="execute_multiline_insert_in_one_transaction_return_generated_key" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -2417,12 +2193,6 @@ The same as execute_with_params_array_in_one_transaction is passed to the input,
                     <value>Similar to execute_multiline_insert_in_one_transaction, but returns the generated key.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -2492,28 +2262,21 @@ The same as execute_with_params_array_in_one_transaction is passed to the input,
                 </element>
             </output>
         </type>
-        <type>
-            <type>execute_raw_script</type>
+        <type t="execute_raw_script" minS="1" max="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Исполняет sql выражения. В одном сообщении (строке) может быть много операций, разделенных символом ; и новой строкой.
+                    <value><![CDATA[Исполняет sql выражения. В одном сообщении (строке) может быть много операций, разделенных символом ; и новой строкой.
 Каждое сообщение исполняется в своей транзакции.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Executes sql expressions. There can be many operations in one message (line), separated by the symbol ; and a new line.
+                    <value><![CDATA[Executes sql expressions. There can be many operations in one message (line), separated by the symbol ; and a new line.
 Each message is executed in its own transaction.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -2548,6 +2311,56 @@ Each message is executed in its own transaction.
                 </element>
             </output>
         </type>
+        <type t="run_in_transaction" minEC="1" maxEC="-1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Запускает все контексты в одной транзакции и комитит её в конце.
+Так же сохраняет в памяти текущий поток. Запускает все контексты по порядку. При вызове передает номер транзакции.
+Если любой контекст вернет ошибку - прекращает вызовы и откатывает транзакцию.
+Допускается вызовы других контекстов, например EXECUTE_IN_EXTERNAL_TRANSACTION.
+В них, если указать в качестве номера транзакции -1, то будет искаться номер транзакции для текущего потока.
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Runs all contexts in one transaction and commits it at the end.
+Also saves the current thread in memory. Runs all contexts in order. When called, it transmits the transaction number.
+If any context returns an error, stops calls and rolls back the transaction.
+Calls to other contexts are allowed, for example EXECUTE_IN_EXTERNAL_TRANSACTION.
+In them, if you specify -1 as the transaction number, the transaction number for the current thread will be searched for.
+                    ]]></value>
+                </entry>
+            </description>
+            <sources/>
+            <ecs>
+                <ec c="-1">
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="номер транзакции"/>
+                                <entry k="en" v="transaction number"/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output/>
+                </ec>
+            </ecs>
+            <output>
+                <element t="VALUE" vt="LONG" v="1">
+                    <description>
+                        <entry k="ru" v="номер транзакции"/>
+                        <entry k="en" v="transaction number"/>
+                    </description>
+                </element>
+                <element t="VALUE" vt="BOOLEAN" v="true">
+                    <description>
+                        <entry k="ru" v="статус, все ли выполнено или нет"/>
+                        <entry k="en" v="status, is everything committed or not"/>
+                    </description>
+                </element>
+            </output>
+        </type>
     </types>
 
     <useStorage>true</useStorage>
@@ -2568,15 +2381,15 @@ Each message is executed in its own transaction.
     <help>
         <entry>
             <key>en</key>
-            <value>represents the implementation of the client to the database. while the database itself, in some cases, can also be created.
-if the install.sql file is in the working directory, at startup it tries to execute commands in it in one transaction. in this case, if errors occur, displays a message in the console but allows you to continue to work - does not stop working with an error.
-            </value>
+            <value><![CDATA[Represents the implementation of the client to the database. while the database itself, in some cases, can also be created.
+If the install.sql file is in the working directory, at startup it tries to execute commands in it in one transaction. in this case, if errors occur, displays a message in the console but allows you to continue to work - does not stop working with an error.
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>представляет собой реализацию клиента к бд. при этом сама бд, в некоторых случаях, так же может быть создана.
-если в рабочей директории есть файл install.sql, при старте пытается исполнить команды в нем в одной транзакции. при этом если возникают ошибки, выводит сообщение в консоль но позволяет работать дальше - не прекращает работу с ошибкой.
-            </value>
+            <value><![CDATA[Представляет собой реализацию клиента к бд. при этом сама бд, в некоторых случаях, так же может быть создана.
+Если в рабочей директории есть файл install.sql, при старте пытается исполнить команды в нем в одной транзакции. при этом если возникают ошибки, выводит сообщение в консоль но позволяет работать дальше - не прекращает работу с ошибкой.
+            ]]></value>
         </entry>
     </help>
 
@@ -2585,7 +2398,7 @@ if the install.sql file is in the working directory, at startup it tries to exec
             <description>
                 <entry>
                     <key>en</key>
-                    <value>The first example. use of the dbms derby in memory.
+                    <value><![CDATA[The first example. use of the dbms derby in memory.
 the initialization file is used (in the working directory, the install.sql file):
 CREATE TABLE textes (
 uuid VARCHAR(1000) PRIMARY KEY,
@@ -2594,11 +2407,11 @@ value INTEGER
 );
 
 INSERT INTO textes VALUES ('test', 'test msg', 1);
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>Первый пример. использование субд дерби в памяти.
+                    <value><![CDATA[Первый пример. использование субд дерби в памяти.
 используется файл начальной инициализации (в рабочей директории файл install.sql):
 CREATE TABLE textes (
 uuid VARCHAR(1000) PRIMARY KEY,
@@ -2607,7 +2420,7 @@ value INTEGER
 );
 
 INSERT INTO textes VALUES ('test', 'test msg', 1);
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
             <settings>
@@ -2713,11 +2526,12 @@ INSERT INTO textes VALUES ('test', 'test msg', 1);
                                 </message>
                                 <message>
                                     <type>STRING</type>
-                                    <value>CREATE TABLE Test (
-                                        id INTEGER PRIMARY KEY,
-                                        name VARCHAR(1000),
-                                        date TIMESTAMP
-                                        )</value>
+                                    <value><![CDATA[CREATE TABLE Test (
+id INTEGER PRIMARY KEY,
+name VARCHAR(1000),
+date TIMESTAMP
+)
+                                    ]]></value>
                                 </message>
                                 <message>
                                     <type>STRING</type>
@@ -2835,5 +2649,6 @@ INSERT INTO textes VALUES ('test', 'test msg', 1);
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
+    <icon><![CDATA[iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAACgklEQVR4nO2ay2oUQRSGP0FBN3FmXCdmFaPxATS6EMnGB9DoC0SD8waarREJqDt1IS69QkhcCMkYTOIzCK7EhRcyDAluEsWMFPwNRTNkqmequytSP9Rius91uqr/U6ca+sdJ4BowAzwD1oHPwFegBfzRaOmaubcm2RnpjlICjgHTwCvgB9D2NIytl8AN+cgNl4A3wE4qgJ/APHAPmAIu6h8+DlSBQxpVXRuVzJR05mXDtrkjX8anN5zVdEmc/AWW9M+d8uTjgGxNA8vykfhbVww94wjwBNiVwSZwGxgkfwxq/TTl28TwEDiY1dCA9RS2gTvAUYpHBZi1pvM7xeb8mN9a8/8c5eO8tY4WFWNXXJXCL2CEcDCimExsV1wUViRsFl5ouKnYGi7CWxI28zM0VBXbpotwO+BEalZ8XZEImscYGuq9JBLyYm+7KNilwgZwgfIx3qGu64pEcNmqe2ZLWjMV4K5FiEu9JGLKgQfW76bKhqH842coVaKYcV8xZU4kgWH2j6misaGXwZgry3aBsXFaNt93KBrH94jPOZEEpqR+rdorvY4WgDlVxBOqZIc7lPHDSn5CsnPS3UjZ3JavTmV834nY7/LrwAvgu8eN1TfgufYptT7iyy4onFB9dgt4CqwCn4Av2t7+1mjpmrn3QbJGZzLja76dNZHI7DmiHpmdyOxeUInMTmR2IrMTmX1vRGYvAPXI7ERm94JKZHYisxOZnZyYfSvjVrfIPXstSzd+ZR80sRsuwpP7oIl92bXrt2idIZrzu5DOEBeydDcH9JlFaE3s1SynuvY5++PUOXtZTexd4BFw2PeXD0U2sdeAM3hEKE1sbyi7iZ0bim5i81/jHwn5KgDx2BeAAAAAAElFTkSuQmCC]]></icon>
 
 </properties>

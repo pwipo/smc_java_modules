@@ -5,10 +5,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import ru.smcsystem.api.dto.IMessage;
-import ru.smcsystem.api.dto.ObjectArray;
-import ru.smcsystem.api.dto.ObjectElement;
-import ru.smcsystem.api.dto.ObjectField;
+import ru.smcsystem.api.dto.*;
+import ru.smcsystem.api.enumeration.CommandType;
 import ru.smcsystem.api.enumeration.ObjectType;
 import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
@@ -20,78 +18,29 @@ import java.io.File;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class DB implements Module {
-
-    private enum Type {
-        derbyInMemory("org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:memory:%s;create=true", "jdbc:derby:memory:%s", "values 1"),
-        derby("org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:%s;create=true", "jdbc:derby:%s", "values 1"),
-        postgreeClient("org.postgresql.Driver", null, "jdbc:postgresql://%s", "select 1"),
-        mysqlClient("com.mysql.jdbc.Driver", null, "jdbc:mysql://%s", "select 1"),
-        oracleClient("oracle.jdbc.driver.OracleDriver", null, "jdbc:oracle:thin:%s", "select 1 from dual"),
-        db2Client("com.ibm.db2.jcc.DB2Driver", null, "jdbc:db2:%s", "select 1 from sysibm.sysdummy1");
-
-        final String driver;
-        final String urlStart;
-        final String urlPattern;
-        final String validationQuery;
-
-        Type(String driver, String urlStart, String urlPattern, String validationQuery) {
-            this.driver = driver;
-            this.urlStart = urlStart;
-            this.urlPattern = urlPattern;
-            this.validationQuery = validationQuery;
-        }
-    }
 
     private Type type;
     private String connection_params;
     private String login;
     private String password;
     private boolean useAutoConvert;
-
     private BasicDataSource dataSource;
-
-    private Map<Long, Connection> connections;
-    private AtomicLong connectionId;
+    private Map<Long/*connectionId*/, Connection> connections;
+    private AtomicLong connectionIdGenerator;
     private String jdbc_url;
-
-    private enum ResultFormat {
-        OBJECT_SERIALIZATION,
-        OBJECT,
-        OBJECT_WITHOUT_NULL,
-        OBJECT_WITH_NULL_AND_BOOLEAN,
-    }
-
     private ResultFormat resultFormat;
-
-    private enum OperationType {
-        EXECUTE_IN_ONE_TRANSACTION,
-        BEGIN_EXTERNAL_TRANSACTION,
-        END_AND_COMMIT_EXTERNAL_TRANSACTION,
-        END_AND_ROLLBACK_EXTERNAL_TRANSACTION,
-        EXECUTE_IN_EXTERNAL_TRANSACTION,
-        EXECUTE_EACH_IN_OWN_TRANSACTION,
-        EXECUTE_WITH_PARAMS_IN_ONE_TRANSACTION,
-        EXECUTE_WITH_PARAMS_IN_EXTERNAL_TRANSACTION,
-        EXECUTE_WITH_PARAMS_ARRAY_IN_ONE_TRANSACTION,
-        EXECUTE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION,
-        EXECUTE_UPDATE_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY,
-        EXECUTE_UPDATE_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY,
-        EXECUTE_UPDATE_EACH_IN_OWN_TRANSACTION_RETURN_GENERATED_KEY,
-        EXECUTE_UPDATE_WITH_PARAMS_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY,
-        EXECUTE_UPDATE_WITH_PARAMS_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY,
-        EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY,
-        EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY,
-        EXECUTE_MULTILINE_INSERT_IN_ONE_TRANSACTION,
-        EXECUTE_MULTILINE_INSERT_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY,
-        EXECUTE_RAW_SCRIPT,
-    }
-
     private Boolean resultSetColumnNameToUpperCase;
     private Integer queryTimeout;
+    private Map<Long, Long> threadToConnectionId;
+
+    public static String escapeSql(String str) {
+        return str != null ? ("'" + StringUtils.replace(str, "'", "''") + "'") : null;
+    }
 
     @Override
     public void start(ConfigurationTool externalConfigurationTool) throws ModuleException {
@@ -197,8 +146,9 @@ public class DB implements Module {
             }
         }
 
-        connectionId = new AtomicLong(0);
-        connections = new HashMap<>();
+        connectionIdGenerator = new AtomicLong(0);
+        connections = new ConcurrentHashMap<>();
+        threadToConnectionId = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -221,68 +171,71 @@ public class DB implements Module {
         }
     }
 
-    private void process(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, OperationType operationType, LinkedList<IMessage> messages) throws Exception {
-        externalConfigurationTool.loggerDebug(operationType.name());
+    private void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, OperationType operationType, LinkedList<IMessage> messages) throws Exception {
+        configurationTool.loggerDebug(operationType.name());
         switch (operationType) {
             case EXECUTE_IN_ONE_TRANSACTION:
-                execute(externalConfigurationTool, externalExecutionContextTool, messages, true, false);
+                execute(configurationTool, executionContextTool, messages, true, false);
                 break;
             case BEGIN_EXTERNAL_TRANSACTION:
-                startConnectionWithTransaction(externalExecutionContextTool);
+                startConnectionWithTransaction(configurationTool, executionContextTool);
                 break;
             case END_AND_COMMIT_EXTERNAL_TRANSACTION:
-                commitAndStopConnection(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue());
+                commitAndStopConnection(configurationTool, executionContextTool, ModuleUtils.getNumber(messages.poll()).longValue());
                 break;
             case END_AND_ROLLBACK_EXTERNAL_TRANSACTION:
-                rollbackAndStopConnection(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue());
+                rollbackAndStopConnection(configurationTool, executionContextTool, ModuleUtils.getNumber(messages.poll()).longValue());
                 break;
             case EXECUTE_IN_EXTERNAL_TRANSACTION:
-                executeInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false);
+                executeInTransaction(configurationTool, executionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false);
                 break;
             case EXECUTE_EACH_IN_OWN_TRANSACTION:
-                execute(externalConfigurationTool, externalExecutionContextTool, messages, false, false);
+                execute(configurationTool, executionContextTool, messages, false, false);
                 break;
             case EXECUTE_WITH_PARAMS_IN_ONE_TRANSACTION:
-                executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, false, false);
+                executePreparedStatement(configurationTool, executionContextTool, messages, false, false);
                 break;
             case EXECUTE_WITH_PARAMS_IN_EXTERNAL_TRANSACTION:
-                executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false, false);
+                executePreparedStatementInTransaction(configurationTool, executionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false, false);
                 break;
             case EXECUTE_WITH_PARAMS_ARRAY_IN_ONE_TRANSACTION:
-                executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, true, false);
+                executePreparedStatement(configurationTool, executionContextTool, messages, true, false);
                 break;
             case EXECUTE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION:
-                executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true, false);
+                executePreparedStatementInTransaction(configurationTool, executionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true, false);
                 break;
             case EXECUTE_UPDATE_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY:
-                execute(externalConfigurationTool, externalExecutionContextTool, messages, true, true);
+                execute(configurationTool, executionContextTool, messages, true, true);
                 break;
             case EXECUTE_UPDATE_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY:
-                executeInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true);
+                executeInTransaction(configurationTool, executionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true);
                 break;
             case EXECUTE_UPDATE_EACH_IN_OWN_TRANSACTION_RETURN_GENERATED_KEY:
-                execute(externalConfigurationTool, externalExecutionContextTool, messages, false, true);
+                execute(configurationTool, executionContextTool, messages, false, true);
                 break;
             case EXECUTE_UPDATE_WITH_PARAMS_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY:
-                executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, false, true);
+                executePreparedStatement(configurationTool, executionContextTool, messages, false, true);
                 break;
             case EXECUTE_UPDATE_WITH_PARAMS_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY:
-                executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false, true);
+                executePreparedStatementInTransaction(configurationTool, executionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, false, true);
                 break;
             case EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY:
-                executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, true, true);
+                executePreparedStatement(configurationTool, executionContextTool, messages, true, true);
                 break;
             case EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY:
-                executePreparedStatementInTransaction(externalConfigurationTool, externalExecutionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true, true);
+                executePreparedStatementInTransaction(configurationTool, executionContextTool, ModuleUtils.getNumber(messages.poll()).longValue(), messages, true, true);
                 break;
             case EXECUTE_MULTILINE_INSERT_IN_ONE_TRANSACTION:
-                executePreparedStatementInsertMultiline(externalConfigurationTool, externalExecutionContextTool, messages, false);
+                executePreparedStatementInsertMultiline(configurationTool, executionContextTool, messages, false);
                 break;
             case EXECUTE_MULTILINE_INSERT_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY:
-                executePreparedStatementInsertMultiline(externalConfigurationTool, externalExecutionContextTool, messages, true);
+                executePreparedStatementInsertMultiline(configurationTool, executionContextTool, messages, true);
                 break;
             case EXECUTE_RAW_SCRIPT:
-                executeRawScript(externalConfigurationTool, externalExecutionContextTool, messages);
+                executeRawScript(configurationTool, executionContextTool, messages);
+                break;
+            case RUN_IN_TRANSACTION:
+                runInTransaction(configurationTool, executionContextTool);
                 break;
         }
 
@@ -350,6 +303,8 @@ public class DB implements Module {
         login = null;
         password = null;
         jdbc_url = null;
+        connections = null;
+        threadToConnectionId = null;
         if (exception != null)
             throw exception;
     }
@@ -358,8 +313,8 @@ public class DB implements Module {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(!useTransaction);
             try {
-                for (int i = 0; i < messages.size(); i++)
-                    executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(messages.get(i)));
+                for (IMessage message : messages)
+                    executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(message));
                 if (useTransaction)
                     connection.commit();
             } catch (Exception e) {
@@ -394,7 +349,7 @@ public class DB implements Module {
                     }
                     for (int i = 1; i <= parameterCount; i++) {
                         IMessage message = messages.poll();
-                        Object value = message.getValue();
+                        Object value = message != null ? message.getValue() : null;
 
                         if (value instanceof ObjectArray) {
                             ObjectArray objectArrayValue = (ObjectArray) value;
@@ -504,14 +459,14 @@ public class DB implements Module {
                             continue;
                         try (PreparedStatement stm = isUpdateReturnKeys ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                             stm.setQueryTimeout(queryTimeout);
-                            if (objectElement.getFields().size() < parameterCount || objectElement.getFields().size() < fieldNames.size()) {
+                            if (objectElement.getFields().size() < parameterCount) {
                                 externalExecutionContextTool.addError("need " + parameterCount + " params");
                                 return;
                             }
                             for (int j = 1; j <= parameterCount; j++) {
                                 int jj = j - 1;
-                                ObjectField f = objectElement.findField(fieldNames.get(jj)).orElseThrow(() -> new NoSuchElementException(fieldNames.get(jj)));
-                                Object value = f.getValue();
+                                ObjectField f = objectElement.findField(fieldNames.get(jj)).orElse(null);//.orElseThrow(() -> new NoSuchElementException(fieldNames.get(jj)));
+                                Object value = f != null ? f.getValue() : null;
                                 if (value == null) {
                                     stm.setNull(j, parameterTypes.get(jj));
                                 } else if (ModuleUtils.isObjectArray(f)) {
@@ -704,8 +659,8 @@ public class DB implements Module {
             List<String> sqlInserts = buildInsertMultiline(externalConfigurationTool, externalExecutionContextTool, messages, connection);
             if (sqlInserts != null && !sqlInserts.isEmpty()) {
                 try {
-                    for (int i = 0; i < sqlInserts.size(); i++)
-                        executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, sqlInserts.get(i));
+                    for (String sqlInsert : sqlInserts)
+                        executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, sqlInsert);
                     connection.commit();
                 } catch (Exception e) {
                     connection.rollback();
@@ -768,15 +723,15 @@ public class DB implements Module {
                     ObjectElement objectElement = (ObjectElement) objectArray.get(i);
                     if (objectElement.getFields().isEmpty())
                         continue;
-                    if (objectElement.getFields().size() < parameterCount || objectElement.getFields().size() < fieldNames.size()) {
+                    if (objectElement.getFields().size() < parameterCount) {
                         externalExecutionContextTool.addError("need " + parameterCount + " params");
                         return null;
                     }
                     List<String> sqlParamListInner = new ArrayList<>(parameterCount);
                     for (int j = 1; j <= parameterCount; j++) {
                         int jj = j - 1;
-                        ObjectField f = objectElement.findField(fieldNames.get(jj)).orElseThrow(() -> new NoSuchElementException(fieldNames.get(jj)));
-                        Object value = f.getValue();
+                        ObjectField f = objectElement.findField(fieldNames.get(jj)).orElse(null);//.orElseThrow(() -> new NoSuchElementException(fieldNames.get(jj)));
+                        Object value = f != null ? f.getValue() : null;
                         if (value == null) {
                             sqlParamListInner.add("null");
                         } else if (ModuleUtils.isObjectArray(f)) {
@@ -923,10 +878,6 @@ public class DB implements Module {
                             .collect(Collectors.joining(",")));
         }
         return result;
-    }
-
-    public static String escapeSql(String str) {
-        return str != null ? ("'" + StringUtils.replace(str, "'", "''") + "'") : null;
     }
 
     private long toLong(IMessage message) {
@@ -1201,16 +1152,18 @@ public class DB implements Module {
         return obj != null ? obj : "NULL";
     }
 
-    private void startConnectionWithTransaction(ExecutionContextTool externalExecutionContextTool) throws Exception {
+    private void startConnectionWithTransaction(ConfigurationTool configurationTool, ExecutionContextTool externalExecutionContextTool) throws Exception {
+        long id = connectionIdGenerator.incrementAndGet();
         Connection connection = dataSource.getConnection();
         connection.setAutoCommit(false);
-        long id = connectionId.incrementAndGet();
         connections.put(id, connection);
+        configurationTool.getInfo("threadId").map(ModuleUtils::toNumber).map(Number::longValue).ifPresent(threadId -> threadToConnectionId.put(threadId, id));
         externalExecutionContextTool.addMessage(id);
     }
 
-    private void commitAndStopConnection(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId) throws Exception {
+    private void commitAndStopConnection(ConfigurationTool configurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId) throws Exception {
         Connection connection = connections.remove(transactionId);
+        configurationTool.getInfo("threadId").map(ModuleUtils::toNumber).map(Number::longValue).ifPresent(threadId -> threadToConnectionId.remove(threadId));
         if (connection != null) {
             try {
                 connection.commit();
@@ -1219,15 +1172,16 @@ public class DB implements Module {
                     connection.close();
                 } catch (Exception e) {
                     // throw new ModuleException("error", e);
-                    externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+                    configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                 }
             }
             externalExecutionContextTool.addMessage(transactionId);
         }
     }
 
-    private void rollbackAndStopConnection(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId) throws Exception {
+    private void rollbackAndStopConnection(ConfigurationTool configurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId) throws Exception {
         Connection connection = connections.remove(transactionId);
+        configurationTool.getInfo("threadId").map(ModuleUtils::toNumber).map(Number::longValue).ifPresent(threadId -> threadToConnectionId.remove(threadId));
         if (connection != null) {
             try {
                 connection.rollback();
@@ -1236,19 +1190,27 @@ public class DB implements Module {
                     connection.close();
                 } catch (Exception e) {
                     // throw new ModuleException("error", e);
-                    externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+                    configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                 }
             }
             externalExecutionContextTool.addMessage(transactionId);
         }
     }
 
-    private void executeInTransaction(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId, List<IMessage> messages, boolean isUpdateReturnKeys) throws Exception {
-        Connection connection = connections.get(transactionId);
-        if (connection != null) {
-            for (int i = 0; i < messages.size(); i++)
-                executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(messages.get(i)));
-        }
+    private void executeInTransaction(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId, List<IMessage> messages, boolean isUpdateReturnKeys) {
+        getConnection(externalConfigurationTool, transactionId)
+                .ifPresent(connection -> {
+                    for (IMessage message : messages)
+                        executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(message));
+                });
+    }
+
+    private Optional<Connection> getConnection(ConfigurationTool configurationTool, long transactionId) {
+        if (transactionId > -1)
+            return Optional.ofNullable(connections.get(transactionId));
+        return configurationTool.getInfo("threadId").map(ModuleUtils::toNumber)
+                .map(n -> threadToConnectionId.get(n.longValue()))
+                .map(id -> connections.get(id));
     }
 
     private void executeSql(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, Connection connection, boolean isUpdateReturnKeys, String sql) {
@@ -1269,9 +1231,14 @@ public class DB implements Module {
     }
 
     private void executePreparedStatementInTransaction(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId, LinkedList<IMessage> messages, boolean isArray, boolean isUpdateReturnKeys) throws Exception {
-        Connection connection = connections.get(transactionId);
-        if (connection != null) {
-            executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, connection, false, isArray, isUpdateReturnKeys);
+        getConnection(externalConfigurationTool, transactionId)
+                .ifPresent(connection -> {
+                    for (IMessage message : messages)
+                        executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(message));
+                });
+        Optional<Connection> connection = getConnection(externalConfigurationTool, transactionId);
+        if (connection.isPresent()) {
+            executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, connection.get(), false, isArray, isUpdateReturnKeys);
         }
     }
 
@@ -1336,6 +1303,93 @@ public class DB implements Module {
                 }
             }
         }
+    }
+
+    private void runInTransaction(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws SQLException {
+        long id = connectionIdGenerator.incrementAndGet();
+        Long threadId = configurationTool.getInfo("threadId").map(ModuleUtils::toNumber).map(Number::longValue).orElse(null);
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            connections.put(id, connection);
+            if (threadId != null)
+                threadToConnectionId.put(threadId, id);
+            executionContextTool.addMessage(id);
+            try {
+                boolean hasError = false;
+                for (int i = 0; i < executionContextTool.getFlowControlTool().countManagedExecutionContexts(); i++) {
+                    executionContextTool.getFlowControlTool().executeNow(CommandType.EXECUTE, i, List.of(id));
+                    List<ICommand> commandsFromExecuted = executionContextTool.getFlowControlTool().getCommandsFromExecuted(i);
+                    hasError = commandsFromExecuted != null && !commandsFromExecuted.isEmpty() && ModuleUtils.hasErrors(commandsFromExecuted.get(commandsFromExecuted.size() - 1));
+                    if (hasError)
+                        break;
+                }
+                executionContextTool.addMessage(hasError);
+                if (hasError) {
+                    connection.rollback();
+                } else {
+                    connection.commit();
+                }
+            } catch (Exception e) {
+                connection.rollback();
+                throw e;
+            }
+        } finally {
+            connections.remove(id);
+            if (threadId != null)
+                threadToConnectionId.remove(threadId);
+        }
+    }
+
+
+    private enum Type {
+        derbyInMemory("org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:memory:%s;create=true", "jdbc:derby:memory:%s", "values 1"),
+        derby("org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:%s;create=true", "jdbc:derby:%s", "values 1"),
+        postgreeClient("org.postgresql.Driver", null, "jdbc:postgresql://%s", "select 1"),
+        mysqlClient("com.mysql.jdbc.Driver", null, "jdbc:mysql://%s", "select 1"),
+        oracleClient("oracle.jdbc.driver.OracleDriver", null, "jdbc:oracle:thin:%s", "select 1 from dual"),
+        db2Client("com.ibm.db2.jcc.DB2Driver", null, "jdbc:db2:%s", "select 1 from sysibm.sysdummy1");
+
+        final String driver;
+        final String urlStart;
+        final String urlPattern;
+        final String validationQuery;
+
+        Type(String driver, String urlStart, String urlPattern, String validationQuery) {
+            this.driver = driver;
+            this.urlStart = urlStart;
+            this.urlPattern = urlPattern;
+            this.validationQuery = validationQuery;
+        }
+    }
+
+    private enum ResultFormat {
+        OBJECT_SERIALIZATION,
+        OBJECT,
+        OBJECT_WITHOUT_NULL,
+        OBJECT_WITH_NULL_AND_BOOLEAN,
+    }
+
+    private enum OperationType {
+        EXECUTE_IN_ONE_TRANSACTION,
+        BEGIN_EXTERNAL_TRANSACTION,
+        END_AND_COMMIT_EXTERNAL_TRANSACTION,
+        END_AND_ROLLBACK_EXTERNAL_TRANSACTION,
+        EXECUTE_IN_EXTERNAL_TRANSACTION,
+        EXECUTE_EACH_IN_OWN_TRANSACTION,
+        EXECUTE_WITH_PARAMS_IN_ONE_TRANSACTION,
+        EXECUTE_WITH_PARAMS_IN_EXTERNAL_TRANSACTION,
+        EXECUTE_WITH_PARAMS_ARRAY_IN_ONE_TRANSACTION,
+        EXECUTE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION,
+        EXECUTE_UPDATE_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY,
+        EXECUTE_UPDATE_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY,
+        EXECUTE_UPDATE_EACH_IN_OWN_TRANSACTION_RETURN_GENERATED_KEY,
+        EXECUTE_UPDATE_WITH_PARAMS_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY,
+        EXECUTE_UPDATE_WITH_PARAMS_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY,
+        EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY,
+        EXECUTE_UPDATE_WITH_PARAMS_ARRAY_IN_EXTERNAL_TRANSACTION_RETURN_GENERATED_KEY,
+        EXECUTE_MULTILINE_INSERT_IN_ONE_TRANSACTION,
+        EXECUTE_MULTILINE_INSERT_IN_ONE_TRANSACTION_RETURN_GENERATED_KEY,
+        EXECUTE_RAW_SCRIPT, RUN_IN_TRANSACTION,
     }
 
 }

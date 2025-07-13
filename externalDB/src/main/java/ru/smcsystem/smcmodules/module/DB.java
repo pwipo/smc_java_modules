@@ -1086,8 +1086,8 @@ public class DB implements Module {
                     value = rs.getShort(column_name);
                 } else if (columnType == Types.NUMERIC) {
                     // externalExecutionContextTool.addMessage(rs.getInt(column_name));
-                    fieldType = ObjectType.LONG;
-                    value = rs.getLong(column_name);
+                    fieldType = ObjectType.BIG_DECIMAL;
+                    value = rs.getBigDecimal(column_name);
                 } else if (columnType == java.sql.Types.DATE) {
                     Date date = rs.getDate(column_name);
                     // externalExecutionContextTool.addMessage(date != null ? date.getTime() : "NULL");

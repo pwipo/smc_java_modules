@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.DB</className>
-    <ver>1.2.4</ver>
+    <ver>1.2.5</ver>
     <apiVer>1.4.0</apiVer>
     <date>12-07-2025</date>
 
@@ -225,7 +225,7 @@ OBJECT_WITH_NULL_AND_BOOLEAN - аналогичен OBJECT, но нулевые 
     </defaultSettings>
 
     <types>
-        <type t="default" minS="1" max="1">
+        <type t="default" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1045,7 +1045,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_in_one_transaction" minS="1" max="1">
+        <type t="execute_in_one_transaction" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1088,7 +1088,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="begin_external_transaction" minS="0" max="0">
+        <type t="begin_external_transaction" minS="0" maxS="0">
             <description>
                 <entry k="ru" v="Начать новую внешнюю транзакцию. Так же привязывает эту транзакцию к текущему потоку."/>
                 <entry k="en" v="Start a new external transaction. Also binds this transaction to the current thread."/>
@@ -1103,7 +1103,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="end_and_commit_external_transaction" minS="1" max="1">
+        <type t="end_and_commit_external_transaction" minS="1" maxS="1">
             <description>
                 <entry k="ru" v="Завершает, с сохранением, внешнюю транзакцию. Так же отвязывает эту транзакцию от текущего потока."/>
                 <entry k="en" v="Completes, with saving, the outer transaction. Also unbinds this transaction from the current thread."/>
@@ -1129,7 +1129,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="end_and_rollback_external_transaction" minS="1" max="1">
+        <type t="end_and_rollback_external_transaction" minS="1" maxS="1">
             <description>
                 <entry k="ru" v="Отклонить и завершить внешнюю транзакцию. Так же отвязывает эту транзакцию от текущего потока."/>
                 <entry k="en" v="Reject and complete the outer transaction. Also detaches this transaction from the current thread."/>
@@ -1156,7 +1156,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_in_external_transaction" minS="1" max="1">
+        <type t="execute_in_external_transaction" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1205,7 +1205,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_each_in_own_transaction" minS="1" max="1">
+        <type t="execute_each_in_own_transaction" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1248,7 +1248,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_with_params_in_one_transaction" minS="1" max="1">
+        <type t="execute_with_params_in_one_transaction" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1341,7 +1341,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_with_params_in_external_transaction" minS="1" max="1">
+        <type t="execute_with_params_in_external_transaction" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1440,7 +1440,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_with_params_array_in_one_transaction" minS="1" max="1">
+        <type t="execute_with_params_array_in_one_transaction" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1520,7 +1520,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_with_params_array_in_external_transaction" minS="1" max="1">
+        <type t="execute_with_params_array_in_external_transaction" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1606,7 +1606,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_update_in_one_transaction_return_generated_key" minS="1" max="1">
+        <type t="execute_update_in_one_transaction_return_generated_key" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1649,7 +1649,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_update_in_external_transaction_return_generated_key" minS="1" max="1">
+        <type t="execute_update_in_external_transaction_return_generated_key" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1697,7 +1697,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_update_each_in_own_transaction_return_generated_key" minS="1" max="1">
+        <type t="execute_update_each_in_own_transaction_return_generated_key" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1740,7 +1740,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_update_with_params_in_one_transaction_return_generated_key" minS="1" max="1">
+        <type t="execute_update_with_params_in_one_transaction_return_generated_key" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1833,7 +1833,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_update_with_params_in_external_transaction_return_generated_key" minS="1" max="1">
+        <type t="execute_update_with_params_in_external_transaction_return_generated_key" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -1932,7 +1932,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_update_with_params_array_in_one_transaction_return_generated_key" minS="1" max="1">
+        <type t="execute_update_with_params_array_in_one_transaction_return_generated_key" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -2012,7 +2012,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_update_with_params_array_in_external_transaction_return_generated_key" minS="1" max="1">
+        <type t="execute_update_with_params_array_in_external_transaction_return_generated_key" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -2098,7 +2098,7 @@ returns for types:
                 </element>
             </output>
         </type>
-        <type t="execute_multiline_insert_in_one_transaction" minS="1" max="1">
+        <type t="execute_multiline_insert_in_one_transaction" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -2182,7 +2182,7 @@ The same as execute_with_params_array_in_one_transaction is passed to the input,
                 </element>
             </output>
         </type>
-        <type t="execute_multiline_insert_in_one_transaction_return_generated_key" minS="1" max="1">
+        <type t="execute_multiline_insert_in_one_transaction_return_generated_key" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -2262,7 +2262,7 @@ The same as execute_with_params_array_in_one_transaction is passed to the input,
                 </element>
             </output>
         </type>
-        <type t="execute_raw_script" minS="1" max="1">
+        <type t="execute_raw_script" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>

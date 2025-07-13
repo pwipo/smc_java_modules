@@ -984,6 +984,11 @@ public class Server implements Module {
                         partElements.add(objectElementPart);
                     }
                     requestInputStreamMap.put(i, requestInputStream);
+                    // if (bytes != null && bytes.length > 0 && (requestInputStream.getContentType() == null || !requestInputStream.getContentType().toLowerCase().contains("charset"))) {
+                    //     byte[] bytesTmp = bytes;
+                    //     parameters.stream().filter(e -> e.getKey().equals(requestInputStream.getName())).findFirst()
+                    //             .ifPresent(e -> parameters.set(parameters.indexOf(e), Map.entry(e.getKey(), new String(bytesTmp, StandardCharsets.UTF_8))));
+                    // }
                 }
                 if (!partElements.isEmpty())
                     objectElement.getFields().add(new ObjectField("multipart", new ObjectArray((List) partElements, ObjectType.OBJECT_ELEMENT)));

@@ -1231,15 +1231,9 @@ public class DB implements Module {
     }
 
     private void executePreparedStatementInTransaction(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId, LinkedList<IMessage> messages, boolean isArray, boolean isUpdateReturnKeys) throws Exception {
-        getConnection(externalConfigurationTool, transactionId)
-                .ifPresent(connection -> {
-                    for (IMessage message : messages)
-                        executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(message));
-                });
         Optional<Connection> connection = getConnection(externalConfigurationTool, transactionId);
-        if (connection.isPresent()) {
+        if (connection.isPresent())
             executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, connection.get(), false, isArray, isUpdateReturnKeys);
-        }
     }
 
     private void executeSqlScript(Connection connection, File inputFile) throws Exception {

@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Server</className>
-    <ver>1.4.7</ver>
+    <ver>1.4.8</ver>
     <apiVer>1.4.2</apiVer>
     <date>09-05-2025</date>
 
@@ -272,15 +272,25 @@ The list is separated by :: or newline characters.
                 <entry>
                     <key>ru</key>
                     <value><![CDATA[Набор параметров для виртуальных серверов. Используется только для режима VIRTUAL.
-Каждый объект представляет собой отдельный виртуальный сервре. Поля объекта соответствуют именам настроек, при этом если какое-то поле отсутствует, то берется соответсвующее значение из настройки. пример:
-[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false","headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type", "maxFileSizeFull": -1]}]
+Каждый объект представляет собой отдельный виртуальный сервере. Поля объекта соответствуют именам настроек, при этом если какое-то поле отсутствует, то берется соответсвующее значение из настройки. пример:
+[{
+"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,
+"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false",
+"headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type"], "maxFileSizeFull": -1, "fileResponsePieceSize": 1048576,
+"corsAccessList":["127\.0\.0\..*"]
+}]
                     ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
                     <value><![CDATA[A set of parameters for virtual servers. Used only for VIRTUAL mode.
 Each object is a separate virtual server. The fields of the object correspond to the names of the settings, and if a field is missing, then the corresponding value is taken from the settings. example:
-[{"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false","headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type", "maxFileSizeFull": -1]}]
+[{
+"protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,
+"countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false",
+"headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type"], "maxFileSizeFull": -1, "fileResponsePieceSize": 1048576,
+"corsAccessList":["127\.0\.0\..*"]
+}]
                     ]]></value>
                 </entry>
             </description>
@@ -427,6 +437,29 @@ Examples: ["Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, 
 If the size is less than this value or equal to -1, it is immediately read and sent along with the request.
 Otherwise, only the size is sent in place of bytes in the request, and the file itself can be read by calling the get_file_part context.
 Used for lazy loading of large files.
+                    ]]></value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>corsAccessList</name>
+            <type>OBJECT_ARRAY</type>
+            <value>[]</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Массив строк, содержащих паттерны источников, которым разрешен CORS доступ.
+Если есть совпадение, то добавляется заголовок: Access-Control-Allow-Origin: client_ip
+Формат: массив строк, каждая строка должна содержать полный ip или его паттерн.
+Примеры: ["http://127\.0\.0\.1:3000", "http://example.com", ".*"]
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[An array of strings containing patterns of origins that are allowed CORS access.
+If there is a match, the header is added: Access-Control-Allow-Origin: client_ip
+Format: array of strings, each string must contain a full IP or its pattern.
+Examples: ["http://127\.0\.0\.1:3000", "http://example.com", ".*"]
                     ]]></value>
                 </entry>
             </description>

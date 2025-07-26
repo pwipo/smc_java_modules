@@ -57,6 +57,10 @@ public class ServerTest {
         settings.put("allowMultipartParsing", new Value("true"));
         settings.put("virtualServerSettings", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
         settings.put("requestType", new Value("LIST"));
+        settings.put("fileResponsePieceSize", new Value(1048576));
+        settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
+        settings.put("maxFileSizeFull", new Value(-1));
+        settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -205,6 +209,10 @@ public class ServerTest {
         settings.put("allowMultipartParsing", new Value("true"));
         settings.put("virtualServerSettings", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
         settings.put("requestType", new Value("OBJECT"));
+        settings.put("fileResponsePieceSize", new Value(1048576));
+        settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
+        settings.put("maxFileSizeFull", new Value(-1));
+        settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -277,6 +285,8 @@ public class ServerTest {
         settings.put("requestType", new Value("OBJECT"));
         settings.put("fileResponsePieceSize", new Value(1048576));
         settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
+        settings.put("maxFileSizeFull", new Value(-1));
+        settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -340,11 +350,12 @@ public class ServerTest {
         process.stop();
     }
 
-    private static String sendingGetRequest(HttpClientBuilder builder, String url) throws IOException, InterruptedException {
+    private static String sendingGetRequest(HttpClientBuilder builder, String url, Map<String, String> headers) throws IOException, InterruptedException {
         String token = null;
         try (CloseableHttpClient client = builder.build()) {
             HttpGet request = new HttpGet(url);
             request.addHeader(HttpHeaders.USER_AGENT, HttpHeaders.USER_AGENT);
+            headers.forEach(request::addHeader);
 
             try (CloseableHttpResponse response = client.execute(request)) {
                 Header[] allHeaders = response.getAllHeaders();
@@ -358,6 +369,10 @@ public class ServerTest {
             }
         }
         return token;
+    }
+
+    private static String sendingGetRequest(HttpClientBuilder builder, String url) throws IOException, InterruptedException {
+        return sendingGetRequest(builder, url, Map.of());
     }
 
     private static String sendPostRequest(HttpClientBuilder builder, String url, HttpEntity entity) throws IOException {
@@ -405,6 +420,8 @@ public class ServerTest {
         settings.put("requestType", new Value("OBJECT"));
         settings.put("fileResponsePieceSize", new Value(1048576));
         settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
+        settings.put("maxFileSizeFull", new Value(-1));
+        settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -530,6 +547,8 @@ public class ServerTest {
         )));
         settings.put("fileResponsePieceSize", new Value(1048576));
         settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
+        settings.put("maxFileSizeFull", new Value(-1));
+        settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -634,6 +653,8 @@ public class ServerTest {
         settings.put("virtualServerSettings", new Value(new ObjectArray()));
         settings.put("fileResponsePieceSize", new Value(1048576));
         settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
+        settings.put("maxFileSizeFull", new Value(-1));
+        settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -814,6 +835,8 @@ public class ServerTest {
         settings.put("virtualServerSettings", new Value(new ObjectArray()));
         settings.put("fileResponsePieceSize", new Value(1048576));
         settings.put("headers", new Value(new ObjectArray(List.of(), ObjectType.STRING)));
+        settings.put("maxFileSizeFull", new Value(-1));
+        settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -898,6 +921,7 @@ public class ServerTest {
         settings.put("fileResponsePieceSize", new Value(1048576));
         settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
         settings.put("maxFileSizeFull", new Value(5));
+        settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -1064,6 +1088,7 @@ public class ServerTest {
         settings.put("fileResponsePieceSize", new Value(1048576));
         settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
         settings.put("maxFileSizeFull", new Value(5));
+        settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -1136,6 +1161,113 @@ public class ServerTest {
         System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "http://www.smcsystem.ru/hello"));
         System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "https://www.smcsystem.ru/test"));
         System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "https://service.smcsystem.ru/service/store/hello"));
+
+        ExecutionContextToolImpl executionContextTool2 = new ExecutionContextToolImpl(null, null, null);
+        process.execute(executionContextTool2);
+
+        thread.join();
+
+        process.stop();
+    }
+
+    @Test
+    public void processCors() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+        Map<String, IValue> settings = new HashMap<>(Map.of(
+                "port", new Value(8080),
+                "requestTimeout", new Value(20000),
+                "countThreads", new Value(10),
+                "backlog", new Value(0),
+                // "mode", new Value(ValueType.STRING, "PASSIVE"),
+                "protocol", new Value("HTTP"),
+                "availablePaths", new Value("/hello::/test::/service"),
+                "keyStoreFileName", new Value(""),
+                "keyStorePass", new Value(""),
+                "keyPass", new Value(""),
+                "keyAlias", new Value("")
+        ));
+        settings.put("bindAddress", new Value(""));
+        settings.put("sessionTimeout", new Value(30));
+        settings.put("maxPostSize", new Value(10485760));
+        settings.put("allowMultipartParsing", new Value("true"));
+        settings.put("requestType", new Value("OBJECT"));
+        settings.put("virtualServerSettings", new Value(new ObjectArray()));
+        settings.put("fileResponsePieceSize", new Value(1048576));
+        settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
+        settings.put("maxFileSizeFull", new Value(5));
+        settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray(List.of("http://127.0.0.1:\\d+"), ObjectType.STRING)));
+
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        settings,
+                        null,
+                        WORK_DIR
+                ),
+                new Server()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                null,
+                null,
+                null,
+                List.of(
+                        list -> {
+                            System.out.println("func1");
+                            System.out.println(list);
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(200))
+                                            , new Message(MessageType.DATA, new Date(), new Value("hi".getBytes()))
+                                    ),
+                                    ActionType.EXECUTE);
+                        },
+                        list -> {
+                            System.out.println("func2");
+                            System.out.println(list);
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(200))
+                                            , new Message(MessageType.DATA, new Date(), new Value("test".getBytes()))
+                                    ),
+                                    ActionType.EXECUTE);
+                        },
+                        list -> {
+                            System.out.println("func3");
+                            System.out.println(list);
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(200))
+                                            , new Message(MessageType.DATA, new Date(), new Value("store".getBytes()))
+                                    ),
+                                    ActionType.EXECUTE);
+                        }
+                )
+        );
+
+        Thread thread = new Thread(() -> {
+            process.execute(executionContextTool);
+        });
+        thread.start();
+
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create()
+                .setSSLSocketFactory(new SSLConnectionSocketFactory(
+                                SSLContexts.custom()
+                                        .loadTrustMaterial(null, new TrustSelfSignedStrategy())
+                                        .build()
+                                , NoopHostnameVerifier.INSTANCE
+                        )
+                );
+        // .setConnectionReuseStrategy(NoConnectionReuseStrategy.INSTANCE);
+
+        Thread.sleep(1000);
+
+        Map<String, String> headers = Map.of("Origin", "http://127.0.0.1:3001");
+        System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "http://localhost:8080/hello", Map.of("Origin", "http://127.0.0.1:3001")));
+        System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "http://localhost:8080/test", Map.of("Origin", "http://127.0.0.2:3001")));
+        System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "http://localhost:8080/service/store/hello", Map.of("Origin", "http://127.0.0.1")));
 
         ExecutionContextToolImpl executionContextTool2 = new ExecutionContextToolImpl(null, null, null);
         process.execute(executionContextTool2);

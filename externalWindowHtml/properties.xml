@@ -39,11 +39,15 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>HTML конфигурация для окна. Используется версия 3.2 https://www.w3.org/TR/2018/SPSD-html32-20180315</value>
+                    <value><![CDATA[HTML конфигурация для окна. Используется версия 3.2 https://www.w3.org/TR/2018/SPSD-html32-20180315.
+Может содержать только чистый HTML, без скриптов.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>HTML configuration for the window. Version 3.2 is used https://www.w3.org/TR/2018/SPSD-html32-20180315</value>
+                    <value><![CDATA[HTML configuration for the window. Version 3.2 is used https://www.w3.org/TR/2018/SPSD-html32-20180315.
+May contain only pure HTML, without scripts.
+                    ]]></value>
                 </entry>
             </description>
         </value>

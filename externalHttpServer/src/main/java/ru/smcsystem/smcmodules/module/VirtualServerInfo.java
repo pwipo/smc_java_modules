@@ -19,7 +19,6 @@ public class VirtualServerInfo {
     private final String keyPass;
     private final InetAddress address;
     private final List<Map.Entry<Integer, Pattern>> patterns;
-    private final Host host;
     private final Integer requestTimeout;
     private final Integer countThreads;
     private final Integer backlog;
@@ -27,13 +26,16 @@ public class VirtualServerInfo {
     private final Integer maxPostSize;
     private final Boolean allowMultipartParsing;
     private final List<String> headers;
-    private Server.RequestType requestType;
-    private Integer maxFileSizeFull;
+    private final Server.RequestType requestType;
+    private final Integer maxFileSizeFull;
+    private final Integer fileResponsePieceSize;
+    private final List<Pattern> corsAccessList;
+    private final Host host;
 
     public VirtualServerInfo(String urlHeader, URL url, File keyStore, String keyStorePass, String keyAlias, String keyPass,
                              InetAddress address, List<Map.Entry<Integer, Pattern>> patterns, Integer requestTimeout, Integer countThreads,
                              Integer backlog, Integer sessionTimeout, Integer maxPostSize, Boolean allowMultipartParsing,
-                             List<String> headers, Server.RequestType requestType, Integer maxFileSizeFull) {
+                             List<String> headers, Server.RequestType requestType, Integer maxFileSizeFull, Integer fileResponsePieceSize, List<Pattern> corsAccessList) {
         this.urlHeader = urlHeader;
         this.url = url;
         this.keyStore = keyStore;
@@ -48,12 +50,15 @@ public class VirtualServerInfo {
         this.sessionTimeout = sessionTimeout;
         this.maxPostSize = maxPostSize;
         this.allowMultipartParsing = allowMultipartParsing;
-        this.host = new StandardHost();
-        host.setName(url.getHost());
-        host.setAppBase(url.getProtocol() + "_" + url.getHost() + "_" + url.getPort());
         this.headers = headers;
         this.requestType = requestType;
         this.maxFileSizeFull = maxFileSizeFull;
+        this.fileResponsePieceSize = fileResponsePieceSize;
+        this.corsAccessList = corsAccessList;
+
+        this.host = new StandardHost();
+        this.host.setName(url.getHost());
+        this.host.setAppBase(url.getProtocol() + "_" + url.getHost() + "_" + url.getPort());
     }
 
     public String getUrlHeader() {
@@ -126,5 +131,13 @@ public class VirtualServerInfo {
 
     public Integer getMaxFileSizeFull() {
         return maxFileSizeFull;
+    }
+
+    public Integer getFileResponsePieceSize() {
+        return fileResponsePieceSize;
+    }
+
+    public List<Pattern> getCorsAccessList() {
+        return corsAccessList;
     }
 }

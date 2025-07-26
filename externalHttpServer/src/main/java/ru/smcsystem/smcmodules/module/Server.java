@@ -706,8 +706,8 @@ public class Server implements Module {
                         return;
                     }
                     String requestOrigin = getRequestOrigin(req);
-                    // externalConfigurationTool.loggerTrace("origin: " + requestOrigin + " cors list: " + virtualServerInfo.getCorsAccessList());
                     if (virtualServerInfo.getCorsAccessList() != null && !virtualServerInfo.getCorsAccessList().isEmpty() && requestOrigin != null) {
+                        // externalConfigurationTool.loggerTrace("check cors, origin: " + requestOrigin + ", cors list size: " + virtualServerInfo.getCorsAccessList().size());
                         if (virtualServerInfo.getCorsAccessList().stream().anyMatch(p -> p.matcher(requestOrigin).find())) {
                             resp.addHeader("Access-Control-Allow-Origin", requestOrigin);
                         } else {
@@ -721,6 +721,7 @@ public class Server implements Module {
                     Map<Integer, RequestInputStream> requestInputStreamMap = new HashMap<>();
                     Map.Entry<Long, List<Object>> requestEntry = createRequest(req, virtualServerInfo.getRequestType(), virtualServerInfo.getMaxFileSizeFull(), requestInputStreamMap);
                     reqId = requestEntry.getKey();
+                    // externalConfigurationTool.loggerTrace("New request " + reqId + " " + req.getRequestURI());
                     Response responseMain = new Response(reqId, req, resp, virtualServerInfo, requestInputStreamMap);
                     mapResponse.put(reqId, responseMain);
                     externalConfigurationTool.getInfo("threadId").map(ModuleUtils::getNumber).ifPresent(n -> threadReqMap.put(n.longValue(), requestEntry.getKey()));
@@ -802,7 +803,7 @@ public class Server implements Module {
                             externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                         }
                     }
-                    externalConfigurationTool.loggerTrace("End response " + reqId);
+                    // externalConfigurationTool.loggerTrace("End request " + reqId);
                 }
             }
         };

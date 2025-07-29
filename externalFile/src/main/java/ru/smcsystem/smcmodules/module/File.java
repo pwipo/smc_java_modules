@@ -4,11 +4,11 @@ import com.ibm.icu.text.CharsetDetector;
 import com.ibm.icu.text.CharsetMatch;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import ru.smcsystem.api.dto.IAction;
-import ru.smcsystem.api.dto.IMessage;
+import ru.smcsystem.api.dto.*;
 import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
@@ -26,71 +26,16 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class File implements Module {
-
     private final int intCountByte = 1000;
-
-    private enum HashAlgType {
-        MD5("MD5"),
-        SHA1("SHA-1"),
-        SHA256("SHA-256");
-
-        HashAlgType(String algName) {
-            this.algName = algName;
-        }
-
-        private String algName;
-
-        public String getAlgName() {
-            return algName;
-        }
-    }
-
-    private enum Type {
-        info,
-        fullInfo,
-        treeInfo,
-        treeFullInfo,
-        copy,
-        read,
-        readText,
-        tmpFolder,
-        remove,
-        dir,
-        create,
-        writePart,
-        write,
-        changeLastModified,
-        mkdir,
-        move,
-        useArgument,
-        readPart,
-        readTextPart,
-        pwd,
-        dirNames,
-        createPath,
-        parent,
-        rename,
-        readTextNew,
-        readNew,
-        readTextLastNLines,
-        waitFile,
-        copyForce,
-        writeText,
-        writeTextBOM,
-        dirSortDate,
-        dirNamesSortDate,
-        removeOrWait,
-        readOrWait,
-        writeOrWait,
-        size
-    }
-
     private Type type;
     private HashAlgType hashAlgType;
     private java.io.File workDirectory;
@@ -146,7 +91,7 @@ public class File implements Module {
                 String[] split = arguments.split(",");
                 paramLong = Long.valueOf(split[0].trim());
                 paramInt = Integer.valueOf(split[1].trim());
-            } else if (Type.writePart.equals(type)) {
+            } else if (Type.writePart.equals(type) || Type.writeTextPart.equals(type)) {
                 String[] split = arguments.split(",", 2);
                 paramLong = Long.valueOf(split[0].trim());
                 paramStr = split[1].trim();
@@ -160,6 +105,8 @@ public class File implements Module {
                     paramLong = Long.valueOf(split[0].trim());
                     paramInt = Integer.valueOf(split[1].trim());
                 }
+            } else if (Type.readFromZip.equals(type) || Type.readTextFromZip.equals(type)) {
+                paramStr = arguments.trim();
             }
         }
     }
@@ -171,12 +118,12 @@ public class File implements Module {
     }
 
     @Override
-    public void process(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool) throws ModuleException {
-        try {
-            if (Objects.equals(externalExecutionContextTool.getType(), "default")) {
-                if (externalExecutionContextTool.countSource() > 0) {
-                    for (int i = 0; i < externalExecutionContextTool.countSource(); i++) {
-                        List<IAction> messagesLst1 = externalExecutionContextTool.getMessages(i);
+    public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
+        if (Objects.equals(executionContextTool.getType(), "default")) {
+            try {
+                if (executionContextTool.countSource() > 0) {
+                    for (int i = 0; i < executionContextTool.countSource(); i++) {
+                        List<IAction> messagesLst1 = executionContextTool.getMessages(i);
                         for (int j = 0; j < messagesLst1.size(); j++) {
                             LinkedList<IMessage> messages = new LinkedList<>(messagesLst1.get(j).getMessages());
                             while (!messages.isEmpty()) {
@@ -188,13 +135,13 @@ public class File implements Module {
                                     } else if (ModuleUtils.isString(value)) {
                                         currentType = Type.valueOf((String) value.getValue());
                                     } else {
-                                        externalExecutionContextTool.addError("for type useArgument need type id");
+                                        executionContextTool.addError("for type useArgument need type id");
                                         return;
                                     }
                                 } else {
                                     currentType = type;
                                 }
-                                process(externalExecutionContextTool, currentType, messages);
+                                process(configurationTool, executionContextTool, currentType, messages);
                             }
                         }
                     }
@@ -203,117 +150,131 @@ public class File implements Module {
                         case info:
                         case treeInfo:
                             if (isFile) {
-                                getFileAttrFromFile(externalExecutionContextTool, rootFolder, false);
+                                getFileAttrFromFile(executionContextTool, rootFolder, false, null, true);
                             } else {
-                                getFileAttrsFromFolder(externalExecutionContextTool, rootFolder, false);
+                                getFileAttrsFromFolder(configurationTool, executionContextTool, rootFolder, false);
                             }
                             break;
                         case fullInfo:
                         case treeFullInfo:
                             if (isFile) {
-                                getFileAttrFromFile(externalExecutionContextTool, rootFolder, true);
+                                getFileAttrFromFile(executionContextTool, rootFolder, true, null, true);
                             } else {
-                                getFileAttrsFromFolder(externalExecutionContextTool, rootFolder, true);
+                                getFileAttrsFromFolder(configurationTool, executionContextTool, rootFolder, true);
                             }
                             break;
                         case copy:
-                            copy(externalExecutionContextTool, rootFolder, paramFile, false, null);
+                            copy(executionContextTool, rootFolder, paramFile, false, null);
                             break;
                         case copyForce:
-                            copy(externalExecutionContextTool, rootFolder, paramFile, true, null);
+                            copy(executionContextTool, rootFolder, paramFile, true, null);
                             break;
                         case read:
                         case readOrWait:
-                            readAll(externalExecutionContextTool, rootFolder, false, 0, 0, type == Type.readOrWait);
+                            readAll(executionContextTool, rootFolder, false, 0, 0, type == Type.readOrWait);
                             break;
                         case readText:
-                            readAll(externalExecutionContextTool, rootFolder, true, 0, 0, false);
+                            readAll(executionContextTool, rootFolder, true, 0, 0, false);
                             break;
                         case tmpFolder:
-                            createTmpFolder(externalExecutionContextTool, rootFolder);
+                            createTmpFolder(executionContextTool, rootFolder);
                             break;
                         case remove:
                         case removeOrWait:
-                            remove(externalExecutionContextTool, rootFolder, type == Type.removeOrWait);
+                            remove(executionContextTool, rootFolder, type == Type.removeOrWait);
                             break;
                         case dir:
                         case dirSortDate:
-                            dir(externalExecutionContextTool, rootFolder, true, type == Type.dirSortDate);
+                            dir(configurationTool, executionContextTool, rootFolder, true, type == Type.dirSortDate, false, false, false);
                             break;
                         case create:
-                            create(externalExecutionContextTool, rootFolder);
+                            create(executionContextTool, rootFolder);
                             break;
                         case writePart:
-                            write(externalExecutionContextTool, rootFolder, paramLong, paramStr, false, null, false, false);
+                            write(executionContextTool, rootFolder, paramLong, paramStr, false, null, false, false, false);
                             break;
                         case write:
                         case writeOrWait:
-                            write(externalExecutionContextTool, rootFolder, 0, arguments, true, null, false, type == Type.writeOrWait);
+                            write(executionContextTool, rootFolder, 0, arguments, true, null, false, type == Type.writeOrWait, false);
                             break;
                         case changeLastModified:
-                            changeLastModified(externalExecutionContextTool, rootFolder, paramLong);
+                            changeLastModified(executionContextTool, rootFolder, paramLong);
                             break;
                         case mkdir:
-                            createDir(externalExecutionContextTool, rootFolder);
+                            createDir(executionContextTool, rootFolder);
                             break;
                         case move:
-                            move(externalExecutionContextTool, rootFolder, paramFile);
+                            move(executionContextTool, rootFolder, paramFile);
                             break;
                         case readPart:
-                            read(externalExecutionContextTool, rootFolder, false, paramLong, paramInt, false);
+                            read(executionContextTool, rootFolder, false, paramLong, paramInt, false);
                             break;
                         case readTextPart:
-                            read(externalExecutionContextTool, rootFolder, true, paramLong, paramInt, false);
+                            read(executionContextTool, rootFolder, true, paramLong, paramInt, false);
                             break;
                         case pwd:
-                            externalExecutionContextTool.addMessage(FileUtils.getUserDirectory().getAbsolutePath());
+                            executionContextTool.addMessage(FileUtils.getUserDirectory().getAbsolutePath());
                             break;
                         case dirNames:
                         case dirNamesSortDate:
-                            dir(externalExecutionContextTool, rootFolder, false, type == Type.dirNamesSortDate);
+                            dir(configurationTool, executionContextTool, rootFolder, false, type == Type.dirNamesSortDate, false, false, false);
                             break;
                         case createPath:
                             break;
                         case parent:
-                            parent(externalExecutionContextTool, rootFolder);
+                            parent(executionContextTool, rootFolder);
                             break;
                         case rename:
                             break;
                         case readTextNew:
-                            readNew(externalExecutionContextTool, rootFolder, true);
+                            readNew(executionContextTool, rootFolder, true);
                             break;
                         case readNew:
-                            readNew(externalExecutionContextTool, rootFolder, false);
+                            readNew(executionContextTool, rootFolder, false);
                             break;
                         case readTextLastNLines:
-                            readTextLastNLines(externalExecutionContextTool, rootFolder, paramLong);
+                            readTextLastNLines(executionContextTool, rootFolder, paramLong);
                             break;
                         case waitFile:
-                            waitFile(externalExecutionContextTool, rootFolder);
+                            waitFile(executionContextTool, rootFolder);
                             break;
                         case writeText:
-                            write(externalExecutionContextTool, rootFolder, paramLong, paramStr, true, StandardCharsets.UTF_8, false, false);
+                            write(executionContextTool, rootFolder, paramLong, paramStr, true, StandardCharsets.UTF_8, false, false, true);
                         case writeTextBOM:
-                            write(externalExecutionContextTool, rootFolder, paramLong, paramStr, true, StandardCharsets.UTF_8, true, false);
+                            write(executionContextTool, rootFolder, paramLong, paramStr, true, StandardCharsets.UTF_8, true, false, true);
                             break;
                         case size:
-                            size(externalExecutionContextTool, rootFolder);
+                            size(executionContextTool, rootFolder);
+                            break;
+                        case writeTextPart:
+                            write(executionContextTool, rootFolder, paramLong, paramStr, false, StandardCharsets.UTF_8, false, false, true);
+                            break;
+                        case readFromZip:
+                            readFromZip(configurationTool, executionContextTool, rootFolder, false, paramStr, null, false);
+                            break;
+                        case readTextFromZip:
+                            readFromZip(configurationTool, executionContextTool, rootFolder, true, paramStr, StandardCharsets.UTF_8, false);
+                            break;
+                        case dirInfoObj:
+                        case dirFullInfoObj:
+                            dir(configurationTool, executionContextTool, rootFolder, false, false, true, true, type == Type.dirFullInfoObj);
                             break;
                     }
                 }
-            } else {
-                Type type = Type.valueOf(externalExecutionContextTool.getType());
-                if (type != this.type)
-                    updateSettings();
-                ModuleUtils.processMessages(externalConfigurationTool, externalExecutionContextTool, 0, (id, messages) ->
-                        process(externalExecutionContextTool, type, messages));
+            } catch (Exception e) {
+                executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
+                configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
             }
-        } catch (Exception e) {
-            throw new ModuleException(e.getMessage(), e);
+        } else {
+            Type type = Type.valueOf(executionContextTool.getType());
+            if (type != this.type)
+                updateSettings();
+            ModuleUtils.processMessages(configurationTool, executionContextTool, 0, (id, messages) ->
+                    process(configurationTool, executionContextTool, type, messages));
         }
     }
 
-    private void process(ExecutionContextTool externalExecutionContextTool, Type currentType, LinkedList<IMessage> messages) throws Exception {
+    private void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, Type currentType, LinkedList<IMessage> messages) throws Exception {
         if (messages == null || currentType == null)
             return;
         switch (currentType) {
@@ -325,188 +286,211 @@ public class File implements Module {
                                         getFileAttrsFromFolder(externalExecutionContextTool, srcFile, false);
                                     } else {
                                     */
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                getFileAttrFromFile(externalExecutionContextTool, getFile(messages), Type.fullInfo.equals(currentType));
+                getFileAttrFromFile(executionContextTool, getFile(messages), Type.fullInfo.equals(currentType), null, true);
                 // }
                 // });
                 break;
             case treeInfo:
-            case treeFullInfo: {
+            case treeFullInfo:
                 // messages.forEach(m -> {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                java.io.File srcFile = getFile(messages);
-                if (isFile) {
-                    getFileAttrFromFile(externalExecutionContextTool, srcFile, Type.fullInfo.equals(currentType));
-                } else {
-                    getFileAttrsFromFolder(externalExecutionContextTool, srcFile, Type.treeFullInfo.equals(currentType));
-                }
+                getFileAttrsFromFolder(configurationTool, executionContextTool, getFile(messages), Type.treeFullInfo.equals(currentType));
                 // });
                 break;
-            }
             case copy:
                 // while (!messages.isEmpty()) {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 2))
+                if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
-                copy(externalExecutionContextTool, getFile(messages), getFile(messages), false, messages);
+                copy(executionContextTool, getFile(messages), getFile(messages), false, messages);
                 // }
                 break;
             case copyForce:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 2))
+                if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
-                copy(externalExecutionContextTool, getFile(messages), getFile(messages), true, messages);
+                copy(executionContextTool, getFile(messages), getFile(messages), true, messages);
                 break;
             case read:
             case readOrWait:
                 // messages.forEach(m -> {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                readAll(externalExecutionContextTool, getFile(messages), false, 0, 0, type == Type.readOrWait);
+                readAll(executionContextTool, getFile(messages), false, 0, 0, type == Type.readOrWait);
                 // });
                 break;
             case readText:
                 // messages.forEach(m -> {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                readAll(externalExecutionContextTool, getFile(messages), true, 0, 0, false);
+                readAll(executionContextTool, getFile(messages), true, 0, 0, false);
                 // });
                 break;
             case tmpFolder:
                 // messages.forEach(m -> {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                createTmpFolder(externalExecutionContextTool, getFile(messages));
+                createTmpFolder(executionContextTool, getFile(messages));
                 // });
                 break;
             case remove:
             case removeOrWait:
                 // messages.forEach(m -> {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                remove(externalExecutionContextTool, getFile(messages), currentType == Type.removeOrWait);
+                remove(executionContextTool, getFile(messages), currentType == Type.removeOrWait);
                 // });
                 break;
             case dir:
             case dirSortDate:
                 // messages.forEach(m -> {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                dir(externalExecutionContextTool, getFile(messages), true, currentType == Type.dirSortDate);
+                dir(configurationTool, executionContextTool, getFile(messages), true, currentType == Type.dirSortDate, false, false, false);
                 // });
                 break;
             case create:
                 // messages.forEach(m -> {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                create(externalExecutionContextTool, getFile(messages));
+                create(executionContextTool, getFile(messages));
                 // });
                 break;
             case writePart: {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 2))
+                if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
                 java.io.File srcFile = getFile(messages);
                 Object v = messages.poll().getValue();
-                write(externalExecutionContextTool, srcFile, !messages.isEmpty() ? ModuleUtils.getNumber(messages.poll()).longValue() : 0, v, false, null, false, false);
+                write(executionContextTool, srcFile, !messages.isEmpty() ? ModuleUtils.getNumber(messages.poll()).longValue() : 0, v,
+                        false, null, false, false, false);
                 break;
             }
             case write:
             case writeOrWait:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 2))
+                if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
-                write(externalExecutionContextTool, getFile(messages), 0, messages.poll().getValue(), true, null, false, currentType == Type.writeOrWait);
+                write(executionContextTool, getFile(messages), 0, messages.poll().getValue(),
+                        true, null, false, currentType == Type.writeOrWait, false);
                 break;
             case changeLastModified:
                 // while (!messages.isEmpty()) {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 2))
+                if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
-                changeLastModified(externalExecutionContextTool, getFile(messages), ModuleUtils.getNumber(messages.poll()).longValue());
+                changeLastModified(executionContextTool, getFile(messages), ModuleUtils.getNumber(messages.poll()).longValue());
                 // }
                 break;
             case mkdir:
                 // messages.forEach(m -> {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                createDir(externalExecutionContextTool, getFile(messages));
+                createDir(executionContextTool, getFile(messages));
                 // });
                 break;
             case move:
                 // while (!messages.isEmpty()) {
-                if (!checkCountMessages(externalExecutionContextTool, messages, 2))
+                if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
-                move(externalExecutionContextTool, getFile(messages), getFile(messages));
+                move(executionContextTool, getFile(messages), getFile(messages));
                 // }
                 break;
             case useArgument:
                 break;
             case readPart:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 3))
+                if (!checkCountMessages(executionContextTool, messages, 3))
                     break;
-                read(externalExecutionContextTool, getFile(messages), false, ModuleUtils.getNumber(messages.poll()).longValue(), ModuleUtils.getNumber(messages.poll()).intValue(), false);
+                read(executionContextTool, getFile(messages), false, ModuleUtils.getNumber(messages.poll()).longValue(), ModuleUtils.getNumber(messages.poll()).intValue(), false);
                 break;
             case readTextPart:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 3))
+                if (!checkCountMessages(executionContextTool, messages, 3))
                     break;
-                read(externalExecutionContextTool, getFile(messages), true, ModuleUtils.getNumber(messages.poll()).longValue(), ModuleUtils.getNumber(messages.poll()).intValue(), false);
+                read(executionContextTool, getFile(messages), true, ModuleUtils.getNumber(messages.poll()).longValue(), ModuleUtils.getNumber(messages.poll()).intValue(), false);
                 break;
             case pwd:
-                externalExecutionContextTool.addMessage(FileUtils.getUserDirectory().getAbsolutePath());
+                executionContextTool.addMessage(FileUtils.getUserDirectory().getAbsolutePath());
                 break;
             case dirNames:
             case dirNamesSortDate:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                dir(externalExecutionContextTool, getFile(messages), false, currentType == Type.dirNamesSortDate);
+                dir(configurationTool, executionContextTool, getFile(messages), false, currentType == Type.dirNamesSortDate, false, false, false);
                 break;
             case createPath:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 2))
+                if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
-                externalExecutionContextTool.addMessage(new java.io.File(getFile(messages), ModuleUtils.getString(messages.poll())).getAbsolutePath());
+                executionContextTool.addMessage(getAbsolutePath(new java.io.File(getFile(messages), ModuleUtils.toString(messages.poll()))));
                 break;
             case parent:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                parent(externalExecutionContextTool, getFile(messages));
+                parent(executionContextTool, getFile(messages));
                 break;
             case rename:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 2))
+                if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
-                rename(externalExecutionContextTool, getFile(messages), ModuleUtils.getString(messages.poll()));
+                rename(executionContextTool, getFile(messages), ModuleUtils.getString(messages.poll()));
                 break;
             case readTextNew:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                readNew(externalExecutionContextTool, getFile(messages), true);
+                readNew(executionContextTool, getFile(messages), true);
                 break;
             case readNew:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                readNew(externalExecutionContextTool, getFile(messages), false);
+                readNew(executionContextTool, getFile(messages), false);
                 break;
             case readTextLastNLines:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 2))
+                if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
-                readTextLastNLines(externalExecutionContextTool, getFile(messages), ModuleUtils.getNumber(messages.poll()).longValue());
+                readTextLastNLines(executionContextTool, getFile(messages), ModuleUtils.getNumber(messages.poll()).longValue());
                 break;
             case waitFile:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 1))
+                if (!checkCountMessages(executionContextTool, messages, 1))
                     break;
-                waitFile(externalExecutionContextTool, getFile(messages));
+                waitFile(executionContextTool, getFile(messages));
                 break;
             case writeText:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 2))
+                if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
-                write(externalExecutionContextTool, getFile(messages), 0, messages.poll().getValue(), true,
-                        !messages.isEmpty() && ModuleUtils.isString(messages.peek()) ? Charset.forName(ModuleUtils.getString(messages.poll())) : null, false, false);
+                write(executionContextTool, getFile(messages), 0, ModuleUtils.toString(messages.poll()), true,
+                        !messages.isEmpty() && ModuleUtils.isString(messages.peek()) ? Charset.forName(ModuleUtils.getString(messages.poll())) : null,
+                        false, false, true);
                 break;
             case writeTextBOM:
-                if (!checkCountMessages(externalExecutionContextTool, messages, 2))
+                if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
-                write(externalExecutionContextTool, getFile(messages), 0, messages.poll().getValue(), true,
-                        !messages.isEmpty() && ModuleUtils.isString(messages.peek()) ? Charset.forName(ModuleUtils.getString(messages.poll())) : null, true, false);
+                write(executionContextTool, getFile(messages), 0, ModuleUtils.toString(messages.poll()), true,
+                        !messages.isEmpty() && ModuleUtils.isString(messages.peek()) ? Charset.forName(ModuleUtils.getString(messages.poll())) : null,
+                        true, false, true);
                 break;
             case size:
-                size(externalExecutionContextTool, getFile(messages));
+                size(executionContextTool, getFile(messages));
+                break;
+            case writeTextPart: {
+                if (!checkCountMessages(executionContextTool, messages, 2))
+                    break;
+                java.io.File srcFile = getFile(messages);
+                Object v = ModuleUtils.toString(messages.poll());
+                write(executionContextTool, srcFile, !messages.isEmpty() ? ModuleUtils.toNumber(messages.poll()).longValue() : 0, v, false,
+                        !messages.isEmpty() && ModuleUtils.isString(messages.peek()) ? Charset.forName(ModuleUtils.getString(messages.poll())) : null,
+                        false, false, true);
+                break;
+            }
+            case readFromZip:
+                if (!checkCountMessages(executionContextTool, messages, 2))
+                    break;
+                readFromZip(configurationTool, executionContextTool, getFile(messages), false, ModuleUtils.toString(messages.poll()), null, false);
+                break;
+            case readTextFromZip:
+                readFromZip(configurationTool, executionContextTool, getFile(messages), true, ModuleUtils.toString(messages.poll()),
+                        !messages.isEmpty() && ModuleUtils.isString(messages.peek()) ? Charset.forName(ModuleUtils.getString(messages.poll())) : null, false);
+                break;
+            case dirInfoObj:
+            case dirFullInfoObj:
+                if (!checkCountMessages(executionContextTool, messages, 1))
+                    break;
+                dir(configurationTool, executionContextTool, getFile(messages), false, false, true, true, type == Type.dirFullInfoObj);
                 break;
         }
     }
@@ -570,7 +554,8 @@ public class File implements Module {
         tmpStrVariable = null;
     }
 
-    private void dir(ExecutionContextTool externalExecutionContextTool, java.io.File folder, boolean getPath, boolean sortDate) {
+    private void dir(ConfigurationTool configurationTool, ExecutionContextTool externalExecutionContextTool, java.io.File folder, boolean getPath, boolean sortDate,
+                     boolean useInfo, boolean useObject, boolean getHash) {
         if (!folder.exists() || !folder.isDirectory())
             return;
         java.io.File[] files = folder.listFiles();
@@ -580,13 +565,21 @@ public class File implements Module {
         List<java.io.File> fileList = Arrays.stream(files).collect(Collectors.toList());
         if (sortDate)
             fileList.sort(Comparator.comparing(java.io.File::lastModified));
+        ObjectArray objectArray = useObject ? new ObjectArray() : null;
         fileList.forEach(f -> {
             try {
-                externalExecutionContextTool.addMessage(getPath ? getAbsolutePath(f) : f.getName());
+                if (useInfo) {
+                    getFileAttrFromFile(externalExecutionContextTool, f, getHash, objectArray, false);
+                } else {
+                    externalExecutionContextTool.addMessage(getPath ? getAbsolutePath(f) : f.getName());
+                }
             } catch (Exception e) {
-                e.printStackTrace();
+                configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
             }
         });
+        if (useObject)
+            externalExecutionContextTool.addMessage(objectArray);
+
         /*
         Files.walkFileTree(folder.toPath(), new SimpleFileVisitor<Path>() {
             @Override
@@ -605,7 +598,7 @@ public class File implements Module {
         */
     }
 
-    private void getFileAttrsFromFolder(ExecutionContextTool externalExecutionContextTool, java.io.File folder, boolean getHash) throws Exception {
+    private void getFileAttrsFromFolder(ConfigurationTool configurationTool, ExecutionContextTool externalExecutionContextTool, java.io.File folder, boolean getHash) throws Exception {
         if (folder == null || !folder.exists() || !folder.isDirectory())
             return;
 
@@ -622,7 +615,7 @@ public class File implements Module {
             try {
                 getFileAttrFromFile(externalExecutionContextTool, f, getHash);
             } catch (Exception e) {
-                e.printStackTrace();
+                configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
             }
         });
         */
@@ -631,9 +624,9 @@ public class File implements Module {
             public FileVisitResult visitFile(Path file,
                                              BasicFileAttributes attrs) throws IOException {
                 try {
-                    getFileAttrFromFile(externalExecutionContextTool, new java.io.File(file.toUri()), getHash);
+                    getFileAttrFromFile(externalExecutionContextTool, new java.io.File(file.toUri()), getHash, null, true);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -641,9 +634,9 @@ public class File implements Module {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                 try {
-                    getFileAttrFromFile(externalExecutionContextTool, new java.io.File(dir.toUri()), getHash);
+                    getFileAttrFromFile(externalExecutionContextTool, new java.io.File(dir.toUri()), false, null, true);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                 }
                 return super.preVisitDirectory(dir, attrs);
             }
@@ -651,7 +644,7 @@ public class File implements Module {
 
     }
 
-    private void getFileAttrFromFile(ExecutionContextTool externalExecutionContextTool, java.io.File file, boolean getHash) throws Exception {
+    private void getFileAttrFromFile(ExecutionContextTool externalExecutionContextTool, java.io.File file, boolean getHash, ObjectArray objectArray, boolean getPath) throws Exception {
         //File fileTmp = new File(path);
         if (!file.exists() && !file.canRead())
             return;
@@ -666,14 +659,28 @@ public class File implements Module {
         //result = new FileAttr(fileSource.getName() + File.separator + path, fileTmp.lastModified(), fileTmp.length(), hash);
         //System.out.println(Utils.exportFileAttr(result));
 
-        externalExecutionContextTool.addMessage(file.getAbsolutePath());
-        externalExecutionContextTool.addMessage(file.length());
-        externalExecutionContextTool.addMessage(file.lastModified());
-        externalExecutionContextTool.addMessage(file.canWrite() ? 2 : (file.canRead() ? 1 : 0));
-        externalExecutionContextTool.addMessage(file.isFile() ? 1 : 0);
-
-        if (getHash)
-            externalExecutionContextTool.addMessage(hash);
+        if (objectArray != null) {
+            ObjectElement objectElement = new ObjectElement(
+                    new ObjectField("name", file.getName()),
+                    new ObjectField("length", file.length()),
+                    new ObjectField("lastModified", file.lastModified()),
+                    new ObjectField("access", file.canWrite() ? 2 : (file.canRead() ? 1 : 0)),
+                    new ObjectField("isFile", file.isFile())
+            );
+            if (getPath)
+                objectElement.getFields().add(new ObjectField("path", getAbsolutePath(file)));
+            if (getHash)
+                objectElement.getFields().add(new ObjectField("hash", hash));
+            objectArray.add(objectElement);
+        } else {
+            externalExecutionContextTool.addMessage(getAbsolutePath(file));
+            externalExecutionContextTool.addMessage(file.length());
+            externalExecutionContextTool.addMessage(file.lastModified());
+            externalExecutionContextTool.addMessage(file.canWrite() ? 2 : (file.canRead() ? 1 : 0));
+            externalExecutionContextTool.addMessage(file.isFile() ? 1 : 0);
+            if (getHash)
+                externalExecutionContextTool.addMessage(hash);
+        }
     }
 
     private byte[] createChecksum(java.io.File file) throws Exception {
@@ -764,7 +771,7 @@ public class File implements Module {
         });
 			/*
 		} catch (IOException e) {
-			//e.printStackTrace();
+			//configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
 			return;
 		}
 		*/
@@ -806,15 +813,33 @@ public class File implements Module {
         */
     }
 
-    private void size(ExecutionContextTool externalExecutionContextTool, java.io.File srcFile) {
+    private void size(ExecutionContextTool externalExecutionContextTool, java.io.File srcFile) throws IOException {
         if (!srcFile.exists()) {
             externalExecutionContextTool.addError("file not exist " + srcFile.getName());
             return;
         }
-        externalExecutionContextTool.addMessage(srcFile.length());
+        if (srcFile.isFile()) {
+            externalExecutionContextTool.addMessage(srcFile.length());
+        } else {
+            AtomicLong size = new AtomicLong();
+            Files.walkFileTree(srcFile.toPath(), new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file,
+                                                 BasicFileAttributes attrs) throws IOException {
+                    size.addAndGet(file.toFile().length());
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+            externalExecutionContextTool.addMessage(size.get());
+        }
     }
 
-    private void write(ExecutionContextTool externalExecutionContextTool, java.io.File srcFile, long offset, Object value, boolean rewrite, Charset charset, boolean useBom, boolean wait) throws IOException {
+    private void write(ExecutionContextTool externalExecutionContextTool, java.io.File srcFile, long offset, Object value, boolean rewrite,
+                       Charset charset, boolean useBom, boolean wait, boolean isText) throws IOException {
+        if (value == null) {
+            externalExecutionContextTool.addError("need value");
+            return;
+        }
         if (!srcFile.exists()) {
             if (srcFile.getParentFile() != null && !srcFile.getParentFile().exists())
                 srcFile.getParentFile().mkdirs();
@@ -826,18 +851,22 @@ public class File implements Module {
             return;
         }
         boolean isBites = value instanceof byte[];
-
-        if (!isBites && charset == null) {
-            if (srcFile.exists()) {
-                charset = detectCharset(srcFile);
-            } else {
-                charset = Charset.defaultCharset();
-            }
+        if (!isBites && !isText) {
+            isText = true;
+            value = value.toString();
         }
+        if (isText && charset == null) {
+            if (srcFile.exists())
+                charset = detectCharset(srcFile);
+            if (charset == null)
+                charset = Charset.defaultCharset();
+        }
+        if (isText && isBites)
+            value = new String((byte[]) value, charset);
 
         long changeSize = 0;
         if (rewrite) {
-            if (isBites) {
+            if (!isText) {
                 try (FileOutputStream fileOutputStream = new FileOutputStream(srcFile, false)) {
                     byte[] bytes = (byte[]) value;
                     fileOutputStream.write(bytes);
@@ -857,7 +886,7 @@ public class File implements Module {
                                 fileWriter.write('\ufeff');
                             }
                         }
-                        String str = value.toString();
+                        String str = (String) value;
                         fileWriter.append(str);
                         changeSize = str.length();
                         needExit = true;
@@ -868,7 +897,7 @@ public class File implements Module {
                     if (wait && !needExit && paramInt != null) {
                         try {
                             Thread.sleep(paramInt);
-                        } catch (Exception e) {
+                        } catch (Exception ignore) {
                         }
                     }
                 } while (wait && !needExit && paramLong != null && (startTime + paramLong) < System.currentTimeMillis());
@@ -881,12 +910,12 @@ public class File implements Module {
                     long startPosition = Math.max(0, offset > 0 ? offset : srcFile.length() + offset);
                     if (startPosition > 0)
                         randomAccessFile.seek(startPosition);
-                    if (isBites) {
+                    if (!isText) {
                         byte[] bytes = (byte[]) value;
                         randomAccessFile.write(bytes);
                         changeSize = bytes.length;
                     } else {
-                        String str = value.toString();
+                        String str = (String) value;
                         randomAccessFile.write(str.getBytes(charset));
                         // randomAccessFile.writeBytes(str);
                         changeSize = str.length();
@@ -899,7 +928,7 @@ public class File implements Module {
                 if (wait && !needExit && paramInt != null) {
                     try {
                         Thread.sleep(paramInt);
-                    } catch (Exception e) {
+                    } catch (Exception ignore) {
                     }
                 }
             } while (wait && !needExit && paramLong != null && (startTime + paramLong) < System.currentTimeMillis());
@@ -921,7 +950,6 @@ public class File implements Module {
                 }
             }
             copyFolder(srcFile, dstFile, force, excludePaths);
-            getFileAttrFromFile(externalExecutionContextTool, dstFile, false);
         } else {
             if (!force && dstFile.exists())
                 return;
@@ -934,8 +962,8 @@ public class File implements Module {
             } else {
                 Files.copy(srcFile.toPath(), dstFile.toPath());
             }
-            getFileAttrFromFile(externalExecutionContextTool, dstFile, false);
         }
+        getFileAttrFromFile(externalExecutionContextTool, dstFile, false, null, true);
     }
 
     private Charset detectCharset(java.io.File srcFile) throws IOException {
@@ -1083,7 +1111,6 @@ public class File implements Module {
         if (srcFile.isDirectory()) {
             copyFolder(srcFile, dstFile, false, null);
             delete(srcFile, false);
-            getFileAttrFromFile(externalExecutionContextTool, dstFile, false);
         } else {
             if (dstFile.exists())
                 return;
@@ -1092,8 +1119,8 @@ public class File implements Module {
                 dstFile.getParentFile().mkdirs();
 
             FileUtils.moveFile(srcFile, dstFile);
-            getFileAttrFromFile(externalExecutionContextTool, dstFile, false);
         }
+        getFileAttrFromFile(externalExecutionContextTool, dstFile, false, null, true);
     }
 
     private void parent(ExecutionContextTool externalExecutionContextTool, java.io.File srcFile) {
@@ -1174,6 +1201,138 @@ public class File implements Module {
         } while (!srcFile.exists() && !externalExecutionContextTool.isNeedStop() && Instant.now().isBefore(end));
         if (srcFile.exists())
             externalExecutionContextTool.addMessage(1);
+    }
+
+    private void readFromZip(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, java.io.File srcFile, boolean isText,
+                             String path, Charset charset, boolean returnPairs) throws IOException {
+        if (isText && charset == null)
+            charset = Charset.defaultCharset();
+        try (FileInputStream fis = new FileInputStream(srcFile); ZipInputStream zis = new ZipInputStream(fis)) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                String entryPath = entry.getName();
+                if (entry.isDirectory())
+                    continue;
+                if (entryPath.startsWith(path)) {
+                    InputStream is = null;
+                    try {
+                        is = new FilterInputStream(zis) {
+                            @Override
+                            public void close() throws IOException {
+                                zis.closeEntry();
+                            }
+                        };
+                        long size = entry.getSize();
+                        if (size == -1) {
+                            byte[] data = IOUtils.toByteArray(is);
+                            size = data.length;
+                            is = new ByteArrayInputStream(data);
+                        }
+                        if (returnPairs)
+                            executionContextTool.addMessage(entry.getName());
+                        readFileFromZip(executionContextTool, is, isText, size, 0, 0, charset);
+                        if (entryPath.equals(path))
+                            break;
+                    } catch (Throwable e) {
+                        configurationTool.loggerWarn(String.format("error while read file=%s: %s", entryPath, ModuleUtils.getStackTraceAsString(e)));
+                    } finally {
+                        if (is != null)
+                            is.close();
+                    }
+                }
+            }
+        }
+    }
+
+    private void readFileFromZip(ExecutionContextTool executionContextTool, InputStream is, boolean isText, long fileSize, long offset,
+                                 int size, Charset charset) throws IOException {
+        long startPosition = Math.max(0, offset >= 0 ? offset : fileSize + offset);
+        int newSize = size > 0 ? size : (int) (fileSize - startPosition);
+        if (isText) {
+            try (InputStreamReader isr = new InputStreamReader(is, charset)) {
+                if (startPosition > 0)
+                    isr.skip(startPosition);
+                char[] arr = new char[newSize];
+                int readLength = isr.read(arr);
+                if (readLength > 0) {
+                    if (readLength != newSize)
+                        arr = ArrayUtils.subarray(arr, 0, readLength);
+                    executionContextTool.addMessage(new String(arr));
+                }
+            }
+        } else {
+            // executionContextTool.addMessage(IOUtils.toByteArray(is));
+            if (startPosition > 0)
+                is.skip(startPosition);
+            byte[] arr = new byte[newSize];
+            int readLength = is.read(arr);
+            if (readLength > 0) {
+                if (readLength != newSize)
+                    arr = ArrayUtils.subarray(arr, 0, readLength);
+                executionContextTool.addMessage(arr);
+            }
+        }
+    }
+
+    private enum HashAlgType {
+        MD5("MD5"),
+        SHA1("SHA-1"),
+        SHA256("SHA-256");
+
+        private String algName;
+
+        HashAlgType(String algName) {
+            this.algName = algName;
+        }
+
+        public String getAlgName() {
+            return algName;
+        }
+    }
+
+    private enum Type {
+        info,
+        fullInfo,
+        treeInfo,
+        treeFullInfo,
+        copy,
+        read,
+        readText,
+        tmpFolder,
+        remove,
+        dir,
+        create,
+        writePart,
+        write,
+        changeLastModified,
+        mkdir,
+        move,
+        useArgument,
+        readPart,
+        readTextPart,
+        pwd,
+        dirNames,
+        createPath,
+        parent,
+        rename,
+        readTextNew,
+        readNew,
+        readTextLastNLines,
+        waitFile,
+        copyForce,
+        writeText,
+        writeTextBOM,
+        dirSortDate,
+        dirNamesSortDate,
+        removeOrWait,
+        readOrWait,
+        writeOrWait,
+        size,
+        writeTextPart,
+        readFromZip,
+        readTextFromZip,
+        dirInfoObj,
+        dirFullInfoObj
     }
 
 }

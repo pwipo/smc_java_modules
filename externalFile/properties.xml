@@ -7,26 +7,26 @@
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
     <className>ru.smcsystem.smcmodules.module.File</className>
-    <ver>1.6.0</ver>
+    <ver>1.7.0</ver>
     <apiVer>1.4.0</apiVer>
-    <date>19-10-2023</date>
+    <date>27-07-2025</date>
     <categories>Java, File</categories>
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
 
@@ -89,11 +89,16 @@ The program is supplied as is. For problems arising during the operation or inst
                 <value>writeOrWait</value>
                 <value>createPath</value>
                 <value>size</value>
+                <value>writeTextPart</value>
+                <value>readFromZip</value>
+                <value>readTextFromZip</value>
+                <value>dirInfoObj</value>
+                <value>dirFullInfoObj</value>
             </validValues>
             <description>
                 <entry>
                     <key>en</key>
-                    <value>Type of transaction:
+                    <value><![CDATA[Type of transaction:
 info - gives information about the file (or all files in the specified directory): path, size, date of the last change, access level (2-write, 1-read, 0-no access), type (1- file, 0-directory),
 fullInfo - the same as the previous + produces a hash,
 treeInfo - same as info, but only for folders. displays information recursively,
@@ -131,11 +136,16 @@ readOrWait - similar to read, but if it fails, it tries again at the specified i
 writeOrWait - similar to write, but if it fails, it tries again at the specified interval. in the arguments setting, 2 values are specified separated by commas: the maximum timeout in milliseconds, the interval between attempts in milliseconds. if it's empty, it doesn't wait.
 createPath - joins two parts of a path into one, takes 2 strings, returns the resulting path.
 size - return file length.
-                    </value>
+writeTextPart - Writes text data (second data element) to file starting from the specified position (third data element, optional) with replacement. The fourth parameter is the encoding name, optional. Returns the amount of data written.
+readFromZip - similar to read, but reads from the zip archive. Requires 2 parameters - the path to the file (zip archive) and the path to the file (without the leading /).
+readTextFromZip - similar to readFromZip, but reads text files. Requires 2 parameters - the path to the file (zip archive) and the path to the file (without the leading /). You can also set the encoding with the third parameter.
+dirInfoObj - similar to dir + info, and gives information as an array of objects. Each object contains information about the file, fields: name, length, lastModified, access (access level: 2-write, 1-read, 0-no access), isFile.
+dirFullInfoObj - similar to dirInfoObj, but each object (file only) also contains a hash field.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>Тип операции:
+                    <value><![CDATA[Тип операции:
 info - выдает информацию о файле (или всех файлах в указанной директории): путь, размер, дата последнего изменения, уровень доступа (2-на запись,1-на чтение,0-нет доступа), тип (1- файл, 0-директория),
 fullInfo - тоже самое что и предыдуще + выдает хеш.
 treeInfo - аналогично info, но только для папок. выводит информацию рекурсивно.
@@ -173,7 +183,12 @@ readOrWait - аналогичен read, но если не получается 
 writeOrWait - аналогичен write, но если не получается выполнить, то пытается снова с указанным интервалом. в настройке arguments указаны 2 значения через запятую: максимальное время ожидания в милисекундах, интервал между попытками в милисекундах. если пусто то не ждет.
 createPath - соединяет две части пути в один, принимает 2 строки, возвращает результирующий путь.
 size - возвращает размер файла.
-                    </value>
+writeTextPart - Записывает с заменой текстовые данные (второй элементы данных) в файл начиная с указанной позиции (третий элемент данных, опционально). Четвертый параметр - имя кодировки, опционально. Возвращает количество записанных данных.
+readFromZip - аналогичен read, но читает из зим архива. Требует 2 параметра - путь до файла (зим архива) и путь до файла (без начального /).
+readTextFromZip - аналогичен readFromZip, но читает текстовые файлы. Требует 2 параметра - путь до файла (зим архива) и путь до файла (без начального /). Так же можно установить кодировку третьим параметром.
+dirInfoObj - похож на dir + info, и выдает информацию в виде массива объектов. Каждый объект содержит информацию о файле, поля: name, length, lastModified, access (уровень доступа: 2-на запись,1-на чтение,0-нет доступа), isFile.
+dirFullInfoObj - аналогичен dirInfoObj, но так же каждый объект (только файл) содержит поле hash.
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -253,8 +268,7 @@ size - возвращает размер файла.
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="0" maxS="-1" minEC="0" maxEC="0" minC="0" maxC="0">
             <description>
                 <entry>
                     <key>ru</key>
@@ -266,12 +280,6 @@ size - возвращает размер файла.
                     <value>Default execution context. If there are no sources, then it uses internal parameters.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
@@ -2930,43 +2938,38 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>info</type>
+        <type t="info" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>выдает информацию о файле (или всех файлах в указанной директории): путь, размер, дата последнего изменения, уровень доступа (2-на запись,1-на чтение,0-нет доступа), тип (1- файл,0-директория).</value>
+                    <value><![CDATA[Выдает информацию о файле (или всех файлах в указанной директории):
+    путь,
+    размер,
+    дата последнего изменения,
+    уровень доступа (2-на запись,1-на чтение,0-нет доступа),
+    тип (1- файл,0-директория).
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>gives information about the file (or all files in the specified directory): path, size, date of the last change, access level (2-write, 1-read, 0-no access), type (1- file, 0-directory).</value>
+                    <value><![CDATA[Gives information about the file (or all files in the specified directory):
+    path,
+    size,
+    date of the last change,
+    access level (2-write, 1-read, 0-no access),
+    type (1- file, 0-directory).
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -3054,319 +3057,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>fullInfo</type>
+        <type t="fullInfo" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>тоже самое что и info + выдает хеш.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>the same as info + produces a hash.</value>
-                </entry>
+                <entry k="ru" v="тоже самое что и info + выдает хеш."/>
+                <entry k="en" v="the same as info + produces a hash."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае
-                                        используется рабочая папка.
-                                    </value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working
-                                        folder is used.
-                                    </value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
-                        </element>
-                    </elements>
-                </source>
-            </sources>
-            <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Путь.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>The path.</value>
-                        </entry>
-                    </description>
-                    <valueType>STRING</valueType>
-                    <value>/test/file.txt</value>
-                </element>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Размер.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>Size.</value>
-                        </entry>
-                    </description>
-                    <valueType>LONG</valueType>
-                    <value>10</value>
-                </element>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Время.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>Time.</value>
-                        </entry>
-                    </description>
-                    <valueType>LONG</valueType>
-                    <value>1697741510</value>
-                </element>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Права: 0-запрещено, 1-чтение, 2-запись.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>Permissions: 0-denied, 1-read, 2-write.</value>
-                        </entry>
-                    </description>
-                    <valueType>INTEGER</valueType>
-                    <value>2</value>
-                </element>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Это файл - 1, иначе 0.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>This is a file - 1, otherwise 0.</value>
-                        </entry>
-                    </description>
-                    <valueType>INTEGER</valueType>
-                    <value>1</value>
-                </element>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Хеш.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>Hash.</value>
-                        </entry>
-                    </description>
-                    <valueType>STRING</valueType>
-                    <value>5sr5t47j6586</value>
-                </element>
-            </output>
-        </type>
-        <type>
-            <type>treeInfo</type>
-            <description>
-                <entry>
-                    <key>ru</key>
-                    <value>аналогично info, но только для папок. выводит информацию рекурсивно.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>same as info, but only for folders. displays information recursively.</value>
-                </entry>
-            </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
-            <sources>
-                <source>
-                    <count>1</count>
-                    <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае
-                                        используется рабочая папка.
-                                    </value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working
-                                        folder is used.
-                                    </value>
-                                </entry>
-                            </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
-                        </element>
-                    </elements>
-                </source>
-            </sources>
-            <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Путь.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>The path.</value>
-                        </entry>
-                    </description>
-                    <valueType>STRING</valueType>
-                    <value>/test/file.txt</value>
-                </element>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Размер.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>Size.</value>
-                        </entry>
-                    </description>
-                    <valueType>LONG</valueType>
-                    <value>10</value>
-                </element>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Время.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>Time.</value>
-                        </entry>
-                    </description>
-                    <valueType>LONG</valueType>
-                    <value>1697741510</value>
-                </element>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Права: 0-запрещено, 1-чтение, 2-запись.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>Permissions: 0-denied, 1-read, 2-write.</value>
-                        </entry>
-                    </description>
-                    <valueType>INTEGER</valueType>
-                    <value>2</value>
-                </element>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Это файл - 1, иначе 0.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>This is a file - 1, otherwise 0.</value>
-                        </entry>
-                    </description>
-                    <valueType>INTEGER</valueType>
-                    <value>1</value>
-                </element>
-            </output>
-        </type>
-        <type>
-            <type>treeFullInfo</type>
-            <description>
-                <entry>
-                    <key>ru</key>
-                    <value>аналогично fullInfo, но только для папок. выводит информацию рекурсивно.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>same as fullInfo, but only for folders. displays information recursively.</value>
-                </entry>
-            </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
-            <sources>
-                <source>
-                    <count>1</count>
-                    <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае
-                                        используется рабочая папка.
-                                    </value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working
-                                        folder is used.
-                                    </value>
-                                </entry>
-                            </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -3470,32 +3174,241 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>copy</type>
+        <type t="treeInfo" minS="1" maxS="1">
+            <description>
+                <entry k="ru" v="аналогично info, но только для папок. выводит информацию рекурсивно."/>
+                <entry k="en" v="same as info, but only for folders. displays information recursively."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element vt="STRING" v="/test/">
+                            <description>
+                                <entry k="ru" v="Путь до папки, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the folder, can be absolute or relative, in this case the working folder is used."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Путь.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>The path.</value>
+                        </entry>
+                    </description>
+                    <valueType>STRING</valueType>
+                    <value>/test/file.txt</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Размер.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Size.</value>
+                        </entry>
+                    </description>
+                    <valueType>LONG</valueType>
+                    <value>10</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Время.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Time.</value>
+                        </entry>
+                    </description>
+                    <valueType>LONG</valueType>
+                    <value>1697741510</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Права: 0-запрещено, 1-чтение, 2-запись.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Permissions: 0-denied, 1-read, 2-write.</value>
+                        </entry>
+                    </description>
+                    <valueType>INTEGER</valueType>
+                    <value>2</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Это файл - 1, иначе 0.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>This is a file - 1, otherwise 0.</value>
+                        </entry>
+                    </description>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+            </output>
+        </type>
+        <type t="treeFullInfo" minS="1" maxS="1">
+            <description>
+                <entry k="ru" v="аналогично fullInfo, но только для папок. выводит информацию рекурсивно."/>
+                <entry k="en" v="same as fullInfo, but only for folders. displays information recursively."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element vt="STRING" v="/test/">
+                            <description>
+                                <entry k="ru" v="Путь до папки, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the folder, can be absolute or relative, in this case the working folder is used."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Путь.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>The path.</value>
+                        </entry>
+                    </description>
+                    <valueType>STRING</valueType>
+                    <value>/test/file.txt</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Размер.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Size.</value>
+                        </entry>
+                    </description>
+                    <valueType>LONG</valueType>
+                    <value>10</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Время.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Time.</value>
+                        </entry>
+                    </description>
+                    <valueType>LONG</valueType>
+                    <value>1697741510</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Права: 0-запрещено, 1-чтение, 2-запись.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Permissions: 0-denied, 1-read, 2-write.</value>
+                        </entry>
+                    </description>
+                    <valueType>INTEGER</valueType>
+                    <value>2</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Это файл - 1, иначе 0.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>This is a file - 1, otherwise 0.</value>
+                        </entry>
+                    </description>
+                    <valueType>INTEGER</valueType>
+                    <value>1</value>
+                </element>
+                <element>
+                    <type>VALUE</type>
+                    <count>1</count>
+                    <description>
+                        <entry>
+                            <key>ru</key>
+                            <value>Хеш.</value>
+                        </entry>
+                        <entry>
+                            <key>en</key>
+                            <value>Hash.</value>
+                        </entry>
+                    </description>
+                    <valueType>STRING</valueType>
+                    <value>5sr5t47j6586</value>
+                </element>
+            </output>
+        </type>
+        <type t="copy" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>копирует файл или папку в путь указанный вторым элементом данных. возвращает информацию о
-                        файле. не перезаписывает файлы. требует 2 параметра: путь к источнику и путь назначения. так же,
-                        если есть еще строковые сообщения - то их рассматривает как паттерны (регулярные выражения) для
-                        исключения (исключает пути из копирования).
-                    </value>
+                    <value><![CDATA[Копирует файл или папку в путь указанный вторым элементом данных. Возвращает информацию о файле.
+Не перезаписывает файлы. Требует 2 параметра: путь к источнику и путь назначения.
+Так же, если есть еще строковые сообщения - то их рассматривает как паттерны (регулярные выражения) для исключения (исключает пути из копирования).
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>copies the file or folder to the path specified by the second data element. returns
-                        information about the file. does not overwrite files. requires 2 parameters: source path and
-                        destination path. also, if there are more string messages, then they are considered as patterns
-                        (regexp) for exclusion (excludes paths from copying).
-                    </value>
+                    <value><![CDATA[Copies the file or folder to the path specified by the second data element. Returns information about the file.
+Does not overwrite files. requires 2 parameters: source path and destination path.
+Also, if there are more string messages, then they are considered as patterns (regexp) for exclusion (excludes paths from copying).
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -3626,24 +3539,11 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>copyForce</type>
+        <type t="copyForce" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>аналогичен copy, но всегда перезаписывает файлы назначения.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>Similar to copy, but always overwrites destination files.</value>
-                </entry>
+                <entry k="ru" v="аналогичен copy, но всегда перезаписывает файлы назначения."/>
+                <entry k="en" v="Similar to copy, but always overwrites destination files."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -3774,49 +3674,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>read</type>
+        <type t="read" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>читает файл и возвращает в виде массива байт. требует 1 параметр - путь до файла.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>reads a file and returns it as an array of bytes. requires 1 parameter - the path to the
-                        file.
-                    </value>
-                </entry>
+                <entry k="ru" v="читает файл и возвращает в виде массива байт. Требует 1 параметр - путь до файла."/>
+                <entry k="en" v="reads a file and returns it as an array of bytes. Requires 1 parameter - the path to the file."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае
-                                        используется рабочая папка.
-                                    </value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working
-                                        folder is used.
-                                    </value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -3840,53 +3711,32 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>readOrWait</type>
+        <type t="readOrWait" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>аналогичен read, но если не получается выполнить, то пытается снова с указанным интервалом. в
-                        настройке arguments указаны 2 значения через запятую: максимальное время ожидания в
-                        милисекундах, интервал между попытками в милисекундах. если пусто то не ждет.
-                    </value>
+                    <value><![CDATA[Аналогичен read, но если не получается выполнить, то пытается снова с указанным интервалом.
+В настройке arguments указаны 2 значения через запятую: максимальное время ожидания в милисекундах, интервал между попытками в милисекундах.
+Если пусто, то не ждет.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>similar to read, but if it fails, it tries again at the specified interval. in the arguments
-                        setting, 2 values are specified separated by commas: the maximum timeout in milliseconds, the
-                        interval between attempts in milliseconds. if it's empty, it doesn't wait.
-                    </value>
+                    <value><![CDATA[Similar to read, but if it fails, it tries again at the specified interval.
+In the arguments setting, 2 values are specified separated by commas: the maximum timeout in milliseconds, the interval between attempts in milliseconds.
+If it's empty, it doesn't wait.
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае
-                                        используется рабочая папка.
-                                    </value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working
-                                        folder is used.
-                                    </value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -3910,47 +3760,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>readText</type>
+        <type t="readText" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>читает файл и возвращает в виде строки. требует 1 параметр - путь до файла.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>Reads a file and returns it as a string. requires 1 parameter - the path to the file.</value>
-                </entry>
+                <entry k="ru" v="читает файл и возвращает в виде строки. требует 1 параметр - путь до файла."/>
+                <entry k="en" v="Reads a file and returns it as a string. requires 1 parameter - the path to the file."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае
-                                        используется рабочая папка.
-                                    </value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working
-                                        folder is used.
-                                    </value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -3974,231 +3797,101 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>tmpFolder</type>
+        <type t="tmpFolder" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>создает временную папку с префиксом Folder. возвращает путь.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>creates a temporary folder with the prefix Folder. returns the path.</value>
-                </entry>
+                <entry k="ru" v="создает временную папку с префиксом Folder. возвращает путь."/>
+                <entry k="en" v="creates a temporary folder with the prefix Folder. returns the path."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources/>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
+                <element vt="STRING" v="/test/file.txt">
                     <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется
-                                рабочая папка.
-                            </value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>The path to the file can be absolute or relative, in this case the working folder is
-                                used.
-                            </value>
-                        </entry>
+                        <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                        <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                     </description>
-                    <valueType>STRING</valueType>
-                    <value>/test/file.txt</value>
                 </element>
             </output>
         </type>
-        <type>
-            <type>remove</type>
+        <type t="remove" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>удаляет файл (директорию). возвращает путь.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>removes the file (directory). returns the path.</value>
-                </entry>
+                <entry k="ru" v="удаляет файл (директорию). возвращает путь."/>
+                <entry k="en" v="removes the file (directory). returns the path."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае
-                                        используется рабочая папка.
-                                    </value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working
-                                        folder is used.
-                                    </value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
+                <element vt="STRING" v="/test/file.txt">
                     <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется
-                                рабочая папка.
-                            </value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>The path to the file can be absolute or relative, in this case the working folder is
-                                used.
-                            </value>
-                        </entry>
+                        <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                        <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                     </description>
-                    <valueType>STRING</valueType>
-                    <value>/test/file.txt</value>
                 </element>
             </output>
         </type>
-        <type>
-            <type>removeOrWait</type>
+        <type t="removeOrWait" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>аналогичен remove, но если не получается выполнить, то пытается снова с указанным интервалом.
-                        в настройке arguments указаны 2 значения через запятую: максимальное время ожидания в
-                        милисекундах, интервал между попытками в милисекундах. если пусто то не ждет.
-                    </value>
+                    <value><![CDATA[Аналогичен remove, но если не получается выполнить, то пытается снова с указанным интервалом.
+В настройке arguments указаны 2 значения через запятую: максимальное время ожидания в милисекундах, интервал между попытками в милисекундах.
+Если пусто, то не ждет.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>similar to remove, but if it fails, it tries again at the specified interval. in the
-                        arguments setting, 2 values are specified separated by commas: the maximum timeout in
-                        milliseconds, the interval between attempts in milliseconds. if it's empty, it doesn't wait.
-                    </value>
+                    <value><![CDATA[Similar to remove, but if it fails, it tries again at the specified interval. in the
+Arguments setting, 2 values are specified separated by commas: the maximum timeout in milliseconds, the interval between attempts in milliseconds.
+If it's empty, it doesn't wait.
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае
-                                        используется рабочая папка.
-                                    </value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working
-                                        folder is used.
-                                    </value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
+                <element vt="STRING" v="/test/file.txt">
                     <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется
-                                рабочая папка.
-                            </value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>The path to the file can be absolute or relative, in this case the working folder is
-                                used.
-                            </value>
-                        </entry>
+                        <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                        <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                     </description>
-                    <valueType>STRING</valueType>
-                    <value>/test/file.txt</value>
                 </element>
             </output>
         </type>
-        <type>
-            <type>dir</type>
+        <type t="dir" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>выводит полные имена файлов в директории.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>displays file paths in a directory.</value>
-                </entry>
+                <entry k="ru" v="выводит полные имена файлов в директории."/>
+                <entry k="en" v="displays file paths in a directory."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае
-                                        используется рабочая папка.
-                                    </value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working
-                                        folder is used.
-                                    </value>
-                                </entry>
+                                <entry k="ru" v="Путь до папки, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the folder, can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test</value>
                         </element>
                     </elements>
                 </source>
@@ -4222,47 +3915,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>dirSortDate</type>
+        <type t="dirSortDate" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>аналогичен dir, но выводит сортированый по времени список.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>Similar to dir, but outputs a list sorted by time.</value>
-                </entry>
+                <entry k="ru" v="аналогичен dir, но выводит сортированый по времени список."/>
+                <entry k="en" v="Similar to dir, but outputs a list sorted by time."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае
-                                        используется рабочая папка.
-                                    </value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working
-                                        folder is used.
-                                    </value>
-                                </entry>
+                                <entry k="ru" v="Путь до папки, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the folder, can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test</value>
                         </element>
                     </elements>
                 </source>
@@ -4286,43 +3952,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>create</type>
+        <type t="create" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>создает пустой файл, если не существует. возвращает путь.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>creates an empty file if it doesn’t exist.</value>
-                </entry>
+                <entry k="ru" v="создает пустой файл, если не существует. возвращает путь."/>
+                <entry k="en" v="creates an empty file if it doesn’t exist."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -4346,137 +3989,83 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>writePart</type>
+        <type t="writePart" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>записывает с заменой данные (второй элементы данных) в файл начиная с указанной позиции (третий элемент данных). возвращает колиество записаных данных. требует 2 параметра - путь до файла и данные.</value>
+                    <value><![CDATA[Записывает с заменой данные (второй элементы данных) в файл начиная с указанной позиции (третий элемент данных).
+Возвращает количество записанных данных. Требует 3 параметра: путь до файла, данные, позиция (начиная с которой записываются данные).
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Writes replacement data (second data element) to the file starting at the specified position (third data element). returns the amount of data written. requires 2 parameters - the path to the file and the data.</value>
+                    <value><![CDATA[Writes replacement data (second data element) to the file starting at the specified position (third data element).
+Returns the amount of data written. Requires 3 parameters: path to file, data, position (starting from which data is written).
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>1</count>
+                        <element t="VALUE_ANY" vt="STRING" v="value">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Значение, которое будет записано, может быть байтовым массивом или текстом.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The value to be written can be a byte array or text.</value>
-                                </entry>
+                                <entry k="ru" v="Значение, которое будет записано, может быть байтовым массивом или текстом."/>
+                                <entry k="en" v="The value to be written can be a byte array or text."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>value</value>
                         </element>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <optional>true</optional>
+                        <element o="true" vt="LONG" v="0">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Смещение относительно начала файла, на которое надо установить указатель до начала записи.</value>
+                                <entry k="ru">
+                                    <value>Смещение относительно начала файла, на которое надо установить указатель до начала записи. Может быть положительная, или отрицательная. Значение по умолчанию - 0.</value>
                                 </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The offset relative to the beginning of the file at which the pointer must be set before recording begins.</value>
+                                <entry k="en">
+                                    <value>The offset relative to the beginning of the file to which the pointer should be positioned before writing begins. Can be positive or negative. The default value is 0.</value>
                                 </entry>
                             </description>
-                            <valueType>LONG</valueType>
-                            <value>0</value>
                         </element>
                     </elements>
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <optional>true</optional>
+                <element o="true" vt="LONG" v="10">
                     <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Количество записанных байтов.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>Number of bytes written.</value>
-                        </entry>
+                        <entry k="ru" v="Количество записанных байтов"/>
+                        <entry k="en" v="Number of bytes written"/>
                     </description>
-                    <valueType>LONG</valueType>
-                    <value>10</value>
                 </element>
             </output>
         </type>
-        <type>
-            <type>write</type>
+        <type t="write" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>записывает с заменой данные (второй элементы данных) в файл. старые данные стираются. возвращает колиество записаных данных. требует 2 параметра - путь до файла и данные.</value>
+                    <value><![CDATA[Записывает с заменой данные (второй элементы данных) в файл. Старые данные стираются.
+Возвращает количество записанных данных. Требует 2 параметра - путь до файла и данные.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Writes data (the second data element) to a file with replacement. old data is deleted. returns the amount of data written. requires 2 parameters - the path to the file and the data.</value>
+                    <value><![CDATA[Writes data (the second data element) to a file with replacement. Old data is deleted.
+Returns the amount of data written. Requires 2 parameters - the path to the file and the data.
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                         <element>
                             <type>VALUE_ANY</type>
@@ -4498,62 +4087,40 @@ size - возвращает размер файла.
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <optional>true</optional>
+                <element o="true" vt="LONG" v="10">
                     <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Количество записанных байтов.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>Number of bytes written.</value>
-                        </entry>
+                        <entry k="ru" v="Количество записанных байтов"/>
+                        <entry k="en" v="Number of bytes written"/>
                     </description>
-                    <valueType>LONG</valueType>
-                    <value>10</value>
                 </element>
             </output>
         </type>
-        <type>
-            <type>writeOrWait</type>
+        <type t="writeOrWait" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>аналогичен write, но если не получается выполнить, то пытается снова с указанным интервалом. в настройке arguments указаны 2 значения через запятую: максимальное время ожидания в милисекундах, интервал между попытками в милисекундах. если пусто то не ждет.</value>
+                    <value><![CDATA[аналогичен write, но если не получается выполнить, то пытается снова с указанным интервалом.
+в настройке arguments указаны 2 значения через запятую: максимальное время ожидания в милисекундах, интервал между попытками в милисекундах.
+если пусто то не ждет.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>similar to write, but if it fails, it tries again at the specified interval. in the arguments setting, 2 values are specified separated by commas: the maximum timeout in milliseconds, the interval between attempts in milliseconds. if it's empty, it doesn't wait.</value>
+                    <value><![CDATA[similar to write, but if it fails, it tries again at the specified interval.
+in the arguments setting, 2 values are specified separated by commas: the maximum timeout in milliseconds, the interval between attempts in milliseconds.
+if it's empty, it doesn't wait.
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                         <element>
                             <type>VALUE_ANY</type>
@@ -4575,62 +4142,28 @@ size - возвращает размер файла.
                 </source>
             </sources>
             <output>
-                <element>
-                    <type>VALUE</type>
-                    <count>1</count>
-                    <optional>true</optional>
+                <element o="true" vt="LONG" v="10">
                     <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Количество записанных байтов.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>Number of bytes written.</value>
-                        </entry>
+                        <entry k="ru" v="Количество записанных байтов"/>
+                        <entry k="en" v="Number of bytes written"/>
                     </description>
-                    <valueType>LONG</valueType>
-                    <value>10</value>
                 </element>
             </output>
         </type>
-        <type>
-            <type>changeLastModified</type>
+        <type t="changeLastModified" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>изменяет дату последнего изменения, возвращает предыдущее значение.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>changes the date of the last change, returns the previous value.</value>
-                </entry>
+                <entry k="ru" v="изменяет дату последнего изменения, возвращает предыдущее значение."/>
+                <entry k="en" v="changes the date of the last change, returns the previous value."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                         <element>
                             <type>VALUE</type>
@@ -4670,43 +4203,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>mkdir</type>
+        <type t="mkdir" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>создает папку. возвращает путь.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>creates a folder. returns the path</value>
-                </entry>
+                <entry k="ru" v="создает папку. возвращает путь."/>
+                <entry k="en" v="creates a folder. returns the path"/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -4730,24 +4240,11 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>move</type>
+        <type t="move" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>перемещает. принимает 2 параметра пути источника и назначения. возвращает путь.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>moves. takes 2 source and destination path parameters. returns the path</value>
-                </entry>
+                <entry k="ru" v="перемещает. принимает 2 параметра пути источника и назначения. возвращает путь."/>
+                <entry k="en" v="moves. takes 2 source and destination path parameters. returns the path"/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
@@ -4806,75 +4303,50 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>readPart</type>
+        <type t="readPart" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>читает часть файла и возвращает в виде массива байт. второй аргумент - смещение в байтах, если отрицательное, то начинается с конца файла. третий аргумент - размер байтового массива ответа (0 если читать до конца файла). первый аргумент - путь до файла.</value>
+                    <value><![CDATA[читает часть файла и возвращает в виде массива байт.
+второй аргумент - смещение в байтах, если отрицательное, то начинается с конца файла.
+третий аргумент - размер байтового массива ответа (0 если читать до конца файла).
+первый аргумент - путь до файла.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Reads part of a file and returns it as an array of bytes. the second argument is the offset in bytes, if negative, it starts from the end of the file. the third argument is the size of the response byte array (0 if read to the end of the file). the first argument is the path to the file.</value>
+                    <value><![CDATA[Reads part of a file and returns it as an array of bytes.
+the second argument is the offset in bytes, if negative, it starts from the end of the file.
+the third argument is the size of the response byte array (0 if read to the end of the file).
+the first argument is the path to the file.
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="LONG" v="0">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Смещение относительно начала файла, на которое надо установить указатель до начала записи.</value>
+                                <entry k="ru">
+                                    <value>Смещение относительно начала файла, на которое надо установить указатель до начала записи. Может быть положительная, или отрицательная. Значение по умолчанию - 0.</value>
                                 </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The offset relative to the beginning of the file at which the pointer must be set before recording begins.</value>
+                                <entry k="en">
+                                    <value>The offset relative to the beginning of the file to which the pointer should be positioned before writing begins. Can be positive or negative. The default value is 0.</value>
                                 </entry>
                             </description>
-                            <valueType>LONG</valueType>
-                            <value>0</value>
                         </element>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="LONG" v="0">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Размер читаемого блока, в байтах.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>Size of the read block, in bytes.</value>
-                                </entry>
+                                <entry k="ru" v="Размер читаемого блока, в байтах"/>
+                                <entry k="en" v="Size of the read block, in bytes"/>
                             </description>
-                            <valueType>LONG</valueType>
-                            <value>0</value>
                         </element>
                     </elements>
                 </source>
@@ -4898,75 +4370,50 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>readTextPart</type>
+        <type t="readTextPart" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>читает часть файла и возвращает в виде строки. второй аргумент - смещение в байтах, если отрицательное, то начинается с конца файла. третий аргумент - размер байтового массива ответа (0 если читать до конца файла). первый аргумент - путь до файла.</value>
+                    <value><![CDATA[читает часть файла и возвращает в виде строки.
+второй аргумент - смещение в байтах, если отрицательное, то начинается с конца файла.
+третий аргумент - размер байтового массива ответа (0 если читать до конца файла).
+первый аргумент - путь до файла.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>reads part of a file and returns it as a string. the second argument is the offset in bytes, if negative, it starts from the end of the file. the third argument is the size of the response byte array (0 if read to the end of the file). the first argument is the path to the file.</value>
+                    <value><![CDATA[reads part of a file and returns it as a string.
+the second argument is the offset in bytes, if negative, it starts from the end of the file.
+the third argument is the size of the response byte array (0 if read to the end of the file).
+the first argument is the path to the file.
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="LONG" v="0">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Смещение относительно начала файла, на которое надо установить указатель до начала записи.</value>
+                                <entry k="ru">
+                                    <value>Смещение относительно начала файла, на которое надо установить указатель до начала записи. Может быть положительная, или отрицательная. Значение по умолчанию - 0.</value>
                                 </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The offset relative to the beginning of the file at which the pointer must be set before recording begins.</value>
+                                <entry k="en">
+                                    <value>The offset relative to the beginning of the file to which the pointer should be positioned before writing begins. Can be positive or negative. The default value is 0.</value>
                                 </entry>
                             </description>
-                            <valueType>LONG</valueType>
-                            <value>0</value>
                         </element>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="LONG" v="0">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Размер читаемого блока, в байтах.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>Size of the read block, in bytes.</value>
-                                </entry>
+                                <entry k="ru" v="Размер читаемого блока, в байтах"/>
+                                <entry k="en" v="Size of the read block, in bytes"/>
                             </description>
-                            <valueType>LONG</valueType>
-                            <value>0</value>
                         </element>
                     </elements>
                 </source>
@@ -4990,43 +4437,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>dirNames</type>
+        <type t="dirNames" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>выводит имена файлов в директории.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>displays file names in a directory.</value>
-                </entry>
+                <entry k="ru" v="выводит имена файлов в директории."/>
+                <entry k="en" v="displays file names in a directory."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до папки, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the folder, can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test</value>
                         </element>
                     </elements>
                 </source>
@@ -5050,43 +4474,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>dirNamesSortDate</type>
+        <type t="dirNamesSortDate" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>аналогичен dirNames, но выводит сортированый по времени список.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>Similar to dirNames, but outputs a list sorted by time.</value>
-                </entry>
+                <entry k="ru" v="аналогичен dirNames, но выводит сортированый по времени список."/>
+                <entry k="en" v="Similar to dirNames, but outputs a list sorted by time."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до папки, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the folder, can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test</value>
                         </element>
                     </elements>
                 </source>
@@ -5110,43 +4511,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>createPath</type>
+        <type t="createPath" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>соединяет две части пути в один, принимает 2 строки, возвращает результирующий путь.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>joins two parts of a path into one, takes 2 strings, returns the resulting path.</value>
-                </entry>
+                <entry k="ru" v="соединяет две части пути в один, принимает 2 строки, возвращает результирующий путь."/>
+                <entry k="en" v="joins two parts of a path into one, takes 2 strings, returns the resulting path."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test</value>
                         </element>
                         <element>
                             <type>VALUE</type>
@@ -5186,43 +4564,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>parent</type>
+        <type t="parent" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>выводит полный путь до родительской директории если она существует.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>displays the full path to the parent directory if it exists.</value>
-                </entry>
+                <entry k="ru" v="выводит полный путь до родительской директории если она существует."/>
+                <entry k="en" v="displays the full path to the parent directory if it exists."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -5246,59 +4601,26 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>rename</type>
+        <type t="rename" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>переименовывает файл или папку. требует второй аргумент - новое имя.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>renames a file or folder. requires a second argument - a new name.</value>
-                </entry>
+                <entry k="ru" v="переименовывает файл или папку. требует второй аргумент - новое имя."/>
+                <entry k="en" v="renames a file or folder. requires a second argument - a new name."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file2.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file2.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -5322,43 +4644,32 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>readTextNew</type>
+        <type t="readTextNew" minS="1" maxS="1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>читает только новый текст. при каждом обращении запоминает размер файла и читает только добавленную часть. если новый размер файла меньше или равен запомненому или путь до файла не равен предыдущему, ничего не возвращает, только запоминает. при первом запуске ничего не возвращает. возвращает строку только если есть добавление.</value>
+                    <value><![CDATA[читает только новый текст. при каждом обращении запоминает размер файла и читает только добавленную часть.
+если новый размер файла меньше или равен запомненому или путь до файла не равен предыдущему, ничего не возвращает, только запоминает.
+при первом запуске ничего не возвращает. возвращает строку только если есть добавление.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Reads only new text. on each call, it remembers the file size and reads only the added part. if the new file size is less than or equal to the memorized one or the path to the file is not equal to the previous one, it returns nothing, only remembers. returns nothing on first run. returns a string only if there is an append.</value>
+                    <value><![CDATA[Reads only new text. on each call, it remembers the file size and reads only the added part.
+if the new file size is less than or equal to the memorized one or the path to the file is not equal to the previous one, it returns nothing, only remembers.
+returns nothing on first run. returns a string only if there is an append.
+                    ]]></value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -5382,43 +4693,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>readNew</type>
+        <type t="readNew" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>аналогичен readTextNew, но работает с бинарными файлами. возвращает массив байт.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>Similar to readTextNew, but works with binaries. returns an array of bytes.</value>
-                </entry>
+                <entry k="ru" v="аналогичен readTextNew, но работает с бинарными файлами. возвращает массив байт."/>
+                <entry k="en" v="Similar to readTextNew, but works with binaries. returns an array of bytes."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -5442,43 +4730,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>readTextLastNLines</type>
+        <type t="readTextLastNLines" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>читает последние N строк. принимает 2 параметра: путь до файла и число - количество строк.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>reads the last N lines. takes 2 parameters: path to file and number - number of lines.</value>
-                </entry>
+                <entry k="ru" v="читает последние N строк. принимает 2 параметра: путь до файла и число - количество строк."/>
+                <entry k="en" v="reads the last N lines. takes 2 parameters: path to file and number - number of lines."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                         <element>
                             <type>VALUE</type>
@@ -5518,43 +4783,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>waitFile</type>
+        <type t="waitFile" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>ждет пока не появится файл или не будет превышено время ожидания. проверяет каждую секунду. требуется 1 параметр: максимальное время ожидания в миллисекундах.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>waits until the file appears or the timeout is exceeded. checks every second. 1 parameter is required: maximum timeout in milliseconds.</value>
-                </entry>
+                <entry k="ru" v="ждет пока не появится файл или не будет превышено время ожидания. проверяет каждую секунду. требуется 1 параметр: максимальное время ожидания в миллисекундах."/>
+                <entry k="en" v="waits until the file appears or the timeout is exceeded. checks every second. 1 parameter is required: maximum timeout in milliseconds."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -5579,43 +4821,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>writeText</type>
+        <type t="writeText" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>аналогичен write, но для текста. принимает 3 параметра, 2 как write, последний имя кодировки, опционально.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>similar to write, but for text. takes 3 parameters, 2 as write, the last encoding name, optional.</value>
-                </entry>
+                <entry k="ru" v="аналогичен write, но для текста. принимает 3 параметра, 2 как write, последний имя кодировки, опционально."/>
+                <entry k="en" v="similar to write, but for text. takes 3 parameters, 2 as write, the last encoding name, optional."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                         <element>
                             <type>VALUE_ANY</type>
@@ -5633,22 +4852,11 @@ size - возвращает размер файла.
                             <valueType>STRING</valueType>
                             <value>value</value>
                         </element>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <optional>true</optional>
+                        <element o="true" vt="STRING" v="UTF-8">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Кодировка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>Charset.</value>
-                                </entry>
+                                <entry k="ru" v="кодировка"/>
+                                <entry k="en" v="encoding"/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>UTF-8</value>
                         </element>
                     </elements>
                 </source>
@@ -5673,43 +4881,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>writeTextBOM</type>
+        <type t="writeTextBOM" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>аналогичен writeText, но использует формат BOM.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>Similar to writeText but uses the BOM format.</value>
-                </entry>
+                <entry k="ru" v="аналогичен writeText, но использует формат BOM."/>
+                <entry k="en" v="Similar to writeText but uses the BOM format."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                         <element>
                             <type>VALUE_ANY</type>
@@ -5727,22 +4912,11 @@ size - возвращает размер файла.
                             <valueType>STRING</valueType>
                             <value>value</value>
                         </element>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
-                            <optional>true</optional>
+                        <element o="true" vt="STRING" v="UTF-8">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Кодировка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>Charset.</value>
-                                </entry>
+                                <entry k="ru" v="кодировка"/>
+                                <entry k="en" v="encoding"/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>UTF-8</value>
                         </element>
                     </elements>
                 </source>
@@ -5767,43 +4941,20 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
-        <type>
-            <type>size</type>
+        <type t="size" minS="1" maxS="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>Возвращает размер файла.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>Return file size.</value>
-                </entry>
+                <entry k="ru" v="Возвращает размер или папки."/>
+                <entry k="en" v="Return file or folder size."/>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>1</count>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/test/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>The path to the file can be absolute or relative, in this case the working folder is used.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла или папки, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file or folder, can be absolute or relative, in this case the working folder is used."/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/test/file.txt</value>
                         </element>
                     </elements>
                 </source>
@@ -5827,11 +4978,195 @@ size - возвращает размер файла.
                 </element>
             </output>
         </type>
+        <type t="writeTextPart" minS="1" maxS="1">
+            <description>
+                <entry k="ru">
+                    <value><![CDATA[Записывает с заменой текстовые данные (второй элементы данных) в файл начиная с указанной позиции (третий элемент данных, опционально).
+Четвертый параметр - имя кодировки, опционально. Возвращает количество записанных данных.
+                    ]]></value>
+                </entry>
+                <entry k="en">
+                    <value><![CDATA[Writes text data (second data element) to the file with replacement, starting from the specified position (third data element, optional).
+The fourth parameter is the encoding name, optional. Returns the amount of data written.
+                    ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element vt="STRING" v="/test/file.txt">
+                            <description>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
+                            </description>
+                        </element>
+                        <element t="VALUE_ANY" vt="STRING" v="value">
+                            <description>
+                                <entry k="ru" v="Значение, которое будет записано, может быть байтовым массивом или текстом."/>
+                                <entry k="en" v="The value to be written can be a byte array or text."/>
+                            </description>
+                        </element>
+                        <element o="true" vt="LONG" v="0">
+                            <description>
+                                <entry k="ru">
+                                    <value>Смещение относительно начала файла, на которое надо установить указатель до начала записи. Может быть положительная, или отрицательная. Значение по умолчанию - 0.</value>
+                                </entry>
+                                <entry k="en">
+                                    <value>The offset relative to the beginning of the file to which the pointer should be positioned before writing begins. Can be positive or negative. The default value is 0.</value>
+                                </entry>
+                            </description>
+                        </element>
+                        <element o="true" vt="STRING" v="UTF-8">
+                            <description>
+                                <entry k="ru" v="кодировка"/>
+                                <entry k="en" v="encoding"/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element o="true" vt="LONG" v="10">
+                    <description>
+                        <entry k="ru" v="Количество записанных байтов"/>
+                        <entry k="en" v="Number of bytes written"/>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type t="readFromZip" minS="1" maxS="1">
+            <description>
+                <entry k="ru" v="Читает файл из зип файла и возвращает в виде строки."/>
+                <entry k="en" v="Reads a file from a zip file and returns it as a string."/>
+            </description>
+            <sources>
+                <source>
+                    <elements>
+                        <element vt="STRING" v="/test/archive.zip">
+                            <description>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
+                            </description>
+                        </element>
+                        <element vt="STRING" v="/test/file.txt">
+                            <description>
+                                <entry k="ru" v="Путь до файла внутри зип архива."/>
+                                <entry k="en" v="Path to the file inside the zip archive."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" vt="BYTES" v="AQIDBAU=">
+                    <description>
+                        <entry k="ru" v="Содержимое файла"/>
+                        <entry k="en" v="File contents"/>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type t="readTextFromZip" minS="1" maxS="1">
+            <description>
+                <entry k="ru" v="Читает текстовый файл из зип файла и возвращает в виде строки."/>
+                <entry k="en" v="Reads a text file from a zip file and returns it as a string."/>
+            </description>
+            <sources>
+                <source>
+                    <elements>
+                        <element vt="STRING" v="/test/archive.zip">
+                            <description>
+                                <entry k="ru" v="Путь до файла, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the file can be absolute or relative, in this case the working folder is used."/>
+                            </description>
+                        </element>
+                        <element vt="STRING" v="/test/file.txt">
+                            <description>
+                                <entry k="ru" v="Путь до файла внутри зип архива."/>
+                                <entry k="en" v="Path to the file inside the zip archive."/>
+                            </description>
+                        </element>
+                        <element o="true" vt="STRING" v="UTF-8">
+                            <description>
+                                <entry k="ru" v="кодировка"/>
+                                <entry k="en" v="encoding"/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" vt="STRING" v="text">
+                    <description>
+                        <entry k="ru" v="Содержимое текстового файла"/>
+                        <entry k="en" v="Text file contents"/>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type t="dirInfoObj" minS="1" maxS="1">
+            <description>
+                <entry k="ru" v="похож на dir + info, и выдает информацию в виде массива объектов."/>
+                <entry k="en" v="similar to dir + info, and gives information as an array of objects."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element vt="STRING" v="/test/">
+                            <description>
+                                <entry k="ru" v="Путь до папки, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the folder, can be absolute or relative, in this case the working folder is used."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element vt="OBJECT_ARRAY">
+                    <description>
+                        <entry k="ru" v="Каждый объект содержит информацию о файле, поля: name, length, lastModified, access (уровень доступа: 2-на запись,1-на чтение,0-нет доступа), isFile."/>
+                        <entry k="en" v="Each object contains information about the file, fields: name, length, lastModified, access (access level: 2-write, 1-read, 0-no access), isFile."/>
+                    </description>
+                    <value><![CDATA[[{"name":"file.txt", "length":10, "lastModified":123, "access":2, "isFile":true}]]]></value>
+                </element>
+            </output>
+        </type>
+        <type t="dirFullInfoObj" minS="1" maxS="1">
+            <description>
+                <entry k="ru" v="аналогичен dirInfoObj, но так же каждый объект (только файл) содержит поле hash."/>
+                <entry k="en" v="similar to dirInfoObj, but each object (file only) also contains a hash field."/>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element vt="STRING" v="/test/">
+                            <description>
+                                <entry k="ru" v="Путь до папки, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the folder, can be absolute or relative, in this case the working folder is used."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element vt="OBJECT_ARRAY">
+                    <description>
+                        <entry k="ru" v="Каждый объект содержит информацию о файле, поля: name, length, lastModified, access (уровень доступа: 2-на запись,1-на чтение,0-нет доступа), isFile, hash."/>
+                        <entry k="en" v="Each object contains information about the file, fields: name, length, lastModified, access (access level: 2-write, 1-read, 0-no access), isFile, hash."/>
+                    </description>
+                    <value><![CDATA[[{"name":"file.txt", "length":10, "lastModified":123, "access":2, "isFile":true, "hash":"124fd4345"}]]]></value>
+                </element>
+            </output>
+        </type>
     </types>
 
     <useStorage>true</useStorage>
-
     <threadSafe>true</threadSafe>
+    <useVariables>false</useVariables>
+    <useManagement>false</useManagement>
 
     <description>
         <entry>
@@ -5847,51 +5182,55 @@ size - возвращает размер файла.
     <help>
         <entry>
             <key>en</key>
-            <value>The module for working with files.
-works in two modes:
+            <value><![CDATA[The module for working with files.
+Works in three modes:
     dynamic:
-        type required - useArgument and at least one source
+        the context type is default
+        the type is required - useArgument and at least one source
         processes commands from sources.
         format:
-            only if set useArgument - digit - type of operation,
-            if rootFolder is a folder, then 2 arguments - a line - the relative path to the file (directory). if rootFolder is the name of the file, then it is used.
+            if useArgument is set - a digit - the type of operation,
+            if rootFolder is a folder, then - a string - a relative path to the file (directory). if rootFolder is a file name, then it is used.
             other arguments depend on the type of action.
     static:
-        type and all arguments are set in the configuration. Zapuk occurs without sources.
-if rootFolder is set, this path will be used as the parent directory (if the path is relative, for example 1.txt, then the full path will be relative to the working directory).
-otherwise the working configuration folder will be used. even if a folder is specified, you can specify the full path to the file if no restriction is set.
-            </value>
+        the context type is default
+        the type and all arguments are set via the configuration settings.
+    context type:
+        any context type is used, except default
+        some settings are not used, for example type
+If rootFolder is set, this path will be used as the parent directory (if the path is relative, for example 1.txt then the full path will be relative to the working directory).
+Otherwise, the working folder of the configuration will be used. Even if a folder is specified, you can specify the full path to the file, if there is no restriction.
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Модуль работы с файлами.
-работает в двух режимах:
+            <value><![CDATA[Модуль работы с файлами.
+Работает в трех режимах:
     динамический:
+        используется тип контекста - default
         требуется тип - useArgument и хотя бы один источник
         обрабатывает команды из источников.
         формат:
             если установлен useArgument - цифра - тип операции,
             если rootFolder - папка, то - строка - относительный путь к файлу(директории). если rootFolder - имя файл, то используется он.
-            другие аргументы зависят от типа действияю.
+            другие аргументы зависят от типа действия.
     статический:
-        тип и все аргументы (arguments) задаются в конфигурации.
-если установлен rootFolder, будет исползоваться этот путь в качестве родительской директории (если путь относительный, например 1.txt то полный путь будет относительно рабочей директории).
-иначе будет использоваться рабочая папка конфигурации. даже если указана папка можно указывать полный путь до файла, если не установлено ограничение.
-            </value>
+        используется тип контекста - default
+        тип и все аргументы (arguments) задаются через настройки конфигурации.
+    тип контекста:
+        используется любой тип контекста, кроме default
+        некоторые настройки не использоваться, например type
+Если установлен rootFolder, будет использоваться этот путь в качестве родительской директории (если путь относительный, например 1.txt то полный путь будет относительно рабочей директории).
+Иначе будет использоваться рабочая папка конфигурации. Даже если указана папка, можно указывать полный путь до файла, если не установлено ограничение.
+            ]]></value>
         </entry>
     </help>
 
     <examples>
         <example>
             <description>
-                <entry>
-                    <key>en</key>
-                    <value>First example. output file names and directories in a folder. dynamic path.</value>
-                </entry>
-                <entry>
-                    <key>ru</key>
-                    <value>Первый пример. вывод имен файлов и директорий в папке. динамическое указание пути.</value>
-                </entry>
+                <entry k="en" v="First example. output file names and directories in a folder. dynamic path."/>
+                <entry k="ru" v="Первый пример. вывод имен файлов и директорий в папке. динамическое указание пути."/>
             </description>
             <settings/>
             <variables/>
@@ -5924,14 +5263,8 @@ otherwise the working configuration folder will be used. even if a folder is spe
         </example>
         <example>
             <description>
-                <entry>
-                    <key>en</key>
-                    <value>Second example. output file names and directories in a folder. static.</value>
-                </entry>
-                <entry>
-                    <key>ru</key>
-                    <value>Второй пример. вывод имен файлов и директорий в папке. статический.</value>
-                </entry>
+                <entry k="en" v="Second example. output file names and directories in a folder. static."/>
+                <entry k="ru" v="Второй пример. вывод имен файлов и директорий в папке. статический."/>
             </description>
             <settings>
                 <setting>
@@ -5958,15 +5291,15 @@ otherwise the working configuration folder will be used. even if a folder is spe
             <description>
                 <entry>
                     <key>en</key>
-                    <value>Third example. output file names and directories in a folder. static.
+                    <value><![CDATA[Third example. output file names and directories in a folder. static.
 using the work configuration directory, where 1 file is located: test.txt.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>Третий пример. вывод имен файлов и директорий в папке. статический.
+                    <value><![CDATA[Третий пример. вывод имен файлов и директорий в папке. статический.
 с использованием рабочей директории конфигурации, где лежит 1 файл: test.txt.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
             <settings/>
@@ -5985,15 +5318,15 @@ using the work configuration directory, where 1 file is located: test.txt.
             <description>
                 <entry>
                     <key>en</key>
-                    <value>Fourth example. output file names and directories in a folder.
+                    <value><![CDATA[Fourth example. output file names and directories in a folder.
 fully dynamic - both the command and the arguments are transmitted by incoming messages.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>Четвертый пример. вывод имен файлов и директорий в папке.
+                    <value><![CDATA[Четвертый пример. вывод имен файлов и директорий в папке.
 полностью динамический - и команда и аргументы передаются входящими сообщениями.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
             <settings>
@@ -6036,14 +5369,8 @@ fully dynamic - both the command and the arguments are transmitted by incoming m
         </example>
         <example>
             <description>
-                <entry>
-                    <key>en</key>
-                    <value>Fifth example. Append text to file using dynamic mode.</value>
-                </entry>
-                <entry>
-                    <key>ru</key>
-                    <value>Пятый пример. Дописать текст в файл используя динамический режим работы.</value>
-                </entry>
+                <entry k="en" v="Fifth example. Append text to file using dynamic mode."/>
+                <entry k="ru" v="Пятый пример. Дописать текст в файл используя динамический режим работы."/>
             </description>
             <settings>
                 <setting>
@@ -6085,14 +5412,8 @@ fully dynamic - both the command and the arguments are transmitted by incoming m
         </example>
         <example>
             <description>
-                <entry>
-                    <key>en</key>
-                    <value>Sixth example. Read text file.</value>
-                </entry>
-                <entry>
-                    <key>ru</key>
-                    <value>Шестой пример. Читать текстовый файл.</value>
-                </entry>
+                <entry k="en" v="Sixth example. Read text file."/>
+                <entry k="ru" v="Шестой пример. Читать текстовый файл."/>
             </description>
             <settings>
                 <setting>
@@ -6125,6 +5446,6 @@ fully dynamic - both the command and the arguments are transmitted by incoming m
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
-    <icon>iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAaUlEQVR4nO3VQQqAMAxE0X88j+XSc9aDjAi6EcFJqlKqA9k1edAsAj1mAGZAFzVmgWIMVw2yNztvBExPA4oiGUARJAvIRWoA3QWc5cOAzD9vF3DTLqB/B6/voAQOjg619lonM4OUrbezLMRKo6v0kDuFAAAAAElFTkSuQmCC</icon>
+    <icon><![CDATA[iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAaUlEQVR4nO3VQQqAMAxE0X88j+XSc9aDjAi6EcFJqlKqA9k1edAsAj1mAGZAFzVmgWIMVw2yNztvBExPA4oiGUARJAvIRWoA3QWc5cOAzD9vF3DTLqB/B6/voAQOjg619lonM4OUrbezLMRKo6v0kDuFAAAAAElFTkSuQmCC]]></icon>
 
 </properties>

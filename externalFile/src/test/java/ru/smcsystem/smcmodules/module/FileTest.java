@@ -76,7 +76,7 @@ public class FileTest {
     }
 
     @Test
-    public void process3() {
+    public void writePart() {
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -84,7 +84,7 @@ public class FileTest {
                         Map.of("rootFolder", new Value(ValueType.STRING, "C:\\tmp\\DB-db-34\\install2.sql"),
                                 "type", new Value(ValueType.STRING, "writePart"),
                                 "hashAlgType", new Value(ValueType.STRING, "SHA256"),
-                                "arguments", new Value(ValueType.STRING, "100,test,test,egfd,тест"),
+                                "arguments", new Value(ValueType.STRING, "20,test,test,egfd,тест"),
                                 "printAbsolutePath", new Value(ValueType.STRING, "false"),
                                 "useOnlyWorkDirectory", new Value(ValueType.STRING, "false")
                         ),
@@ -93,10 +93,22 @@ public class FileTest {
                 ),
                 new File()
         );
+        process.start();
 
         ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(null, null, null);
-        process.fullLifeCycle(executionContextTool);//.forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        process.execute(executionContextTool);
         executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(List.of(List.of(
+                new Action(List.of(
+                        new Message(new Value("1-test")),
+                        new Message(new Value(-1))
+                ))
+        )), null, null);
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        process.stop();
     }
 
     @Test
@@ -124,7 +136,7 @@ public class FileTest {
     }
 
     @Test
-    public void process5() {
+    public void readText() {
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -146,8 +158,8 @@ public class FileTest {
                 List.of(
                         new Action(
                                 List.of(
-                                        new Message(MessageType.DATA, new Date(), new Value(ValueType.STRING, "C:\\Users\\user\\Documents\\tmp\\main.txt")),
-                                        new Message(MessageType.DATA, new Date(), new Value(ValueType.STRING, "C:\\Users\\user\\Documents\\tmp\\main2.txt"))
+                                        new Message(new Value("C:\\Users\\user\\Documents\\tmp\\main.txt")),
+                                        new Message(new Value("C:\\Users\\user\\Documents\\tmp\\main2.txt"))
                                 ),
                                 ActionType.EXECUTE
                         ))),
@@ -396,6 +408,74 @@ public class FileTest {
                                 ),
                                 ActionType.EXECUTE
                         ))), null, null);
+        process.fullLifeCycle(executionContextTool);//.forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+    }
+
+    @Test
+    public void readTextFromZip() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of("rootFolder", new Value(ValueType.STRING, "C:\\tmp\\"),
+                                "type", new Value(ValueType.STRING, "readText"),
+                                "hashAlgType", new Value(ValueType.STRING, "SHA256"),
+                                "arguments", new Value(ValueType.STRING, ""),
+                                "printAbsolutePath", new Value(ValueType.STRING, "false"),
+                                "useOnlyWorkDirectory", new Value(ValueType.STRING, "true")
+                        ),
+                        null,
+                        "C:\\tmp"
+                ),
+                new File()
+        );
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(List.of(
+                List.of(
+                        new Action(
+                                List.of(
+                                        new Message(new Value("example-1.0.0.smcm")),
+                                        new Message(new Value("properties.xml")),
+                                        new Message(new Value("UTF-8"))
+                                ),
+                                ActionType.EXECUTE
+                        ))),
+                null,
+                null, null, "ec", "readTextFromZip");
+        process.fullLifeCycle(executionContextTool);//.forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+    }
+
+    @Test
+    public void dirInfoObj() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of("rootFolder", new Value(ValueType.STRING, ""),
+                                "type", new Value(ValueType.STRING, "readText"),
+                                "hashAlgType", new Value(ValueType.STRING, "SHA256"),
+                                "arguments", new Value(ValueType.STRING, ""),
+                                "printAbsolutePath", new Value(ValueType.STRING, "false"),
+                                "useOnlyWorkDirectory", new Value(ValueType.STRING, "true")
+                        ),
+                        null,
+                        "C:\\tmp"
+                ),
+                new File()
+        );
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(List.of(
+                List.of(
+                        new Action(
+                                List.of(
+                                        new Message(new Value(""))
+                                ),
+                                ActionType.EXECUTE
+                        ))),
+                null,
+                null, null, "ec", "dirInfoObj");
         process.fullLifeCycle(executionContextTool);//.forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
         executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
     }

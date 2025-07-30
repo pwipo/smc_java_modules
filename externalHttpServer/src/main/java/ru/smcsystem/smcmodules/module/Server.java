@@ -677,6 +677,7 @@ public class Server implements Module {
                 ResponseObj responseObj = null;
                 long reqId = 0;
                 long startTime = System.currentTimeMillis();
+                Long threadId = null;
                 try {
                     // req.getSession().setMaxInactiveInterval(requestTimeout);
                     // System.out.println(req.getSession().getMaxInactiveInterval());
@@ -727,13 +728,13 @@ public class Server implements Module {
                     // externalConfigurationTool.loggerTrace("New request " + reqId + " " + req.getRequestURI());
                     Response responseMain = new Response(reqId, req, resp, virtualServerInfo, requestInputStreamMap);
                     mapResponse.put(reqId, responseMain);
-                    externalConfigurationTool.getInfo("threadId").map(ModuleUtils::getNumber).ifPresent(n -> threadReqMap.put(n.longValue(), requestEntry.getKey()));
-                    long threadId = externalExecutionContextTool.getFlowControlTool().executeParallel(
+                    threadId = externalExecutionContextTool.getFlowControlTool().executeParallel(
                             CommandType.EXECUTE,
                             idsForExecute,
                             requestEntry.getValue(),
                             null,
                             virtualServerInfo.getRequestTimeout());
+                    threadReqMap.put(threadId, requestEntry.getKey());
                     boolean mapFastResponseArrived = false;
                     try {
                         do {
@@ -790,8 +791,8 @@ public class Server implements Module {
                     externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                     // externalExecutionContextTool.addError(e.getLocalizedMessage());
                 } finally {
+                    threadReqMap.remove(threadId);
                     Response response = mapResponse.remove(reqId);
-                    externalConfigurationTool.getInfo("threadId").map(ModuleUtils::getNumber).ifPresent(n -> threadReqMap.remove(n.longValue()));
                     if (response != null)
                         response.getRequestInputStreamMap().forEach((k, v) -> v.close());
                     if (response != null && (responseObj == null || !responseObj.isFastResponse())) {

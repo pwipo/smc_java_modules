@@ -286,7 +286,7 @@ public class Server implements Module {
         }
         LinkedList<IMessage> messages = messagesOpt.get();
         Number number = ModuleUtils.getNumber(messages.poll());
-        Long reqId = number != null ? number.longValue() : null;
+        Long reqId = number != null ? getReqId(configurationTool, executionContextTool, number.longValue()) : null;
         number = ModuleUtils.getNumber(messages.poll());
         Integer fileId = number != null ? number.intValue() : null;
         number = ModuleUtils.getNumber(messages.poll());
@@ -357,6 +357,17 @@ public class Server implements Module {
         }
     }
 
+    private Long getReqId(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, Long reqId) {
+        if (reqId == -1L) {
+            reqId = configurationTool.getInfo("threadId").map(ModuleUtils::getNumber).map(n -> threadReqMap.get(n.longValue())).orElse(-1L);
+            if (reqId == -1L) {
+                executionContextTool.addError("need reqId");
+                return null;
+            }
+        }
+        return reqId;
+    }
+
     private void fastResponse(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) {
         if (tomcat == null) {
             executionContextTool.addError("server not started");
@@ -375,14 +386,10 @@ public class Server implements Module {
             executionContextTool.addError("wrong field names");
             return;
         }
-        Long reqId = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(1)).map(l -> ModuleUtils.getNumber(l.poll())).map(Number::longValue).orElse(-1L);
-        if (reqId == -1L) {
-            reqId = configurationTool.getInfo("threadId").map(ModuleUtils::getNumber).map(n -> threadReqMap.get(n.longValue())).orElse(-1L);
-            if (reqId == -1L) {
-                executionContextTool.addError("need reqId");
-                return;
-            }
-        }
+        Long reqId = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(1)).map(l -> ModuleUtils.getNumber(l.poll()))
+                .map(Number::longValue).map(n -> getReqId(configurationTool, executionContextTool, n)).orElse(null);
+        if (reqId == null)
+            return;
         IAction a = ModuleUtils.getLastActionExecuteWithMessagesFromCommands(executionContextTool.getCommands(2)).orElse(null);
 
         int errorCode = 0;
@@ -551,14 +558,10 @@ public class Server implements Module {
             executionContextTool.addError("server not started");
             return;
         }
-        long reqId = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(0)).map(l -> ModuleUtils.getNumber(l.poll())).map(Number::longValue).orElse(-1L);
-        if (reqId == -1L) {
-            reqId = configurationTool.getInfo("threadId").map(ModuleUtils::getNumber).map(n -> threadReqMap.get(n.longValue())).orElse(-1L);
-            if (reqId == -1L) {
-                executionContextTool.addError("need reqId");
-                return;
-            }
-        }
+        Long reqId = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(0)).map(l -> ModuleUtils.getNumber(l.poll()))
+                .map(Number::longValue).map(n -> getReqId(configurationTool, executionContextTool, n)).orElse(null);
+        if (reqId == null)
+            return;
         String path = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(1)).map(l -> ModuleUtils.getString(l.poll())).orElse(null);
 
         String mimeType = "application/json";

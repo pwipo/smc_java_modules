@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Server</className>
-    <ver>1.4.8</ver>
+    <ver>1.4.9</ver>
     <apiVer>1.4.2</apiVer>
     <date>09-05-2025</date>
 
@@ -848,10 +848,10 @@ Returns a byte array only if there is something to read. Returns nothing when th
                 <source>
                     <count>1</count>
                     <elements>
-                        <element t="VALUE" vt="LONG" v="1">
+                        <element t="VALUE" o="true" vt="LONG" v="1">
                             <description>
-                                <entry k="ru" v="Номер запроса."/>
-                                <entry k="en" v="The request number."/>
+                                <entry k="ru" v="Номер запроса, может быть пустым. Если не указан или равен -1, то ищется запрос для текущего потока."/>
+                                <entry k="en" v="Request number, may be empty. If not specified or equal to -1, then the request for the current thread is searched."/>
                             </description>
                         </element>
                         <element t="VALUE" vt="INTEGER" v="0">

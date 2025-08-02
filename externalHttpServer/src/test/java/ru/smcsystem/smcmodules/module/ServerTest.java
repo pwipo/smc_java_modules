@@ -962,7 +962,6 @@ public class ServerTest {
                                     ),
                                     ActionType.EXECUTE);
                         }
-
                 ),
                 "default", "start");
 
@@ -1275,6 +1274,142 @@ public class ServerTest {
         thread.join();
 
         process.stop();
+    }
+
+    @Test
+    public void testGetPartAsObject() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+        Map<String, IValue> settings = new HashMap<>(Map.of(
+                "port", new Value(8080),
+                "requestTimeout", new Value(20000),
+                "countThreads", new Value(10),
+                "backlog", new Value(0),
+                // "mode", new Value(ValueType.STRING, "PASSIVE"),
+                "protocol", new Value("HTTP"),
+                "availablePaths", new Value(".*"),
+                "keyStoreFileName", new Value(""),
+                "keyStorePass", new Value(""),
+                "keyPass", new Value(""),
+                "keyAlias", new Value("")
+        ));
+        settings.put("bindAddress", new Value(""));
+        settings.put("sessionTimeout", new Value(30));
+        settings.put("maxPostSize", new Value(10485760));
+        settings.put("allowMultipartParsing", new Value("true"));
+        settings.put("requestType", new Value("OBJECT"));
+        settings.put("virtualServerSettings", new Value(new ObjectArray()));
+        settings.put("fileResponsePieceSize", new Value(1048576));
+        settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
+        settings.put("maxFileSizeFull", new Value(5));
+        settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
+
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        settings,
+                        null,
+                        WORK_DIR
+                ),
+                new Server()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                null,
+                null,
+                null,
+                List.of(
+                        (lst) -> {
+                            ObjectArray objectArray = (ObjectArray) lst.get(0);
+                            ObjectElement objectElement = (ObjectElement) objectArray.get(0);
+                            Long reqId = objectElement.findField("reqId").map(ModuleUtils::getNumber).map(Number::longValue).orElse(-1L);
+                            ObjectArray resultObject = getPartAsObject(process, objectArray, 1, 20);
+                            sendFastResp(process, reqId,
+                                    List.of(new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("result", resultObject)))))));
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return new Action(
+                                    List.of(
+                                            new Message(MessageType.DATA, new Date(), new Value(200))
+                                            , new Message(MessageType.DATA, new Date(), new Value("hi".getBytes()))
+                                    ),
+                                    ActionType.EXECUTE);
+                        }
+                ),
+                "default", "start");
+
+        Thread thread = new Thread(() -> {
+            process.execute(executionContextTool);
+            executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+            executionContextTool.getOutput().clear();
+        });
+        thread.start();
+
+        Thread.sleep(1000);
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+
+        try {
+            System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "http://localhost:8080/hello"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            String content = sendPostRequest(httpClientBuilder, "http://localhost:8080/hello",
+                    MultipartEntityBuilder.create()
+                            .setContentType(ContentType.MULTIPART_FORM_DATA)
+                            .setCharset(Charset.forName("UTF-8"))
+                            .addTextBody("uuid", "uuid")
+                            .addBinaryBody("data", new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12})
+                            .build());
+            System.out.println("Response: " + content);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        ExecutionContextToolImpl executionContextTool2 = new ExecutionContextToolImpl(null, null, null, null, "default", "stop");
+        process.execute(executionContextTool2);
+
+        thread.join();
+
+        process.stop();
+    }
+
+    private ObjectArray getPartAsObject(Process process, ObjectArray array, int fileId, int maxSize) {
+        ExecutionContextToolImpl executionContextToolFastResp = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(array)),
+                                                new Message(new Value(fileId)),
+                                                new Message(new Value(maxSize))
+                                        ), ActionType.EXECUTE)
+                        )),
+                null,
+                null,
+                List.of(
+                        (lst) -> {
+                            byte[] bytes = (byte[]) lst.get(0);
+                            System.out.println(bytes.length);
+                            return new Action(
+                                    List.of(
+                                            new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("resp", "ok")))))
+                                    ),
+                                    ActionType.EXECUTE);
+                        }
+                ),
+                "default", "get_part_as_object"
+        );
+        process.execute(executionContextToolFastResp);
+        // executionContextToolFastResp.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        ObjectArray result = executionContextToolFastResp.getOutput().stream().filter(ModuleUtils::isObjectArray).map(ModuleUtils::getObjectArray).findAny().orElse(null);
+        executionContextToolFastResp.getOutput().clear();
+        return result;
     }
 
 

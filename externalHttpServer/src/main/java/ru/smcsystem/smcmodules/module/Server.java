@@ -13,6 +13,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.AbstractProtocol;
+import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import ru.smcsystem.api.dto.*;
 import ru.smcsystem.api.enumeration.CommandType;
@@ -269,9 +270,81 @@ public class Server implements Module {
                     case GET_FILE_PART:
                         getFilePart(configurationTool, executionContextTool);
                         break;
+                    case GET_PART_AS_OBJECT:
+                        getPartAsObject(configurationTool, executionContextTool);
+                        break;
                 }
             }
         });
+    }
+
+    private void getPartAsObject(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws IOException {
+        if (tomcat == null) {
+            executionContextTool.addError("server not started");
+            return;
+        }
+        Optional<LinkedList<IMessage>> messagesOpt = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(0));
+        if (messagesOpt.isEmpty()) {
+            executionContextTool.addError("need 3 messages");
+            return;
+        }
+        LinkedList<IMessage> messages = messagesOpt.get();
+        ObjectArray objectArray = ModuleUtils.getObjectArray(messages.poll());
+        if (!ModuleUtils.isArrayContainObjectElements(objectArray)) {
+            executionContextTool.addError("need objectArray");
+            return;
+        }
+        ObjectElement objectElement = (ObjectElement) objectArray.get(0);
+        Long reqId = objectElement.findField("reqId").map(ModuleUtils::getNumber).map(Number::longValue).or(() -> Optional.of(-1L))
+                .map(n -> getReqId(configurationTool, executionContextTool, n)).orElse(null);
+        Integer fileId = Optional.ofNullable(ModuleUtils.getNumber(messages.poll())).map(Number::intValue).orElse(0);
+        int maxSize = Optional.ofNullable(ModuleUtils.getNumber(messages.poll())).map(Number::intValue).orElse(Integer.MAX_VALUE);
+        int size = 1024 * 1024;
+        if (reqId == null) {
+            executionContextTool.addError("need reqId");
+            return;
+        }
+        Response response = mapResponse.get(reqId);
+        if (response == null) {
+            executionContextTool.addError("response for reqId not exist");
+            return;
+        }
+        if (response.getVirtualServerInfo().getMaxPostSize() != null)
+            maxSize = Math.min(maxSize, response.getVirtualServerInfo().getMaxPostSize());
+
+        byte[] bytes = null;
+        Optional<ObjectArray> multipart = objectElement.findField("multipart").map(ModuleUtils::getObjectArray);
+        if (multipart.isPresent()) {
+            if (fileId < 0)
+                fileId = Math.max(Math.min(multipart.get().size() - fileId, multipart.get().size() - 1), 0);
+            int fileIdTmp = fileId;
+            bytes = multipart
+                    .filter(arr -> arr.size() > fileIdTmp && ModuleUtils.isArrayContainObjectElements(arr))
+                    .map(arr -> (ObjectElement) arr.get(fileIdTmp))
+                    .flatMap(o -> o.findField("data"))
+                    .map(ModuleUtils::getBytes).orElse(null);
+        } else {
+            fileId = 0;
+            bytes = objectElement.findField("data").map(ModuleUtils::getBytes).orElse(null);
+        }
+        if (bytes == null) {
+            RequestInputStream requestInputStream = response.getRequestInputStreamMap().get(fileId);
+            if (requestInputStream != null && requestInputStream.getSize() > 0) {
+                int count = 0;
+                try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                    do {
+                        bytes = requestInputStream.getInputStream().readNBytes(size);
+                        if (bytes.length > 0) {
+                            count += bytes.length;
+                            baos.write(bytes);
+                        }
+                    } while (bytes.length > 0 && count < maxSize);
+                    bytes = baos.toByteArray();
+                }
+            }
+        }
+        if (bytes != null && bytes.length > 0)
+            ModuleUtils.executeAndGetArrayElements(executionContextTool, 0, List.of(bytes)).ifPresent(executionContextTool::addMessage);
     }
 
     private void getFilePart(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws IOException {
@@ -280,19 +353,17 @@ public class Server implements Module {
             return;
         }
         Optional<LinkedList<IMessage>> messagesOpt = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(0));
-        if (messagesOpt.isEmpty() || messagesOpt.get().size() < 3) {
+        if (messagesOpt.isEmpty()) {
             executionContextTool.addError("need 3 messages");
             return;
         }
         LinkedList<IMessage> messages = messagesOpt.get();
-        Number number = ModuleUtils.getNumber(messages.poll());
-        Long reqId = number != null ? getReqId(configurationTool, executionContextTool, number.longValue()) : null;
-        number = ModuleUtils.getNumber(messages.poll());
-        Integer fileId = number != null ? number.intValue() : null;
-        number = ModuleUtils.getNumber(messages.poll());
-        Integer size = number != null ? number.intValue() : null;
-        if (reqId == null || fileId == null || size == null) {
-            executionContextTool.addError("wrong params");
+        Long reqId = Optional.ofNullable(ModuleUtils.getNumber(messages.poll())).map(Number::longValue).or(() -> Optional.of(-1L))
+                .map(n -> getReqId(configurationTool, executionContextTool, n)).orElse(null);
+        Integer fileId = Optional.ofNullable(ModuleUtils.getNumber(messages.poll())).map(Number::intValue).orElse(0);
+        Integer size = Optional.ofNullable(ModuleUtils.getNumber(messages.poll())).map(Number::intValue).orElse(1024 * 1024);
+        if (reqId == null) {
+            executionContextTool.addError("need reqId");
             return;
         }
         Response response = mapResponse.get(reqId);
@@ -358,7 +429,7 @@ public class Server implements Module {
     }
 
     private Long getReqId(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, Long reqId) {
-        if (reqId == -1L) {
+        if (reqId == null || reqId == -1L) {
             reqId = configurationTool.getInfo("threadId").map(ModuleUtils::getNumber).map(n -> threadReqMap.get(n.longValue())).orElse(-1L);
             if (reqId == -1L) {
                 executionContextTool.addError("need reqId");
@@ -373,29 +444,24 @@ public class Server implements Module {
             executionContextTool.addError("server not started");
             return;
         }
-        Optional<LinkedList<IMessage>> names = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(0));
-        if (names.isEmpty() || names.get().size() < 3) {
-            executionContextTool.addError("need 3 field names");
+        LinkedList<IMessage> messages = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(0)).orElse(new LinkedList<>());
+        String fieldErrorCode = Optional.ofNullable(ModuleUtils.getString(messages.poll())).orElse("errorCode");
+        String fieldErrorText = Optional.ofNullable(ModuleUtils.getString(messages.poll())).orElse("errorText");
+        String fieldData = Optional.ofNullable(ModuleUtils.getString(messages.poll())).orElse("data");
+
+        messages = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(1)).orElse(new LinkedList<>());
+        Long reqId = Optional.ofNullable(ModuleUtils.getNumber(messages.poll())).map(Number::longValue).or(() -> Optional.of(-1L))
+                .map(n -> getReqId(configurationTool, executionContextTool, n)).orElse(null);
+        if (reqId == null) {
+            executionContextTool.addError("need reqId");
             return;
         }
-        LinkedList<IMessage> messages = names.get();
-        String fieldErrorCode = ModuleUtils.getString(messages.poll());
-        String fieldErrorText = ModuleUtils.getString(messages.poll());
-        String fieldData = ModuleUtils.getString(messages.poll());
-        if (fieldErrorCode == null || fieldErrorText == null || fieldData == null) {
-            executionContextTool.addError("wrong field names");
-            return;
-        }
-        Long reqId = ModuleUtils.getLastActionWithDataList(executionContextTool.getMessages(1)).map(l -> ModuleUtils.getNumber(l.poll()))
-                .map(Number::longValue).map(n -> getReqId(configurationTool, executionContextTool, n)).orElse(null);
-        if (reqId == null)
-            return;
+        String mimeType = Optional.ofNullable(ModuleUtils.getString(messages.poll())).orElse("application/json");
         IAction a = ModuleUtils.getLastActionExecuteWithMessagesFromCommands(executionContextTool.getCommands(2)).orElse(null);
 
         int errorCode = 0;
         String errorText = null;
         ObjectField data = null;
-        String mimeType = "application/json";
         byte[] content = null;
         String path = null;
 
@@ -984,6 +1050,7 @@ public class Server implements Module {
                         headers.put(headerName, part.getHeader(headerName));
                     RequestInputStream requestInputStream = new RequestInputStream(part);
                     size = requestInputStream.getSize();
+                    bytes = null;
                     ObjectElement objectElementPart = new ObjectElement();
                     objectElementPart.getFields().add(new ObjectField("name", requestInputStream.getName()));
                     objectElementPart.getFields().add(new ObjectField("contentType", requestInputStream.getContentType()));
@@ -994,16 +1061,13 @@ public class Server implements Module {
                                         .collect(Collectors.toList()))));
                     }
                     objectElementPart.getFields().add(new ObjectField("size", size));
-                    if (maxFileSizeFull == -1 || maxFileSizeFull < size) {
+                    if (size > 0 && (maxFileSizeFull == -1 || maxFileSizeFull > size)) {
                         bytes = IOUtils.toByteArray(requestInputStream.getInputStream());
                         requestInputStream.close();
-                        if (bytes != null && bytes.length > 0) {
+                        if (bytes != null && bytes.length > 0)
                             objectElementPart.getFields().add(new ObjectField("data", bytes));
-                            partElements.add(objectElementPart);
-                        }
-                    } else {
-                        partElements.add(objectElementPart);
                     }
+                    partElements.add(objectElementPart);
                     requestInputStreamMap.put(i, requestInputStream);
                     // if (bytes != null && bytes.length > 0 && (requestInputStream.getContentType() == null || !requestInputStream.getContentType().toLowerCase().contains("charset"))) {
                     //     byte[] bytesTmp = bytes;
@@ -1016,7 +1080,7 @@ public class Server implements Module {
             } else {
                 RequestInputStream requestInputStream = new RequestInputStream(req);
                 size = requestInputStream.getSize();
-                if (maxFileSizeFull == -1 || maxFileSizeFull < size) {
+                if (size > 0 && (maxFileSizeFull == -1 || maxFileSizeFull > size)) {
                     bytes = IOUtils.toByteArray(req.getInputStream());
                     requestInputStream.close();
                 }
@@ -1120,7 +1184,7 @@ public class Server implements Module {
     }
 
     private enum Type {
-        START, STOP, FAST_RESPONSE, FILE_FAST_RESPONSE, GET_FILE_PART
+        START, STOP, FAST_RESPONSE, FILE_FAST_RESPONSE, GET_FILE_PART, GET_PART_AS_OBJECT
     }
 
 }

@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Server</className>
-    <ver>1.4.9</ver>
+    <ver>1.4.10</ver>
     <apiVer>1.4.2</apiVer>
     <date>09-05-2025</date>
 
@@ -584,31 +584,22 @@ The third context is used to get the file size, it passes 1 parameter: path, it 
                         <entry k="en" v="The field names of the response object are specified by the first 3 incoming values: error_code, error_text, data."/>
                     </description>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <valueType>STRING</valueType>
-                            <value>errorCode</value>
+                        <element o="true" vt="STRING" v="errorCode">
                             <description>
-                                <entry k="ru" v="Имя поля кода ошибки."/>
-                                <entry k="en" v="Error code field name."/>
+                                <entry k="ru" v="Имя поля кода ошибки. Значение по умолчанию - errorCode."/>
+                                <entry k="en" v="Error code field name. The default value is errorCode."/>
                             </description>
                         </element>
-                        <element>
-                            <type>VALUE</type>
-                            <valueType>STRING</valueType>
-                            <value>errorText</value>
+                        <element o="true" vt="STRING" v="errorText">
                             <description>
-                                <entry k="ru" v="Имя поля текста ошибки."/>
-                                <entry k="en" v="Error text field name."/>
+                                <entry k="ru" v="Имя поля текста ошибки. Значение по умолчанию - errorCode."/>
+                                <entry k="en" v="Error text field name. The default value is errorCode."/>
                             </description>
                         </element>
-                        <element>
-                            <type>VALUE</type>
-                            <valueType>STRING</valueType>
-                            <value>data</value>
+                        <element o="true" vt="STRING" v="data">
                             <description>
-                                <entry k="ru" v="Имя поля для данных."/>
-                                <entry k="en" v="Data field name."/>
+                                <entry k="ru" v="Имя поля для данных. Значение по умолчанию - errorCode."/>
+                                <entry k="en" v="Data field name. The default value is errorCode."/>
                             </description>
                         </element>
                     </elements>
@@ -617,8 +608,14 @@ The third context is used to get the file size, it passes 1 parameter: path, it 
                     <elements>
                         <element t="VALUE" o="true" vt="LONG" v="1">
                             <description>
-                                <entry k="ru" v="Номер запроса, может быть пустым. Если не указан или равен -1, то ищется запрос для текущего потока."/>
-                                <entry k="en" v="Request number, may be empty. If not specified or equal to -1, then the request for the current thread is searched."/>
+                                <entry k="ru" v="Номер запроса, может быть пустым. Если не указан или равен -1, то ищется запрос для текущего потока. Значение по умолчанию -1."/>
+                                <entry k="en" v="Request number, may be empty. If not specified or equal to -1, then the request for the current thread is searched. The default value is -1."/>
+                            </description>
+                        </element>
+                        <element o="true" vt="STRING" v="application/json">
+                            <description>
+                                <entry k="ru" v="Тип контента для объекта. Значение по умолчанию - application/json."/>
+                                <entry k="en" v="Content type for object. The default value is application/json."/>
                             </description>
                         </element>
                     </elements>
@@ -726,34 +723,18 @@ The second context is used to get the file size, passes 1 parameter: path, recei
                 </source>
                 <source>
                     <elements>
-                        <element>
-                            <type>VALUE</type>
-                            <count>1</count>
+                        <element vt="STRING" v="/path/file.txt">
                             <description>
-                                <entry>
-                                    <key>ru</key>
-                                    <value>Путь до файла.</value>
-                                </entry>
-                                <entry>
-                                    <key>en</key>
-                                    <value>Path to the file.</value>
-                                </entry>
+                                <entry k="ru" v="Путь до файла"/>
+                                <entry k="en" v="Path to the file"/>
                             </description>
-                            <valueType>STRING</valueType>
-                            <value>/path/file.txt</value>
                         </element>
                     </elements>
                 </source>
                 <source o="true">
                     <description>
-                        <entry>
-                            <key>ru</key>
-                            <value>Заголовки в формате имя=значение.</value>
-                        </entry>
-                        <entry>
-                            <key>en</key>
-                            <value>Headers in the format name=value.</value>
-                        </entry>
+                        <entry k="ru" v="Заголовки в формате имя=значение."/>
+                        <entry k="en" v="Headers in the format name=value."/>
                     </description>
                     <elements>
                         <element>
@@ -846,24 +827,23 @@ Returns a byte array only if there is something to read. Returns nothing when th
             </description>
             <sources>
                 <source>
-                    <count>1</count>
                     <elements>
                         <element t="VALUE" o="true" vt="LONG" v="1">
                             <description>
-                                <entry k="ru" v="Номер запроса, может быть пустым. Если не указан или равен -1, то ищется запрос для текущего потока."/>
-                                <entry k="en" v="Request number, may be empty. If not specified or equal to -1, then the request for the current thread is searched."/>
+                                <entry k="ru" v="Номер запроса, может быть пустым. Если не указан или равен -1, то ищется запрос для текущего потока. Значение по умолчанию -1."/>
+                                <entry k="en" v="Request number, may be empty. If not specified or equal to -1, then the request for the current thread is searched. The default value is -1."/>
                             </description>
                         </element>
-                        <element t="VALUE" vt="INTEGER" v="0">
+                        <element t="VALUE" o="true" vt="INTEGER" v="0">
                             <description>
-                                <entry k="ru" v="Номер файла (с нуля)."/>
-                                <entry k="en" v="File number (starting from zero)."/>
+                                <entry k="ru" v="Номер файла (с нуля). Значение по умолчанию 0."/>
+                                <entry k="en" v="File number (starting from zero). The default value is 0."/>
                             </description>
                         </element>
-                        <element t="VALUE" vt="INTEGER" v="10">
+                        <element t="VALUE" o="true" vt="INTEGER" v="10">
                             <description>
-                                <entry k="ru" v="Количество байт которые надо прочитать."/>
-                                <entry k="en" v="The number of bytes to read."/>
+                                <entry k="ru" v="Количество байт которые надо прочитать. Значение по умолчанию 1048576."/>
+                                <entry k="en" v="The number of bytes to read. The default value is 1048576."/>
                             </description>
                         </element>
                     </elements>
@@ -876,6 +856,65 @@ Returns a byte array only if there is something to read. Returns nothing when th
                     <valueType>BYTES</valueType>
                     <value>AQIDBAU=</value>
                 </element>
+            </output>
+        </type>
+        <type t="get_part_as_object" minS="1" maxS="1" minEC="1" maxEC="1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Читает файл/контекст указанной части (или читает из входного потока) и конвертирует в ObjectArray.
+Работает и если в запросе нет байтового массива (читает входной поток) и если есть.
+Принимает 3 параметра: объект запроса, номер части (с нуля), количество байт которые надо прочитать. Возвращает объект.
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Reads the file/context of the specified part (or reads from the input stream) and converts it to ObjectArray.
+Works both if the request does not contain a byte array (reads the input stream) and if it does.
+Takes 3 parameters: the request object, the part number (starting from zero), the number of bytes to read. Returns an object.
+                    ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <elements>
+                        <element t="VALUE" vt="OBJECT_ARRAY" v="[]">
+                            <description>
+                                <entry k="ru" v="Объект запроса, содержащий поля: reqId, data, multipart и другие"/>
+                                <entry k="en" v="Request object containing fields: reqId, data, multipart and others"/>
+                            </description>
+                        </element>
+                        <element t="VALUE" o="true" vt="INTEGER" v="0">
+                            <description>
+                                <entry k="ru" v="Номер файла (с нуля). Значение по умолчанию 0."/>
+                                <entry k="en" v="File number (starting from zero). The default value is 0."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" o="true" vt="INTEGER" v="1024">
+                            <description>
+                                <entry k="ru" v="Максимальный размер, которые можно прочитать всего. Должен быть меньше maxPostSize. Значение по умолчанию 2147483647."/>
+                                <entry k="en" v="The maximum size that can be read in total. Must be less than maxPostSize. Default value is 2147483647."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <ecs>
+                <ec>
+                    <description>
+                        <entry k="ru" v="Конвертер в ObjectArray, на вход передается байтовый массив. Например конвертер из json или xml."/>
+                        <entry k="en" v="Converter to ObjectArray, a byte array is passed to the input. For example, a converter from json or xml."/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" vt="BYTES" v="AQIDBAU="/>
+                    </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY" v="[]"/>
+                    </output>
+                </ec>
+            </ecs>
+            <output>
+                <element t="VALUE" c="1" vt="OBJECT_ARRAY" v="[]"/>
             </output>
         </type>
     </types>

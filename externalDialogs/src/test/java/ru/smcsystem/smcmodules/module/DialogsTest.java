@@ -1,6 +1,9 @@
 package ru.smcsystem.smcmodules.module;
 
 import org.junit.Test;
+import ru.smcsystem.api.dto.ObjectArray;
+import ru.smcsystem.api.dto.ObjectElement;
+import ru.smcsystem.api.dto.ObjectField;
 import ru.smcsystem.api.enumeration.ActionType;
 import ru.smcsystem.api.enumeration.MessageType;
 import ru.smcsystem.test.Process;
@@ -13,7 +16,7 @@ import java.util.Map;
 public class DialogsTest {
 
     @Test
-    public void process() {
+    public void testMessage() {
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -37,7 +40,7 @@ public class DialogsTest {
     }
 
     @Test
-    public void process2() {
+    public void testMessage2() {
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -88,7 +91,7 @@ public class DialogsTest {
     }
 
     @Test
-    public void process3() {
+    public void testSelect() {
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -127,7 +130,7 @@ public class DialogsTest {
     }
 
     @Test
-    public void process4() {
+    public void testTwoInput() {
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -157,6 +160,51 @@ public class DialogsTest {
                                         ),
                                         ActionType.EXECUTE
                                 ))), null, null);
+        process.execute(executionContextTool).forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        process.stop();
+    }
+
+    @Test
+    public void testChat() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "type", new Value("CHAT"),
+                                "title", new Value("[[titleText]]!"),
+                                "message", new Value("[[text]]"),
+                                "lang", new Value("titleText::en::Window chat::ru::Окно чата;;" +
+                                        "text::en::Chat messages::ru::Сообщения чата;;"
+                                )
+                        ),
+                        null,
+                        null
+                ),
+                new Dialogs()
+        );
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool;
+
+        executionContextTool = new ExecutionContextToolImpl(null, null, null);
+        process.execute(executionContextTool).forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(null, null, null, List.of(
+                (lst) -> {
+                    return new Action(List.of(new Message(new Value("1 " + (!lst.isEmpty() ? lst.get(0).toString().length() : "")))));
+                }
+        ));
+        process.execute(executionContextTool).forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(null, null, null, List.of(
+                (lst) -> {
+                    return new Action(List.of(new Message(new Value(new ObjectArray(
+                            new ObjectElement(new ObjectField("id", 1), new ObjectField("name", "f1"), new ObjectField("value", 1)),
+                            new ObjectElement(new ObjectField("id", 2), new ObjectField("name", "f2"), new ObjectField("value", 3)))))));
+                }
+        ));
         process.execute(executionContextTool).forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
 
         process.stop();

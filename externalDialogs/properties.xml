@@ -10,25 +10,25 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Dialogs</className>
-    <ver>1.1.1</ver>
+    <ver>1.2.0</ver>
     <apiVer>1.4.0</apiVer>
-    <date>19-10-2023</date>
+    <date>18-08-2025</date>
 
     <defaultSettings>
         <value>
@@ -44,12 +44,13 @@ The program is supplied as is. For problems arising during the operation or inst
                 <value>FILE_READ</value>
                 <value>FILE_SAVE</value>
                 <value>SELECT</value>
+                <value>CHAT</value>
             </validValues>
             <value>INPUT</value>
             <description>
                 <entry>
                     <key>en</key>
-                    <value>
+                    <value><![CDATA[
 dialog box type:
     INPUT - a dialog box with a single input field. returns text from a field if press button.
     TWO_INPUT - a dialog box with two input fields. returns text from fields if press button.
@@ -60,11 +61,12 @@ dialog box type:
     FILE_READ - a dialog box for selecting a file to read. returns the absolute path to the file (if selected).
     FILE_SAVE - dialog box for selecting a file for recording. returns the absolute path to the file (if selected).
     SELECT - a dialog box for selecting an option from a list. returns selected value. Incoming messages are used as options.
-                    </value>
+    CHAT - a form for correspondence with an external source. Contains a test input field and an area where the input is printed, as well as a response. The response is obtained by calling the first context, the entered text is passed to it, a value of any type is expected. If an ObjectArray containing objects is returned, it is displayed as a table.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>
+                    <value><![CDATA[
 тип диалогового окна:
     INPUT - диалоговое окно с одинм полем ввода. возвращает текст из поля если нажата кнопка.
     TWO_INPUT - диалоговое окно с двумя полями ввода. возвращает текст из полей если нажата кнопка.
@@ -75,7 +77,8 @@ dialog box type:
     FILE_READ - диалоговое окно выбора файла для чтения. возвращает абсолютный путь к файлу (если выбран).
     FILE_SAVE - диалоговое окно выбора файла для записи. возвращает абсолютный путь к файлу (если выбран).
     SELECT - диалоговое окно выбора варианта из списка. возвращает выбранное значение. В качестве вариантов используются входящие сообщения.
-                    </value>
+    CHAT - форма для переписки с внешним источником. Содержит тестовое поле ввода и область куда печатается ввод, а так же ответ. Ответ получается, вызовом первого контекста, ему передается введенный текст, ожидается значение любого типа. Если возвращается ObjectArray содержащий объекты, то отображает его в виде таблицы.
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -114,7 +117,7 @@ dialog box type:
             <name>lang</name>
             <type>STRING</type>
             <value>title::en::Title::ru::Заголовок;;
-message::en::Message::ru::Текст;;
+                message::en::Message::ru::Текст;;
             </value>
             <description>
                 <entry>
@@ -130,24 +133,11 @@ message::en::Message::ru::Текст;;
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="0" maxS="-1" minEC="0" maxEC="1">
             <description>
-                <entry>
-                    <key>ru</key>
-                    <value>Контекст исполнения по умолчанию. Результат зависит от настройки type.</value>
-                </entry>
-                <entry>
-                    <key>en</key>
-                    <value>Default execution context. The result depends on the setting type.</value>
-                </entry>
+                <entry k="ru" v="Контекст исполнения по умолчанию. Результат зависит от настройки type."/>
+                <entry k="en" v="Default execution context. The result depends on the setting type."/>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
@@ -162,16 +152,24 @@ message::en::Message::ru::Текст;;
                         </entry>
                     </description>
                     <elements>
-                        <element>
-                            <type>VALUE_ANY</type>
-                            <count>-1</count>
-                            <description/>
-                            <valueType>STRING</valueType>
-                            <value>Hello world</value>
-                        </element>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="Hello world"/>
                     </elements>
                 </source>
             </sources>
+            <ecs>
+                <ec>
+                    <description>
+                        <entry k="ru" v="Используется если выбран type CHAT. Ему передается вводимый текст, ожидает 1 сообщение любого типа."/>
+                        <entry k="en" v="Used if the type CHAT is selected. The input text is passed to it, and 1 message of any type is expected."/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="hello world"/>
+                    </elements>
+                    <output>
+                        <element t="VALUE_ANY" c="-1" vt="INTEGER" v="1"/>
+                    </output>
+                </ec>
+            </ecs>
             <output>
                 <element>
                     <type>IF</type>
@@ -401,21 +399,21 @@ message::en::Message::ru::Текст;;
     <help>
         <entry>
             <key>en</key>
-            <value>The module is a set of dialog boxes.
+            <value><![CDATA[The module is a set of dialog boxes.
 Each time it starts, it displays the selected dialog box and expects it to close. when closing the window, returns data corresponding to the type of window.
 There is an opportunity to internationalize the text. To do this, use the lang setting. In the text, the variable name is surrounded by double quotes: [[message]].
 The title and message settings contain values that will be displayed in dialog boxes in the corresponding positions. Not used in all types of windows, for example, the FILE_READ type.
 If there are incoming messages, they are concatenated together into one line, if necessary, translated and displayed instead of the message setting (except FILE_READ, FILE_SAVE, SELECT).
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Модуль предсталяет собой набор диалоговых окон.
+            <value><![CDATA[Модуль предсталяет собой набор диалоговых окон.
 При каждом запуске показывает выбранное диалоговое окно и ожидает его закрытия. при закрытии окна, возвращает данные, соответствующие типу окна.
 Есть возможность по интернационализации текста. Для этого используется настройка lang. В тексте имя переменной обрамляется двойными кавыйчками: [[message]].
 Настройки title и message содержат значения которые будут выводится в диалоговых окнах в соответствующих позициях. Используются не во всех типах оконо, например тип FILE_READ.
 Если есть входящие сообщения, они объединяются вместе в одну строку, при необходимости, переводятся и выводятся в замен настройки message (кроме FILE_READ, FILE_SAVE, SELECT).
-            </value>
+            ]]></value>
         </entry>
     </help>
 
@@ -550,6 +548,6 @@ If there are incoming messages, they are concatenated together into one line, if
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
-    <icon>iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAA8klEQVRoge3ZUQrCMBAE0FGkd1LPp9VzVRHvYXsM9SfVgjUbsd1OwzwI7UeiOyRQkgAiIkKiAHAE0AB4kLUaQBlqNB0ICrbaPiVIHTqvUzo72+A9M6Y2NQCcAVTGu7dufS9LY9C9M+jbO63exER661sZA2bDWlqzEZuRhVsVv+ldKdnMiIKw8QhyBXBx+J8PQ39HXH5PS4uNgrBREDZDBKkQ35a2Yn3+3qSxzMgoWwZ9EKekIGwUhE02QWKHD0M5YaKjpVke0GWztLIO0oTnxrOQRNvwTLpWKDH9RY7VdilBihCmvfBharcQIunqTURERvcEEvreQMbAaWoAAAAASUVORK5CYII=</icon>
+    <icon><![CDATA[iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAA8klEQVRoge3ZUQrCMBAE0FGkd1LPp9VzVRHvYXsM9SfVgjUbsd1OwzwI7UeiOyRQkgAiIkKiAHAE0AB4kLUaQBlqNB0ICrbaPiVIHTqvUzo72+A9M6Y2NQCcAVTGu7dufS9LY9C9M+jbO63exER661sZA2bDWlqzEZuRhVsVv+ldKdnMiIKw8QhyBXBx+J8PQ39HXH5PS4uNgrBREDZDBKkQ35a2Yn3+3qSxzMgoWwZ9EKekIGwUhE02QWKHD0M5YaKjpVke0GWztLIO0oTnxrOQRNvwTLpWKDH9RY7VdilBihCmvfBharcQIunqTURERvcEEvreQMbAaWoAAAAASUVORK5CYII=]]></icon>
 
 </properties>

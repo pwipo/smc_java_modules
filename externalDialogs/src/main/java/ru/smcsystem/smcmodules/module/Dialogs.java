@@ -5,14 +5,12 @@ import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.api.tools.execution.ExecutionContextTool;
+import ru.smcsystem.smc.utils.ModuleUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,7 +25,8 @@ public class Dialogs implements Module {
         MESSAGE,
         FILE_READ,
         FILE_SAVE,
-        SELECT
+        SELECT,
+        CHAT,
     }
 
     private Type type;
@@ -39,11 +38,11 @@ public class Dialogs implements Module {
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
-        type = Type.valueOf((String) configurationTool.getSetting("type").orElseThrow(() -> new ModuleException("type setting")).getValue());
-        title = (String) configurationTool.getSetting("title").orElseThrow(() -> new ModuleException("title setting")).getValue();
-        message = (String) configurationTool.getSetting("message").orElseThrow(() -> new ModuleException("message setting")).getValue();
+        type = configurationTool.getSetting("type").map(ModuleUtils::toString).map(Type::valueOf).orElseThrow(() -> new ModuleException("type setting"));
+        title = configurationTool.getSetting("title").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("title setting"));
+        message = configurationTool.getSetting("message").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("message setting"));
 
-        String lang = (String) configurationTool.getSetting("lang").orElseThrow(() -> new ModuleException("lang setting")).getValue();
+        String lang = configurationTool.getSetting("lang").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("lang setting"));
         dictionary = new HashMap<>();
         if (!lang.isBlank()) {
             String[] arrMessages = lang.split(";;");
@@ -87,65 +86,101 @@ public class Dialogs implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
-        String externalMessage = Stream.iterate(0, n -> n + 1)
-                .limit(executionContextTool.countSource())
-                .flatMap(i -> executionContextTool.getMessages(i).stream())
-                .flatMap(a -> a.getMessages().stream())
-                .map(m -> m.getValue().toString())
-                .collect(Collectors.joining());
-        String resultMessage = StringUtils.isNoneBlank(externalMessage) ? translate(externalMessage) : message;
-        JFrame dummyFrame = createDummyFrame();
-        try {
-            switch (type) {
-                case INPUT:
-                    // executionContextTool.addMessage(JOptionPane.showInputDialog(null, externalMessage, title, JOptionPane.QUESTION_MESSAGE));
-                    twoInputDialog(executionContextTool, dummyFrame, title, message, StringUtils.isNoneBlank(externalMessage) ? resultMessage : "", null);
-                    break;
-                case TWO_INPUT:
-                    twoInputDialog(executionContextTool, dummyFrame, title, message, StringUtils.isNoneBlank(externalMessage) ? resultMessage : "", "");
-                    break;
-                case CONFIRM_OK_CANCEL:
-                    showConfirmDialog(executionContextTool, dummyFrame, title, resultMessage, JOptionPane.OK_CANCEL_OPTION);
-                    break;
-                case CONFIRM_YES_NO:
-                    showConfirmDialog(executionContextTool, dummyFrame, title, resultMessage, JOptionPane.YES_NO_OPTION);
-                    break;
-                case CONFIRM_YES_NO_CANCEL:
-                    showConfirmDialog(executionContextTool, dummyFrame, title, resultMessage, JOptionPane.YES_NO_CANCEL_OPTION);
-                    break;
-                case MESSAGE: {
-                    // JLabel label = new JLabel(currentModuleDefinitionDTO.getDescription());
-                    JTextArea textArea = new JTextArea(resultMessage);
-                    // textArea.setMinimumSize(new Dimension(100, 100));
-                    // label.setFont(new Font("Arial", Font.BOLD, 18));
-                    textArea.setEditable(false);
-                    // textArea.setLineWrap(true);
-                    // textArea.setWrapStyleWord(true);
-                    textArea.setBackground(new Color(-1052689));
-                    int panelWidth = Math.min(800, Math.max(100, (int) textArea.getPreferredSize().getWidth()));
-                    int panelHeight = Math.min(600, Math.max(50, (int) textArea.getPreferredSize().getHeight()));
+        ModuleUtils.processMessagesAll(configurationTool, executionContextTool, (id, messagesAll) -> {
+            // String externalMessage = Stream.iterate(0, n -> n + 1)
+            //         .limit(executionContextTool.countSource())
+            //         .flatMap(i -> executionContextTool.getMessages(i).stream())
+            //         .flatMap(a -> a.getMessages().stream())
+            //         .map(m -> m.getValue().toString())
+            //         .collect(Collectors.joining());
+            String externalMessage = messagesAll.stream()
+                    .flatMap(Collection::stream)
+                    .map(m -> m.getValue().toString())
+                    .collect(Collectors.joining());
 
-                    JScrollPane jScrollPane = new JScrollPane();
-                    // jScrollPane.setMinimumSize(new Dimension(800, 600));
-                    jScrollPane.setPreferredSize(new Dimension(panelWidth, panelHeight));
-                    jScrollPane.setMaximumSize(new Dimension(panelWidth, panelHeight));
-                    jScrollPane.setViewportView(textArea);
-                    JOptionPane.showMessageDialog(dummyFrame, jScrollPane, title, JOptionPane.INFORMATION_MESSAGE);
-                    // JOptionPane.showMessageDialog(createDummyFrame(), resultMessage, title, JOptionPane.INFORMATION_MESSAGE);
-                    break;
+            String resultMessage = StringUtils.isNoneBlank(externalMessage) ? translate(externalMessage) : message;
+            JFrame dummyFrame = createDummyFrame();
+            try {
+                switch (type) {
+                    case INPUT:
+                        // executionContextTool.addMessage(JOptionPane.showInputDialog(null, externalMessage, title, JOptionPane.QUESTION_MESSAGE));
+                        twoInputDialog(executionContextTool, dummyFrame, title, message, StringUtils.isNoneBlank(externalMessage) ? resultMessage : "", null);
+                        break;
+                    case TWO_INPUT:
+                        twoInputDialog(executionContextTool, dummyFrame, title, message, StringUtils.isNoneBlank(externalMessage) ? resultMessage : "", "");
+                        break;
+                    case CONFIRM_OK_CANCEL:
+                        showConfirmDialog(executionContextTool, dummyFrame, title, resultMessage, JOptionPane.OK_CANCEL_OPTION);
+                        break;
+                    case CONFIRM_YES_NO:
+                        showConfirmDialog(executionContextTool, dummyFrame, title, resultMessage, JOptionPane.YES_NO_OPTION);
+                        break;
+                    case CONFIRM_YES_NO_CANCEL:
+                        showConfirmDialog(executionContextTool, dummyFrame, title, resultMessage, JOptionPane.YES_NO_CANCEL_OPTION);
+                        break;
+                    case MESSAGE: {
+                        // JLabel label = new JLabel(currentModuleDefinitionDTO.getDescription());
+                        JTextArea textArea = new JTextArea(resultMessage);
+                        // textArea.setMinimumSize(new Dimension(100, 100));
+                        // label.setFont(new Font("Arial", Font.BOLD, 18));
+                        textArea.setEditable(false);
+                        // textArea.setLineWrap(true);
+                        // textArea.setWrapStyleWord(true);
+                        textArea.setBackground(new Color(-1052689));
+                        int panelWidth = Math.min(800, Math.max(100, (int) textArea.getPreferredSize().getWidth()));
+                        int panelHeight = Math.min(600, Math.max(50, (int) textArea.getPreferredSize().getHeight()));
+
+                        JScrollPane jScrollPane = new JScrollPane();
+                        // jScrollPane.setMinimumSize(new Dimension(800, 600));
+                        jScrollPane.setPreferredSize(new Dimension(panelWidth, panelHeight));
+                        jScrollPane.setMaximumSize(new Dimension(panelWidth, panelHeight));
+                        jScrollPane.setViewportView(textArea);
+                        JOptionPane.showMessageDialog(dummyFrame, jScrollPane, title, JOptionPane.INFORMATION_MESSAGE);
+                        // JOptionPane.showMessageDialog(createDummyFrame(), resultMessage, title, JOptionPane.INFORMATION_MESSAGE);
+                        break;
+                    }
+                    case FILE_READ:
+                        fileChooser(executionContextTool, dummyFrame, false, JFileChooser.FILES_ONLY, false);
+                        break;
+                    case FILE_SAVE:
+                        fileChooser(executionContextTool, dummyFrame, true, JFileChooser.FILES_ONLY, false);
+                        break;
+                    case SELECT:
+                        showSelectDialog(executionContextTool, dummyFrame, title, message);
+                        break;
+                    case CHAT:
+                        showChatDialog(executionContextTool, dummyFrame, title, message, "Add", "Clear");
+                        break;
                 }
-                case FILE_READ:
-                    fileChooser(executionContextTool, dummyFrame, false, JFileChooser.FILES_ONLY, false);
-                    break;
-                case FILE_SAVE:
-                    fileChooser(executionContextTool, dummyFrame, true, JFileChooser.FILES_ONLY, false);
-                    break;
-                case SELECT:
-                    showSelectDialog(executionContextTool, dummyFrame, title, message);
-                    break;
+            } finally {
+                dummyFrame.dispose();
+            }
+        });
+
+    }
+
+    private void showChatDialog(ExecutionContextTool executionContextTool, JFrame dummyFrame, String title, String message, String nameButtonAdd, String nameButtonClear) {
+        DialogChat dialogChat = new DialogChat(title, message, nameButtonAdd, nameButtonClear,
+                executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0 ?
+                        str -> ModuleUtils.executeParallelAndGetMessages(executionContextTool, 0, java.util.List.of(str))
+                                .map(lst -> lst.get(0)) :
+                        null);
+        try {
+            dialogChat.frame.setVisible(true);
+            dialogChat.frame.requestFocus();
+            do {
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception ignored) {
+                    // e.printStackTrace();
+                }
+            } while (dialogChat.frame.isVisible() && !executionContextTool.isNeedStop());
+            if (dialogChat.frame.isVisible()) {
+                dialogChat.frame.setVisible(false);
+                executionContextTool.addMessage("force stop server");
             }
         } finally {
-            dummyFrame.dispose();
+            dialogChat.frame.dispose();
         }
     }
 

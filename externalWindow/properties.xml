@@ -101,19 +101,19 @@ The program is supplied as is. For problems arising during the operation or inst
                     <layout type="borderlayout"/>
 
                     <panel constraints="BorderLayout.NORTH">
-                        <label font="Georgia-BOLD-36" text="[[north]]"/>
+                        <labelHeader font="Georgia-BOLD-36" text="[[north]]"/>
                         <textfield id="northInput" columns="20" Text="[[north]]"/>
                         <button id="buttonNorth" text="[[button]]"/>
                     </panel>
 
                     <panel constraints="BorderLayout.CENTER">
-                        <label font="Georgia-BOLD-36" text="[[center]]"/>
+                        <labelHeader font="Georgia-BOLD-36" text="[[center]]"/>
                         <textfield id="centerInput" columns="20" Text="[[center]]"/>
                         <button id="buttonCenter" text="[[button]]"/>
                     </panel>
 
                     <panel constraints="BorderLayout.SOUTH">
-                        <label font="Georgia-BOLD-36" id="out" text="[[south]]"/>
+                        <labelHeader font="Georgia-BOLD-36" id="out" text="[[south]]"/>
                         <textfield id="southInput" columns="20" Text="[[south]]"/>
                         <button id="buttonSouth" text="[[button]]"/>
                     </panel>

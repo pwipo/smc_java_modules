@@ -148,7 +148,7 @@ When an event arrives, the corresponding context is called.
                             <value><![CDATA[The context is called when an event is received for the specified element.
 The context is passed data that depends on the element type:
     for the submit and image buttons, all form fields will be passed as an ObjectArray with one object with the corresponding fields.
-    for select all selected elements will be passed as an ObjectArray with objects with the fields: id, label, value.
+    for select all selected elements will be passed as an ObjectArray with objects with the fields: id, labelHeader, value.
     for fields, the value will be transmitted - a string.
     for checkbox and radio the value will be passed - a boolean value.
     for file, the value will be transmitted - a string.
@@ -160,7 +160,7 @@ The context is passed data that depends on the element type:
                             <value><![CDATA[Контекст вызывается при получении события для указанного элемента.
 Контексту передаются данные, которые зависят от типа элемента:
     для кнопок submit и image будут передаваться все поля формы в виде ObjectArray с одним объектом с соответствующими полями.
-    для select будут передаваться все выбранные элементы в виде ObjectArray с объектами с полями: id, label, value.
+    для select будут передаваться все выбранные элементы в виде ObjectArray с объектами с полями: id, labelHeader, value.
     для полей будет передаваться значение - строка.
     для checkbox и radio будет передано значение - логическое значение.
     для файла будет передаваться значение - строка.
@@ -180,8 +180,8 @@ The context is passed data that depends on the element type:
                     <key>en</key>
                     <value><![CDATA[Getting the element's value:
     for buttons the value field will be transmitted.
-    for a select list (multiple=true) all selected elements will be transferred as an ObjectArray with objects with the fields: id, label, value, selected.
-    for a select combobox only one selected element will be transferred as an ObjectArray with objects with the fields: id, label, value, selected.
+    for a select list (multiple=true) all selected elements will be transferred as an ObjectArray with objects with the fields: id, labelHeader, value, selected.
+    for a select combobox only one selected element will be transferred as an ObjectArray with objects with the fields: id, labelHeader, value, selected.
     for fields, the value will be transmitted - a string.
     for checkbox and radio the value will be passed - a boolean value.
     the value for the file will be a string.
@@ -192,8 +192,8 @@ The context is passed data that depends on the element type:
                     <key>ru</key>
                     <value><![CDATA[Получение значения элемента:
     для кнопок будут передаваться поле value.
-    для select списка (multiple=true) будут передаваться все выбранные элементы в виде ObjectArray с объектами с полями: id, label, value, selected.
-    для select выпадающего списка будет передаваться только один выбранный элемент в виде ObjectArray с объектами с полями: id, label, value, selected.
+    для select списка (multiple=true) будут передаваться все выбранные элементы в виде ObjectArray с объектами с полями: id, labelHeader, value, selected.
+    для select выпадающего списка будет передаваться только один выбранный элемент в виде ObjectArray с объектами с полями: id, labelHeader, value, selected.
     для полей будет передаваться значение - строка.
     для checkbox и radio будет передано значение - логическое значение.
     для файла будет передаваться значение - строка.
@@ -228,7 +228,7 @@ The context is passed data that depends on the element type:
     for select you need to pass:
         number - select by the number of the corresponding element.
         string - select by the value of the corresponding element.
-        array of objects with the fields: id, label, value, selected. In this case, it overwrites all the options and selects those that are selected. The value can be anything, not just a string.
+        array of objects with the fields: id, labelHeader, value, selected. In this case, it overwrites all the options and selects those that are selected. The value can be anything, not just a string.
     for fields you need to pass a string - value.
     for checkbox and radio you need to pass a boolean value.
     for a file you need to pass a string.
@@ -242,7 +242,7 @@ The context is passed data that depends on the element type:
     для select нужно передавать:
         число - выбрать по номеру соответствующего элемента.
         строку - выбрать по значению соответствующего элемента.
-        массив объектов с полями: id, label, value, selected. В этом случае переписывает все опции и выбирает те, что выбраны. Значение может быть любым, не только строка.
+        массив объектов с полями: id, labelHeader, value, selected. В этом случае переписывает все опции и выбирает те, что выбраны. Значение может быть любым, не только строка.
     для полей нужно передавать строку - значение.
     для checkbox и radio нужно передавать логическое значение.
     для файла нужно передавать строку.

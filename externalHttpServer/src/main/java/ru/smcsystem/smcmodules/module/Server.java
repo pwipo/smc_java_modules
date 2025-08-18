@@ -297,7 +297,7 @@ public class Server implements Module {
         ObjectElement objectElement = (ObjectElement) objectArray.get(0);
         Long reqId = objectElement.findField("reqId").map(ModuleUtils::getNumber).map(Number::longValue).or(() -> Optional.of(-1L))
                 .map(n -> getReqId(configurationTool, executionContextTool, n)).orElse(null);
-        Integer fileId = Optional.ofNullable(ModuleUtils.getNumber(messages.poll())).map(Number::intValue).orElse(0);
+        int fileId = Optional.ofNullable(ModuleUtils.getNumber(messages.poll())).map(Number::intValue).orElse(0);
         int maxSize = Optional.ofNullable(ModuleUtils.getNumber(messages.poll())).map(Number::intValue).orElse(Integer.MAX_VALUE);
         int size = 1024 * 1024;
         if (reqId == null) {
@@ -377,7 +377,7 @@ public class Server implements Module {
             return;
         }
         byte[] bytes = requestInputStream.getInputStream().readNBytes(size);
-        if (bytes != null && bytes.length > 0)
+        if (bytes.length > 0)
             executionContextTool.addMessage(bytes);
     }
 
@@ -992,7 +992,7 @@ public class Server implements Module {
                         headers.put(headerName, part.getHeader(headerName));
                     RequestInputStream requestInputStream = new RequestInputStream(part);
                     long size = requestInputStream.getSize();
-                    if (maxFileSizeFull == -1 || maxFileSizeFull < size) {
+                    if (size > 0 && (maxFileSizeFull == -1 || maxFileSizeFull > size)) {
                         byte[] bytes = IOUtils.toByteArray(requestInputStream.getInputStream());
                         requestInputStream.close();
                         if (bytes != null && bytes.length > 0) {
@@ -1005,12 +1005,13 @@ public class Server implements Module {
                         headers.forEach((k, v) -> request.add(k + "=" + v));
                         request.add(size);
                     }
-                    requestInputStreamMap.put(i, requestInputStream);
+                    if (requestInputStream.getSize() > 0)
+                        requestInputStreamMap.put(i, requestInputStream);
                 }
             } else {
                 RequestInputStream requestInputStream = new RequestInputStream(req);
                 long size = requestInputStream.getSize();
-                if (maxFileSizeFull == -1 || maxFileSizeFull < size) {
+                if (size > 0 && (maxFileSizeFull == -1 || maxFileSizeFull > size)) {
                     byte[] bytes = IOUtils.toByteArray(requestInputStream.getInputStream());
                     requestInputStream.close();
                     if (bytes != null && bytes.length > 0)
@@ -1018,7 +1019,8 @@ public class Server implements Module {
                 } else {
                     request.add(size);
                 }
-                requestInputStreamMap.put(0, requestInputStream);
+                if (requestInputStream.getSize() > 0)
+                    requestInputStreamMap.put(0, requestInputStream);
             }
         } else {
             ObjectElement objectElement = new ObjectElement(
@@ -1068,7 +1070,8 @@ public class Server implements Module {
                             objectElementPart.getFields().add(new ObjectField("data", bytes));
                     }
                     partElements.add(objectElementPart);
-                    requestInputStreamMap.put(i, requestInputStream);
+                    if (requestInputStream.getSize() > 0)
+                        requestInputStreamMap.put(i, requestInputStream);
                     // if (bytes != null && bytes.length > 0 && (requestInputStream.getContentType() == null || !requestInputStream.getContentType().toLowerCase().contains("charset"))) {
                     //     byte[] bytesTmp = bytes;
                     //     parameters.stream().filter(e -> e.getKey().equals(requestInputStream.getName())).findFirst()
@@ -1084,7 +1087,8 @@ public class Server implements Module {
                     bytes = IOUtils.toByteArray(req.getInputStream());
                     requestInputStream.close();
                 }
-                requestInputStreamMap.put(0, requestInputStream);
+                if (requestInputStream.getSize() > 0)
+                    requestInputStreamMap.put(0, requestInputStream);
             }
             if (bytes != null && bytes.length > 0)
                 objectElement.getFields().add(new ObjectField("data", bytes));

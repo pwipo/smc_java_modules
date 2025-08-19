@@ -191,9 +191,20 @@ public class DialogsTest {
         executionContextTool = new ExecutionContextToolImpl(null, null, null);
         process.execute(executionContextTool).forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
 
-        executionContextTool = new ExecutionContextToolImpl(null, null, null, List.of(
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(MessageType.DATA, new Date(), new Value("user"))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))), null, null, List.of(
                 (lst) -> {
-                    return new Action(List.of(new Message(new Value("1 " + (!lst.isEmpty() ? lst.get(0).toString().length() : "")))));
+                    return new Action(List.of(
+                            new Message(new Value("1 " + (!lst.isEmpty() ? lst.get(0).toString().length() : ""))),
+                            new Message(new Value("response"))
+                    ));
                 }
         ));
         process.execute(executionContextTool).forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
@@ -209,6 +220,5 @@ public class DialogsTest {
 
         process.stop();
     }
-
 
 }

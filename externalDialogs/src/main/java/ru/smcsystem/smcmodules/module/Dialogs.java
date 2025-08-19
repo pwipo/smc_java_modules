@@ -1,6 +1,11 @@
 package ru.smcsystem.smcmodules.module;
 
 import org.apache.commons.lang3.StringUtils;
+import ru.smcsystem.api.dto.IAction;
+import ru.smcsystem.api.dto.ICommand;
+import ru.smcsystem.api.dto.IMessage;
+import ru.smcsystem.api.enumeration.ActionType;
+import ru.smcsystem.api.enumeration.MessageType;
 import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
@@ -10,6 +15,7 @@ import ru.smcsystem.smc.utils.ModuleUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -149,28 +155,57 @@ public class Dialogs implements Module {
                         showSelectDialog(executionContextTool, dummyFrame, title, message);
                         break;
                     case CHAT:
-                        showChatDialog(executionContextTool, dummyFrame, title, message, "Add", "Clear");
+                        showChatDialog(executionContextTool, title, message, externalMessage, "Add", "Clear");
                         break;
                 }
             } finally {
                 dummyFrame.dispose();
             }
         });
-
     }
 
-    private void showChatDialog(ExecutionContextTool executionContextTool, JFrame dummyFrame, String title, String message, String nameButtonAdd, String nameButtonClear) {
-        DialogChat dialogChat = new DialogChat(title, message, nameButtonAdd, nameButtonClear,
+    public static boolean isData(IMessage message) {
+        return message != null && message.getMessageType() == MessageType.DATA;
+    }
+
+    public static boolean isError(IMessage message) {
+        return message != null && (message.getMessageType() == MessageType.ACTION_ERROR || message.getMessageType() == MessageType.ERROR);
+    }
+
+    public static Optional<IAction> getActionWithDataOrErrorMessages(List<IAction> actions) {
+        return actions.stream()
+                .filter((a) -> ModuleUtils.hasErrors(a) || (a.getType() == ActionType.EXECUTE && a.getMessages().stream().anyMatch(Dialogs::isData)))
+                .findFirst();
+    }
+
+    public static Optional<ICommand> getLastCommand(List<ICommand> commands) {
+        return commands.stream().reduce((first, second) -> second);
+    }
+
+    public static Optional<List<IMessage>> getDataOrErrorMessagesFromLastCommand(List<ICommand> commands) {
+        return getLastCommand(commands)
+                .flatMap(c -> getActionWithDataOrErrorMessages(c.getActions()))
+                .map(IAction::getMessages)
+                .map(l -> l.stream().filter(m -> isData(m) || isError(m)).collect(Collectors.toList()));
+    }
+
+    private void showChatDialog(ExecutionContextTool executionContextTool, String title, String message,
+                                String inputLabel, String nameButtonAdd, String nameButtonClear) {
+        DialogChat dialogChat = new DialogChat(title, message, inputLabel, nameButtonAdd, nameButtonClear,
                 executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0 ?
-                        str -> ModuleUtils.executeParallelAndGetMessages(executionContextTool, 0, java.util.List.of(str))
-                                .map(lst -> lst.get(0)) :
+                        str -> {
+                            long threadId = ModuleUtils.executeParallel(executionContextTool, 0, java.util.List.of(str));
+                            List<ICommand> data = executionContextTool.getFlowControlTool().getCommandsFromExecuted(threadId, 0);
+                            executionContextTool.getFlowControlTool().releaseThread(threadId);
+                            return getDataOrErrorMessagesFromLastCommand(data);
+                        } :
                         null);
         try {
             dialogChat.frame.setVisible(true);
             dialogChat.frame.requestFocus();
             do {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch (Exception ignored) {
                     // e.printStackTrace();
                 }

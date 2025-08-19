@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Dialogs</className>
-    <ver>1.2.0</ver>
+    <ver>1.2.1</ver>
     <apiVer>1.4.0</apiVer>
     <date>18-08-2025</date>
 
@@ -61,23 +61,31 @@ dialog box type:
     FILE_READ - a dialog box for selecting a file to read. returns the absolute path to the file (if selected).
     FILE_SAVE - dialog box for selecting a file for recording. returns the absolute path to the file (if selected).
     SELECT - a dialog box for selecting an option from a list. returns selected value. Incoming messages are used as options.
-    CHAT - a form for correspondence with an external source. Contains a test input field and an area where the input is printed, as well as a response. The response is obtained by calling the first context, the entered text is passed to it, a value of any type is expected. If an ObjectArray containing objects is returned, it is displayed as a table.
+    CHAT - a form for correspondence with an external source. Contains a text input field and an area where the input is printed, as well as a response.
+        The response is obtained by calling the first context, the entered text is passed to it, a value of any type is expected.
+        If the context returned 2 values, the second is considered as the responder's identifier and is displayed in the header.
+        If an ObjectArray containing objects is returned, it is displayed as a table.
+        If there are incoming messages, the text is considered as the questioner's identifier and is displayed in the header.
                     ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
                     <value><![CDATA[
 тип диалогового окна:
-    INPUT - диалоговое окно с одинм полем ввода. возвращает текст из поля если нажата кнопка.
-    TWO_INPUT - диалоговое окно с двумя полями ввода. возвращает текст из полей если нажата кнопка.
-    CONFIRM_OK_CANCEL - диалоговое окно с кнопками OK и CANCEL. если нажата OK возвращает 0, если CANCEL - 2, если закрыто окно иначе - -1.
-    CONFIRM_YES_NO - диалоговое окно с кнопками YES и NO. если нажата YES возвращает 0, если NO - 1, если закрыто окно иначе - -1.
-    CONFIRM_YES_NO_CANCEL - диалоговое окно с кнопками YES, NO и CANCEL. если нажата YES возвращает 0, если NO - 1, если CANCEL - 2, если закрыто окно иначе - -1.
-    MESSAGE - диалоговое окно с текстом. ничего не возвращает.
-    FILE_READ - диалоговое окно выбора файла для чтения. возвращает абсолютный путь к файлу (если выбран).
-    FILE_SAVE - диалоговое окно выбора файла для записи. возвращает абсолютный путь к файлу (если выбран).
-    SELECT - диалоговое окно выбора варианта из списка. возвращает выбранное значение. В качестве вариантов используются входящие сообщения.
-    CHAT - форма для переписки с внешним источником. Содержит тестовое поле ввода и область куда печатается ввод, а так же ответ. Ответ получается, вызовом первого контекста, ему передается введенный текст, ожидается значение любого типа. Если возвращается ObjectArray содержащий объекты, то отображает его в виде таблицы.
+    INPUT - диалоговое окно с одинм полем ввода. Возвращает текст из поля если нажата кнопка.
+    TWO_INPUT - диалоговое окно с двумя полями ввода. Возвращает текст из полей если нажата кнопка.
+    CONFIRM_OK_CANCEL - диалоговое окно с кнопками OK и CANCEL. Если нажата OK возвращает 0, если CANCEL - 2, если закрыто окно иначе - -1.
+    CONFIRM_YES_NO - диалоговое окно с кнопками YES и NO. Если нажата YES возвращает 0, если NO - 1, если закрыто окно иначе - -1.
+    CONFIRM_YES_NO_CANCEL - диалоговое окно с кнопками YES, NO и CANCEL. Если нажата YES возвращает 0, если NO - 1, если CANCEL - 2, если закрыто окно иначе - -1.
+    MESSAGE - диалоговое окно с текстом. Ничего не возвращает.
+    FILE_READ - диалоговое окно выбора файла для чтения. Возвращает абсолютный путь к файлу (если выбран).
+    FILE_SAVE - диалоговое окно выбора файла для записи. Возвращает абсолютный путь к файлу (если выбран).
+    SELECT - диалоговое окно выбора варианта из списка. Возвращает выбранное значение. В качестве вариантов используются входящие сообщения.
+    CHAT - форма для переписки с внешним источником. Содержит тестовое поле ввода и область куда печатается ввод, а так же ответ.
+        Ответ получается, вызовом первого контекста, ему передается введенный текст, ожидается значение любого типа.
+        Если контекст вернул 2 значения, то второе рассматривается как идентификатор ответившего и отображается в заголовке.
+        Если возвращается ObjectArray содержащий объекты, то отображает его в виде таблицы.
+        Если есть входящие сообщения, то текст рассматривается как идентификатор спрашивающего и отображается в заголовке.
                     ]]></value>
                 </entry>
             </description>
@@ -116,9 +124,9 @@ dialog box type:
         <value>
             <name>lang</name>
             <type>STRING</type>
-            <value>title::en::Title::ru::Заголовок;;
-                message::en::Message::ru::Текст;;
-            </value>
+            <value><![CDATA[title::en::Title::ru::Заголовок;;
+message::en::Message::ru::Текст;;
+            ]]></value>
             <description>
                 <entry>
                     <key>ru</key>
@@ -159,14 +167,15 @@ dialog box type:
             <ecs>
                 <ec>
                     <description>
-                        <entry k="ru" v="Используется если выбран type CHAT. Ему передается вводимый текст, ожидает 1 сообщение любого типа."/>
-                        <entry k="en" v="Used if the type CHAT is selected. The input text is passed to it, and 1 message of any type is expected."/>
+                        <entry k="ru" v="Используется если выбран type CHAT. Ему передается вводимый текст, ожидает 0-2 сообщения, первое сообщение любого типа, второе - текст для идентификации ответившего."/>
+                        <entry k="en" v="Used if the type CHAT is selected. It is passed the input text, waits for 0-2 messages, the first message is of any type, the second is the text for identifying the responder."/>
                     </description>
                     <elements>
-                        <element t="VALUE" c="1" vt="STRING" v="hello world"/>
+                        <element t="VALUE" vt="STRING" v="hello world"/>
                     </elements>
                     <output>
-                        <element t="VALUE_ANY" c="-1" vt="INTEGER" v="1"/>
+                        <element t="VALUE_ANY" o="true" vt="INTEGER" v="1"/>
+                        <element t="VALUE" o="true" vt="STRING" v="user1"/>
                     </output>
                 </ec>
             </ecs>

@@ -1,6 +1,6 @@
 package ru.smcsystem.smcmodules.module;
 
-import ru.smcsystem.api.dto.IValue;
+import ru.smcsystem.api.dto.IMessage;
 import ru.smcsystem.api.dto.ObjectArray;
 import ru.smcsystem.api.dto.ObjectElement;
 import ru.smcsystem.api.dto.ObjectField;
@@ -13,6 +13,8 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +24,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DialogChat {
-    private final Function<String, Optional<IValue>> func;
+    private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss").withZone(ZoneId.systemDefault());
+    private final Function<String, Optional<List<IMessage>>> func;
+    private final String inputLabel;
     public final JFrame frame;
     private JPanel panel;
     private JButton buttonAdd;
@@ -33,8 +37,9 @@ public class DialogChat {
     private JScrollPane scrollPane;
     private GridBagConstraints gbc;
 
-    public DialogChat(String title, String label, String nameButtonAdd, String nameButtonClear, Function<String, Optional<IValue>> func) {
+    public DialogChat(String title, String label, String inputLabel, String nameButtonAdd, String nameButtonClear, Function<String, Optional<List<IMessage>>> func) {
         this.func = func;
+        this.inputLabel = inputLabel != null ? inputLabel : "";
         frame = new JFrame(title);
         $$$setupUI$$$();
 
@@ -59,7 +64,7 @@ public class DialogChat {
     }
 
     public static void main(String[] args) {
-        DialogChat dialogChat = new DialogChat("DialogChat", "Chat", "Add", "Clear", null);
+        DialogChat dialogChat = new DialogChat("DialogChat", "Chat", "user", "Add", "Clear", null);
         dialogChat.frame.setVisible(true);
     }
 
@@ -77,9 +82,9 @@ public class DialogChat {
         cleanPanelContent();
 
         buttonAdd.addActionListener(e -> {
-            addPanel(textArea1.getText(), false);
+            addPanel(List.of(textArea1.getText()), false);
             if (func != null)
-                func.apply(textArea1.getText()).ifPresent(v -> addPanel(v, true));
+                func.apply(textArea1.getText()).ifPresent(v -> addPanel((List) v, true));
             textArea1.setText("");
             frame.repaint();
         });
@@ -97,48 +102,65 @@ public class DialogChat {
         });
     }
 
-    private void addPanel(Object obj, boolean isAnswer) {
-        if (obj == null)
+    private void addPanel(List<Object> lst, boolean isAnswer) {
+        if (lst == null || lst.isEmpty())
             return;
+        Object obj = lst.get(0);
+        String answerLabel = lst.size() > 1 ?
+                (lst.get(1) instanceof IMessage ? ModuleUtils.toString((IMessage) lst.get(1)) : lst.get(1).toString()) :
+                "";
+
+        JPanel jPanelMain = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel jPanel = new JPanel(new BorderLayout());
         jPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         // jPanel.setMaximumSize(new Dimension(200, 50));
-        jPanel.add(new Label(String.format("%s %s", isAnswer ? "<<" : ">>", Instant.now().toString())), BorderLayout.NORTH);
         JPanel jPanelValue = null;
         // gbc.weighty = 0;
         // gbc.fill = GridBagConstraints.HORIZONTAL;
-        if (obj instanceof IValue) {
-            IValue value = (IValue) obj;
-            if (ModuleUtils.isObjectArray(value)) {
-                ObjectArray objectArray = ModuleUtils.getObjectArray(value);
+        Instant time = Instant.now();
+        if (obj instanceof IMessage) {
+            IMessage msg = (IMessage) obj;
+            time = msg.getDate().toInstant();
+            if (ModuleUtils.isObjectArray(msg)) {
+                ObjectArray objectArray = ModuleUtils.getObjectArray(msg);
                 if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
                     jPanelValue = new JPanel(new BorderLayout());
                     JTable table = new JTable();
+                    table.setFillsViewportHeight(true);
                     table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
                     initTable(table, objectArray, true);
-                    JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                    // JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
                     // scrollPane.setViewportView(table);
-                    jPanelValue.add(scrollPane, BorderLayout.CENTER);
+                    jPanelValue.add(table.getTableHeader(), BorderLayout.NORTH);
+                    jPanelValue.add(table, BorderLayout.CENTER);
                     // gbc.weighty = 1;
-                    // gbc.fill = GridBagConstraints.BOTH;
+                    // gbc.fill = GridBagConstraints.NONE;
                 } else if (objectArray.isSimple()) {
-                    jPanelValue = createPanelValue(Stream.iterate(0, i -> i + 1)
-                            .limit(objectArray.size())
-                            .map(n -> objectArray.get(n).toString())
-                            .collect(Collectors.joining(" , ")));
+                    jPanelValue = createPanelValue(
+                            Stream.iterate(0, i -> i + 1)
+                                    .limit(objectArray.size())
+                                    .map(n -> objectArray.get(n).toString())
+                                    .collect(Collectors.joining(" , ")),
+                            false);
                 }
             }
             if (jPanelValue == null)
-                jPanelValue = createPanelValue(ModuleUtils.toString(value));
+                jPanelValue = createPanelValue(ModuleUtils.toString(msg), Dialogs.isError(msg));
         } else {
-            jPanelValue = createPanelValue(obj.toString());
+            jPanelValue = createPanelValue(obj.toString(), false);
         }
+
+        jPanel.add(new Label(String.format("%s %s", isAnswer ? answerLabel : inputLabel, formatter.format(time))), BorderLayout.NORTH);
+        if (isAnswer)
+            jPanelMain.add(Box.createRigidArea(new Dimension(30, 30)));
         jPanel.add(jPanelValue, BorderLayout.CENTER);
+        jPanelMain.add(jPanel);
+
         gbc.gridy++;
         // JPanel jPanel2 = new JPanel();
         // jPanel2.setAlignmentX(Component.LEFT_ALIGNMENT);
         // jPanel2.add(jPanel);
-        panelContent.add(jPanel, gbc);
+        panelContent.add(jPanelMain, gbc);
         // panelContent.add(Box.createVerticalGlue());
         // jPanel.revalidate();
         panelContent.revalidate();
@@ -148,17 +170,46 @@ public class DialogChat {
         // textArea.setCaretPosition(textArea.getDocument().getLength());
     }
 
-    private JPanel createPanelValue(String text) {
+    private JPanel createPanelValue(String text, boolean isError) {
         text = text.trim();
-        if (!text.toLowerCase().startsWith("<html>"))
-            text = "<html>" + text;
-        if (!text.toLowerCase().endsWith("</html>"))
-            text = text + "</html>";
+        // if (!text.toLowerCase().startsWith("<html>"))
+        //     text = "<html>" + text;
+        // if (!text.toLowerCase().endsWith("</html>"))
+        //     text = text + "</html>";
         text = text.replace("\n", "<br/>");
-        JLabel jLabel = new JLabel(text);
-        // jLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        if (isError)
+            text = "<font color='red'>" + text + "</font>";
+
+        // JTextField f = new JTextField(text);
+        // f.setEditable(false);
+        // f.setBackground(null); //this is the same as a JLabel
+        // f.setBorder(null); //remove the border
+
+        JTextPane f = new JTextPane();
+        f.setContentType("text/html"); // let the text pane know this is what you want
+        /*
+        if (color != null) {
+            StyledDocument doc = f.getStyledDocument();
+            Style style = f.addStyle("Error", null);
+            StyleConstants.setForeground(style, color);
+            try {
+                doc.insertString(doc.getLength(), text, style);
+            } catch (BadLocationException ignored) {
+                f.setText(text); // showing off
+            }
+        } else {
+            f.setText(text); // showing off
+        }
+        */
+        f.setText(text); // showing off
+        f.setEditable(false); // as before
+        f.setBackground(null); // this is the same as a JLabel
+        f.setBorder(null); // remove the border
+
+        // JLabel f = new JLabel(text);
+        // f.setHorizontalAlignment(SwingConstants.LEFT);
         JPanel jPanelValue = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        jPanelValue.add(jLabel);
+        jPanelValue.add(f);
         return jPanelValue;
     }
 

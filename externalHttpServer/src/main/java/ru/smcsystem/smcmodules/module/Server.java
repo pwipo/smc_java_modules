@@ -743,7 +743,6 @@ public class Server implements Module {
                 ResponseObj responseObj = null;
                 long reqId = 0;
                 long startTime = System.currentTimeMillis();
-                Long threadId = null;
                 try {
                     // req.getSession().setMaxInactiveInterval(requestTimeout);
                     // System.out.println(req.getSession().getMaxInactiveInterval());
@@ -794,14 +793,14 @@ public class Server implements Module {
                     // externalConfigurationTool.loggerTrace("New request " + reqId + " " + req.getRequestURI());
                     Response responseMain = new Response(reqId, req, resp, virtualServerInfo, requestInputStreamMap);
                     mapResponse.put(reqId, responseMain);
-                    threadId = externalExecutionContextTool.getFlowControlTool().executeParallel(
+                    long threadId = externalExecutionContextTool.getFlowControlTool().executeParallel(
                             CommandType.EXECUTE,
                             idsForExecute,
                             requestEntry.getValue(),
                             null,
                             virtualServerInfo.getRequestTimeout());
-                    threadReqMap.put(threadId, requestEntry.getKey());
                     boolean mapFastResponseArrived = false;
+                    threadReqMap.put(threadId, requestEntry.getKey());
                     try {
                         do {
                             try {
@@ -840,6 +839,7 @@ public class Server implements Module {
                             }
                         }
                     } finally {
+                        threadReqMap.remove(threadId);
                         if (!mapFastResponseArrived) {
                             // if (externalExecutionContextTool.getFlowControlTool().isThreadActive(threadId))
                             //     externalConfigurationTool.loggerWarn(String.format("Thread %d steel work. Time left=%d, getRequestTimeout=%d, mapResponse contaik key=%s, getResponseObj is null=%s", threadId, System.currentTimeMillis() - startTime, virtualServerInfo.getRequestTimeout(), mapResponse.containsKey(reqId), responseMain.getResponseObj() == null));
@@ -857,7 +857,6 @@ public class Server implements Module {
                     externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                     // externalExecutionContextTool.addError(e.getLocalizedMessage());
                 } finally {
-                    threadReqMap.remove(threadId);
                     Response response = mapResponse.remove(reqId);
                     if (response != null)
                         response.getRequestInputStreamMap().forEach((k, v) -> v.close());

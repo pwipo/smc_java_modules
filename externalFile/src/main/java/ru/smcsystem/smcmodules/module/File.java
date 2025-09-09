@@ -1013,10 +1013,13 @@ public class File implements Module {
                     if (startPosition > 0)
                         fileReader.skip(startPosition);
                     char[] arr = new char[newSize];
-                    int readLength = fileReader.read(arr);
-                    if (readLength > 0) {
-                        if (readLength != newSize)
-                            arr = ArrayUtils.subarray(arr, 0, readLength);
+                    int readLength;
+                    int leftArrSize = newSize;
+                    while (leftArrSize > 0 && (readLength = fileReader.read(arr, newSize - leftArrSize, leftArrSize)) != -1)
+                        leftArrSize = leftArrSize - readLength;
+                    if (leftArrSize != newSize) {
+                        if (leftArrSize > 0)
+                            arr = ArrayUtils.subarray(arr, 0, newSize - leftArrSize);
                         externalExecutionContextTool.addMessage(new String(arr));
                     }
                     needExit = true;
@@ -1046,10 +1049,13 @@ public class File implements Module {
                     if (startPosition > 0)
                         fileInputStream.skip(startPosition);
                     byte[] arr = new byte[newSize];
-                    int readLength = fileInputStream.read(arr);
-                    if (readLength > 0) {
-                        if (readLength != newSize)
-                            arr = ArrayUtils.subarray(arr, 0, readLength);
+                    int readLength;
+                    int leftArrSize = newSize;
+                    while (leftArrSize > 0 && (readLength = fileInputStream.read(arr, newSize - leftArrSize, leftArrSize)) != -1)
+                        leftArrSize = leftArrSize - readLength;
+                    if (leftArrSize != newSize) {
+                        if (leftArrSize > 0)
+                            arr = ArrayUtils.subarray(arr, 0, newSize - leftArrSize);
                         externalExecutionContextTool.addMessage(arr);
                     }
                     needExit = true;

@@ -423,7 +423,7 @@ public class FileTest {
                                 "hashAlgType", new Value(ValueType.STRING, "SHA256"),
                                 "arguments", new Value(ValueType.STRING, ""),
                                 "printAbsolutePath", new Value(ValueType.STRING, "false"),
-                                "useOnlyWorkDirectory", new Value(ValueType.STRING, "true")
+                                "useOnlyWorkDirectory", new Value(ValueType.STRING, "false")
                         ),
                         null,
                         "C:\\tmp"
@@ -435,7 +435,7 @@ public class FileTest {
                 List.of(
                         new Action(
                                 List.of(
-                                        new Message(new Value("example-1.0.0.smcm")),
+                                        new Message(new Value("C:\\Users\\pwipo\\Documents\\dev\\soft\\smc\\smcm\\HtmlGuiPage.smcm")),
                                         new Message(new Value("properties.xml")),
                                         new Message(new Value("UTF-8"))
                                 ),

@@ -1230,7 +1230,7 @@ public class File implements Module {
                         }
                         if (returnPairs)
                             executionContextTool.addMessage(entry.getName());
-                        readFileFromZip(executionContextTool, is, isText, size, 0, 0, charset);
+                        readFileFromZip(configurationTool, executionContextTool, is, isText, size, 0, 0, charset);
                         if (entryPath.equals(path))
                             break;
                     } catch (Throwable e) {
@@ -1244,19 +1244,25 @@ public class File implements Module {
         }
     }
 
-    private void readFileFromZip(ExecutionContextTool executionContextTool, InputStream is, boolean isText, long fileSize, long offset,
+    private void readFileFromZip(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, InputStream is, boolean isText, long fileSize, long offset,
                                  int size, Charset charset) throws IOException {
         long startPosition = Math.max(0, offset >= 0 ? offset : fileSize + offset);
         int newSize = size > 0 ? size : (int) (fileSize - startPosition);
+        configurationTool.loggerTrace(String.format("readFileFromZip start position=%d, new size=%d, file size %d", startPosition, newSize, fileSize));
         if (isText) {
             try (InputStreamReader isr = new InputStreamReader(is, charset)) {
                 if (startPosition > 0)
                     isr.skip(startPosition);
                 char[] arr = new char[newSize];
-                int readLength = isr.read(arr);
-                if (readLength > 0) {
-                    if (readLength != newSize)
-                        arr = ArrayUtils.subarray(arr, 0, readLength);
+                int readLength;
+                int leftArrSize = newSize;
+                while (leftArrSize > 0 && (readLength = isr.read(arr, newSize - leftArrSize, leftArrSize)) != -1)
+                    leftArrSize = leftArrSize - readLength;
+                if (leftArrSize != newSize) {
+                    if (leftArrSize > 0) {
+                        configurationTool.loggerWarn(String.format("readFileFromZip size incorrect: required size %d, result size %d", newSize, newSize - leftArrSize));
+                        arr = ArrayUtils.subarray(arr, 0, newSize - leftArrSize);
+                    }
                     executionContextTool.addMessage(new String(arr));
                 }
             }
@@ -1265,10 +1271,15 @@ public class File implements Module {
             if (startPosition > 0)
                 is.skip(startPosition);
             byte[] arr = new byte[newSize];
-            int readLength = is.read(arr);
-            if (readLength > 0) {
-                if (readLength != newSize)
-                    arr = ArrayUtils.subarray(arr, 0, readLength);
+            int readLength;
+            int leftArrSize = newSize;
+            while (leftArrSize > 0 && (readLength = is.read(arr, newSize - leftArrSize, leftArrSize)) != -1)
+                leftArrSize = leftArrSize - readLength;
+            if (leftArrSize != newSize) {
+                if (leftArrSize > 0) {
+                    configurationTool.loggerWarn(String.format("readFileFromZip size incorrect: required size %d, result size %d", newSize, newSize - leftArrSize));
+                    arr = ArrayUtils.subarray(arr, 0, newSize - leftArrSize);
+                }
                 executionContextTool.addMessage(arr);
             }
         }

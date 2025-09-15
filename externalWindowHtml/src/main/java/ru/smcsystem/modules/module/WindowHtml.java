@@ -7,9 +7,7 @@ import ru.smcsystem.api.tools.execution.ExecutionContextTool;
 import ru.smcsystem.smc.utils.ModuleUtils;
 
 import javax.swing.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class WindowHtml implements Module {
@@ -25,15 +23,42 @@ public class WindowHtml implements Module {
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
-        configuration = (String) configurationTool.getSetting("configuration").orElseThrow(() -> new ModuleException("configuration setting")).getValue();
-        Integer width = (Integer) configurationTool.getSetting("width").orElseThrow(() -> new ModuleException("width setting")).getValue();
-        Integer height = (Integer) configurationTool.getSetting("height").orElseThrow(() -> new ModuleException("height setting")).getValue();
-        String title = (String) configurationTool.getSetting("title").orElseThrow(() -> new ModuleException("title setting")).getValue();
-        String idsStr = (String) configurationTool.getSetting("ids").orElseThrow(() -> new ModuleException("ids setting")).getValue();
+        configuration = configurationTool.getSetting("configuration").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("configuration setting"));
+        Integer width = configurationTool.getSetting("width").map(ModuleUtils::toNumber).map(Number::intValue).orElseThrow(() -> new ModuleException("width setting"));
+        Integer height = configurationTool.getSetting("height").map(ModuleUtils::toNumber).map(Number::intValue).orElseThrow(() -> new ModuleException("height setting"));
+        String title = configurationTool.getSetting("title").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("title setting"));
+        String idsStr = configurationTool.getSetting("ids").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("ids setting"));
         ids = Arrays.stream(idsStr.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());
+
+        String shapeId = configurationTool.getSetting("shapeId").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("shapeId setting"));
+        if (!shapeId.isBlank()) {
+            List<Shape> shapes = configurationTool.getInfo("decorationShapes").map(ModuleUtils::getObjectArray)
+                    .filter(ModuleUtils::isArrayContainObjectElements)
+                    .map(a -> ModuleUtils.convertFromObjectArray(a, Shape.class, true, true))
+                    .orElse(List.of());
+            Shape shape = shapes.stream().filter(s -> Objects.equals(s.getName(), shapeId)).findFirst().orElse(null);
+            if (shape != null) {
+                String bodyChildsHtml = shapes.stream()
+                        .filter(s -> Objects.equals(s.getParentName(), shapeId))
+                        .sorted(Comparator.comparing(s -> s.getX() * s.getY()))
+                        .map(s -> new ShapeHtmlElement(s, shapes))
+                        .map(ShapeHtmlElement::genHtml)
+                        .collect(Collectors.joining("\n"));
+                if (!bodyChildsHtml.isBlank()) {
+                    if (configuration.contains("<body>")) {
+                        int indexOf = configuration.indexOf("<body>");
+                        if (indexOf != -1) {
+                            configuration = configuration.substring(0, indexOf);
+                        }
+                    }
+                    configuration = configuration + String.format("<body>\n%s\n</body>\n</html>", bodyChildsHtml);
+                    configurationTool.loggerTrace(configuration);
+                }
+            }
+        }
         mainForm = new MainForm(title, configuration, width, height);
     }
 

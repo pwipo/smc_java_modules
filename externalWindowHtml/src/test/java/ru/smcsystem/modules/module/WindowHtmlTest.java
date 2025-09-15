@@ -368,4 +368,39 @@ public class WindowHtmlTest {
         process.stop();
     }
 
+    @Test
+    public void testGuiHtml() throws InterruptedException {
+        Process process = new Process(
+                new MyConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "configuration", new Value("<html><head></head><body><div>Simple text</div></body></html>"),
+                                "width", new Value(300),
+                                "height", new Value(100),
+                                "title", new Value("MainForm"),
+                                "ids", new Value(""),
+                                "shapeId", new Value("root")
+                        ),
+                        null,
+                        null
+                ),
+                new WindowHtml()
+        );
+        process.start();
+
+        Thread thread = new Thread(() -> {
+            ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(null, null, null, null, "default", "server");
+            process.execute(executionContextTool);
+            executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        });
+        thread.start();
+
+        Thread.sleep(3000);
+
+        thread.join();
+
+        process.stop();
+    }
+
 }

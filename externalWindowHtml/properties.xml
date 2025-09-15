@@ -5,7 +5,7 @@
     <provider>java</provider>
     <os/>
     <arch/>
-    <ver>1.2.1</ver>
+    <ver>1.3.0</ver>
     <apiVer>1.4.0</apiVer>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
@@ -34,7 +34,7 @@ The program is supplied as is. For problems arising during the operation or inst
         <value>
             <name>configuration</name>
             <type>STRING</type>
-            <value><![CDATA[<html><head></head><body><div>Simple text</div></body>]]></value>
+            <value><![CDATA[<html><head></head><body><div>Simple text</div></body></html>]]></value>
             <subType>HTML</subType>
             <description>
                 <entry>
@@ -113,6 +113,30 @@ May contain only pure HTML, without scripts.
                     <key>en</key>
                     <value><![CDATA[Element identifiers (id or name attribute), separated by commas. Provide event processing.
 Each specified identifier is associated with a corresponding managed context (type SERVER), which will be called when an event associated with the specified identifier occurs (for example, a button click).
+                    ]]></value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>shapeId</name>
+            <type>STRING</type>
+            <value></value>
+            <subType>STRING</subType>
+            <description>
+                <entry k="ru">
+                    <value><![CDATA[Идентификатор фигуры (квадрата).
+Если не пусто, то используется для нахождения фигуры с таким именем и генерацией html на основе найденных дочерних элементов.
+Переписывает configuration.
+Экспериментальная настройка!
+Алгоритм работы аналогичен модулю HtmlGuiPage.
+                    ]]></value>
+                </entry>
+                <entry k="ru">
+                    <value><![CDATA[Figure (square) identifier.
+If not empty, it is used to find a figure with this name and generate html based on the found child elements.
+Overwrites configuration.
+Experimental setup!
+The algorithm is similar to the HtmlGuiPage module.
                     ]]></value>
                 </entry>
             </description>
@@ -565,6 +589,9 @@ The context is passed data that depends on the element type:
             <value><![CDATA[The module is a simple HTML configurable graphical window.
 The version used is HTML 3.2 https://www.w3.org/TR/2018/SPSD-html32-20180315
 To start a window, you need to start the context type SERVER.
+Works in 2 modes:
+    using manually specified html via the configuration setting.
+    using an html generator based on graphic shapes - the shapeId setting.
             ]]></value>
         </entry>
         <entry>
@@ -572,6 +599,9 @@ To start a window, you need to start the context type SERVER.
             <value><![CDATA[Модуль представляет собой простое конфигурируемое HTML графическое окно.
 Используется версия HTML 3.2 https://www.w3.org/TR/2018/SPSD-html32-20180315
 Для запуска окна нужно запустить тип контекста SERVER.
+Работает в 2 режимах:
+    использую вручную заданный html через настройку configuration.
+    используя генератор html на основе графических фигур - настройку shapeId.
             ]]></value>
         </entry>
     </help>

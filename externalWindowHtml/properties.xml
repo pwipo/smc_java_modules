@@ -5,7 +5,7 @@
     <provider>java</provider>
     <os/>
     <arch/>
-    <ver>1.3.0</ver>
+    <ver>1.3.1</ver>
     <apiVer>1.4.0</apiVer>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
@@ -131,7 +131,7 @@ Each specified identifier is associated with a corresponding managed context (ty
 Алгоритм работы аналогичен модулю HtmlGuiPage.
                     ]]></value>
                 </entry>
-                <entry k="ru">
+                <entry k="en">
                     <value><![CDATA[Figure (square) identifier.
 If not empty, it is used to find a figure with this name and generate html based on the found child elements.
 Overwrites configuration.
@@ -589,9 +589,29 @@ The context is passed data that depends on the element type:
             <value><![CDATA[The module is a simple HTML configurable graphical window.
 The version used is HTML 3.2 https://www.w3.org/TR/2018/SPSD-html32-20180315
 To start a window, you need to start the context type SERVER.
-Works in 2 modes:
-    using manually specified html via the configuration setting.
-    using an html generator based on graphic shapes - the shapeId setting.
+Works in two modes:
+    HTML - uses manually specified HTML via the configuration setting.
+    Generator - uses an HTML generator based on graphic shapes - shapeId setting.
+
+Generator mode:
+    For shapes, the value of the description field is used to set all parameters. General format:
+    element_name
+    [attributes, example: key1="value1" key2="value2" key3="value3"]
+    [child_elements, HTML text]
+
+    element_name - HTML tag, such as: input, textarea, form, button, div, a, p, img, table, etc.
+    attributes - HTML tag attributes, single line. Inserted as is.
+    child_elements - HTML text, can be multi-line. If specified, child elements will not be generated from shapes, but the ones specified here will be used. Use with caution.
+
+    All elements are given an id attribute, the value of which will be the shape's name.
+    Features:
+        input - the name attribute is added; it contains the same value as the id.
+        textarea - the name attribute is added; it contains the same value as the id. If the shape has text, it will be inserted as a child element.
+        button - if the shape has text, it will be inserted as a child element.
+        form - a hidden input field is added with the id formId and the value of the shape's name.
+        img - the src attribute is added; it contains an image.
+        a, p, td, li, strong, label, etc. - text color and font styles are added. If the shape has text, it will be inserted as a child element.
+            Note: other elements (input, div, etc.) are given a border size and color style.
             ]]></value>
         </entry>
         <entry>
@@ -600,8 +620,28 @@ Works in 2 modes:
 Используется версия HTML 3.2 https://www.w3.org/TR/2018/SPSD-html32-20180315
 Для запуска окна нужно запустить тип контекста SERVER.
 Работает в 2 режимах:
-    использую вручную заданный html через настройку configuration.
-    используя генератор html на основе графических фигур - настройку shapeId.
+    html - использую вручную заданный html через настройку configuration.
+    генератор - использует генератор html на основе графических фигур - настройку shapeId.
+
+Режим генератора:
+    У фигур значение поля описания используется для задания всех параметров. Общий формат:
+    имя_элемента
+    [аттрибуты, пример: ключ1="значение1" ключ2="значение2" ключ3="значение3"]
+    [дочерние_элементы, текст в формате html]
+
+    имя_элемента - html тег, например: input, textarea, form, button, div, a, p, img, table и тп.
+    аттрибуты - аттрибуты html тег, одна строка. Вставляются как есть.
+    дочерние_элементы - html текст, может быть многострочным. Если указан, то дочерние элементы не будут генерироваться из фигур, а будет использоваться, то что указано тут. Использовать с осторожностью.
+
+    Всем элементам добавляется атрибут id, значение которого будет имя фигуры.
+    Особенности:
+        input - добавляется атрибут name, содержит то же что и в id.
+        textarea - добавляется атрибут name, содержит то же что и в id. если у фигуры есть текст, то он будет вставлен как дочерние_элементы.
+        button - если у фигуры есть текст, то он будет вставлен как дочерние_элементы.
+        form - добавляется скрытое поле ввода с id formId и значением имени фигуры.
+        img - добавляется атрибут src, содержит изображение.
+        a,p,td,li,strong,label и тд - добавляются стили цвета и шрифта текста. если у фигуры есть текст, то он будет вставлен как дочерние_элементы.
+            Внимание: остальным элементам (input,div и тп) добавляется стиль размера и цвета границы (border).
             ]]></value>
         </entry>
     </help>

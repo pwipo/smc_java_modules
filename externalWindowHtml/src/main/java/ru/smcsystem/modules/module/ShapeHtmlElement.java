@@ -1,11 +1,13 @@
 package ru.smcsystem.modules.module;
 
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ShapeHtmlElement {
     // private Shape shape;
     private String type;
+    private String name;
     private Map<String, String> htmlElementAttrs;
     private String innerHtml;
     private List<ShapeHtmlElement> childs;
@@ -13,6 +15,7 @@ public class ShapeHtmlElement {
     private int x;
     private int y;
     private String decorationElement;
+    private byte[] bytes;
 
     public ShapeHtmlElement(String type, Map<String, String> htmlElementAttrs, List<Shape> childShapes, List<Shape> shapes) {
         this.type = type;
@@ -30,15 +33,25 @@ public class ShapeHtmlElement {
         x = 0;
         y = 0;
         decorationElement = null;
+        bytes = null;
+        name = null;
     }
 
     public ShapeHtmlElement(Shape shape, List<Shape> shapes) {
         // this.shape = shape;
         this.x = shape.getX();
         this.y = shape.getY();
+        this.name = shape.getName();
         String[] arrLines = shape.getDescription().split("\n");
         if (arrLines.length > 0)
             this.type = arrLines[0].trim().toLowerCase();
+        if ((this.type == null || this.type.isBlank())) {
+            if (shape.getType() == ShapeType.text) {
+                this.type = "p";
+            } else if (shape.getType() == ShapeType.rectangle) {
+                this.type = "div";
+            }
+        }
 
         htmlElementAttrs = new HashMap<>();
         if (arrLines.length > 1) {
@@ -67,9 +80,9 @@ public class ShapeHtmlElement {
 
         childs = null;
         List<Shape> childShapes = shapes.stream()
-                .filter(s -> s.getParentName() != null && Objects.equals(s.getParentName(), shape.getName()))
+                .filter(s -> s.getParentName() != null && Objects.equals(s.getParentName(), name))
                 .collect(Collectors.toList());
-        htmlElementAttrs.putIfAbsent("id", shape.getName());
+        htmlElementAttrs.putIfAbsent("id", name);
         innerHtml = null;
         if (arrLines.length > 2)
             innerHtml = String.join("\n", Arrays.asList(arrLines).subList(2, arrLines.length));
@@ -101,17 +114,17 @@ public class ShapeHtmlElement {
                 0, workX, workY, workX, shape.getWidth(), shape.getHeight());
         switch (this.type) {
             case "input":
-                htmlElementAttrs.putIfAbsent("name", shape.getName());
+                htmlElementAttrs.putIfAbsent("name", name);
                 if (!shape.getText().isBlank())
                     htmlElementAttrs.putIfAbsent("value", shape.getText());
                 break;
             case "textarea":
-                htmlElementAttrs.putIfAbsent("name", shape.getName());
+                htmlElementAttrs.putIfAbsent("name", name);
                 innerHtml = shape.getText();
                 break;
             case "button":
                 type = "input";
-                htmlElementAttrs.putIfAbsent("name", shape.getName());
+                htmlElementAttrs.putIfAbsent("name", name);
                 if (!shape.getText().isBlank())
                     htmlElementAttrs.putIfAbsent("value", shape.getText());
                 htmlElementAttrs.putIfAbsent("type", "submit");
@@ -133,7 +146,9 @@ public class ShapeHtmlElement {
             case "dt":
             case "label":
                 innerHtml = String.format("<font size=\"%d\" color=\"%s\">\n%s\n</font>",
-                        Math.max(7, shape.getFontSize() / 7), intToRgbText(shape.getColor()), shape.getText());
+                        Math.min(7, Math.max(1, shape.getFontSize() != null ? shape.getFontSize() / 6 : 3)),
+                        intToRgbText(shape.getColor()),
+                        shape.getText());
                 // decorationElement = String.format("<font size=\"%d\" color=\"%s\">%%s</font>", shape.getFontSize(), intToRgbText(shape.getColor()));
                 break;
             case "pre":
@@ -181,6 +196,8 @@ public class ShapeHtmlElement {
                 htmlElementAttrs.putIfAbsent("width", shape.getWidth().toString());
                 htmlElementAttrs.putIfAbsent("height", shape.getHeight().toString());
                 htmlElementAttrs.putIfAbsent("border", shape.getStrokeWidth().toString());
+                URL imageFile = WindowHtml.class.getClassLoader().getSystemResource("empty.jpg");
+                htmlElementAttrs.putIfAbsent("src", imageFile != null ? imageFile.toString() : "file:empty.jpg");
                 break;
         }
 
@@ -193,9 +210,12 @@ public class ShapeHtmlElement {
             if (childs.isEmpty())
                 childs = null;
         }
+        bytes = shape.getImageBytes();
     }
 
     public static String intToRgbText(int colorInt) {
+        // if (colorInt == null)
+        //     return "#000000";
         int red = (colorInt >> 16) & 0xFF;
         int green = (colorInt >> 8) & 0xFF;
         int blue = colorInt & 0xFF;
@@ -215,4 +235,27 @@ public class ShapeHtmlElement {
         return resultHtml;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    public List<ShapeHtmlElement> getChilds() {
+        return childs;
+    }
+
+    public List<ShapeHtmlElement> getAllElements() {
+        List<ShapeHtmlElement> allChilds = new LinkedList<>();
+        allChilds.add(this);
+        if (childs != null)
+            childs.stream().map(ShapeHtmlElement::getAllElements).forEach(allChilds::addAll);
+        return allChilds;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

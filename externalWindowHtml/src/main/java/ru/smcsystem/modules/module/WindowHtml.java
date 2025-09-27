@@ -34,32 +34,51 @@ public class WindowHtml implements Module {
                 .collect(Collectors.toList());
 
         String shapeId = configurationTool.getSetting("shapeId").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("shapeId setting"));
+        Map<String, byte[]> mapImages = new HashMap<>();
         if (!shapeId.isBlank()) {
+            // configurationTool.loggerTrace("start shape generator");
             List<Shape> shapes = configurationTool.getInfo("decorationShapes").map(ModuleUtils::getObjectArray)
                     .filter(ModuleUtils::isArrayContainObjectElements)
                     .map(a -> ModuleUtils.convertFromObjectArray(a, Shape.class, true, true))
                     .orElse(List.of());
+            // configurationTool.loggerTrace("count shaps=" + shapes.size());
             Shape shape = shapes.stream().filter(s -> Objects.equals(s.getName(), shapeId)).findFirst().orElse(null);
             if (shape != null) {
-                String bodyChildsHtml = shapes.stream()
+                // try {
+                List<ShapeHtmlElement> elements = shapes.stream()
                         .filter(s -> Objects.equals(s.getParentName(), shapeId))
-                        .sorted(Comparator.comparing(s -> s.getX() * s.getY()))
+                        // .sorted(Comparator.comparing(s -> s.getX() * s.getY()))
+                        .sorted((s1, s2) -> Math.abs(s1.getY() - s2.getY()) < 6 ? s1.getX().compareTo(s2.getX()) : s1.getY().compareTo(s2.getY()))
                         .map(s -> new ShapeHtmlElement(s, shapes))
+                        .filter(s -> s.getType() != null)
+                        .collect(Collectors.toList());
+                configurationTool.loggerTrace("count root shapes " + elements.size());
+                elements.stream()
+                        .flatMap(e -> e.getAllElements().stream())
+                        .filter(e -> e.getBytes() != null)
+                        .forEach(e -> mapImages.put(e.getName(), e.getBytes()));
+                String bodyChildsHtml = elements.stream()
                         .map(ShapeHtmlElement::genHtml)
                         .collect(Collectors.joining("\n"));
                 if (!bodyChildsHtml.isBlank()) {
-                    if (configuration.contains("<body>")) {
+                    if (!configuration.isBlank() && configuration.contains("<body>")) {
                         int indexOf = configuration.indexOf("<body>");
                         if (indexOf != -1) {
                             configuration = configuration.substring(0, indexOf);
                         }
+                        configuration = configuration + String.format("<body>\n%s\n</body>\n</html>", bodyChildsHtml);
+                    } else {
+                        configuration = String.format("<html><head></head><body>\n%s\n</body>\n</html>", bodyChildsHtml);
                     }
-                    configuration = configuration + String.format("<body>\n%s\n</body>\n</html>", bodyChildsHtml);
                     configurationTool.loggerTrace(configuration);
                 }
+                // } catch (Throwable e) {
+                //     configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+                //     throw e;
+                // }
             }
         }
-        mainForm = new MainForm(title, configuration, width, height);
+        mainForm = new MainForm(title, configuration, width, height, mapImages);
     }
 
     @Override

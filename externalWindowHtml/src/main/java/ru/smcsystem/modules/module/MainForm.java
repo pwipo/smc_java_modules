@@ -36,20 +36,22 @@ public class MainForm {
     public JFrame frame;
 
     public enum ElementType {
-        SELECT, TEXTAREA, SUBMIT, RESET, IMAGE, CHECKBOX, RADIO, TEXT, PASSWORD, FILE, OTHER
+        SELECT, TEXTAREA, SUBMIT, RESET, IMAGE, CHECKBOX, RADIO, TEXT, PASSWORD, FILE, OTHER, IMG
     }
 
     public final Map<String, FormElement> elements;
     public final Map<String, Integer> elementsToEcId;
     private String configuration;
     private Instant lastCreatedElement;
+    private Map<String, byte[]> mapImages;
 
-    public MainForm(String title, String configuration, int width, int height) {
+    public MainForm(String title, String configuration, int width, int height, Map<String, byte[]> mapImages) {
         this.configurationTool = null;
         this.executionContextTool = null;
         frame = new JFrame(title);
         this.configuration = configuration;
         this.lastCreatedElement = null;
+        this.mapImages = mapImages;
 
         $$$setupUI$$$();
 
@@ -64,12 +66,12 @@ public class MainForm {
     }
 
     public static void main(String[] args) {
-        MainForm window = new MainForm("MainForm", "<html></html>", 300, 300);
+        MainForm window = new MainForm("MainForm", "<html></html>", 300, 300, Map.of());
         window.frame.setVisible(true);
     }
 
     private void init() {
-        editorPane.setEditorKit(new CompEditorKit(this)); // install our hook
+        editorPane.setEditorKit(new CompEditorKit(this, mapImages)); // install our hook
         clean();
     }
 
@@ -235,6 +237,14 @@ public class MainForm {
                         return getHtml(elementFirst, elementLast);
                     } catch (Exception ignore) {
                     }
+                }
+                case IMG: {
+                    try {
+                        return toJpg(((MyImageView) e.view).getMyImage());
+                    } catch (Exception ignore) {
+                        // ignore.printStackTrace();
+                    }
+                    return null;
                 }
             }
             return null;
@@ -425,6 +435,16 @@ public class MainForm {
                 }
                 break;
             }
+            case IMG: {
+                try {
+                    Image image = ImageIO.read(new ByteArrayInputStream((byte[]) value));
+                    ((MyImageView) e.view).setMyImage(image);
+                    editorPane.repaint();
+                } catch (Exception ignore) {
+                    // ignore.printStackTrace();
+                }
+                break;
+            }
         }
     }
 
@@ -522,6 +542,8 @@ public class MainForm {
                 ((JButton) e.component.getComponent(2)).addActionListener(e2 -> processEcCallWithData(id, ecId));
                 break;
             case OTHER:
+                break;
+            case IMG:
                 break;
         }
     }

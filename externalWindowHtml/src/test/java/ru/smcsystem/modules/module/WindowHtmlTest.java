@@ -31,13 +31,15 @@ public class WindowHtmlTest {
                                         "     </p>\n" +
                                         "     <div id=\"div_element\">\n" +
                                         "     </div>\n" +
+                                        "     <img id=\"image\" width=\"300\" height=\"300\">\n" +
+                                        "     </img>\n" +
                                         "   </body>\n" +
                                         " </html>\n"),
                                 "width", new Value(300),
                                 "height", new Value(100),
                                 "title", new Value("MainForm"),
-                                "ids", new Value("")
-
+                                "ids", new Value(""),
+                                "shapeId", new Value("")
                         ),
                         null,
                         null
@@ -86,6 +88,12 @@ public class WindowHtmlTest {
                                 "</table></td></tr></table>")),
                         new Message(new Value(-1)))))),
                 null, null, null, "default", "ADD_CHILD_ELEMENT");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(List.of(new Action(List.of(new Message(new Value("image")), new Message(new Value("image".getBytes())))))),
+                null, null, null, "default", "SET_VALUE");
         process.execute(executionContextTool);
         executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
 
@@ -204,7 +212,7 @@ public class WindowHtmlTest {
                             "     </p>\n" +
                             "   </body>\n" +
                             " </html>\n",
-                    300, 300);
+                    300, 300, Map.of());
             mainForm.frame.setVisible(true);
             while (mainForm.frame.isVisible()) {
                 try {

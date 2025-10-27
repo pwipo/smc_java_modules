@@ -38,6 +38,7 @@
         <module>internalValueTransformer</module>
         <module>internalValueTypeConverter</module>
         <module>externalWindowHtml</module>
+        <module>internalLinearDB</module>
     </modules>
 
     <groupId>ru.smcsystem.modules</groupId>

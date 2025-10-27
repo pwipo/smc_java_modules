@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>LinearDB</uuid>
+    <provider>java</provider>
+    <os/>
+    <arch/>
+    <ver>1.0.0</ver>
+    <apiVer>1.4.2</apiVer>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>https://www.shelfmc.ru</homePage>
+    <categories>DB, NoSQL</categories>
+    <className>ru.smcsystem.modules.module.LinearDBModule</className>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value><![CDATA[The program is free for use.
+Forbidden: changing the program code, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            ]]></value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value><![CDATA[Программа бесплатна для использования.
+Запрещено: изменение кода программы, а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            ]]></value>
+        </entry>
+    </copyrightAndLicense>
+    <date>27-10-2025</date>
+
+    <defaultSettings>
+        <value>
+            <name>fieldNameId</name>
+            <type>STRING</type>
+            <value>_id</value>
+            <subType>STRING</subType>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Имя поля ключа. Поле должно содержать уникальное целочисленное значение. Если поле отсутствует или пусто, то создается новое.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>The name of the key field. The field must contain a unique integer value. If the field is missing or empty, a new one is created.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>fieldNameDate</name>
+            <type>STRING</type>
+            <value>_date</value>
+            <subType>STRING</subType>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Имя поля времени. Поле должно содержать целочисленное значение. Если поле отсутствует или пусто, то создается новое содержащее текущее время в миллисекундах.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>The name of the time field. The field must contain an integer value. If the field is missing or empty, a new one is created containing the current time in milliseconds.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>indexes</name>
+            <type>STRING</type>
+            <value></value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Дополнительные индексы. Только по проиндексированным полям возможен поиск.
+Содержит строку в формате: имя_поля1=тип, имя_поля2=тип, ...
+Имя поля может быть вложенным, в этом случае имена разделены точкой.
+Тип: LONG, DOUBLE, STRING.
+Пример: value1=LONG, value2.innerValue2=DOUBLE, value3=STRING
+Кроме указанных полей, в индексы включены поля, указанные в fieldNameId и fieldNameDate.
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Additional indexes. Only indexed fields can be searched.
+Contains a string in the format: field_name1=type, field_name2=type, ...
+Field names can be nested; in this case, the names are separated by periods.
+Type: LONG, DOUBLE, STRING.
+Example: value1=LONG, value2.innerValue2=DOUBLE, value3=STRING
+In addition to the specified fields, the indexes include the fields specified in fieldNameId and fieldNameDate.
+                    ]]></value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <types>
+        <type t="insert" minS="1" maxS="1">
+            <description>
+                <entry k="en" v="Insert new objects (1 or more). The _id (fieldNameId) field must be absent."/>
+                <entry k="ru" v="Вставить новые объекты (1 и более). Поле _id (fieldNameId) должно отсутствовать."/>
+            </description>
+            <sources>
+                <source>
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"value1":1, "value2":"v1"}, {"value1":2, "value2":"v2"}]]]></value>
+                            <description>
+                                <entry k="ru" v="Массив объектов, которые надо добавить. Каждый объект - отдельный элемент."/>
+                                <entry k="en" v="An array of objects to be added. Each object is a separate element."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                    <value><![CDATA[[1,2]]]></value>
+                </element>
+            </output>
+            <ecs/>
+        </type>
+        <type t="update" minS="1" maxS="1">
+            <description>
+                <entry k="en" v="Overwrites documents (1 or more). The _id (fieldNameId) field must exist in them. Parameters are similar to insert."/>
+                <entry k="ru" v="Перезаписывает документы (1 и более). Поле _id (fieldNameId) в них должно существовать. Параметры аналогичны insert."/>
+            </description>
+            <sources>
+                <source>
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"value1":1, "value2":"v1", "_id":1}, {"value1":2, "value2":"v2", "_id":2}]]]></value>
+                            <description>
+                                <entry k="ru" v="Массив объектов, которые надо сохранить. Каждый объект - отдельный элемент."/>
+                                <entry k="en" v="An array of objects to be save. Each object is a separate element."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                    <value><![CDATA[[1,2]]]></value>
+                </element>
+            </output>
+            <ecs/>
+        </type>
+        <type t="delete" minS="1" maxS="1">
+            <description>
+                <entry k="en" v="Deletes objects (1 or more) by id (the field is specified by the fieldNameId setting)."/>
+                <entry k="ru" v="Удаляет объекты (1 и более) по id (поле задано настройкой fieldNameId)."/>
+            </description>
+            <sources>
+                <source>
+                    <elements>
+                        <element t="VALUE" c="-1" vt="LONG" v="1">
+                            <description>
+                                <entry k="en" v="Object identifier (the field is specified by the fieldNameId setting, for example _id)."/>
+                                <entry k="ru" v="Идентификатор объекта (поле задано настройкой fieldNameId, например _id)."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                    <value><![CDATA[[1]]]></value>
+                </element>
+            </output>
+            <ecs/>
+        </type>
+        <type t="find" minS="1" maxS="1">
+            <description>
+                <entry k="en" v="Searches for objects with given parameters, accepts selection and sorting parameters."/>
+                <entry k="ru" v="Ищет объекты с заданными параметрами, принимает параметры выборки и сортировки."/>
+            </description>
+            <sources>
+                <source>
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"filter":{"t":"<=", "f":"value1", "v":2}, "sort":{"f":"value1", "t":"asc"}, "skip":0, "limit":10}]]]></value>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value><![CDATA[Формат объекта:
+filter - фильтр - объект - опционален
+sort - сортировка - объект - по умолчанию сортировка по идентификатору
+skip - начальное смещение - число - значение по умолчанию - 0
+limit - максимальное количество элементов в ответе - число - значение по умолчанию - 10
+
+Фильтр - отвечает за фильтрацию данных, поля зависят от типа фильтра, так же, некоторые фильтры могут содержать другие фильтры.
+Все фильтры содержат поле t - определяющий тип фильтра, типы фильтров:
+    логическое И
+        значение: and или &&
+        поля: p1 и p2. Они содержат другие фильтры
+    логическое ИЛИ
+        значение: or или ||
+        поля: p1 и p2. Они содержат другие фильтры
+    логическое НЕ
+        значение: not" или !
+        поля: p1. Они содержат другие фильтры
+    равенство
+        значение: "eq" или "="
+        поля: f - имя поля, v - значение
+    меньше
+        значение: "lt" или "<"
+        поля аналогичны равенству
+    больше
+        значение: "gt" или ">"
+        поля аналогичны равенству
+    меньше или равно
+        значение: "le" или "<="
+        поля аналогичны равенству
+    больше или равно
+        значение: "ge" или ">="
+        поля аналогичны равенству
+
+Сортировка содержит объект с полями: f - имя поля, t - тип. Значения типа: asc и desc. По умолчанию asc.
+                                    ]]></value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value><![CDATA[Object format:
+filter - filter - object - optional
+sort - sorting - object - by default, sort by ID
+skip - starting offset - number - default value - 0
+limit - maximum number of elements in the response - number - default value - 10
+
+Filter - is responsible for filtering data. The fields depend on the filter type. Some filters can also contain other filters.
+All filters contain a t field, which determines the filter type. Filter types:
+    logical AND
+        value: and or &&
+        fields: p1 and p2. These contain other filters.
+    logical OR
+        value: or or ||
+        fields: p1 and p2. They contain other filters
+    logical NOT
+        value: not" or !
+        fields: p1. They contain other filters
+    equality
+        value: "eq" or "="
+        fields: f - field name, v - value
+    less than
+        value: "lt" or "<"
+        fields are similar to equality
+    greater than
+        value: "gt" or ">"
+        fields are similar to equality
+    less than or equal to
+        value: "le" or "<="
+        fields are similar to equality
+    greater than or equal to
+        value: "ge" or ">="
+        fields are similar to equality
+
+Sorting contains an object with fields: f - field name, t - type. Type values: asc and desc. Defaults to asc.
+                                    ]]></value>
+                                </entry>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                    <value><![CDATA[[{"value1":1, "value2":"v1", "_id":1}, {"value1":2, "value2":"v2", "_id":2}]]]></value>
+                </element>
+            </output>
+            <ecs/>
+        </type>
+        <type t="count" minS="1" maxS="1">
+            <description>
+                <entry k="en" v="Similar to find on a query (filter), returns the number of objects."/>
+                <entry k="ru" v="Аналогичен find по запросу (фильтру), возвращает количество объектов."/>
+            </description>
+            <sources>
+                <source>
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"filter":{"t":"<=", "f":"value1", "v":2}}]]]></value>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value><![CDATA[Формат объекта:
+filter - фильтр - объект - опционален
+Формат фильтра смотри в описании контекста find.
+                                    ]]></value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value><![CDATA[Object format:
+filter - filter object - optional
+See the find context description for the filter format.
+                                    ]]></value>
+                                </entry>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="INTEGER">
+                    <value>2</value>
+                </element>
+            </output>
+            <ecs/>
+        </type>
+        <type t="delete_where" minS="1" maxS="1">
+            <description>
+                <entry k="en" v="Removes objects, uses a filter, similar to find."/>
+                <entry k="ru" v="Удаляет объекты, использует фильтр, аналогично find."/>
+            </description>
+            <sources>
+                <source>
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"filter":{"t":"<=", "f":"value1", "v":2}}]]]></value>
+                            <description>
+                                <entry>
+                                    <key>ru</key>
+                                    <value><![CDATA[Формат объекта:
+filter - фильтр - объект - опционален
+Формат фильтра смотри в описании контекста find.
+                                    ]]></value>
+                                </entry>
+                                <entry>
+                                    <key>en</key>
+                                    <value><![CDATA[Object format:
+filter - filter object - optional
+See the find context description for the filter format.
+                                    ]]></value>
+                                </entry>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="INTEGER">
+                    <value>2</value>
+                </element>
+            </output>
+            <ecs/>
+        </type>
+    </types>
+
+    <useStorage>true</useStorage>
+    <threadSafe>true</threadSafe>
+    <privateUsage>false</privateUsage>
+    <useVariables>true</useVariables>
+    <useManagement>false</useManagement>
+    <defaultExecutionContext/>
+
+    <description>
+        <entry k="en" v="This component is a NOSQL object DBMS for the LinearDB database."/>
+        <entry k="ru" v="Деталь представляет собой объектную NOSQL СУБД к базе данных LinearDB."/>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value><![CDATA[This component is a NOSQL object DBMS for the LinearDB database.
+DB page - https://github.com/pwipo/LinearDB
+Works with ObjectElement objects (OBJECT_ARRAY type).
+Allows inserting, updating, deleting, and searching objects with custom fields.
+Only the fields specified by the fieldNameId and fieldNameDate settings are required. If they don't exist, they are created.
+            ]]></value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value><![CDATA[Деталь представляет собой объектную NOSQL СУБД к базе данных LinearDB.
+Страница БД - https://github.com/pwipo/LinearDB
+Работает с объектами ObjectElement (тип OBJECT_ARRAY).
+Позволяет вставлять, изменять, удалять и искать объекты с произвольными полями.
+Обязательны лишь поля, заданные настройками fieldNameId и fieldNameDate. Если их нет, то создаются.
+            ]]></value>
+        </entry>
+    </help>
+
+    <examples/>
+    <icon><![CDATA[iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAACgklEQVR4nO2ay2oUQRSGP0FBN3FmXCdmFaPxATS6EMnGB9DoC0SD8waarREJqDt1IS69QkhcCMkYTOIzCK7EhRcyDAluEsWMFPwNRTNkqmequytSP9Rius91uqr/U6ca+sdJ4BowAzwD1oHPwFegBfzRaOmaubcm2RnpjlICjgHTwCvgB9D2NIytl8AN+cgNl4A3wE4qgJ/APHAPmAIu6h8+DlSBQxpVXRuVzJR05mXDtrkjX8anN5zVdEmc/AWW9M+d8uTjgGxNA8vykfhbVww94wjwBNiVwSZwGxgkfwxq/TTl28TwEDiY1dCA9RS2gTvAUYpHBZi1pvM7xeb8mN9a8/8c5eO8tY4WFWNXXJXCL2CEcDCimExsV1wUViRsFl5ouKnYGi7CWxI28zM0VBXbpotwO+BEalZ8XZEImscYGuq9JBLyYm+7KNilwgZwgfIx3qGu64pEcNmqe2ZLWjMV4K5FiEu9JGLKgQfW76bKhqH842coVaKYcV8xZU4kgWH2j6misaGXwZgry3aBsXFaNt93KBrH94jPOZEEpqR+rdorvY4WgDlVxBOqZIc7lPHDSn5CsnPS3UjZ3JavTmV834nY7/LrwAvgu8eN1TfgufYptT7iyy4onFB9dgt4CqwCn4Av2t7+1mjpmrn3QbJGZzLja76dNZHI7DmiHpmdyOxeUInMTmR2IrMTmX1vRGYvAPXI7ERm94JKZHYisxOZnZyYfSvjVrfIPXstSzd+ZR80sRsuwpP7oIl92bXrt2idIZrzu5DOEBeydDcH9JlFaE3s1SynuvY5++PUOXtZTexd4BFw2PeXD0U2sdeAM3hEKE1sbyi7iZ0bim5i81/jHwn5KgDx2BeAAAAAAElFTkSuQmCC]]></icon>
+
+</properties>

@@ -154,6 +154,19 @@ public class LinearDBModuleTest {
                         List.of(
                                 new Action(
                                         List.of(
+                                                new Message(new Value(10))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "apply_log", "apply_log");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
                                                 new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("filter", new ObjectElement(
                                                         new ObjectField("t", "<="), new ObjectField("f", "value1"), new ObjectField("v", 100)))))))
                                         ),

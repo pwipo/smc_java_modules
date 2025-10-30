@@ -137,6 +137,9 @@ public class LinearDBModule implements Module {
                 case DELETE_WHERE:
                     deleteWhere(configurationTool, executionContextTool, messagesList);
                     break;
+                case APPLY_LOG:
+                    applyLog(configurationTool, executionContextTool, messagesList);
+                    break;
             }
         });
     }
@@ -321,6 +324,19 @@ public class LinearDBModule implements Module {
         ));
     }
 
+    private void applyLog(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messageList) throws IOException {
+        long maxLogFile = ModuleUtils.toNumber(messageList.get(0).poll()).longValue();
+        File logFile = new File(configurationTool.getWorkDirectory(), "db.log");
+        long logFileSize = logFile.length();
+
+        if (logFileSize < maxLogFile)
+            return;
+
+        configurationTool.loggerTrace(String.format("applyLog maxLogFile=%d logFileSize=%d", maxLogFile, logFileSize));
+        db.close();
+        db.open();
+    }
+
     private List<ObjectField> findFields(ObjectElement objectElement, List<Map.Entry<String[], ObjectType>> fieldsIndexed) {
         if (objectElement == null || objectElement.getFields().isEmpty() || fieldsIndexed == null || fieldsIndexed.isEmpty())
             return List.of();
@@ -387,7 +403,7 @@ public class LinearDBModule implements Module {
     }
 
     private enum Type {
-        INSERT, UPDATE, DELETE, FIND, COUNT, DELETE_WHERE
+        INSERT, UPDATE, DELETE, FIND, COUNT, DELETE_WHERE, APPLY_LOG
     }
 
 }

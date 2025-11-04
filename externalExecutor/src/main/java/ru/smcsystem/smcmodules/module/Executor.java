@@ -1,8 +1,7 @@
 package ru.smcsystem.smcmodules.module;
 
 import org.apache.commons.lang3.StringUtils;
-import ru.smcsystem.api.dto.IAction;
-import ru.smcsystem.api.enumeration.ValueType;
+import ru.smcsystem.api.dto.IMessage;
 import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
@@ -11,16 +10,14 @@ import ru.smcsystem.smc.utils.ModuleUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Executor implements Module {
-
     private ProcessBuilder pb;
     private String encoding;
     private Integer maxWorkTime;
@@ -66,38 +63,35 @@ public class Executor implements Module {
 
     @Override
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
-        if (executionContextTool.countSource() > 0) {
-            Stream.iterate(0, n -> n + 1)
-                    .limit(executionContextTool.countSource())
-                    .flatMap(i -> executionContextTool.getMessages(i).stream())
-                    .map(IAction::getMessages)
-                    .filter(Objects::nonNull)
-                    .filter(messages -> !messages.isEmpty())
-                    .filter(messages -> ValueType.STRING.equals(messages.get(0).getType()))
-                    .forEach(messages -> {
-                        ProcessBuilder processBuilder = new ProcessBuilder(messages.stream()
-                                .map(m -> m.getValue().toString())
-                                .collect(Collectors.toList()));
-                        String command = (String) messages.get(0).getValue();
-                        if (command.contains("\\") || command.contains("/")) {
-                            File file = new File(command);
-                            if (file.exists() && file.isFile())
-                                processBuilder.directory(file.getParentFile());
-                        }
-                        execute(configurationTool, executionContextTool, processBuilder);
-                    });
-        } else {
-            if (pb == null)
-                throw new ModuleException("commandPath not set");
-            execute(configurationTool, executionContextTool, pb);
-        }
+        ModuleUtils.processMessagesAll(configurationTool, executionContextTool, (unused, messagesList) -> {
+            Type type = Type.valueOf(executionContextTool.getType().toUpperCase());
+            boolean needWait = type == Type.DEFAULT;
+            if (!messagesList.isEmpty()) {
+                for (LinkedList<IMessage> messages : messagesList) {
+                    if (messages.isEmpty() || !ModuleUtils.isString(messages.peek()))
+                        continue;
+                    ProcessBuilder processBuilder = new ProcessBuilder(messages.stream()
+                            .map(ModuleUtils::toString)
+                            .collect(Collectors.toList()));
+                    String command = ModuleUtils.toString(messages.poll());
+                    if (command.contains("\\") || command.contains("/")) {
+                        File file = new File(command);
+                        if (file.exists() && file.isFile())
+                            processBuilder.directory(file.getParentFile());
+                    }
+                    execute(configurationTool, executionContextTool, processBuilder, needWait);
+                }
+            } else {
+                if (pb == null)
+                    throw new ModuleException("commandPath not set");
+                execute(configurationTool, executionContextTool, pb, needWait);
+            }
+        });
     }
 
-    private void execute(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, ProcessBuilder processBuilder) {
-        Process process = null;
+    private void execute(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, ProcessBuilder processBuilder, boolean needWait) throws IOException {
+        Process process = processBuilder.start();
         try {
-            process = processBuilder.start();
-
             Integer exitValue = null;
             long startTime = System.currentTimeMillis();
             do {
@@ -109,34 +103,29 @@ public class Executor implements Module {
                     exitValue = process.exitValue();
                 } catch (Exception ignore) {
                 }
-            } while (exitValue == null && !executionContextTool.isNeedStop() &&
+            } while (needWait && exitValue == null && !executionContextTool.isNeedStop() &&
                     (maxWorkTime == -1 || maxWorkTime > (System.currentTimeMillis() - startTime)));
-
+            if (needWait && process.isAlive())
+                process.destroy();
             executionContextTool.addMessage(exitValue != null ? exitValue : -1);
         } catch (Exception e) {
             // throw new ModuleException("error", e);
             executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
             configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
-            if (process != null && process.isAlive())
+            if (process.isAlive())
                 process.destroy();
         }
-        if (process != null) {
-            try {
-                try (InputStreamReader isr = new InputStreamReader(process.getInputStream(), encoding); BufferedReader br = new BufferedReader(isr)) {
-                    String result = br.lines().collect(Collectors.joining("\n"));
-                    if (StringUtils.isNotBlank(result))
-                        executionContextTool.addMessage(result);
-                }
+        if (needWait) {
+            try (InputStreamReader isr = new InputStreamReader(process.getInputStream(), encoding); BufferedReader br = new BufferedReader(isr)) {
+                String result = br.lines().collect(Collectors.joining("\n"));
+                if (StringUtils.isNotBlank(result))
+                    executionContextTool.addMessage(result);
+            }
 
-                try (InputStreamReader isr = new InputStreamReader(process.getErrorStream(), encoding); BufferedReader br = new BufferedReader(isr)) {
-                    String result = br.lines().collect(Collectors.joining("\n"));
-                    if (StringUtils.isNotBlank(result))
-                        executionContextTool.addError(result);
-                }
-            } catch (Exception e) {
-                // throw new ModuleException("error", e);
-                executionContextTool.addError(ModuleUtils.getErrorMessageOrClassName(e));
-                configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+            try (InputStreamReader isr = new InputStreamReader(process.getErrorStream(), encoding); BufferedReader br = new BufferedReader(isr)) {
+                String result = br.lines().collect(Collectors.joining("\n"));
+                if (StringUtils.isNotBlank(result))
+                    executionContextTool.addError(result);
             }
         }
     }
@@ -148,4 +137,7 @@ public class Executor implements Module {
         maxWorkTime = null;
     }
 
+    enum Type {
+        DEFAULT, LAUNCHER
+    }
 }

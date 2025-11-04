@@ -23,7 +23,8 @@ public class ExecutorTest {
                                 "workDirectory", new Value(" "),
                                 "args", new Value("test1::test2::test3"),
                                 "encoding", new Value("cp866"),
-                                "maxWorkTime", new Value(-1)
+                                "maxWorkTime", new Value(-1),
+                                "sleepTimeInterval", new Value(50)
                         ),
                         null,
                         null
@@ -70,7 +71,8 @@ public class ExecutorTest {
                                 "workDirectory", new Value(" "),
                                 "args", new Value(" "),
                                 "encoding", new Value("cp866"),
-                                "maxWorkTime", new Value(-1)
+                                "maxWorkTime", new Value(-1),
+                                "sleepTimeInterval", new Value(50)
                         ),
                         null,
                         null
@@ -105,7 +107,8 @@ public class ExecutorTest {
                                 "workDirectory", new Value("C:\\Program Files\\MetaTrader 5"),
                                 "args", new Value("/config:C:\\tmp\\auto_mt5.ini"),
                                 "encoding", new Value("cp866"),
-                                "maxWorkTime", new Value(-1)
+                                "maxWorkTime", new Value(-1),
+                                "sleepTimeInterval", new Value(50)
                         ),
                         null,
                         null
@@ -114,6 +117,32 @@ public class ExecutorTest {
         );
         process.start();
         ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(null, null, null);
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        process.stop();
+    }
+
+    @Test
+    public void process5() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "commandPath", new Value("C:\\Jts_std_2\\tws.exe"),
+                                "workDirectory", new Value("C:\\Jts_std_2"),
+                                "args", new Value("username=craigl454::password=test54321"),
+                                "encoding", new Value("UTF-8"),
+                                "maxWorkTime", new Value(-1),
+                                "sleepTimeInterval", new Value(50)
+                        ),
+                        null,
+                        null
+                ),
+                new Executor()
+        );
+        process.start();
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(null, null, null, null, "launcher", "launcher");
         process.execute(executionContextTool);
         executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
         process.stop();

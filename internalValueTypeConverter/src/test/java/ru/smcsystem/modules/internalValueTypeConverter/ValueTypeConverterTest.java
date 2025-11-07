@@ -1088,4 +1088,118 @@ public class ValueTypeConverterTest {
         process.stop();
     }
 
+    @Test
+    public void testToLong() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "type", new Value(36),
+                                "charsetName", new Value(ValueType.STRING, "UTF-8"),
+                                "param", new Value(ValueType.STRING, "16")
+
+                        ),
+                        null,
+                        null
+                ),
+                new ValueTypeConverter()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value("4d0d08ada45f9dde1e99cad9"))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null,
+                null);
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        process.stop();
+    }
+
+    @Test
+    public void testLong() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "type", new Value(36),
+                                "charsetName", new Value(ValueType.STRING, "UTF-8"),
+                                "param", new Value(ValueType.STRING, "16")
+
+                        ),
+                        null,
+                        null
+                ),
+                new ValueTypeConverter()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(125))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "ec", "longToStringHex");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(125))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "ec", "longToStringOctet");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(300)),
+                                                new Message(new Value(200))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "ec", "twoIntToLong");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(13107500L))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "ec", "longToTwoInt");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        process.stop();
+    }
+
+
 }

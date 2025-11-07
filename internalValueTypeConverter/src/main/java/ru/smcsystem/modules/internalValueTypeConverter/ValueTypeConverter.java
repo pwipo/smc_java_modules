@@ -69,10 +69,10 @@ public class ValueTypeConverter implements Module {
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
-        Integer typeSetting = (Integer) configurationTool.getSetting("type").orElseThrow(() -> new ModuleException("type setting")).getValue();
-        type = Type.values()[typeSetting - 1];
+        type = configurationTool.getSetting("type").map(ModuleUtils::getNumber).map(Number::intValue).map(n -> Type.values()[n - 1])
+                .orElseThrow(() -> new ModuleException("type setting"));
         // charsetName = (String) configurationTool.getSetting("charsetName").orElseThrow(() -> new ModuleException("charsetName setting")).getValue();
-        param = (String) configurationTool.getSetting("param").orElseThrow(() -> new ModuleException("param setting")).getValue();
+        param = configurationTool.getSetting("param").map(ModuleUtils::getString).orElseThrow(() -> new ModuleException("param setting"));
         // start = null;
         // end = null;
         lParam = null;
@@ -98,6 +98,8 @@ public class ValueTypeConverter implements Module {
             strings = split.length - 1 == lParam ? Arrays.asList(Arrays.copyOfRange(split, 1, split.length)) : null;
         } else if (Type.stringToBytes.equals(type) || Type.bytesToString.equals(type)) {
             charset = StringUtils.isNotBlank(param) ? Charset.forName(param) : charset;
+        } else if (Type.stringToLongRadix.equals(type)) {
+            lParam = !param.isBlank() ? NumberUtils.toLong(param.trim()) : 16;
         }
     }
 
@@ -111,13 +113,15 @@ public class ValueTypeConverter implements Module {
     public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
         if (Objects.equals(executionContextTool.getType(), "default")) {
             for (int i = 0; i < executionContextTool.countSource(); i++)
-                process(executionContextTool, configurationTool, executionContextTool.getMessages(i), type);
+                ModuleUtils.executor(configurationTool, executionContextTool, i, executionContextTool.getMessages(i),
+                        (n, v) -> process(executionContextTool, configurationTool, v, type));
         } else {
             Type type = Type.valueOf(executionContextTool.getType());
             if (type != this.type)
                 updateSettings();
             List<IAction> actions = executionContextTool.countSource() > 0 ? executionContextTool.getMessages(0) : null;
-            process(executionContextTool, configurationTool, actions, type);
+            ModuleUtils.executor(configurationTool, executionContextTool, 0, actions,
+                    (n, v) -> process(executionContextTool, configurationTool, v, type));
         }
     }
 
@@ -222,6 +226,21 @@ public class ValueTypeConverter implements Module {
             case fromCsvToValuesNew:
                 fromCsvToValues(executionContextTool, actions, true);
                 break;
+            case twoIntToLong:
+                twoIntToLong(executionContextTool, actions);
+                break;
+            case longToTwoInt:
+                longToTwoInt(executionContextTool, actions);
+                break;
+            case stringToLongRadix:
+                stringToLongRadix(executionContextTool, actions);
+                break;
+            case longToStringHex:
+                longToString(executionContextTool, actions, 3);
+                break;
+            case longToStringOctet:
+                longToString(executionContextTool, actions, 2);
+                break;
         }
 
     }
@@ -302,7 +321,7 @@ public class ValueTypeConverter implements Module {
                 .flatMap(s -> Arrays.stream(s.split("\\s+")))
                 .filter(s -> !s.isBlank())
                 .filter(NumberUtils::isCreatable)
-                .forEach(v -> executionContextTool.addMessage(!StringUtils.contains(v, ".") ? NumberUtils.toLong(v) : (long) NumberUtils.toDouble(v))));
+                .forEach(v -> executionContextTool.addMessage(!StringUtils.contains(v, ".") ? NumberUtils.toLong(v) : Double.valueOf(NumberUtils.toDouble(v)).longValue())));
     }
 
     private void stringToDouble(ExecutionContextTool executionContextTool, List<IAction> actions) {
@@ -1240,6 +1259,70 @@ public class ValueTypeConverter implements Module {
                 .collect(Collectors.toList()));
     }
 
+    private void twoIntToLong(ExecutionContextTool executionContextTool, List<IAction> actions) {
+        actions.forEach(a -> {
+            List<Integer> numbers = a.getMessages().stream()
+                    .filter(ModuleUtils::isNumber)
+                    .map(ModuleUtils::getNumber)
+                    .map(Number::intValue)
+                    .collect(Collectors.toList());
+            if (numbers.size() < 2)
+                return;
+            int first = numbers.get(0);
+            int second = numbers.get(1);
+            executionContextTool.addMessage((first & 0xffff) | ((second & 0xffff) << 16));
+        });
+    }
+
+    private void longToTwoInt(ExecutionContextTool executionContextTool, List<IAction> actions) {
+        actions.forEach(a -> a.getMessages().stream()
+                .filter(ModuleUtils::isNumber)
+                .map(ModuleUtils::getNumber)
+                .map(Number::longValue)
+                .forEach(n -> {
+                    executionContextTool.addMessage((int) (n & 0xffff));
+                    executionContextTool.addMessage((int) ((n >> 16) & 0xffff));
+                }));
+    }
+
+    private void stringToLongRadix(ExecutionContextTool executionContextTool, List<IAction> actions) {
+        int radix = lParam != null ? lParam.intValue() : 16;
+        actions.forEach(a -> a.getMessages().stream()
+                .filter(ModuleUtils::isString)
+                .map(ModuleUtils::getString)
+                // .map(s -> s.replaceAll("[^\\d\\s.-]", ""))
+                // .flatMap(s -> Arrays.stream(s.split("\\s+")))
+                .filter(s -> !s.isBlank())
+                // .filter(NumberUtils::isCreatable)
+                .map(String::trim)
+                .forEach(v -> {
+                    try {
+                        executionContextTool.addMessage(Long.parseLong(v, radix));
+                    } catch (NumberFormatException e) {
+                        executionContextTool.addMessage(new BigInteger(v, radix));
+                    }
+                }));
+    }
+
+    private void longToString(ExecutionContextTool executionContextTool, List<IAction> actions, int type) {
+        actions.forEach(a -> a.getMessages().stream()
+                .filter(ModuleUtils::isNumber)
+                .map(ModuleUtils::getNumber)
+                .map(v -> {
+                    switch (type) {
+                        case 1:
+                            return Long.toBinaryString(v.longValue());
+                        case 2:
+                            return Long.toOctalString(v.longValue());
+                        case 3:
+                            return Long.toHexString(v.longValue());
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .forEach(executionContextTool::addMessage));
+    }
+
     private enum Type {
         bytesToNumbers,
         numbersToBytes,
@@ -1273,7 +1356,12 @@ public class ValueTypeConverter implements Module {
         toXmlSimple,
         autoNew,
         toBoolean,
-        fromCsvToValuesNew
+        fromCsvToValuesNew,
+        twoIntToLong,
+        longToTwoInt,
+        stringToLongRadix,
+        longToStringHex,
+        longToStringOctet,
     }
 
 }

@@ -10,25 +10,25 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.internalValueTypeConverter.ValueTypeConverter</className>
-    <ver>1.2.6</ver>
+    <ver>1.2.7</ver>
     <apiVer>1.4.0</apiVer>
-    <date>20-10-2023</date>
+    <date>07-12-2025</date>
 
     <defaultSettings>
         <value>
@@ -68,12 +68,17 @@ The program is supplied as is. For problems arising during the operation or inst
                 <value>31</value>
                 <value>32</value>
                 <value>33</value>
+                <value>34</value>
+                <value>35</value>
+                <value>36</value>
+                <value>37</value>
+                <value>38</value>
             </validValues>
             <value>5</value>
             <description>
                 <entry>
                     <key>en</key>
-                    <value>The type of conversion:
+                    <value><![CDATA[The type of conversion:
 1 - from byte array to byte digits.
 2 - from digits to byte array.
 3 - from string to long integer. if the string is not converted to a number or not a string, then nothing is returned. there can be many values on one line. filters non-numeric characters.
@@ -110,11 +115,16 @@ The program is supplied as is. For problems arising during the operation or inst
 31 - similar to 10, adds the use of null fields and the BOOLEAN type.
 32 - Converts everything to BOOLEAN. if there is no data, then it is converted to false.
 33 - similar to 11, adds the use of null fields and the BOOLEAN type.
-                    </value>
+34 - Combines two two-byte integers into a single four-byte integer (Long). This is analogous to MAKELONG.
+35 - Splits a single four-byte integer (Long) into two two-byte integers. This is analogous to LOWORD and HIWORD.
+36 - Converts a string to a number (Long or BigInteger). The radix is passed in the param setting; the default is 16.
+37 - Converts an integer (Long) to a string in hex format.
+38 - Converts an integer (Long) to a string in octet format.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>ru</key>
-                    <value>Тип конвертации:
+                    <value><![CDATA[Тип конвертации:
 1 - из байтового массива в байтовые цифры.
 2 - из цифр в байтовый массив.
 3 - из строки в целое типа лонг. если строка не переводится в число или не строка, то ничего не возвращает. может быть много значений в одной строке. фильтрует не цифровые символы.
@@ -151,7 +161,12 @@ The program is supplied as is. For problems arising during the operation or inst
 31 - аналогичен 10, добавляется использование null полей и типа BOOLEAN.
 32 - конвертирует все в тип BOOLEAN. если нет данных, то это конвертируется в false.
 33 - аналогичен 11, добавляется использование null полей и типа BOOLEAN.
-                    </value>
+34 - два двухбайтовых числа (Integer) объединить в одно четырех байтовое (Long). Является аналогом MAKELONG.
+35 - разбивает одно четырех байтовое число (Long) на два двухбайтовых (Integer). Является аналогом LOWORD и HIWORD.
+36 - конвертирует строку в число (Long или BigInteger). Основание (radix) передается в настройке param, по умолчанию 16.
+37 - конвертирует целое число (Long) в строку в hex формате.
+38 - конвертирует целое число (Long) в строку в octet формате.
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -817,6 +832,67 @@ The program is supplied as is. For problems arising during the operation or inst
                                 </element>
                             </elements>
                         </element>
+                        <element t="IF" vt="INTEGER" v="34">
+                            <checkSetting>type</checkSetting>
+                            <elements>
+                                <element t="VALUE_ANY" vt="INTEGER" v="300">
+                                    <description>
+                                        <entry k="ru" v="Двухбайтовое число, нижнее слово."/>
+                                        <entry k="en" v="Two-byte number, low word."/>
+                                    </description>
+                                </element>
+                                <element t="VALUE_ANY" vt="INTEGER" v="200">
+                                    <description>
+                                        <entry k="ru" v="Двухбайтовое число, верхнее слово."/>
+                                        <entry k="en" v="Two-byte number, high word."/>
+                                    </description>
+                                </element>
+                            </elements>
+                        </element>
+                        <element t="IF" vt="INTEGER" v="35">
+                            <checkSetting>type</checkSetting>
+                            <elements>
+                                <element t="VALUE" c="-1" vt="LONG" v="13107500">
+                                    <description>
+                                        <entry k="ru" v="Четырехбайтовое число, содержащее 2 двухбайтовых."/>
+                                        <entry k="en" v="A four-byte number containing two two-byte numbers."/>
+                                    </description>
+                                </element>
+                            </elements>
+                        </element>
+                        <element t="IF" vt="INTEGER" v="36">
+                            <checkSetting>type</checkSetting>
+                            <elements>
+                                <element t="VALUE" c="-1" vt="STRING" v="4d0d08ada45f9dde1e99cad9">
+                                    <description>
+                                        <entry k="ru" v="Строка содержит значение целого числа, основание задано настройкой param, по умолчанию 16."/>
+                                        <entry k="en" v="The string contains an integer value, the base is specified by the param setting, default is 16."/>
+                                    </description>
+                                </element>
+                            </elements>
+                        </element>
+                        <element t="IF" vt="INTEGER" v="37">
+                            <checkSetting>type</checkSetting>
+                            <elements>
+                                <element t="VALUE" c="-1" vt="LONG" v="125">
+                                    <description>
+                                        <entry k="ru" v="Число для конвертации в строку в формате hex."/>
+                                        <entry k="en" v="Number to convert to string in hex format."/>
+                                    </description>
+                                </element>
+                            </elements>
+                        </element>
+                        <element t="IF" vt="INTEGER" v="38">
+                            <checkSetting>type</checkSetting>
+                            <elements>
+                                <element t="VALUE" c="-1" vt="LONG" v="125">
+                                    <description>
+                                        <entry k="ru" v="Число для конвертации в строку в формате octet."/>
+                                        <entry k="en" v="Number to convert to string in octet format."/>
+                                    </description>
+                                </element>
+                            </elements>
+                        </element>
                     </elements>
                 </source>
             </sources>
@@ -1284,19 +1360,19 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>авто конвертация:
+                    <value><![CDATA[авто конвертация:
 если строка - конвертирует в Long, Double или массив байт (если строка в формате Base64)
 если байты - конвертирует в строку (формат Base64)
 иначе конвертирует в строку
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>auto converting:
+                    <value><![CDATA[auto converting:
 if string then convert to Long, Double or bytes (if the string is in Base64 format)
 if bytes convert to string (using Base64 format)
 else convert to string
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
             <minCountSources>1</minCountSources>
@@ -2467,6 +2543,178 @@ else convert to string
                 </element>
             </output>
         </type>
+        <type t="twoIntToLong" minS="1" maxS="-1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>два двухбайтовых числа (Integer) объединить в одно четырех байтовое (Long). Является аналогом MAKELONG.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Combines two two-byte integers into a single four-byte integer (Long). This is analogous to MAKELONG.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE_ANY" vt="INTEGER" v="300">
+                            <description>
+                                <entry k="ru" v="Двухбайтовое число, нижнее слово."/>
+                                <entry k="en" v="Two-byte number, low word."/>
+                            </description>
+                        </element>
+                        <element t="VALUE_ANY" vt="INTEGER" v="200">
+                            <description>
+                                <entry k="ru" v="Двухбайтовое число, верхнее слово."/>
+                                <entry k="en" v="Two-byte number, high word."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="-1" vt="LONG" v="13107500">
+                    <description>
+                        <entry k="ru" v="Четырехбайтовое число, содержащее 2 двухбайтовых."/>
+                        <entry k="en" v="A four-byte number containing two two-byte numbers."/>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type t="longToTwoInt" minS="1" maxS="-1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>разбивает одно четырех байтовое число (Long) на два двухбайтовых (Integer). Является аналогом LOWORD и HIWORD.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Splits a single four-byte integer (Long) into two two-byte integers. This is analogous to LOWORD and HIWORD.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="-1" vt="LONG" v="13107500">
+                            <description>
+                                <entry k="ru" v="Четырехбайтовое число, содержащее 2 двухбайтовых."/>
+                                <entry k="en" v="A four-byte number containing two two-byte numbers."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE_ANY" vt="INTEGER" v="300">
+                    <description>
+                        <entry k="ru" v="Двухбайтовое число, нижнее слово."/>
+                        <entry k="en" v="Two-byte number, low word."/>
+                    </description>
+                </element>
+                <element t="VALUE_ANY" vt="INTEGER" v="200">
+                    <description>
+                        <entry k="ru" v="Двухбайтовое число, верхнее слово."/>
+                        <entry k="en" v="Two-byte number, high word."/>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type t="stringToLongRadix" minS="1" maxS="-1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>конвертирует строку в число (Long или BigInteger). Основание (radix) передается в настройке param, по умолчанию 16.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Converts a string to a number (Long or BigInteger). The radix is passed in the param setting; the default is 16.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="-1" vt="STRING" v="4d0d08ada45f9dde1e99cad9">
+                            <description>
+                                <entry k="ru" v="Строка содержит значение целого числа, основание задано настройкой param, по умолчанию 16."/>
+                                <entry k="en" v="The string contains an integer value, the base is specified by the param setting, default is 16."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE_ANY" c="-1" vt="BIG_INTEGER" v="23846102773961507302322850521"/>
+            </output>
+        </type>
+        <type t="longToStringHex" minS="1" maxS="-1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>конвертирует целое число (Long) в строку в hex формате.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Converts an integer (Long) to a string in hex format.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="-1" vt="LONG" v="125">
+                            <description>
+                                <entry k="ru" v="Число для конвертации в строку в формате hex."/>
+                                <entry k="en" v="Number to convert to string in hex format."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="-1" vt="STRING" v="7d">
+                    <description>
+                        <entry k="ru" v="Строка в формате hex"/>
+                        <entry k="en" v="String in hex format"/>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type t="longToStringOctet" minS="1" maxS="-1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>конвертирует целое число (Long) в строку в octet формате.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Converts an integer (Long) to a string in octet format.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="-1" vt="LONG" v="125">
+                            <description>
+                                <entry k="ru" v="Число для конвертации в строку в формате octet."/>
+                                <entry k="en" v="Number to convert to string in octet format."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="-1" vt="STRING" v="175">
+                    <description>
+                        <entry k="ru" v="Строка в формате octet"/>
+                        <entry k="en" v="String in octet format"/>
+                    </description>
+                </element>
+            </output>
+        </type>
     </types>
 
     <description>
@@ -2483,7 +2731,7 @@ else convert to string
     <help>
         <entry>
             <key>en</key>
-            <value>Install type convertion for sources.
+            <value><![CDATA[Install type convertion for sources.
 JSON objects use the serialization format used in other modules.
 For example, the DB module in this form outputs strings, this allows you to connect the database directly to the converter to generate json objects (type 8).
 Wherever it is indicated that the module accepts an object in the serialization format, it also accepts a new type ObjectArray.
@@ -2529,11 +2777,11 @@ object serialization format (array of objects):
                      any type is a simple value.
         else: list of simple values, format:
             any type - simple value.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Установите тип конвертирования для источников.
+            <value><![CDATA[Установите тип конвертирования для источников.
 Для объектов JSON используется формат сериализации, применяемый и в других модулях.
 Например модуль DB в таком виде выдает строки, это позволяет подключить базу данных непосредственно к конвертеру для формирования json объектов (тип 8).
 Везде где указано, что модуль принимает объект в формате сериализации так же он принимает новый тим ObjectArray.
@@ -2579,7 +2827,7 @@ object serialization format (array of objects):
                     любой тип - простое значение.
         иначе: список простых значений, формат:
             любой тип - значение.
-            </value>
+            ]]></value>
         </entry>
     </help>
 
@@ -3729,6 +3977,6 @@ object serialization format (array of objects):
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
-    <icon>iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAACPUlEQVRIib1WP2gaYRx9X/n0SrEoHDgIzrp4SjuYksVBhQ42dOnklpBRzsW7LLnZLNnN2EOKSyanDN3agiKaEijd4pAhPR0ES3stvA6paUzOP4FLH3xwcD/e+733/b7vDvgPiACwIcQEAH1ZV1xvAUQEAFsI8SbxbEMElMfSj47dnz9+f+19Isl3EsCrxPMX2Hj52hfyv5BC4NeX7sctCeDpZPQNnz+895EfmIycAICAwFVuD4ZHAGBZFkj6uizL+ifw4A5mOD8/Rz6fRygUQqFQwHA4XElgGAYymcx6Atvb2+j3+9jd3UWv18POzs5S8mq1ioODAxSLxaV1tCyLJBkMBrm3t0eSNE2TwWCQi2AYBgFQ13XP95ZlEQDnHLiui06ng3q9jm63C9d1PTsyTRP1eh26ruPw8HBp93MO4HHs1+nccRw6juPp4I7A7HlWsE4spVKJpVLJU2DuekilUkgmkwCARCIBTdOWxpJOp3F6enpdI4SApmkYDAbeEd13Q23bpmEYrFQqzGazBEDbthdHdB/yGc7Ozthut6nrOhVFuRPRUoFV5CS5v79PKSWj0ShzudwdgYVXRa1WWzmKrVYL4/EYQghcXl5CURQ0m83FY3oT6XSatVptYeckmUqlqCgKNzc3WS6XGY/HqWnanAMppfw+Ho+f3Fbt9/uLzF3j5gTdxmg0gpRyKsPh8Emj0dgSQiAWi60kXQcXFxc4OjpCOBw+AYCIqqrHUsopfProSymnqqoe4+qH4mHxBwzbxgIZ84TaAAAAAElFTkSuQmCC</icon>
+    <icon><![CDATA[iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAACPUlEQVRIib1WP2gaYRx9X/n0SrEoHDgIzrp4SjuYksVBhQ42dOnklpBRzsW7LLnZLNnN2EOKSyanDN3agiKaEijd4pAhPR0ES3stvA6paUzOP4FLH3xwcD/e+733/b7vDvgPiACwIcQEAH1ZV1xvAUQEAFsI8SbxbEMElMfSj47dnz9+f+19Isl3EsCrxPMX2Hj52hfyv5BC4NeX7sctCeDpZPQNnz+895EfmIycAICAwFVuD4ZHAGBZFkj6uizL+ifw4A5mOD8/Rz6fRygUQqFQwHA4XElgGAYymcx6Atvb2+j3+9jd3UWv18POzs5S8mq1ioODAxSLxaV1tCyLJBkMBrm3t0eSNE2TwWCQi2AYBgFQ13XP95ZlEQDnHLiui06ng3q9jm63C9d1PTsyTRP1eh26ruPw8HBp93MO4HHs1+nccRw6juPp4I7A7HlWsE4spVKJpVLJU2DuekilUkgmkwCARCIBTdOWxpJOp3F6enpdI4SApmkYDAbeEd13Q23bpmEYrFQqzGazBEDbthdHdB/yGc7Ozthut6nrOhVFuRPRUoFV5CS5v79PKSWj0ShzudwdgYVXRa1WWzmKrVYL4/EYQghcXl5CURQ0m83FY3oT6XSatVptYeckmUqlqCgKNzc3WS6XGY/HqWnanAMppfw+Ho+f3Fbt9/uLzF3j5gTdxmg0gpRyKsPh8Emj0dgSQiAWi60kXQcXFxc4OjpCOBw+AYCIqqrHUsopfProSymnqqoe4+qH4mHxBwzbxgIZ84TaAAAAAElFTkSuQmCC]]></icon>
 
 </properties>

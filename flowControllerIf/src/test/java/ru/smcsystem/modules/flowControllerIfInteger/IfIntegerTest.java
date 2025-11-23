@@ -28,7 +28,9 @@ public class IfIntegerTest {
                                 "type", new Value(ValueType.STRING, "NUMBER_EQUAL"),
                                 "hasElse", new Value(ValueType.STRING, "false"),
                                 "isNeedReturnDataFromLast", new Value(ValueType.STRING, "true"),
-                                "isNeedInsertSourceDataToExecutionContexts", new Value(ValueType.STRING, "false")
+                                "isNeedInsertSourceDataToExecutionContexts", new Value(ValueType.STRING, "false"),
+                                "paths", new Value("value"),
+                                "isNeedReturnErrorFromLast", new Value(false)
                         ),
                         null,
                         null
@@ -153,7 +155,9 @@ public class IfIntegerTest {
                                 "type", new Value(ValueType.STRING, "EQUAL"),
                                 "hasElse", new Value(ValueType.STRING, "false"),
                                 "isNeedReturnDataFromLast", new Value(ValueType.STRING, "true"),
-                                "isNeedInsertSourceDataToExecutionContexts", new Value(ValueType.STRING, "false")
+                                "isNeedInsertSourceDataToExecutionContexts", new Value(ValueType.STRING, "false"),
+                                "paths", new Value("value"),
+                                "isNeedReturnErrorFromLast", new Value(false)
                         ),
                         null,
                         null
@@ -202,7 +206,8 @@ public class IfIntegerTest {
                                 "hasElse", new Value(ValueType.STRING, "false"),
                                 "isNeedReturnDataFromLast", new Value(ValueType.STRING, "true"),
                                 "isNeedInsertSourceDataToExecutionContexts", new Value(ValueType.STRING, "false"),
-                                "paths", new Value("value")
+                                "paths", new Value("value"),
+                                "isNeedReturnErrorFromLast", new Value(true)
                         ),
                         null,
                         null
@@ -230,7 +235,10 @@ public class IfIntegerTest {
                 null,
                 List.of(
                         new Action(
-                                List.of(new Message(MessageType.DATA, new Date(), new Value(ValueType.INTEGER, 0))),
+                                List.of(
+                                        new Message(new Value(0)),
+                                        new Message(MessageType.ERROR, new Date(), new Value(1))
+                                ),
                                 ActionType.EXECUTE)
                 )
         );

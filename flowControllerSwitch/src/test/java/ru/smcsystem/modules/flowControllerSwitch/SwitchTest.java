@@ -22,7 +22,8 @@ public class SwitchTest {
                         Map.of(
                                 "isNeedReturnDataFromLast", new Value("true"),
                                 "patterns", new Value(""),
-                                "countPatternsInPack", new Value(1)
+                                "countPatternsInPack", new Value(1),
+                                "isNeedReturnErrorFromLast",new Value(false)
                         ),
                         null,
                         null
@@ -63,7 +64,8 @@ public class SwitchTest {
                         Map.of(
                                 "isNeedReturnDataFromLast", new Value("true"),
                                 "patterns", new Value("str1::str2::val.*"),
-                                "countPatternsInPack", new Value(1)
+                                "countPatternsInPack", new Value(1),
+                                "isNeedReturnErrorFromLast",new Value(false)
                         ),
                         null,
                         null
@@ -110,7 +112,8 @@ public class SwitchTest {
                         Map.of(
                                 "isNeedReturnDataFromLast", new Value("true"),
                                 "patterns", new Value("str1::val.*::str2::val.*::str3::val.*"),
-                                "countPatternsInPack", new Value(2)
+                                "countPatternsInPack", new Value(2),
+                                "isNeedReturnErrorFromLast",new Value(true)
                         ),
                         null,
                         null
@@ -137,10 +140,16 @@ public class SwitchTest {
                 null,
                 List.of(
                         new Action(
-                                List.of(new Message(MessageType.DATA, new Date(), new Value(0))),
+                                List.of(
+                                        new Message(new Value(0)),
+                                        new Message(MessageType.ERROR, new Date(), new Value(50))
+                                ),
                                 ActionType.EXECUTE),
                         new Action(
-                                List.of(new Message(MessageType.DATA, new Date(), new Value(1))),
+                                List.of(
+                                        new Message(new Value(1)),
+                                        new Message(MessageType.ERROR, new Date(), new Value(100))
+                                ),
                                 ActionType.EXECUTE),
                         new Action(
                                 List.of(new Message(MessageType.DATA, new Date(), new Value(2))),

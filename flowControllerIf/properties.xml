@@ -25,9 +25,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.flowControllerIfInteger.IfInteger</className>
-    <ver>1.2.1</ver>
-    <apiVer>1.4.1</apiVer>
-    <date>17-03-2025</date>
+    <ver>1.3.0</ver>
+    <apiVer>1.4.2</apiVer>
+    <date>23-11-2025</date>
 
     <defaultSettings>
         <value>
@@ -199,6 +199,25 @@ IS_OBJECT_ARRAY_CONTAINS_OBJECTS - правда, если есть хотя бы
                 <entry>
                     <key>ru</key>
                     <value>Пути до полей входящих объектов. Если входящим значением является ObjectArray содержащем объекты, и если это поле не пусто, то беруться значения соответствующих полей. точкой разделяется путь. несколько путей разделяются символом :: .</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>isNeedReturnErrorFromLast</name>
+            <type>BOOLEAN</type>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[If set, it returns errors as its own from the last executed managed context.
+Only works for the now and parallel_wait modes (waits for all threads to complete).
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Если установлен, то возвращает ошибки, как свои, из последнего исполненного управляемого контекста.
+Работает только для режимов now и parallel_wait (ожидает завершения всх потоков).
+                    ]]></value>
                 </entry>
             </description>
         </value>

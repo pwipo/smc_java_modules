@@ -12,6 +12,7 @@ import ru.smcsystem.smc.utils.ModuleUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -24,6 +25,7 @@ public class OrderingExecutor implements Module {
     private Boolean breakWhenError;
     private Boolean breakWhenNoDataFromPrev;
     private Boolean isNeedBreakAndReturnDataFromAny;
+    private Boolean isNeedReturnErrorFromLast;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -39,6 +41,8 @@ public class OrderingExecutor implements Module {
                 .orElseThrow(() -> new ModuleException("breakWhenNoDataFromPrev setting"));
         isNeedBreakAndReturnDataFromAny = configurationTool.getSetting("isNeedBreakAndReturnDataFromAny").map(ModuleUtils::toBoolean)
                 .orElseThrow(() -> new ModuleException("isNeedBreakAndReturnDataFromAny setting"));
+        isNeedReturnErrorFromLast = configurationTool.getSetting("isNeedReturnErrorFromLast").map(ModuleUtils::toBoolean)
+                .orElseThrow(() -> new ModuleException("isNeedReturnErrorFromLast setting"));
     }
 
     @Override
@@ -82,12 +86,14 @@ public class OrderingExecutor implements Module {
                                 .map(IValue::getValue)
                                 .collect(Collectors.toList()) :
                         null;
-                List<Object> result = null;
+                List<Object> resultData = null;
+                List<Object> resultErrors = null;
                 switch (executionType) {
-                    case now:
+                    case now: {
+                        Optional<IAction> lastAction = Optional.empty();
                         for (int i = 0; i < executionContextTool.getFlowControlTool().countManagedExecutionContexts(); i++) {
-                            if (breakWhenNoDataFromPrev && i > 0 && executionContextTool.getFlowControlTool().getMessagesFromExecuted(i - 1).stream()
-                                    .noneMatch(a -> a.getMessages().stream().anyMatch(m -> MessageType.DATA.equals(m.getMessageType())))) {
+                            if (breakWhenNoDataFromPrev && i > 0 && lastAction.stream().noneMatch(
+                                    a -> !a.getMessages().isEmpty() && !ModuleUtils.hasErrors(a))) {
                                 /*
                                 if(!isNeedReturnDataFromLast)
                                     executionContextTool.addMessage(String.format("no messages from configuration %d", i - 1));
@@ -96,22 +102,22 @@ public class OrderingExecutor implements Module {
                             }
 
                             executionContextTool.getFlowControlTool().executeNow(type, i, inputValues);
-                            List<IAction> messagesFromExecuted = executionContextTool.getFlowControlTool().getMessagesFromExecuted(i);
-                            if (breakWhenError && messagesFromExecuted.stream().anyMatch(a -> a.getMessages().stream().anyMatch(m -> MessageType.ERROR.equals(m.getMessageType()))))
+                            lastAction = ModuleUtils.getLastActionExecuteWithMessagesFromCommands(executionContextTool.getFlowControlTool().getCommandsFromExecuted(i));
+                            if (breakWhenError && lastAction.stream().anyMatch(ModuleUtils::hasErrors))
                                 break;
-                            if (isNeedBreakAndReturnDataFromAny && messagesFromExecuted.stream().anyMatch(ModuleUtils::hasData)) {
-                                result = ModuleUtils.getFirstActionWithDataList(messagesFromExecuted)
+                            if (isNeedBreakAndReturnDataFromAny && lastAction.isPresent() && !ModuleUtils.hasErrors(lastAction.get())) {
+                                resultData = lastAction
+                                        .map(ModuleUtils::getData)
                                         .map(l -> l.stream().map(IValue::getValue).collect(Collectors.toList()))
                                         .orElse(null);
                                 break;
                             }
                         }
-                        if (result == null && isNeedReturnDataFromLast && executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0)
-                            result = ModuleUtils.getFirstActionWithDataList(executionContextTool.getFlowControlTool()
-                                            .getMessagesFromExecuted(executionContextTool.getFlowControlTool().countManagedExecutionContexts() - 1))
-                                    .map(l -> l.stream().map(IValue::getValue).collect(Collectors.toList()))
-                                    .orElse(null);
+                        if (resultData == null)
+                            resultData = getData(lastAction);
+                        resultErrors = getError(lastAction);
                         break;
+                    }
                     case later:
                         executionContextTool.getFlowControlTool().executeParallel(type, IntStream.range(0, executionContextTool.getFlowControlTool().countManagedExecutionContexts()).boxed().collect(Collectors.toList()), inputValues, 1, 0);
                         break;
@@ -131,29 +137,53 @@ public class OrderingExecutor implements Module {
                             } while (!executionContextTool.isNeedStop() && executionContextTool.getFlowControlTool().isThreadActive(id));
                         });
                         if (!ids.isEmpty() && executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0) {
+                            Optional<IAction> lastAction = Optional.empty();
                             if (isNeedBreakAndReturnDataFromAny) {
-                                for (int i = 0; i < executionContextTool.getFlowControlTool().countManagedExecutionContexts(); i++) {
-                                    result = ModuleUtils.getFirstActionWithDataList(executionContextTool.getFlowControlTool().getMessagesFromExecuted(ids.get(i), i))
-                                            .map(l -> l.stream().map(IValue::getValue).collect(Collectors.toList()))
-                                            .orElse(null);
-                                    if (result != null)
+                                for (int i = executionContextTool.getFlowControlTool().countManagedExecutionContexts() - 1; i >= 0; i--) {
+                                    lastAction = ModuleUtils.getLastActionExecuteWithMessagesFromCommands(executionContextTool.getFlowControlTool().getCommandsFromExecuted(i));
+                                    if (lastAction.isPresent() && !ModuleUtils.hasErrors(lastAction.get())) {
+                                        resultData = lastAction
+                                                .map(ModuleUtils::getData)
+                                                .map(l -> l.stream().map(IValue::getValue).collect(Collectors.toList()))
+                                                .orElse(null);
                                         break;
+                                    }
                                 }
                             }
-                            if (result == null && isNeedReturnDataFromLast)
-                                result = ModuleUtils.getFirstActionWithDataList(executionContextTool.getFlowControlTool()
-                                                .getMessagesFromExecuted(ids.get(ids.size() - 1), executionContextTool.getFlowControlTool().countManagedExecutionContexts() - 1))
-                                        .map(l -> l.stream().map(IValue::getValue).collect(Collectors.toList()))
-                                        .orElse(null);
+                            if (resultData == null)
+                                resultData = getData(lastAction);
+                            resultErrors = getError(lastAction);
                         }
                         break;
                     }
                 }
-                if (result != null)
-                    executionContextTool.addMessage(result);
+                if (resultData != null)
+                    executionContextTool.addMessage(resultData);
+                if (resultErrors != null)
+                    executionContextTool.addError(resultErrors);
                 break;
             }
         }
+    }
+
+    private List<Object> getData(Optional<IAction> lastAction) {
+        if (isNeedReturnDataFromLast && lastAction.isPresent() && !ModuleUtils.hasErrors(lastAction.get())) {
+            return lastAction
+                    .map(ModuleUtils::getData)
+                    .map(l -> l.stream().map(IValue::getValue).collect(Collectors.toList()))
+                    .orElse(null);
+        }
+        return null;
+    }
+
+    private List<Object> getError(Optional<IAction> lastAction) {
+        if (isNeedReturnErrorFromLast && lastAction.isPresent()) {
+            return lastAction
+                    .map(ModuleUtils::getErrors)
+                    .map(l -> l.stream().map(IValue::getValue).collect(Collectors.toList()))
+                    .orElse(null);
+        }
+        return null;
     }
 
     @Override
@@ -163,6 +193,7 @@ public class OrderingExecutor implements Module {
         isNeedReturnDataFromLast = null;
         breakWhenError = null;
         isNeedBreakAndReturnDataFromAny = null;
+        isNeedReturnErrorFromLast = null;
     }
 
     enum ExecutionType {

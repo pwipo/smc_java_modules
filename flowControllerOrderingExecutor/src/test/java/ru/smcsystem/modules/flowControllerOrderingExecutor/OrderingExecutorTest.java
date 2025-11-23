@@ -23,12 +23,13 @@ public class OrderingExecutorTest {
                         "test",
                         null,
                         Map.of(
-                                "type", new Value(ValueType.STRING, "execute")
-                                , "executionType", new Value(ValueType.STRING, "now")
-                                , "isNeedReturnDataFromLast", new Value(ValueType.STRING, "false")
-                                , "breakWhenError", new Value(ValueType.STRING, "false")
-                                , "breakWhenNoDataFromPrev", new Value(ValueType.STRING, "false")
-                                , "isNeedBreakAndReturnDataFromAny", new Value(ValueType.STRING, "true")
+                                "type", new Value(ValueType.STRING, "execute"),
+                                 "executionType", new Value(ValueType.STRING, "now"),
+                                 "isNeedReturnDataFromLast", new Value(ValueType.STRING, "false"),
+                                 "breakWhenError", new Value(ValueType.STRING, "false"),
+                                 "breakWhenNoDataFromPrev", new Value(ValueType.STRING, "false"),
+                                 "isNeedBreakAndReturnDataFromAny", new Value(ValueType.STRING, "true"),
+                                "isNeedReturnErrorFromLast", new Value(false)
                         ),
                         null,
                         null

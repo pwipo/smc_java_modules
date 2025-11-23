@@ -10,25 +10,25 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.flowControllerSwitch.Switch</className>
-    <ver>1.2.0</ver>
-    <apiVer>1.4.0</apiVer>
-    <date>22-10-2023</date>
+    <ver>1.3.0</ver>
+    <apiVer>1.4.2</apiVer>
+    <date>23-11-2025</date>
 
     <defaultSettings>
         <value>
@@ -58,15 +58,15 @@ The program is supplied as is. For problems arising during the operation or inst
                 <entry>
                     <key>en</key>
                     <value>List of regular expressions. If not empty, it compares the incoming values and regular expressions.
-The sequence number of the first matching regular expression pack (determined by countPatternsInPack) is used as the executable context number for the subsequent transition.
-Value format: string1::string2::string3...
+                        The sequence number of the first matching regular expression pack (determined by countPatternsInPack) is used as the executable context number for the subsequent transition.
+                        Value format: string1::string2::string3...
                     </value>
                 </entry>
                 <entry>
                     <key>ru</key>
                     <value>Список регулярных выражений. Если не пусто, то производит сравнение входящих значений и регулярных выражений.
-Порядковый номер первой совпавшей пачки регулярных выражений (определяется countPatternsInPack) используется как номер исполняемого контекста для последующего перехода.
-Формат value: строка1::строка2::строка3...
+                        Порядковый номер первой совпавшей пачки регулярных выражений (определяется countPatternsInPack) используется как номер исполняемого контекста для последующего перехода.
+                        Формат value: строка1::строка2::строка3...
                     </value>
                 </entry>
             </description>
@@ -79,14 +79,33 @@ Value format: string1::string2::string3...
                 <entry>
                     <key>en</key>
                     <value>Determines the number of incoming values to be processed at a time, and also determines the size of the pack of regular expressions that will process these values.
-For example, if the value is 2, then the number of regular expressions must be at least 2 regular expressions in patterns must be a multiple of 2 (2,4,6 and so on) and the input values must be at least 2.
+                        For example, if the value is 2, then the number of regular expressions must be at least 2 regular expressions in patterns must be a multiple of 2 (2,4,6 and so on) and the input values must be at least 2.
                     </value>
                 </entry>
                 <entry>
                     <key>ru</key>
                     <value>Определяет количество входящих значений, обрабатываем за раз, так же определяет размер пачки регулярных выражений, которые будут обрабатывать эти значения.
-Например, если значение равно 2, то количество регулярных выражений нужно минимум 2 в patterns и должно быть кратно 2 (2,4,6 и так далее) и входящих значений должно быть минимум 2.
+                        Например, если значение равно 2, то количество регулярных выражений нужно минимум 2 в patterns и должно быть кратно 2 (2,4,6 и так далее) и входящих значений должно быть минимум 2.
                     </value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>isNeedReturnErrorFromLast</name>
+            <type>BOOLEAN</type>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[If set, it returns errors as its own from the last executed managed context.
+Only works for the now and parallel_wait modes (waits for all threads to complete).
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Если установлен, то возвращает ошибки, как свои, из последнего исполненного управляемого контекста.
+Работает только для режимов now и parallel_wait (ожидает завершения всх потоков).
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -98,21 +117,21 @@ For example, if the value is 2, then the number of regular expressions must be a
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>В цикле смотрит все входящие сообщения.
+                    <value><![CDATA[В цикле смотрит все входящие сообщения.
 Если поле patterns пусто, то получает только цифровые сообщения.
 Иначе сравнивает входящие значения с регулярными выражениями, порядковый номер первой совпавшей пачки регулярных выражений используется в дальнейшем.
 Если полученное число соответствует какому-либо управляемому контексту исполнения, то запускает его.
 Если установлен isNeedReturnDataFromLast, возвращает ответ от исполненного контекста.
-                    </value>
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>It looks at all incoming messages in a loop.
+                    <value><![CDATA[It looks at all incoming messages in a loop.
 If the patterns field is empty, then only digital messages are received.
 Otherwise, it compares incoming values with regular expressions, the serial number of the first matching pack of regular expressions is used in the future.
 If the resulting number matches any managed execution context, it runs it.
 If isNeedReturnDataFromLast is set, returns the response from the executed context.
-                    </value>
+                    ]]></value>
                 </entry>
             </description>
             <minCountSources>1</minCountSources>
@@ -240,6 +259,6 @@ If isNeedReturnDataFromLast is set, returns the response from the executed conte
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
-    <icon>iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAABkklEQVRoge2aQW7CMBBFn3qHIqBHCkfoMWh7AHotKhWkVoWs2kXPUeiCruhiHAlFJBk7duLFPMkrhvh/O2Y8GsAwjFAWwBr4Bc4jj6PTUviaeM5AfNNYaU0s3BdOwBKY+a5CAmbAA6LpjHJnXlzwMp2uYB4RbWtN8NEFT1MqCmSKaDtogqt3cWg2QAlMOuLU+sYysnPzftFuJnsjt8Cnm/ub5h+ZqEYmwBvwqtOoZoLsSNvORDNyOdmHl0wdXWaiGNGsWBvbi+drx95DnyqwrwnIwEj9IKbMMV1z9TJS4r+S2wATyQ97iJFNAhNN+tSBMc5HF3vl87M47G28M+AVRZt9U5IkIe766/Im+hWlRF6Hocn+0qjlqr6bEYQkIScj2sJKjRVWPbHCqgkrrBSMXo/EMAEZGLHCyhMrrLSBVlh5YIVVaKAVVpFQGzm4wBxabnXuEG0/9Q+u1SNVJr1PqSiQSlOpCS4Q1yekZzdPJMqHOfAE/CHa1G3qFf4JcKihbk9XFEj3tGqOjjmC/zBgGIbwD0pN+bEelrPsAAAAAElFTkSuQmCC</icon>
+    <icon><![CDATA[iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAABkklEQVRoge2aQW7CMBBFn3qHIqBHCkfoMWh7AHotKhWkVoWs2kXPUeiCruhiHAlFJBk7duLFPMkrhvh/O2Y8GsAwjFAWwBr4Bc4jj6PTUviaeM5AfNNYaU0s3BdOwBKY+a5CAmbAA6LpjHJnXlzwMp2uYB4RbWtN8NEFT1MqCmSKaDtogqt3cWg2QAlMOuLU+sYysnPzftFuJnsjt8Cnm/ub5h+ZqEYmwBvwqtOoZoLsSNvORDNyOdmHl0wdXWaiGNGsWBvbi+drx95DnyqwrwnIwEj9IKbMMV1z9TJS4r+S2wATyQ97iJFNAhNN+tSBMc5HF3vl87M47G28M+AVRZt9U5IkIe766/Im+hWlRF6Hocn+0qjlqr6bEYQkIScj2sJKjRVWPbHCqgkrrBSMXo/EMAEZGLHCyhMrrLSBVlh5YIVVaKAVVpFQGzm4wBxabnXuEG0/9Q+u1SNVJr1PqSiQSlOpCS4Q1yekZzdPJMqHOfAE/CHa1G3qFf4JcKihbk9XFEj3tGqOjjmC/zBgGIbwD0pN+bEelrPsAAAAAElFTkSuQmCC]]></icon>
 
 </properties>

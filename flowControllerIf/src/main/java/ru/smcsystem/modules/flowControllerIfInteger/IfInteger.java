@@ -20,44 +20,24 @@ public class IfInteger implements Module {
     private Boolean isNeedReturnDataFromLast;
     private Boolean isNeedInsertSourceDataToExecutionContexts;
     private List<String> paths;
-
-    private enum Type {
-        EXIST,
-        NOT_EXIST,
-        EXIST_ANY,
-        NOT_EXIST_ANY,
-        NUMBER_EQUAL,
-        NUMBER_MORE_THEN,
-        NUMBER_MORE_THEN_OR_EQUAL,
-        NUMBER_LESS_THEN,
-        NUMBER_LESS_THEN_OR_EQUAL,
-        EQUAL,
-        NOT_EQUAL,
-        HAS_ERROR,
-        NO_ERROR,
-        HAS_STRING,
-        HAS_NUMBER,
-        HAS_BYTES,
-        HAS_OBJECT_ARRAY,
-        IS_TRUE,
-        IS_FALSE,
-        HAS_BOOLEANS,
-        IS_OBJECT_ARRAY_NOT_EMPTY,
-        IS_OBJECT_ARRAY_CONTAINS_OBJECTS,
-    }
+    private Boolean isNeedReturnErrorFromLast;
 
     @Override
-    public void start(ConfigurationTool ConfigurationTool) throws ModuleException {
-        number = (Double) ConfigurationTool.getSetting("number").orElseThrow(() -> new ModuleException("number setting not found")).getValue();
-        type = Type.valueOf((String) ConfigurationTool.getSetting("type").orElseThrow(() -> new ModuleException("type setting not found")).getValue());
-        hasElse = Boolean.valueOf((String) ConfigurationTool.getSetting("hasElse").orElseThrow(() -> new ModuleException("hasElse setting not found")).getValue());
-        isNeedReturnDataFromLast = Boolean.valueOf((String) ConfigurationTool.getSetting("isNeedReturnDataFromLast").orElseThrow(() -> new ModuleException("isNeedReturnDataFromLast setting not found")).getValue());
-        isNeedInsertSourceDataToExecutionContexts = Boolean.valueOf((String) ConfigurationTool.getSetting("isNeedInsertSourceDataToExecutionContexts").orElseThrow(() -> new ModuleException("isNeedInsertSourceDataToExecutionContexts setting not found")).getValue());
-        String strPaths = (String) ConfigurationTool.getSetting("paths").orElseThrow(() -> new ModuleException("paths setting not found")).getValue();
+    public void start(ConfigurationTool configurationTool) throws ModuleException {
+        number = configurationTool.getSetting("number").map(ModuleUtils::getNumber).map(Number::doubleValue).orElseThrow(() -> new ModuleException("number setting not found"));
+        type = configurationTool.getSetting("type").map(ModuleUtils::getString).map(Type::valueOf).orElseThrow(() -> new ModuleException("type setting not found"));
+        hasElse = configurationTool.getSetting("hasElse").map(ModuleUtils::toBoolean).orElseThrow(() -> new ModuleException("hasElse setting not found"));
+        isNeedReturnDataFromLast = configurationTool.getSetting("isNeedReturnDataFromLast").map(ModuleUtils::toBoolean)
+                .orElseThrow(() -> new ModuleException("isNeedReturnDataFromLast setting not found"));
+        isNeedInsertSourceDataToExecutionContexts = configurationTool.getSetting("isNeedInsertSourceDataToExecutionContexts").map(ModuleUtils::toBoolean)
+                .orElseThrow(() -> new ModuleException("isNeedInsertSourceDataToExecutionContexts setting not found"));
+        String strPaths = configurationTool.getSetting("paths").map(ModuleUtils::getString).orElseThrow(() -> new ModuleException("paths setting not found"));
         paths = Arrays.stream(strPaths.split("::"))
                 .filter(s -> !s.isBlank())
                 .map(String::trim)
                 .collect(Collectors.toList());
+        isNeedReturnErrorFromLast = configurationTool.getSetting("isNeedReturnErrorFromLast").map(ModuleUtils::toBoolean)
+                .orElseThrow(() -> new ModuleException("isNeedReturnErrorFromLast setting"));
     }
 
     @Override
@@ -67,7 +47,7 @@ public class IfInteger implements Module {
     }
 
     @Override
-    public void process(ConfigurationTool ConfigurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
+    public void process(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws ModuleException {
         if (hasElse && executionContextTool.getFlowControlTool().countManagedExecutionContexts() != 2)
             throw new ModuleException("need 2 managed execution context for implement if-else logic");
         boolean execute[] = new boolean[]{false};
@@ -273,27 +253,60 @@ public class IfInteger implements Module {
             }
         }
 
-        Optional<IAction> dataFromExecuted = Optional.empty();
+        List<Object> resultData = null;
+        List<Object> resultErrors = null;
         if (!hasElse) {
             if (execute[0] && executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0) {
                 for (int j = 0; j < executionContextTool.getFlowControlTool().countManagedExecutionContexts(); j++)
                     executionContextTool.getFlowControlTool().executeNow(CommandType.EXECUTE, j, sourceValues);
-                if (isNeedReturnDataFromLast)
-                    dataFromExecuted = executionContextTool.getFlowControlTool().getMessagesFromExecuted(executionContextTool.getFlowControlTool().countManagedExecutionContexts() - 1).stream().findAny();
+                if (isNeedReturnDataFromLast || isNeedReturnErrorFromLast) {
+                    Optional<IAction> lastAction = ModuleUtils.getLastActionExecuteWithMessagesFromCommands(
+                            executionContextTool.getFlowControlTool().getCommandsFromExecuted(executionContextTool.getFlowControlTool().countManagedExecutionContexts() - 1));
+                    resultData = getData(lastAction);
+                    resultErrors = getError(lastAction);
+                }
             }
         } else {
             if (execute[0]) {
                 executionContextTool.getFlowControlTool().executeNow(CommandType.EXECUTE, 0, sourceValues);
-                if (isNeedReturnDataFromLast)
-                    dataFromExecuted = executionContextTool.getFlowControlTool().getMessagesFromExecuted(0).stream().findAny();
+                if (isNeedReturnDataFromLast || isNeedReturnErrorFromLast) {
+                    Optional<IAction> lastAction = ModuleUtils.getLastActionExecuteWithMessagesFromCommands(executionContextTool.getFlowControlTool().getCommandsFromExecuted(0));
+                    resultData = getData(lastAction);
+                    resultErrors = getError(lastAction);
+                }
             } else {
                 executionContextTool.getFlowControlTool().executeNow(CommandType.EXECUTE, 1, sourceValues);
-                if (isNeedReturnDataFromLast)
-                    dataFromExecuted = executionContextTool.getFlowControlTool().getMessagesFromExecuted(1).stream().findAny();
+                if (isNeedReturnDataFromLast || isNeedReturnErrorFromLast) {
+                    Optional<IAction> lastAction = ModuleUtils.getLastActionExecuteWithMessagesFromCommands(executionContextTool.getFlowControlTool().getCommandsFromExecuted(1));
+                    resultData = getData(lastAction);
+                    resultErrors = getError(lastAction);
+                }
             }
         }
-        dataFromExecuted.ifPresent(action ->
-                executionContextTool.addMessage(action.getMessages().stream().map(IValue::getValue).collect(Collectors.toList())));
+        if (resultData != null)
+            executionContextTool.addMessage(resultData);
+        if (resultErrors != null)
+            executionContextTool.addError(resultErrors);
+    }
+
+    private List<Object> getData(Optional<IAction> lastAction) {
+        if (isNeedReturnDataFromLast && lastAction.isPresent() && !ModuleUtils.hasErrors(lastAction.get())) {
+            return lastAction
+                    .map(ModuleUtils::getData)
+                    .map(l -> l.stream().map(IValue::getValue).collect(Collectors.toList()))
+                    .orElse(null);
+        }
+        return null;
+    }
+
+    private List<Object> getError(Optional<IAction> lastAction) {
+        if (isNeedReturnErrorFromLast && lastAction.isPresent()) {
+            return lastAction
+                    .map(ModuleUtils::getErrors)
+                    .map(l -> l.stream().map(IValue::getValue).collect(Collectors.toList()))
+                    .orElse(null);
+        }
+        return null;
     }
 
     private List<ObjectField> getFromPaths(IMessage m) {
@@ -322,8 +335,34 @@ public class IfInteger implements Module {
         number = null;
         type = null;
         hasElse = null;
-        isNeedReturnDataFromLast = false;
-        isNeedInsertSourceDataToExecutionContexts = false;
+        isNeedReturnDataFromLast = null;
+        isNeedInsertSourceDataToExecutionContexts = null;
+        isNeedReturnErrorFromLast = null;
+    }
+
+    private enum Type {
+        EXIST,
+        NOT_EXIST,
+        EXIST_ANY,
+        NOT_EXIST_ANY,
+        NUMBER_EQUAL,
+        NUMBER_MORE_THEN,
+        NUMBER_MORE_THEN_OR_EQUAL,
+        NUMBER_LESS_THEN,
+        NUMBER_LESS_THEN_OR_EQUAL,
+        EQUAL,
+        NOT_EQUAL,
+        HAS_ERROR,
+        NO_ERROR,
+        HAS_STRING,
+        HAS_NUMBER,
+        HAS_BYTES,
+        HAS_OBJECT_ARRAY,
+        IS_TRUE,
+        IS_FALSE,
+        HAS_BOOLEANS,
+        IS_OBJECT_ARRAY_NOT_EMPTY,
+        IS_OBJECT_ARRAY_CONTAINS_OBJECTS,
     }
 
 }

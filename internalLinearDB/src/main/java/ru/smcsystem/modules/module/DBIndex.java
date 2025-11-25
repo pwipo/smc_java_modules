@@ -1,49 +1,237 @@
 package ru.smcsystem.modules.module;
 
+import ru.seits.projects.lineardb.DB;
+import ru.seits.projects.lineardb.IElement;
+import ru.smcsystem.api.dto.ObjectArray;
+import ru.smcsystem.api.dto.ObjectElement;
 import ru.smcsystem.api.dto.ObjectField;
+import ru.smcsystem.api.enumeration.ObjectType;
 import ru.smcsystem.api.enumeration.ValueType;
 import ru.smcsystem.smc.utils.ModuleUtils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DBIndex {
+    private DB<ObjectElement> db;
+    private List<IElement> indexElements;
+    private final List<Map<Object, Set<IElement>>> indexes;
+    private boolean indexElementsReady;
+    private final List<ValueType> fieldTypes;
 
-    public static int countBytes(ValueType type) {
-        Objects.requireNonNull(type, "type is null");
+    public DBIndex() {
+        db = null;
+        indexElements = null;
+        indexes = new ArrayList<>();
+        indexElementsReady = false;
+        fieldTypes = new ArrayList<>(List.of(ValueType.LONG, ValueType.LONG));
+    }
+
+    public void setDb(DB<ObjectElement> db) {
+        this.db = db;
+    }
+
+    public void markDirtyIndexElements() {
+        this.indexElementsReady = false;
+    }
+
+    public List<Map<Object, Set<IElement>>> getIndexes() {
+        getIndexElements();
+        return indexes;
+    }
+
+    public List<IElement> getIndexElements() {
+        if (indexElements != null && indexElementsReady)
+            return indexElements;
+
+        //rebuild indexes
+        //get all elements
+        indexElements = db.getIndexElements();
+
+        //create indexes
+        indexes.clear();
+        this.fieldTypes.forEach(v -> {
+            if (ModuleUtils.isNumber(v)) {
+                Comparator<Object> nullFirstComparator = (Comparator) Comparator.nullsFirst(Comparator.naturalOrder());
+                indexes.add(new TreeMap<>(nullFirstComparator));
+            } else {
+                indexes.add(new HashMap<>());
+            }
+        });
+
+        //fill indexes
+        Map<Object, Set<IElement>> mapId = indexes.get(0);
+        Map<Object, Set<IElement>> mapDate = indexes.get(1);
+        indexElements.forEach(e -> {
+            mapId.computeIfAbsent(e.getId(), k -> new HashSet<>()).add(e);
+            mapDate.computeIfAbsent(e.getDate(), k -> new HashSet<>()).add(e);
+            for (int i = 0; i < e.getAdditionalData().size(); i++) {
+                Map<Object, Set<IElement>> indexMap = indexes.get(2 + i);
+                Object v = e.getAdditionalData().get(i);
+                indexMap.computeIfAbsent(convert(v, fieldTypes.get(2 + i)), k -> new HashSet<>()).add(e);
+            }
+        });
+
+        indexElementsReady = true;
+        return indexElements;
+    }
+
+    public void updateIndexes(List<Map.Entry<String, ValueType>> fieldsIndexed) {
+        Objects.requireNonNull(fieldsIndexed);
+        this.fieldTypes.clear();
+        this.fieldTypes.add(ValueType.LONG); //id
+        this.fieldTypes.add(ValueType.LONG); //date
+        this.fieldTypes.addAll(fieldsIndexed.stream().map(Map.Entry::getValue).collect(Collectors.toList()));
+    }
+
+    public Stream<IElement> findEquals(int fieldId, Object value) {
+        Map<Object, Set<IElement>> indexMap = getIndexes().get(fieldId);
+        ValueType valueType = fieldTypes.get(fieldId);
+        Object valueConverted = convert(value, valueType);
+        return indexMap.getOrDefault(valueConverted, Set.of()).stream();
+    }
+
+    public Stream<IElement> findNotEquals(int fieldId, Object value) {
+        Map<Object, Set<IElement>> indexMap = getIndexes().get(fieldId);
+        ValueType valueType = fieldTypes.get(fieldId);
+        Object valueConverted = convert(value, valueType);
+        return indexMap.entrySet().stream()
+                .filter(e -> !Objects.equals(e.getKey(), valueConverted))
+                .flatMap(e -> e.getValue().stream());
+    }
+
+    public Stream<IElement> findLess(int fieldId, Object value, boolean inclusive) {
+        Map<Object, Set<IElement>> indexMap = getIndexes().get(fieldId);
+        ValueType valueType = fieldTypes.get(fieldId);
+        if (ModuleUtils.isNumber(valueType)) {
+            Object valueConverted = convert(value, valueType);
+            TreeMap<Object, Set<IElement>> map = (TreeMap<Object, Set<IElement>>) indexMap;
+            return map.headMap(valueConverted, inclusive).values().stream().flatMap(Collection::stream);
+        }
+        return Stream.of();
+    }
+
+    public Stream<IElement> findGreater(int fieldId, Object value, boolean inclusive) {
+        Map<Object, Set<IElement>> indexMap = getIndexes().get(fieldId);
+        ValueType valueType = fieldTypes.get(fieldId);
+        if (ModuleUtils.isNumber(valueType)) {
+            Object valueConverted = convert(value, valueType);
+            TreeMap<Object, Set<IElement>> map = (TreeMap<Object, Set<IElement>>) indexMap;
+            return map.tailMap(valueConverted, inclusive).values().stream().flatMap(Collection::stream);
+        }
+        return Stream.of();
+    }
+
+    public Stream<IElement> findLike(int fieldId, String value) {
+        Map<Object, Set<IElement>> indexMap = getIndexes().get(fieldId);
+        ValueType valueType = fieldTypes.get(fieldId);
+        if (valueType == ValueType.STRING) {
+            Pattern pattern = Pattern.compile(convertSqlLikeToRegex(value));
+            Map<String, Set<IElement>> map = (Map<String, Set<IElement>>) (Map) indexMap;
+            return map.entrySet().stream()
+                    .filter(e -> e.getKey() != null && pattern.matcher(e.getKey()).matches())
+                    .flatMap(e -> e.getValue().stream());
+        }
+        return Stream.of();
+    }
+
+    private String convertSqlLikeToRegex(String sqlLikePattern) {
+        // Escape characters that are special in regex but not in SQL LIKE
+        String regex = sqlLikePattern.replace(".", "\\.")
+                .replace("*", "\\*")
+                .replace("+", "\\+")
+                .replace("?", "\\?")
+                .replace("[", "\\[")
+                .replace("]", "\\]")
+                .replace("(", "\\(")
+                .replace(")", "\\)")
+                .replace("{", "\\{")
+                .replace("}", "\\}")
+                .replace("^", "\\^")
+                .replace("$", "\\$")
+                .replace("|", "\\|")
+                .replace("\\", "\\\\"); // Escape backslash itself
+
+        // Replace SQL LIKE wildcards with regex equivalents
+        regex = regex.replace("%", ".*");
+        regex = regex.replace("_", ".");
+
+        // Add start and end anchors for exact matching (optional, depending on desired behavior)
+        // If you want to match anywhere within a string, omit these.
+        regex = "^" + regex + "$";
+
+        return regex;
+    }
+
+    private Object convert(Object value, ValueType type) {
+        if (value == null)
+            return null;
         switch (type) {
             case STRING:
-                return 1/*is null*/ + 4/*hash*/ + 4/*size*/;
+                return value.toString();
             case BYTE:
-                return 1/*is null*/ + 1/*value*/;
+                return value instanceof Number ? ((Number) value).byteValue() : (byte) 0;
             case SHORT:
-                return 1/*is null*/ + 2/*value*/;
+                return value instanceof Number ? ((Number) value).shortValue() : (short) 0;
             case INTEGER:
-                return 1/*is null*/ + 4/*value*/;
+                return value instanceof Number ? ((Number) value).intValue() : (int) 0;
             case LONG:
-                return 1/*is null*/ + 8/*value*/;
+                return value instanceof Number ? ((Number) value).longValue() : (long) 0;
             case BIG_INTEGER:
-                return 1/*is null*/ + 8/*value*/;
+                return value instanceof Number ? BigInteger.valueOf(((Number) value).longValue()) : BigInteger.ZERO;
             case FLOAT:
-                return 1/*is null*/ + 4/*value*/;
+                return value instanceof Number ? ((Number) value).floatValue() : (float) 0;
             case DOUBLE:
-                return 1/*is null*/ + 8/*value*/;
+                return value instanceof Number ? ((Number) value).doubleValue() : (double) 0;
             case BIG_DECIMAL:
-                return 1/*is null*/ + 8/*value*/;
+                return value instanceof Number ? BigDecimal.valueOf(((Number) value).doubleValue()) : BigDecimal.ZERO;
             case BYTES:
-                return 1/*is null*/ + 4/*hash*/ + 4/*size*/;
+                return value instanceof byte[] ? value : value.toString().getBytes();
             case OBJECT_ARRAY:
-                return 0;
+                return value instanceof ObjectArray ? value : new ObjectArray(List.of(value), ObjectType.VALUE_ANY);
             case BOOLEAN:
-                return 1/*is null*/ + 1/*value*/;
+                return value instanceof Boolean ? value : (value instanceof Number ? ((Number) value).intValue() > 0 : Boolean.parseBoolean(value.toString()));
         }
-        throw new IllegalArgumentException("Unsupported type " + type);
+        return value;
     }
+
+    // public static int countBytes(ValueType type) {
+    //     Objects.requireNonNull(type, "type is null");
+    //     switch (type) {
+    //         case STRING:
+    //             return 1/*is null*/ + 4/*hash*/ + 4/*size*/;
+    //         case BYTE:
+    //             return 1/*is null*/ + 1/*value*/;
+    //         case SHORT:
+    //             return 1/*is null*/ + 2/*value*/;
+    //         case INTEGER:
+    //             return 1/*is null*/ + 4/*value*/;
+    //         case LONG:
+    //             return 1/*is null*/ + 8/*value*/;
+    //         case BIG_INTEGER:
+    //             return 1/*is null*/ + 8/*value*/;
+    //         case FLOAT:
+    //             return 1/*is null*/ + 4/*value*/;
+    //         case DOUBLE:
+    //             return 1/*is null*/ + 8/*value*/;
+    //         case BIG_DECIMAL:
+    //             return 1/*is null*/ + 8/*value*/;
+    //         case BYTES:
+    //             return 1/*is null*/ + 4/*hash*/ + 4/*size*/;
+    //         case OBJECT_ARRAY:
+    //             return 0;
+    //         case BOOLEAN:
+    //             return 1/*is null*/ + 1/*value*/;
+    //     }
+    //     throw new IllegalArgumentException("Unsupported type " + type);
+    // }
 
     public static Object readValue(ValueType type, DataInputStream dis) throws IOException {
         Objects.requireNonNull(type, "type is null");
@@ -52,11 +240,8 @@ public class DBIndex {
         if (isNull)
             return null;
         switch (type) {
-            case STRING: {
-                int hash = dis.readInt();
-                int size = dis.readInt();
-                return Map.entry(hash, size);
-            }
+            case STRING:
+                return dis.readUTF();
             case BYTE:
                 return dis.readByte()/*value*/;
             case SHORT:
@@ -74,9 +259,11 @@ public class DBIndex {
             case BIG_DECIMAL:
                 return dis.readDouble()/*value*/;
             case BYTES: {
-                int hash = dis.readInt();
                 int size = dis.readInt();
-                return Map.entry(hash, size);
+                byte[] data = new byte[size];
+                if (dis.read(data) == size)
+                    return data;
+                return null;
             }
             case OBJECT_ARRAY:
                 return null;
@@ -90,10 +277,8 @@ public class DBIndex {
         Objects.requireNonNull(type, "type is null");
         Objects.requireNonNull(field, "field is null");
         switch (type) {
-            case STRING: {
-                String value = ModuleUtils.getString(field);
-                return value != null ? Map.entry(value.hashCode(), value.length()) : null;
-            }
+            case STRING:
+                return ModuleUtils.getString(field);
             case BYTE: {
                 Number value = ModuleUtils.getNumber(field);
                 return value != null ? value.byteValue() : null;
@@ -126,10 +311,8 @@ public class DBIndex {
                 Number value = ModuleUtils.getNumber(field);
                 return value != null ? value.doubleValue() : null;
             }
-            case BYTES: {
-                byte[] value = ModuleUtils.getBytes(field);
-                return value != null ? Map.entry(Arrays.hashCode(value), value.length) : List.of();
-            }
+            case BYTES:
+                return ModuleUtils.getBytes(field);
             case OBJECT_ARRAY:
                 return null;
             case BOOLEAN:
@@ -142,10 +325,11 @@ public class DBIndex {
         Objects.requireNonNull(dos, "dos is null");
         Objects.requireNonNull(type, "type is null");
         dos.writeBoolean(value == null);
+        if (value == null)
+            return;
         switch (type) {
             case STRING:
-                dos.writeInt(value instanceof Map.Entry ? ((Map.Entry<Integer, Integer>) value).getKey() : 0);
-                dos.writeInt(value instanceof Map.Entry ? ((Map.Entry<Integer, Integer>) value).getValue() : 0);
+                dos.writeUTF(value instanceof String ? (String) value : "");
                 break;
             case BYTE:
                 dos.writeByte(value instanceof Number ? ((Number) value).byteValue() : 0);
@@ -172,8 +356,9 @@ public class DBIndex {
                 dos.writeDouble(value instanceof Number ? ((Number) value).doubleValue() : 0);
                 break;
             case BYTES:
-                dos.writeInt(value instanceof Map.Entry ? ((Map.Entry<Integer, Integer>) value).getKey() : 0);
-                dos.writeInt(value instanceof Map.Entry ? ((Map.Entry<Integer, Integer>) value).getValue() : 0);
+                dos.writeInt(value instanceof byte[] ? ((byte[]) value).length : 0);
+                if (value instanceof byte[])
+                    dos.write((byte[]) value);
                 break;
             case OBJECT_ARRAY:
                 break;

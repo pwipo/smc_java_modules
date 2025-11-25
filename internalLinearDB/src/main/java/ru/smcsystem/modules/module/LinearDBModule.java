@@ -12,7 +12,6 @@ import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.api.tools.execution.ExecutionContextTool;
-import ru.smcsystem.modules.module.predicators.MyPredicateUtils;
 import ru.smcsystem.smc.utils.ModuleUtils;
 
 import java.io.*;
@@ -26,14 +25,12 @@ public class LinearDBModule implements Module {
     // private static final Object INDEX_VALUE_NULL = DBIndex.getValue(ValueType.STRING, new ObjectField("none", (String) null));
     private DB<ObjectElement> db;
     private List<Map.Entry<String, ValueType>> fieldsIndexed;
-    private int countAdditionalBytes;
+    // private int countAdditionalBytes;
     private List<Map.Entry<String[], ObjectType>> fieldsIndexed2;
-    // private final List<Map<?, List<IElement>>> indexes;
     private List<String> fieldsIndexedNames;
     private String fieldNameId;
     private String fieldNameDate;
-    private List<IElement> indexElements;
-    private boolean indexElementsReady;
+    private DBIndex dbIndex;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -41,9 +38,8 @@ public class LinearDBModule implements Module {
         fieldNameDate = configurationTool.getSetting("fieldNameDate").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("fieldNameDate setting not found"));
         String indexesStr = configurationTool.getSetting("indexes").map(ModuleUtils::toString).orElse("");
         String indexesStr2 = configurationTool.getVariable("indexes").map(ModuleUtils::toString).orElse(null);
+        dbIndex = new DBIndex();
         this.setFieldsIndexed(indexesStr2 != null ? indexesStr2 : indexesStr);
-        indexElements = null;
-        indexElementsReady = false;
         this.db = new DB<>(
                 new File(configurationTool.getWorkDirectory()),
                 "db",
@@ -58,13 +54,13 @@ public class LinearDBModule implements Module {
                 (o, id) -> o.findField(fieldNameDate).ifPresentOrElse(
                         f -> f.setValue(id),
                         () -> o.getFields().add(new ObjectField(fieldNameDate, id))),
-                ver -> countAdditionalBytes,
+                ver -> -1,
                 (ver, b) -> {
                     List<Object> lst = new ArrayList<>(this.fieldsIndexed.size());
                     try (ByteArrayInputStream bais = new ByteArrayInputStream(b); DataInputStream dis = new DataInputStream(bais)) {
                         for (Map.Entry<String, ValueType> e : this.fieldsIndexed) {
-                            if (DBIndex.countBytes(e.getValue()) > dis.available())
-                                break;
+                            // if (DBIndex.countBytes(e.getValue()) > dis.available())
+                            //     break;
                             lst.add(DBIndex.readValue(e.getValue(), dis));
                         }
                     } catch (Exception e) {
@@ -80,7 +76,7 @@ public class LinearDBModule implements Module {
                         dos.flush();
                         return baos.toByteArray();
                     } catch (Exception e) {
-                        return new byte[countAdditionalBytes];
+                        return null;
                     }
                 },
                 (ver, c) -> Optional.of(findFields(c, this.fieldsIndexed2))
@@ -92,6 +88,7 @@ public class LinearDBModule implements Module {
                         })
                         .orElse(List.of())
         );
+        dbIndex.setDb(db);
         try {
             db.open();
         } catch (Exception e) {
@@ -120,10 +117,13 @@ public class LinearDBModule implements Module {
             Type type = Type.valueOf(executionContextTool.getType().toUpperCase());
             switch (type) {
                 case INSERT:
-                    insert(configurationTool, executionContextTool, messagesList);
+                    save(configurationTool, executionContextTool, messagesList, false);
                     break;
                 case UPDATE:
-                    update(configurationTool, executionContextTool, messagesList);
+                    save(configurationTool, executionContextTool, messagesList, true);
+                    break;
+                case SAVE:
+                    save(configurationTool, executionContextTool, messagesList, null);
                     break;
                 case DELETE:
                     delete(configurationTool, executionContextTool, messagesList);
@@ -156,21 +156,20 @@ public class LinearDBModule implements Module {
         fieldsIndexed = null;
         fieldsIndexed2 = null;
         fieldsIndexedNames = null;
-        indexElements = null;
-        indexElementsReady = false;
+        dbIndex = null;
     }
 
-    private void insert(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messageList) throws IOException {
+    private void save(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messageList, Boolean update) throws IOException {
         ObjectArray objectArray = ModuleUtils.deserializeToObject(messageList.get(0));
         if (!ModuleUtils.isArrayContainObjectElements(objectArray)) {
             executionContextTool.addError("need objectArray elements");
             return;
         }
-        configurationTool.loggerDebug("insert " + objectArray.size());
+        configurationTool.loggerDebug((update != null ? (update ? "update " : "insert ") : "save ") + objectArray.size());
         List<ObjectElement> elements = Stream.iterate(0, i -> i + 1)
                 .limit(objectArray.size())
                 .map(n -> (ObjectElement) objectArray.get(n))
-                .filter(o -> o.findField(fieldNameId).isEmpty())
+                .filter(o -> update == null || (update ? o.findField(fieldNameId).isPresent() : o.findField(fieldNameId).isEmpty()))
                 .map(e -> {
                     try {
                         return (ObjectElement) e.clone();
@@ -181,37 +180,7 @@ public class LinearDBModule implements Module {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         List<ObjectElement> result = db.save(elements);
-        indexElementsReady = false;
-        executionContextTool.addMessage(new ObjectArray(
-                result.stream()
-                        .flatMap(e -> e.findField(fieldNameId).map(ModuleUtils::getNumber).map(Number::longValue).stream())
-                        .collect(Collectors.toList()),
-                ObjectType.LONG
-        ));
-    }
-
-    private void update(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messageList) throws IOException {
-        ObjectArray objectArray = ModuleUtils.deserializeToObject(messageList.get(0));
-        if (!ModuleUtils.isArrayContainObjectElements(objectArray)) {
-            executionContextTool.addError("need objectArray elements");
-            return;
-        }
-        configurationTool.loggerDebug("update " + objectArray.size());
-        List<ObjectElement> elements = Stream.iterate(0, i -> i + 1)
-                .limit(objectArray.size())
-                .map(n -> (ObjectElement) objectArray.get(n))
-                .filter(o -> o.findField(fieldNameId).isPresent())
-                .map(e -> {
-                    try {
-                        return (ObjectElement) e.clone();
-                    } catch (CloneNotSupportedException ignored) {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        List<ObjectElement> result = db.save(elements);
-        indexElementsReady = false;
+        dbIndex.markDirtyIndexElements();
         executionContextTool.addMessage(new ObjectArray(
                 result.stream()
                         .flatMap(e -> e.findField(fieldNameId).map(ModuleUtils::getNumber).map(Number::longValue).stream())
@@ -228,9 +197,10 @@ public class LinearDBModule implements Module {
                 .collect(Collectors.toList());
 
         configurationTool.loggerDebug("delete " + ids.size());
-        List<IElement> elements = getIndexElements().stream().filter(e -> ids.contains(e.getId())).collect(Collectors.toList());
+        List<IElement> elements = ids.stream().flatMap(id -> dbIndex.findEquals(0, id)).collect(Collectors.toList());
+
         db.delete(elements);
-        indexElementsReady = false;
+        dbIndex.markDirtyIndexElements();
         executionContextTool.addMessage(new ObjectArray(
                 elements.stream()
                         .map(IElement::getId)
@@ -259,14 +229,12 @@ public class LinearDBModule implements Module {
         //         new LinkedList<>();
 
         configurationTool.loggerTrace(String.format("find filter=%s, skip=%s, limit=%s, sort=%s", filter, skip, limit, sort));
-        List<ObjectElement> elements = MyPredicateUtils.parse(filter, fieldsIndexedNames/*, placeHolderValues*/)
-                .map(p -> getIndexElements().stream().filter(p)
-                        .sorted(SortUtils.parse(sort, fieldsIndexedNames))
-                        .skip(skip)
-                        .limit(limit)
-                        .collect(Collectors.toList()))
-                .map(l -> db.get(l))
-                .orElse(List.of());
+        List<IElement> indexElements = PredicateUtils.find(filter, fieldsIndexedNames, dbIndex).stream()
+                .sorted(SortUtils.parse(sort, fieldsIndexedNames))
+                .skip(skip)
+                .limit(limit)
+                .collect(Collectors.toList());
+        List<ObjectElement> elements = db.get(indexElements);
         executionContextTool.addMessage(new ObjectArray((List) elements, ObjectType.OBJECT_ELEMENT));
     }
 
@@ -287,9 +255,7 @@ public class LinearDBModule implements Module {
         //         new LinkedList<>();
 
         configurationTool.loggerTrace(String.format("count filter=%s", filter));
-        Long result = MyPredicateUtils.parse(filter, fieldsIndexedNames/*, placeHolderValues*/)
-                .map(p -> getIndexElements().stream().filter(p).count())
-                .orElse(0L);
+        Integer result = PredicateUtils.find(filter, fieldsIndexedNames, dbIndex).size();
         executionContextTool.addMessage(result);
     }
 
@@ -310,12 +276,10 @@ public class LinearDBModule implements Module {
         //         new LinkedList<>();
 
         configurationTool.loggerTrace(String.format("deleteWhere filter=%s", filter));
-        List<IElement> elements = MyPredicateUtils.parse(filter, fieldsIndexedNames/*, placeHolderValues*/)
-                .map(p -> getIndexElements().stream().filter(p).collect(Collectors.toList()))
-                .orElse(List.of());
+        List<IElement> elements = PredicateUtils.find(filter, fieldsIndexedNames, dbIndex);
 
         db.delete(elements);
-        indexElementsReady = false;
+        dbIndex.markDirtyIndexElements();
         executionContextTool.addMessage(new ObjectArray(
                 elements.stream()
                         .map(IElement::getId)
@@ -372,30 +336,15 @@ public class LinearDBModule implements Module {
         // countAdditionalBytes = 4/*type*/ + 4/*size*/ +
         //         fieldsIndexed.stream().mapToInt(e -> DBIndex.countBytes(e.getValue())).sum() +
         //         fieldsIndexed.size() * 4/*value type*/;
-        this.countAdditionalBytes = this.fieldsIndexed.stream().mapToInt(e -> DBIndex.countBytes(e.getValue())).sum();
+        // this.countAdditionalBytes = this.fieldsIndexed.stream().mapToInt(e -> DBIndex.countBytes(e.getValue())).sum();
         this.fieldsIndexed2 = this.fieldsIndexed.stream()
                 .map(e -> Map.entry(ModuleUtils.splitFieldNames(e.getKey()), ModuleUtils.convertTo(e.getValue())))
                 .collect(Collectors.toList());
-        // indexes.clear();
-        // fieldsIndexed.forEach(e -> {
-        //     if (isNumber(e.getValue())) {
-        //         indexes.add(new TreeMap<Number, List<IElement>>());
-        //     } else {
-        //         indexes.add(new HashMap<>());
-        //     }
-        // });
+        dbIndex.updateIndexes(fieldsIndexed);
         this.fieldsIndexedNames = new ArrayList<>(fieldsIndexed.size() + 2);
         fieldsIndexedNames.add(fieldNameId);
         fieldsIndexedNames.add(fieldNameDate);
         fieldsIndexedNames.addAll(fieldsIndexed.stream().map(Map.Entry::getKey).collect(Collectors.toList()));
-    }
-
-    private List<IElement> getIndexElements() {
-        if (indexElements != null && indexElementsReady)
-            return indexElements;
-        indexElements = db.getIndexElements();
-        indexElementsReady = true;
-        return indexElements;
     }
 
     private enum IndexValueType {
@@ -403,7 +352,7 @@ public class LinearDBModule implements Module {
     }
 
     private enum Type {
-        INSERT, UPDATE, DELETE, FIND, COUNT, DELETE_WHERE, APPLY_LOG
+        INSERT, UPDATE, SAVE, DELETE, FIND, COUNT, DELETE_WHERE, APPLY_LOG
     }
 
 }

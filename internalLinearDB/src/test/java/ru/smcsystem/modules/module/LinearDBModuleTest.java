@@ -93,6 +93,21 @@ public class LinearDBModuleTest {
                         List.of(
                                 new Action(
                                         List.of(
+                                                new Message(new Value(new ObjectArray(
+                                                        new ObjectElement(new ObjectField("value1", 5), new ObjectField("value2", 6.), new ObjectField("value3", (String) null))
+                                                )))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "save", "save");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
                                                 new Message(new Value(new ObjectArray(new ObjectElement(
                                                         new ObjectField("filter", new ObjectElement(
                                                                 new ObjectField("t", "<="),
@@ -128,7 +143,49 @@ public class LinearDBModuleTest {
                                 new Action(
                                         List.of(
                                                 new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("filter", new ObjectElement(
+                                                        new ObjectField("t", "like"), new ObjectField("f", "value3"), new ObjectField("v", "v2%")))))))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "find", "find");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("filter", new ObjectElement(
+                                                        new ObjectField("t", "eq"), new ObjectField("f", "value3"), new ObjectField("v", (String) null)))))))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "find", "find");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("filter", new ObjectElement(
                                                         new ObjectField("t", "<="), new ObjectField("f", "value1"), new ObjectField("v", 3)))))))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "delete_where", "delete_where");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("filter", new ObjectElement(
+                                                        new ObjectField("t", "="), new ObjectField("f", "value3"), new ObjectField("v", (String) null)))))))
                                         ),
                                         ActionType.EXECUTE
                                 ))),
@@ -168,7 +225,7 @@ public class LinearDBModuleTest {
                                 new Action(
                                         List.of(
                                                 new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("filter", new ObjectElement(
-                                                        new ObjectField("t", "<="), new ObjectField("f", "value1"), new ObjectField("v", 100)))))))
+                                                        new ObjectField("t", ">"), new ObjectField("f", "value1"), new ObjectField("v", 0)))))))
                                         ),
                                         ActionType.EXECUTE
                                 ))),
@@ -179,4 +236,5 @@ public class LinearDBModuleTest {
         process.stop();
 
     }
+
 }

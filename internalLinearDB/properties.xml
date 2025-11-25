@@ -5,7 +5,7 @@
     <provider>java</provider>
     <os/>
     <arch/>
-    <ver>1.0.1</ver>
+    <ver>1.0.2</ver>
     <apiVer>1.4.2</apiVer>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
@@ -143,6 +143,43 @@ In addition to the specified fields, the indexes include the fields specified in
             </output>
             <ecs/>
         </type>
+        <type t="save" minS="1" maxS="1">
+            <description>
+                <entry k="ru">
+                    <value><![CDATA[Saves documents (1 or more).
+Works as both insert and update.
+If the _id (fieldNameId) field doesn't exist, it inserts as a new document; otherwise, it updates the existing document.
+Parameters are the same as insert and update.
+                    ]]></value>
+                </entry>
+                <entry k="ru">
+                    <value><![CDATA[Сохраняет документы (1 и более).
+Работает и как insert и как update.
+Если поле _id (fieldNameId) не существует, то вставляет как новый документ, иначе обновляет существующий.
+Параметры аналогичны insert и update.
+                    ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"value1":1, "value2":"v1", "_id":1}, {"value1":2, "value2":"v2", "_id":2}]]]></value>
+                            <description>
+                                <entry k="ru" v="Массив объектов, которые надо сохранить. Каждый объект - отдельный элемент."/>
+                                <entry k="en" v="An array of objects to be save. Each object is a separate element."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                    <value><![CDATA[[1,2]]]></value>
+                </element>
+            </output>
+            <ecs/>
+        </type>
         <type t="delete" minS="1" maxS="1">
             <description>
                 <entry k="en" v="Deletes objects (1 or more) by id (the field is specified by the fieldNameId setting)."/>
@@ -194,24 +231,27 @@ limit - максимальное количество элементов в от
     логическое ИЛИ
         значение: or или ||
         поля: p1 и p2. Они содержат другие фильтры
-    логическое НЕ
-        значение: not" или !
-        поля: p1. Они содержат другие фильтры
     равенство
         значение: "eq" или "="
         поля: f - имя поля, v - значение
-    меньше
+    не равенство
+        значение: "ne" или "!="
+        поля: f - имя поля, v - значение
+    меньше (только числа)
         значение: "lt" или "<"
         поля аналогичны равенству
-    больше
+    больше (только числа)
         значение: "gt" или ">"
         поля аналогичны равенству
-    меньше или равно
+    меньше или равно (только числа)
         значение: "le" или "<="
         поля аналогичны равенству
-    больше или равно
+    больше или равно (только числа)
         значение: "ge" или ">="
         поля аналогичны равенству
+    подобный (аналог sql like, только строки)
+        значение: "like"
+        поля: f - имя поля, v - значение
 
 Сортировка содержит объект с полями: f - имя поля, t - тип. Значения типа: asc и desc. По умолчанию asc.
                                     ]]></value>
@@ -226,30 +266,36 @@ limit - maximum number of elements in the response - number - default value - 10
 
 Filter - is responsible for filtering data. The fields depend on the filter type. Some filters can also contain other filters.
 All filters contain a t field, which determines the filter type. Filter types:
-    logical AND
+    Logical AND
         value: and or &&
         fields: p1 and p2. These contain other filters.
-    logical OR
+    Logical OR
         value: or or ||
         fields: p1 and p2. They contain other filters
-    logical NOT
+    Logical NOT
         value: not" or !
         fields: p1. They contain other filters
-    equality
+    Equality
         value: "eq" or "="
         fields: f - field name, v - value
-    less than
-        value: "lt" or "<"
-        fields are similar to equality
-    greater than
-        value: "gt" or ">"
-        fields are similar to equality
-    less than or equal to
-        value: "le" or "<="
-        fields are similar to equality
-    greater than or equal to
-        value: "ge" or ">="
-        fields are similar to equality
+    Not equal
+        Value: "ne" or "!="
+        Fields: f - field name, v - value
+    Less than (numbers only)
+        Value: "lt" or "<"
+        Fields similar to equality
+    Greater than (numbers only)
+        Value: "gt" or ">"
+        Fields similar to equality
+    Less than or equal (numbers only)
+        Value: "le" or "<="
+        Fields similar to equality
+    Greater than or equal (numbers only)
+        Value: "ge" or ">="
+        Fields similar to equality
+    Like (similar to SQL like, only strings)
+        Value: "like"
+        Fields: f - field name, v - value
 
 Sorting contains an object with fields: f - field name, t - type. Type values: asc and desc. Defaults to asc.
                                     ]]></value>

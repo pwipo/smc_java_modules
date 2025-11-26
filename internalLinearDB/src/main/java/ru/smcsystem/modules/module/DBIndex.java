@@ -111,14 +111,21 @@ public class DBIndex {
         IElement element = elements.iterator().next();
         Map<Object, Set<IElement>> mapDate = getIndexes(configurationTool).get(1);
         elements = mapDate.get(element.getDate());
-        if (elements != null)
+        if (elements != null) {
             elements.remove(element);
+            if (elements.isEmpty())
+                mapDate.remove(element.getDate());
+        }
         for (int i = 0; i < element.getAdditionalData().size(); i++) {
             Map<Object, Set<IElement>> indexMap = getIndexes(configurationTool).get(2 + i);
             Object v = element.getAdditionalData().get(i);
-            elements = indexMap.get(convert(v, fieldTypes.get(2 + i)));
-            if (elements != null)
+            Object indexId = convert(v, fieldTypes.get(2 + i));
+            elements = indexMap.get(indexId);
+            if (elements != null) {
                 elements.remove(element);
+                if (elements.isEmpty())
+                    indexMap.remove(indexId);
+            }
         }
     }
 

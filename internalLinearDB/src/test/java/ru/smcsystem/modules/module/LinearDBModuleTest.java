@@ -93,6 +93,20 @@ public class LinearDBModuleTest {
                         List.of(
                                 new Action(
                                         List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("filter", new ObjectElement(
+                                                        new ObjectField("t", "like"), new ObjectField("f", "value3"), new ObjectField("v", "v2%")))))))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "find", "find");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
                                                 new Message(new Value(new ObjectArray(
                                                         new ObjectElement(new ObjectField("value1", 5), new ObjectField("value2", 6.), new ObjectField("value3", (String) null))
                                                 )))
@@ -134,20 +148,6 @@ public class LinearDBModuleTest {
                                         ActionType.EXECUTE
                                 ))),
                 null, null, null, "count", "count");
-        process.execute(executionContextTool);
-        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
-
-        executionContextTool = new ExecutionContextToolImpl(
-                List.of(
-                        List.of(
-                                new Action(
-                                        List.of(
-                                                new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("filter", new ObjectElement(
-                                                        new ObjectField("t", "like"), new ObjectField("f", "value3"), new ObjectField("v", "v2%")))))))
-                                        ),
-                                        ActionType.EXECUTE
-                                ))),
-                null, null, null, "find", "find");
         process.execute(executionContextTool);
         executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
 

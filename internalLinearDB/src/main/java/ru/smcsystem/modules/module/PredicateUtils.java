@@ -4,6 +4,7 @@ import ru.seits.projects.lineardb.IElement;
 import ru.smcsystem.api.dto.ObjectArray;
 import ru.smcsystem.api.dto.ObjectElement;
 import ru.smcsystem.api.dto.ObjectField;
+import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.smc.utils.ModuleUtils;
 
 import java.util.*;
@@ -12,13 +13,13 @@ import java.util.stream.Stream;
 
 public class PredicateUtils {
 
-    public static List<IElement> find(ObjectElement element, List<String> fields, DBIndex dbIndex) {
-        return findPrv(element, fields, dbIndex).distinct().collect(Collectors.toList());
+    public static List<IElement> find(ConfigurationTool configurationTool, ObjectElement element, List<String> fields, DBIndex dbIndex) {
+        return findPrv(configurationTool, element, fields, dbIndex).distinct().collect(Collectors.toList());
     }
 
-    private static Stream<IElement> findPrv(ObjectElement element, List<String> fields, DBIndex dbIndex) {
+    private static Stream<IElement> findPrv(ConfigurationTool configurationTool, ObjectElement element, List<String> fields, DBIndex dbIndex) {
         if (element == null || element.getFields().isEmpty())
-            return dbIndex.getIndexElements().stream();
+            return dbIndex.getIndexElements(configurationTool).stream();
         if (fields == null || dbIndex == null)
             return Stream.of();
         return element.findFieldIgnoreCase("t")
@@ -32,7 +33,7 @@ public class PredicateUtils {
                             Object value = element.findFieldIgnoreCase("v")
                                     .map(ObjectField::getValue)
                                     .orElse(null);
-                            return dbIndex.findEquals(fields.indexOf(fieldName), value);
+                            return dbIndex.findEquals(configurationTool, fields.indexOf(fieldName), value);
                         }
                         case NOT_EQUALS: {
                             String fieldName = element.findFieldIgnoreCase("f").map(ModuleUtils::toString).orElse(null);
@@ -41,7 +42,7 @@ public class PredicateUtils {
                             Object value = element.findFieldIgnoreCase("v")
                                     .map(ObjectField::getValue)
                                     .orElse(null);
-                            return dbIndex.findNotEquals(fields.indexOf(fieldName), value);
+                            return dbIndex.findNotEquals(configurationTool, fields.indexOf(fieldName), value);
                         }
                         case LESS:
                         case LESS_OR_EQUAL: {
@@ -51,7 +52,7 @@ public class PredicateUtils {
                             Object value = element.findFieldIgnoreCase("v")
                                     .map(ObjectField::getValue)
                                     .orElse(null);
-                            return dbIndex.findLess(fields.indexOf(fieldName), value, t == PredicateType.LESS_OR_EQUAL);
+                            return dbIndex.findLess(configurationTool, fields.indexOf(fieldName), value, t == PredicateType.LESS_OR_EQUAL);
                         }
                         case GREATER:
                         case GREATER_OR_EQUAL: {
@@ -61,7 +62,7 @@ public class PredicateUtils {
                             Object value = element.findFieldIgnoreCase("v")
                                     .map(ObjectField::getValue)
                                     .orElse(null);
-                            return dbIndex.findGreater(fields.indexOf(fieldName), value, t == PredicateType.GREATER_OR_EQUAL);
+                            return dbIndex.findGreater(configurationTool, fields.indexOf(fieldName), value, t == PredicateType.GREATER_OR_EQUAL);
                         }
                         case LIKE: {
                             String fieldName = element.findFieldIgnoreCase("f").map(ModuleUtils::toString).orElse(null);
@@ -70,7 +71,7 @@ public class PredicateUtils {
                             String value = element.findFieldIgnoreCase("v")
                                     .map(ModuleUtils::toString)
                                     .orElse("");
-                            return dbIndex.findLike(fields.indexOf(fieldName), value);
+                            return dbIndex.findLike(configurationTool, fields.indexOf(fieldName), value);
                         }
                         case IN: {
                             String fieldName = element.findFieldIgnoreCase("f").map(ModuleUtils::toString).orElse(null);
@@ -83,13 +84,13 @@ public class PredicateUtils {
                             return Stream.iterate(0, i -> i + 1)
                                     .limit(arr.size())
                                     .map(arr::get)
-                                    .flatMap(o -> dbIndex.findEquals(indexOf, o));
+                                    .flatMap(o -> dbIndex.findEquals(configurationTool, indexOf, o));
                         }
                         case AND: {
                             List<IElement> lst1 = element.findFieldIgnoreCase("p1").map(ModuleUtils::getObjectElement)
-                                    .map(e -> findPrv(e, fields, dbIndex).collect(Collectors.toList())).orElse(List.of());
+                                    .map(e -> findPrv(configurationTool, e, fields, dbIndex).collect(Collectors.toList())).orElse(List.of());
                             List<IElement> lst2 = element.findFieldIgnoreCase("p2").map(ModuleUtils::getObjectElement)
-                                    .map(e -> findPrv(e, fields, dbIndex).collect(Collectors.toList())).orElse(List.of());
+                                    .map(e -> findPrv(configurationTool, e, fields, dbIndex).collect(Collectors.toList())).orElse(List.of());
                             List<IElement> resultLst = new ArrayList<>(lst1);
                             resultLst.retainAll(lst2);
                             return resultLst.stream();
@@ -97,9 +98,9 @@ public class PredicateUtils {
                         case OR: {
                             return Stream.concat(
                                     element.findFieldIgnoreCase("p1").map(ModuleUtils::getObjectElement)
-                                            .map(e -> findPrv(e, fields, dbIndex)).orElse(Stream.of()),
+                                            .map(e -> findPrv(configurationTool, e, fields, dbIndex)).orElse(Stream.of()),
                                     element.findFieldIgnoreCase("p2").map(ModuleUtils::getObjectElement)
-                                            .map(e -> findPrv(e, fields, dbIndex)).orElse(Stream.of())
+                                            .map(e -> findPrv(configurationTool, e, fields, dbIndex)).orElse(Stream.of())
                             );
                         }
                     }

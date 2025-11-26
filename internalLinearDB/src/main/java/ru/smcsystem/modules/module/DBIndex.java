@@ -7,6 +7,7 @@ import ru.smcsystem.api.dto.ObjectElement;
 import ru.smcsystem.api.dto.ObjectField;
 import ru.smcsystem.api.enumeration.ObjectType;
 import ru.smcsystem.api.enumeration.ValueType;
+import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.smc.utils.ModuleUtils;
 
 import java.io.DataInputStream;
@@ -42,16 +43,16 @@ public class DBIndex {
         this.indexElementsReady = false;
     }
 
-    public List<Map<Object, Set<IElement>>> getIndexes() {
-        getIndexElements();
+    public List<Map<Object, Set<IElement>>> getIndexes(ConfigurationTool configurationTool) {
+        getIndexElements(configurationTool);
         return indexes;
     }
 
-    public List<IElement> getIndexElements() {
+    public List<IElement> getIndexElements(ConfigurationTool configurationTool) {
         if (indexElements != null && indexElementsReady)
             return indexElements;
 
-        //rebuild indexes
+        configurationTool.loggerDebug("rebuild indexes start");
         //get all elements
         indexElements = db.getIndexElements();
 
@@ -69,37 +70,80 @@ public class DBIndex {
         //fill indexes
         Map<Object, Set<IElement>> mapId = indexes.get(0);
         Map<Object, Set<IElement>> mapDate = indexes.get(1);
-        indexElements.forEach(e -> {
-            mapId.computeIfAbsent(e.getId(), k -> new HashSet<>()).add(e);
-            mapDate.computeIfAbsent(e.getDate(), k -> new HashSet<>()).add(e);
-            for (int i = 0; i < e.getAdditionalData().size(); i++) {
-                Map<Object, Set<IElement>> indexMap = indexes.get(2 + i);
-                Object v = e.getAdditionalData().get(i);
-                indexMap.computeIfAbsent(convert(v, fieldTypes.get(2 + i)), k -> new HashSet<>()).add(e);
-            }
-        });
+        indexElements.forEach(e -> insertIndexElement(mapId, mapDate, e));
+        configurationTool.loggerDebug("rebuild indexes end, count elements " + indexElements.size());
 
         indexElementsReady = true;
         return indexElements;
     }
 
-    public void updateIndexes(List<Map.Entry<String, ValueType>> fieldsIndexed) {
+    private void insertIndexElement(Map<Object, Set<IElement>> mapId, Map<Object, Set<IElement>> mapDate, IElement element) {
+        Objects.requireNonNull(mapId, "mapId");
+        Objects.requireNonNull(mapDate, "mapDate");
+        Objects.requireNonNull(element, "element");
+        mapId.put(element.getId(), Set.of(element));
+        mapDate.computeIfAbsent(element.getDate(), k -> new HashSet<>()).add(element);
+        for (int i = 0; i < element.getAdditionalData().size(); i++) {
+            Map<Object, Set<IElement>> indexMap = indexes.get(2 + i);
+            Object v = element.getAdditionalData().get(i);
+            indexMap.computeIfAbsent(convert(v, fieldTypes.get(2 + i)), k -> new HashSet<>()).add(element);
+        }
+    }
+
+    public void insertOrUpdateIndexElement(ConfigurationTool configurationTool, IElement element) {
+        Objects.requireNonNull(element, "element");
+        Map<Object, Set<IElement>> mapId = getIndexes(configurationTool).get(0);
+        Map<Object, Set<IElement>> mapDate = getIndexes(configurationTool).get(1);
+
+        if (mapId.containsKey(element.getId()))
+            removeIndexElement(configurationTool, element);
+        insertIndexElement(mapId, mapDate, element);
+    }
+
+    public void removeIndexElement(ConfigurationTool configurationTool, IElement e) {
+        if (e == null)
+            return;
+        Map<Object, Set<IElement>> mapId = getIndexes(configurationTool).get(0);
+        Set<IElement> elements = mapId.remove(e.getId());
+        if (elements == null || elements.isEmpty())
+            return;
+
+        IElement element = elements.iterator().next();
+        Map<Object, Set<IElement>> mapDate = getIndexes(configurationTool).get(1);
+        elements = mapDate.get(element.getDate());
+        if (elements != null)
+            elements.remove(element);
+        for (int i = 0; i < element.getAdditionalData().size(); i++) {
+            Map<Object, Set<IElement>> indexMap = getIndexes(configurationTool).get(2 + i);
+            Object v = element.getAdditionalData().get(i);
+            elements = indexMap.get(convert(v, fieldTypes.get(2 + i)));
+            if (elements != null)
+                elements.remove(element);
+        }
+    }
+
+    public void updateIndexTypes(List<Map.Entry<String, ValueType>> fieldsIndexed) {
         Objects.requireNonNull(fieldsIndexed);
         this.fieldTypes.clear();
         this.fieldTypes.add(ValueType.LONG); //id
         this.fieldTypes.add(ValueType.LONG); //date
         this.fieldTypes.addAll(fieldsIndexed.stream().map(Map.Entry::getValue).collect(Collectors.toList()));
+        markDirtyIndexElements();
     }
 
-    public Stream<IElement> findEquals(int fieldId, Object value) {
-        Map<Object, Set<IElement>> indexMap = getIndexes().get(fieldId);
+    public Optional<IElement> findOne(ConfigurationTool configurationTool, Long id) {
+        return Optional.ofNullable(id).map(n -> getIndexes(configurationTool).get(0).get(n)).map(c -> c.iterator().next());
+    }
+
+    public Stream<IElement> findEquals(ConfigurationTool configurationTool, int fieldId, Object value) {
+        Map<Object, Set<IElement>> indexMap = getIndexes(configurationTool).get(fieldId);
         ValueType valueType = fieldTypes.get(fieldId);
         Object valueConverted = convert(value, valueType);
         return indexMap.getOrDefault(valueConverted, Set.of()).stream();
     }
 
-    public Stream<IElement> findNotEquals(int fieldId, Object value) {
-        Map<Object, Set<IElement>> indexMap = getIndexes().get(fieldId);
+    public Stream<IElement> findNotEquals(ConfigurationTool configurationTool, int fieldId, Object value) {
+        Map<Object, Set<IElement>> indexMap = getIndexes(configurationTool).get(fieldId);
         ValueType valueType = fieldTypes.get(fieldId);
         Object valueConverted = convert(value, valueType);
         return indexMap.entrySet().stream()
@@ -107,8 +151,8 @@ public class DBIndex {
                 .flatMap(e -> e.getValue().stream());
     }
 
-    public Stream<IElement> findLess(int fieldId, Object value, boolean inclusive) {
-        Map<Object, Set<IElement>> indexMap = getIndexes().get(fieldId);
+    public Stream<IElement> findLess(ConfigurationTool configurationTool, int fieldId, Object value, boolean inclusive) {
+        Map<Object, Set<IElement>> indexMap = getIndexes(configurationTool).get(fieldId);
         ValueType valueType = fieldTypes.get(fieldId);
         if (ModuleUtils.isNumber(valueType)) {
             Object valueConverted = convert(value, valueType);
@@ -118,8 +162,8 @@ public class DBIndex {
         return Stream.of();
     }
 
-    public Stream<IElement> findGreater(int fieldId, Object value, boolean inclusive) {
-        Map<Object, Set<IElement>> indexMap = getIndexes().get(fieldId);
+    public Stream<IElement> findGreater(ConfigurationTool configurationTool, int fieldId, Object value, boolean inclusive) {
+        Map<Object, Set<IElement>> indexMap = getIndexes(configurationTool).get(fieldId);
         ValueType valueType = fieldTypes.get(fieldId);
         if (ModuleUtils.isNumber(valueType)) {
             Object valueConverted = convert(value, valueType);
@@ -129,8 +173,8 @@ public class DBIndex {
         return Stream.of();
     }
 
-    public Stream<IElement> findLike(int fieldId, String value) {
-        Map<Object, Set<IElement>> indexMap = getIndexes().get(fieldId);
+    public Stream<IElement> findLike(ConfigurationTool configurationTool, int fieldId, String value) {
+        Map<Object, Set<IElement>> indexMap = getIndexes(configurationTool).get(fieldId);
         ValueType valueType = fieldTypes.get(fieldId);
         if (valueType == ValueType.STRING) {
             Pattern pattern = Pattern.compile(convertSqlLikeToRegex(value));

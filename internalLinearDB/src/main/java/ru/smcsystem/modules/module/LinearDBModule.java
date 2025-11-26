@@ -169,7 +169,7 @@ public class LinearDBModule implements Module {
         List<ObjectElement> elements = Stream.iterate(0, i -> i + 1)
                 .limit(objectArray.size())
                 .map(n -> (ObjectElement) objectArray.get(n))
-                .filter(o -> update == null || (update ? o.findField(fieldNameId).isPresent() : o.findField(fieldNameId).isEmpty()))
+                .filter(o -> update == null || (update ? o.findField(fieldNameId).map(ModuleUtils::getNumber).isPresent() : o.findField(fieldNameId).isEmpty()))
                 .map(e -> {
                     try {
                         return (ObjectElement) e.clone();
@@ -180,7 +180,16 @@ public class LinearDBModule implements Module {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         List<ObjectElement> result = db.save(elements);
-        dbIndex.markDirtyIndexElements();
+        try {
+            db.findIndexElements(
+                            result.stream()
+                                    .flatMap(o -> o.findField(fieldNameId).map(ModuleUtils::getNumber).map(Number::longValue).stream())
+                                    .collect(Collectors.toList()))
+                    .forEach(el -> dbIndex.insertOrUpdateIndexElement(configurationTool, el));
+        } catch (Exception ignored) {
+            // configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+            dbIndex.markDirtyIndexElements();
+        }
         executionContextTool.addMessage(new ObjectArray(
                 result.stream()
                         .flatMap(e -> e.findField(fieldNameId).map(ModuleUtils::getNumber).map(Number::longValue).stream())
@@ -197,10 +206,10 @@ public class LinearDBModule implements Module {
                 .collect(Collectors.toList());
 
         configurationTool.loggerDebug("delete " + ids.size());
-        List<IElement> elements = ids.stream().flatMap(id -> dbIndex.findEquals(0, id)).collect(Collectors.toList());
+        List<IElement> elements = ids.stream().flatMap(id -> dbIndex.findOne(configurationTool, id).stream()).collect(Collectors.toList());
 
         db.delete(elements);
-        dbIndex.markDirtyIndexElements();
+        elements.forEach(e -> dbIndex.removeIndexElement(configurationTool, e));
         executionContextTool.addMessage(new ObjectArray(
                 elements.stream()
                         .map(IElement::getId)
@@ -229,8 +238,10 @@ public class LinearDBModule implements Module {
         //         new LinkedList<>();
 
         configurationTool.loggerTrace(String.format("find filter=%s, skip=%s, limit=%s, sort=%s", filter, skip, limit, sort));
-        List<IElement> indexElements = PredicateUtils.find(filter, fieldsIndexedNames, dbIndex).stream()
-                .sorted(SortUtils.parse(sort, fieldsIndexedNames))
+        Stream<IElement> stream = PredicateUtils.find(configurationTool, filter, fieldsIndexedNames, dbIndex).stream();
+        if (fieldsIndexedNames != null && !fieldsIndexedNames.isEmpty())
+            stream = stream.sorted(SortUtils.parse(sort, fieldsIndexedNames));
+        List<IElement> indexElements = stream
                 .skip(skip)
                 .limit(limit)
                 .collect(Collectors.toList());
@@ -255,7 +266,7 @@ public class LinearDBModule implements Module {
         //         new LinkedList<>();
 
         configurationTool.loggerTrace(String.format("count filter=%s", filter));
-        Integer result = PredicateUtils.find(filter, fieldsIndexedNames, dbIndex).size();
+        Integer result = PredicateUtils.find(configurationTool, filter, fieldsIndexedNames, dbIndex).size();
         executionContextTool.addMessage(result);
     }
 
@@ -276,10 +287,10 @@ public class LinearDBModule implements Module {
         //         new LinkedList<>();
 
         configurationTool.loggerTrace(String.format("deleteWhere filter=%s", filter));
-        List<IElement> elements = PredicateUtils.find(filter, fieldsIndexedNames, dbIndex);
+        List<IElement> elements = PredicateUtils.find(configurationTool, filter, fieldsIndexedNames, dbIndex);
 
         db.delete(elements);
-        dbIndex.markDirtyIndexElements();
+        elements.forEach(e -> dbIndex.removeIndexElement(configurationTool, e));
         executionContextTool.addMessage(new ObjectArray(
                 elements.stream()
                         .map(IElement::getId)
@@ -299,6 +310,7 @@ public class LinearDBModule implements Module {
         configurationTool.loggerTrace(String.format("applyLog maxLogFile=%d logFileSize=%d", maxLogFile, logFileSize));
         db.close();
         db.open();
+        dbIndex.markDirtyIndexElements();
     }
 
     private List<ObjectField> findFields(ObjectElement objectElement, List<Map.Entry<String[], ObjectType>> fieldsIndexed) {
@@ -340,7 +352,7 @@ public class LinearDBModule implements Module {
         this.fieldsIndexed2 = this.fieldsIndexed.stream()
                 .map(e -> Map.entry(ModuleUtils.splitFieldNames(e.getKey()), ModuleUtils.convertTo(e.getValue())))
                 .collect(Collectors.toList());
-        dbIndex.updateIndexes(fieldsIndexed);
+        dbIndex.updateIndexTypes(fieldsIndexed);
         this.fieldsIndexedNames = new ArrayList<>(fieldsIndexed.size() + 2);
         fieldsIndexedNames.add(fieldNameId);
         fieldsIndexedNames.add(fieldNameDate);

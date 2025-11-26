@@ -5,7 +5,7 @@
     <provider>java</provider>
     <os/>
     <arch/>
-    <ver>1.0.2</ver>
+    <ver>1.0.3</ver>
     <apiVer>1.4.2</apiVer>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
@@ -219,7 +219,7 @@ Parameters are the same as insert and update.
                                     <key>ru</key>
                                     <value><![CDATA[Формат объекта:
 filter - фильтр - объект - опционален
-sort - сортировка - объект - по умолчанию сортировка по идентификатору
+sort - сортировка - объект - опционален
 skip - начальное смещение - число - значение по умолчанию - 0
 limit - максимальное количество элементов в ответе - число - значение по умолчанию - 10
 
@@ -260,7 +260,7 @@ limit - максимальное количество элементов в от
                                     <key>en</key>
                                     <value><![CDATA[Object format:
 filter - filter - object - optional
-sort - sorting - object - by default, sort by ID
+sort - sorting - object - optional
 skip - starting offset - number - default value - 0
 limit - maximum number of elements in the response - number - default value - 10
 

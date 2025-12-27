@@ -99,10 +99,11 @@ public class Dialogs implements Module {
             //         .flatMap(a -> a.getMessages().stream())
             //         .map(m -> m.getValue().toString())
             //         .collect(Collectors.joining());
-            String externalMessage = messagesAll.stream()
+            List<String> inputLst = messagesAll.stream()
                     .flatMap(Collection::stream)
-                    .map(m -> m.getValue().toString())
-                    .collect(Collectors.joining());
+                    .map(ModuleUtils::toString)
+                    .collect(Collectors.toList());
+            String externalMessage = String.join("", inputLst);
 
             String resultMessage = StringUtils.isNoneBlank(externalMessage) ? translate(externalMessage) : message;
             JFrame dummyFrame = createDummyFrame();
@@ -155,7 +156,7 @@ public class Dialogs implements Module {
                         showSelectDialog(executionContextTool, dummyFrame, title, message);
                         break;
                     case CHAT:
-                        showChatDialog(executionContextTool, title, message, externalMessage, "Add", "Clear");
+                        showChatDialog(executionContextTool, title, message, inputLst, "Add", "Clear");
                         break;
                 }
             } finally {
@@ -190,8 +191,10 @@ public class Dialogs implements Module {
     }
 
     private void showChatDialog(ExecutionContextTool executionContextTool, String title, String message,
-                                String inputLabel, String nameButtonAdd, String nameButtonClear) {
-        DialogChat dialogChat = new DialogChat(title, message, inputLabel, nameButtonAdd, nameButtonClear,
+                                List<String> inputLst, String nameButtonAdd, String nameButtonClear) {
+        String inputLabel = inputLst != null && !inputLst.isEmpty() ? inputLst.get(0) : "";
+        List<String> paths = inputLst != null && inputLst.size() > 1 ? inputLst.subList(1,  inputLst.size()) : null;
+        DialogChat dialogChat = new DialogChat(title, message, inputLabel, nameButtonAdd, nameButtonClear, paths,
                 executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0 ?
                         str -> {
                             long threadId = ModuleUtils.executeParallel(executionContextTool, 0, java.util.List.of(str));

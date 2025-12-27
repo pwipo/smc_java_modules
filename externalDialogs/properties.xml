@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Dialogs</className>
-    <ver>1.2.1</ver>
+    <ver>1.2.2</ver>
     <apiVer>1.4.0</apiVer>
     <date>18-08-2025</date>
 
@@ -65,7 +65,9 @@ dialog box type:
         The response is obtained by calling the first context, the entered text is passed to it, a value of any type is expected.
         If the context returned 2 values, the second is considered as the responder's identifier and is displayed in the header.
         If an ObjectArray containing objects is returned, it is displayed as a table.
-        If there are incoming messages, the text is considered as the questioner's identifier and is displayed in the header.
+        If there are incoming messages, then:
+            the text of the first one is treated as the requester's ID and displayed in the header.
+            the text of the second is treated as the field name or object path to be used if an array of objects is returned, for example: field1.innerObjField2
                     ]]></value>
                 </entry>
                 <entry>
@@ -85,7 +87,9 @@ dialog box type:
         Ответ получается, вызовом первого контекста, ему передается введенный текст, ожидается значение любого типа.
         Если контекст вернул 2 значения, то второе рассматривается как идентификатор ответившего и отображается в заголовке.
         Если возвращается ObjectArray содержащий объекты, то отображает его в виде таблицы.
-        Если есть входящие сообщения, то текст рассматривается как идентификатор спрашивающего и отображается в заголовке.
+        Если есть входящие сообщения, то:
+            текст первого рассматривается как идентификатор спрашивающего и отображается в заголовке.
+            текст второго рассматривается как имя поля или путь объекта, который будет использоваться если возвращается массив объектов, например: field1.innerObjField2
                     ]]></value>
                 </entry>
             </description>

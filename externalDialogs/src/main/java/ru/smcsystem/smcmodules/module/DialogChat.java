@@ -15,10 +15,8 @@ import java.awt.event.KeyEvent;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Vector;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,6 +26,7 @@ public class DialogChat {
     private final Function<String, Optional<List<IMessage>>> func;
     private final String inputLabel;
     public final JFrame frame;
+    private final List<String> paths;
     private JPanel panel;
     private JButton buttonAdd;
     private JButton buttonClear;
@@ -37,10 +36,11 @@ public class DialogChat {
     private JScrollPane scrollPane;
     private GridBagConstraints gbc;
 
-    public DialogChat(String title, String label, String inputLabel, String nameButtonAdd, String nameButtonClear, Function<String, Optional<List<IMessage>>> func) {
+    public DialogChat(String title, String label, String inputLabel, String nameButtonAdd, String nameButtonClear, List<String> paths, Function<String, Optional<List<IMessage>>> func) {
         this.func = func;
         this.inputLabel = inputLabel != null ? inputLabel : "";
         frame = new JFrame(title);
+        this.paths = paths;
         $$$setupUI$$$();
 
         labelHeader.setText(label);
@@ -64,7 +64,7 @@ public class DialogChat {
     }
 
     public static void main(String[] args) {
-        DialogChat dialogChat = new DialogChat("DialogChat", "Chat", "user", "Add", "Clear", null);
+        DialogChat dialogChat = new DialogChat("DialogChat", "Chat", "user", "Add", "Clear", null, null);
         dialogChat.frame.setVisible(true);
     }
 
@@ -124,17 +124,26 @@ public class DialogChat {
             if (ModuleUtils.isObjectArray(msg)) {
                 ObjectArray objectArray = ModuleUtils.getObjectArray(msg);
                 if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
-                    jPanelValue = new JPanel(new BorderLayout());
-                    JTable table = new JTable();
-                    table.setFillsViewportHeight(true);
-                    table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-                    initTable(table, objectArray, true);
-                    // JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-                    // scrollPane.setViewportView(table);
-                    jPanelValue.add(table.getTableHeader(), BorderLayout.NORTH);
-                    jPanelValue.add(table, BorderLayout.CENTER);
-                    // gbc.weighty = 1;
-                    // gbc.fill = GridBagConstraints.NONE;
+                    if (paths != null) {
+                        jPanelValue = createPanelValue(
+                                ModuleUtils.findFields(objectArray, paths).stream()
+                                        .flatMap(Collection::stream)
+                                        .map(ModuleUtils::toString)
+                                        .collect(Collectors.joining("\n")),
+                                Dialogs.isError(msg));
+                    } else {
+                        jPanelValue = new JPanel(new BorderLayout());
+                        JTable table = new JTable();
+                        table.setFillsViewportHeight(true);
+                        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                        initTable(table, objectArray, true);
+                        // JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                        // scrollPane.setViewportView(table);
+                        jPanelValue.add(table.getTableHeader(), BorderLayout.NORTH);
+                        jPanelValue.add(table, BorderLayout.CENTER);
+                        // gbc.weighty = 1;
+                        // gbc.fill = GridBagConstraints.NONE;
+                    }
                 } else if (objectArray.isSimple()) {
                     jPanelValue = createPanelValue(
                             Stream.iterate(0, i -> i + 1)

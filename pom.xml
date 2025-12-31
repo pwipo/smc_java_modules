@@ -39,6 +39,7 @@
         <module>internalValueTypeConverter</module>
         <module>externalWindowHtml</module>
         <module>internalLinearDB</module>
+        <module>internalSecurityJwt</module>
     </modules>
 
     <groupId>ru.smcsystem.modules</groupId>

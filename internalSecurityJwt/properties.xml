@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>SecurityJwt</uuid>
+    <provider>java</provider>
+    <os/>
+    <arch/>
+    <ver>1.0.0</ver>
+    <apiVer>1.4.2</apiVer>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>https://www.shelfmc.ru</homePage>
+    <className>ru.smcsystem.modules.module.SecurityJwt</className>
+    <categories>Java, Security, JWT</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value><![CDATA[The program is free for use.
+Forbidden: changing the program code, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            ]]></value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value><![CDATA[Программа бесплатна для использования.
+Запрещено: изменение кода программы, а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            ]]></value>
+        </entry>
+    </copyrightAndLicense>
+    <date>30-12-2025</date>
+
+    <defaultSettings>
+        <value>
+            <name>issuer</name>
+            <type>STRING</type>
+            <value>test.com</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Идентификатор выпускающей стороны.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Identifier of the issuing party.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>accessTokenExpires</name>
+            <type>INTEGER</type>
+            <value>180</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Время жизни токена доступа, в секундах.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Access token lifetime, in seconds.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>refreshTokenExpires</name>
+            <type>INTEGER</type>
+            <value>7200</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Время жизни токена обновления, в секундах.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Refresh token lifetime, in seconds.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>publicKey</name>
+            <type>STRING</type>
+            <value>public.key</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Имя файла публичного ключа.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Public key file name.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>privateKey</name>
+            <type>STRING</type>
+            <value>private.key</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Имя файла приватного ключа.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Private key file name.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>bcryptCost</name>
+            <type>INTEGER</type>
+            <value>12</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Количество итераций при генерации хеша. Экспоненциальная стоимость (логарифм по основанию 2) между 4 и 31, например, 12 --> 2^12 = 4096 итераций.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>The number of iterations to generate a hash. Exponential cost (logarithm to base 2) between 4 and 31, e.g., 12 --> 2^12 = 4096 iterations.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>authSleep</name>
+            <type>INTEGER</type>
+            <value>100</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Время сна перед аутентификацией (логином), в миллисекундах.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Sleep time before authentication (login), in milliseconds.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>fieldNames</name>
+            <type>STRING</type>
+            <value>email</value>
+            <subType>STRING</subType>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Имена дополнительных полей объекта пользователя, разделенных запятой, которые надо включить в токен.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>The comma-separated names of additional user object fields to include in the token.</value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+
+    <types>
+        <type t="login" minS="1" maxS="1" minEC="2" maxEC="3">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Вход (аутентификация). Требует 2-3 управляемых контекста исполнения.
+параметры:
+    строка - логин.
+    строка - пароль.
+управляемые контексты исполнения:
+    1 - вызывается для получения данных пользователя.
+        при вызове передает параметры:
+            строка - логин.
+        ожидает получить объект с полями:
+            id - число - идентификатор.
+            login - строка - имя пользователя.
+            password - строка или массив - пароль или его хеш.
+            disabled - число (опционально) - время отключения (в миллисекундах).
+            другие поля.
+    2 - вызывается для получения списка ролей.
+        при вызове передает параметры:
+            число - идентификатор пользователя.
+        ожидает получить массив объектов с полями:
+            id - число - идентификатор.
+            name - строка - имя роли.
+    3  - дополнительная проверка.
+        при вызове передает параметры:
+            число - идентификатор пользователя.
+        ожидает получить логическое значение. Если true, то проверка прошла успешно.
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Login (authentication). Requires 2-3 managed execution contexts.
+Parameters:
+    String - login.
+    String - password.
+Managed execution contexts:
+    1 - Called to retrieve user data.
+        When called, passes the following parameters:
+            String - login.
+        Expects an object with the following fields:
+            id - number - identifier.
+            login - string - username.
+            password - string or array - password or its hash.
+            disabled - number (optional) - disconnection time (in milliseconds).
+            other fields.
+    2 - Called to retrieve a list of roles.
+        When called, passes the following parameters:
+            Number - user identifier.
+        Expects an array of objects with the following fields:
+            id - number - identifier.
+            name - string - role name.
+    3 - Additional validation.
+        When called, passes the following parameters:
+            Number - user identifier.
+        Expects a Boolean value. If true, the validation was successful.
+                    ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="1">
+                            <description>
+                                <entry k="ru" v="логин"/>
+                                <entry k="en" v="login"/>
+                            </description>
+                        </element>
+                        <element t="VALUE" c="1" vt="STRING" v="1">
+                            <description>
+                                <description>
+                                    <entry k="ru" v="пароль"/>
+                                    <entry k="en" v="password"/>
+                                </description>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                    <value><![CDATA[[{"accessToken":"3454", "refreshToken":"123"}]]]></value>
+                    <description>
+                        <entry k="ru" v="объект с токенами доступа и обновления"/>
+                        <entry k="en" v="object with access and refresh tokens"/>
+                    </description>
+                </element>
+            </output>
+            <ecs>
+                <ec>
+                    <description>
+                        <entry k="ru" v="Вызывается для получения данных пользователя."/>
+                        <entry k="en" v="Called to retrieve user data."/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Логин пользователя."/>
+                                <entry k="en" v="User login."/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"id":1, "login":"user1", "password":"hash_password"}]]]></value>
+                            <description>
+                                <entry k="ru" v="объект пользователя"/>
+                                <entry k="en" v="user object"/>
+                            </description>
+                        </element>
+                    </output>
+                </ec>
+                <ec>
+                    <description>
+                        <entry k="ru" v="Вызывается для получения списка ролей."/>
+                        <entry k="en" v="Called to get a list of roles."/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Идентификатор пользователя."/>
+                                <entry k="en" v="User id."/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"id":1, "name":"users"}]]]></value>
+                            <description>
+                                <entry k="ru" v="объекты ролей"/>
+                                <entry k="en" v="role objects"/>
+                            </description>
+                        </element>
+                    </output>
+                </ec>
+                <ec o="true">
+                    <description>
+                        <entry k="ru" v="Дополнительная проверка"/>
+                        <entry k="en" v="Additional check"/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Идентификатор пользователя."/>
+                                <entry k="en" v="User id."/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="BOOLEAN" v="true"/>
+                    </output>
+                </ec>
+            </ecs>
+        </type>
+        <type t="gen_hash" minS="1" maxS="1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Сгенерировать хеш в виде строки.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Generate hash as string.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE_ANY" c="1" vt="INTEGER" v="1">
+                            <description>
+                                <entry k="ru" v="Значение."/>
+                                <entry k="en" v="Value."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="STRING" v="AQIDBAU="/>
+            </output>
+        </type>
+        <type t="has_role" minS="1" maxS="1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Проверяет, есть ли у пользователя (токена) роль. Роль должна быть в "groups".</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Checks whether the user (token) has a role. The role must be in "groups".</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"sub":"123", "groups":["users","admins"]}]]]></value>
+                            <description>
+                                <entry k="ru" v="Расшифрованный токен, представляет собой объект со всеми полями."/>
+                                <entry k="en" v="The decrypted token is an object with all fields."/>
+                            </description>
+                        </element>
+                        <element t="VALUE" c="1" vt="STRING" v="users">
+                            <description>
+                                <entry k="ru" v="Имя искомой роли"/>
+                                <entry k="en" v="Name of the role sought"/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="BOOLEAN" v="true"/>
+            </output>
+        </type>
+        <type t="parse" minS="1" maxS="1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Расшифровывает и проверяет токен доступа (строку), возвращает объект.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Decrypts and validates an access token (string), returns an object.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="slk234p;dor">
+                            <description>
+                                <entry k="ru" v="Токен доступа"/>
+                                <entry k="en" v="Access token"/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                    <value><![CDATA[[{"sub":"123", "isAT":"true", "groups":["users","admins"]}]]]></value>
+                    <description>
+                        <entry k="ru" v="Расшифрованный токен, представляет собой объект со всеми полями."/>
+                        <entry k="en" v="The decrypted token is an object with all fields."/>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type t="refresh_tokens" minS="1" maxS="1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Возвращает новую пару токенов (доступа и обновления) на основе существующего и валидного токена обновления.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Returns a new token pair (access and refresh) based on an existing and valid refresh token.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="slk234p;dor">
+                            <description>
+                                <entry k="ru" v="Токен обновления"/>
+                                <entry k="en" v="Refresh token"/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                    <value><![CDATA[[{"accessToken":"3454", "refreshToken":"123"}]]]></value>
+                    <description>
+                        <entry k="ru" v="объект с токенами доступа и обновления"/>
+                        <entry k="en" v="object with access and refresh tokens"/>
+                    </description>
+                </element>
+            </output>
+        </type>
+    </types>
+
+    <useStorage>true</useStorage>
+    <threadSafe>true</threadSafe>
+    <privateUsage>false</privateUsage>
+    <useVariables>false</useVariables>
+    <useManagement>false</useManagement>
+    <defaultExecutionContext/>
+
+    <description>
+        <entry k="en" v="The module provides tools for authentication and authorization based on JWT."/>
+        <entry k="ru" v="Модуль предоставляет средства для аутентификации и авторизации на основе JWT."/>
+    </description>
+
+    <help>
+        <entry>
+            <key>en</key>
+            <value><![CDATA[The module provides tools for authentication and authorization based on JWT.
+It allows you to log in, then parse and verify the access token, as well as reissue token pairs.
+Requires the following files to be installed: a private and public key.
+The SecurityKeyPair module can be used for generation. Note: JWT requires a key length of at least 2048 for RSA.
+            ]]></value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value><![CDATA[Модуль предоставляет средства для аутентификации и авторизации на основе JWT.
+Позволяет логинится, затем парсить и проверять токен доступа, а так же перевыпускать пары токенов.
+Для работы требует установленных файлов: закрытого и открытого ключа.
+Для генерациии можно использовать модуль SecurityKeyPair. Внимание, JWT требует для rsa длину ключа от 2048.
+            ]]></value>
+        </entry>
+    </help>
+
+    <examples/>
+    <icon/>
+
+</properties>

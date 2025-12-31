@@ -35,3 +35,4 @@
 /externalHttpServer/tomcat.8080/
 /externalWindowHtml/target/
 /internalLinearDB/target/
+/internalSecurityJwt/target/

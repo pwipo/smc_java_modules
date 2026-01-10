@@ -406,7 +406,9 @@ public class SecurityJwt implements Module {
      * @throws io.jsonwebtoken.JwtException if the token is invalid or expired.
      */
     private Claims parseToken(String token) {
-        if (token != null && token.startsWith("Bearer "))
+        if (token == null || token.isBlank())
+            return null;
+        if (token.startsWith("Bearer "))
             token = token.substring(7);
         Jws<Claims> claimsJws = parser.parseClaimsJws(token);
         // Return the claims payload from the validated token

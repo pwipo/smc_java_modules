@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<properties>
+
+    <uuid>LogicGui</uuid>
+    <provider>java</provider>
+    <os/>
+    <arch/>
+    <ver>1.0.0</ver>
+    <apiVer>1.4.2</apiVer>
+    <author>Nikolay V. Ulyanov</author>
+    <contacts>ulianownv@mail.ru</contacts>
+    <homePage>http://www.shelfmc.ru</homePage>
+    <className>ru.smcsystem.modules.module.LogicGui</className>
+    <categories>Logic, Algorithm, Gui</categories>
+    <copyrightAndLicense>
+        <entry>
+            <key>en</key>
+            <value><![CDATA[The program is free for use.
+Forbidden: changing the program code, as well as other actions and rights not explicitly permitted.
+The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
+            ]]></value>
+        </entry>
+        <entry>
+            <key>ru</key>
+            <value><![CDATA[Программа бесплатна для использования.
+Запрещено: изменение кода программы, а так же иные не разрешенные явно действия и права.
+Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
+            ]]></value>
+        </entry>
+    </copyrightAndLicense>
+    <date>30-03-2025</date>
+
+    <defaultSettings>
+        <value>
+            <name>shapeId</name>
+            <type>STRING</type>
+            <value></value>
+            <subType>STRING</subType>
+            <description>
+                <entry k="ru">
+                    <value><![CDATA[Идентификатор начальной фигуры.
+Не должно быть пусто. Используется для нахождения фигуры с таким именем и генерацией логики на основе найденных связанных элементов.
+                    ]]></value>
+                </entry>
+                <entry k="en">
+                    <value><![CDATA[The ID of the starting shape.
+Must not be empty. Used to find a shape with this name and generate logic based on the associated elements found.
+                    ]]></value>
+                </entry>
+            </description>
+        </value>
+    </defaultSettings>
+
+    <types>
+        <type type="execute" minS="0" maxS="-1" minEC="0" maxEC="-1" minC="0" maxC="0">
+            <description>
+                <entry k="ru">
+                    <value><![CDATA[Контекст исполнения по умолчанию.
+Используется для исполнения логики.
+Все что подается на вход, может быть использовано логикой (переменная $src{n} $src1).
+Управляемые контексты вызываются по мере необходимости.
+Возвращаемые данные зависят от логики.
+                    ]]></value>
+                </entry>
+                <entry k="en">
+                    <value><![CDATA[The default execution context.
+Used for logic execution.
+Any input can be used by the logic (the $src{n} $src1 variable).
+Managed contexts are invoked as needed.
+The returned data depends on the logic.
+                    ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>-1</count>
+                    <elements>
+                        <element t="VALUE_ANY" c="-1" vt="STRING" v="test"/>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE_ANY" c="-1" vt="STRING" v="Hello world"/>
+            </output>
+            <ecs/>
+        </type>
+    </types>
+
+    <useStorage>false</useStorage>
+    <threadSafe>true</threadSafe>
+    <privateUsage>false</privateUsage>
+    <useVariables>false</useVariables>
+    <useManagement>false</useManagement>
+    <defaultExecutionContext/>
+
+    <description>
+        <entry k="en" v="A module for building custom logic defined using vector graphics on a Manner-Scheme block."/>
+        <entry k="ru" v="Модуль для исполнения настраиваемой логики, заданную с помощью векторной графики на манер блок-схем."/>
+    </description>
+
+    <help>
+        <entry k="en">
+            <value><![CDATA[A module for building custom logic defined using vector graphics on a Manner-Scheme block.
+Supports three types of operations: conditional jump (if), running a controlled context, and data output (printing).
+Each type has its own symbol.
+More details:
+    - conditional jump - graphic symbol - diamond.
+        Depending on the condition's outcome: if positive, the branch (the one on the left) is executed; otherwise, the branch on the right is executed.
+        A condition is a binary logical expression consisting of two results and an operation. The result of executing a condition is a logical value (yes/no).
+        Condition format - specified in the test or description of the following lines: 1 - first value, 2 - operation, 3 - second value.
+        Operations: eq, ==, ne, !=, lt, <, gt, >, le, <=, ge, >=, contains, startWith, endWith.
+        Explanation is provided below.
+    - Launch context - Graphic shape - Rotation.
+        Launches the specified context with the specified parameters. The response is stored in an internal variable, for example, the first context is $ec0, the second is $ec1...
+        The number and parameters (values) are specified in the test or description. Format: the first line contains a number—the context number—in each separate value.
+    - Data output - Graphic shape - Circle.
+        Outputs opposite values. After executing the logic, they are formed as the resulting data.
+        Format: each line contains a separate value.
+
+The value can be a string, a number, a Boolean value, or a reference to an internal variable.
+Format:
+    String - enclosed in quotation marks, "test"
+    Number - a number, 1, 2.4
+    Boolean value – true, false
+    Reference - a string describing access to results within a specific scope.
+        The following reference types are available:
+            Input data - $src{n}. Example: Get the last value from the first source - $src0.-1, get the values of field1 of the object passed as the first value of the first source - $src0.0.field1.
+            Context execution result - $ec{n}. Example: Get the last value from the first context - $ec0.-1, get the values of the field1 object passed as the first value of the first context - $ec0.0.field1.
+            Parameter - $param. Example: Get the last value - $param.-1, get the values of field1 of the object passed as the first value - $param.0.field1.
+            Result - $result. Example: Get the last value - $result.-1, get the values of the field1 object passed as the first value - $result.0.field1.
+
+Links between elements. A line shape is used for this. To create a link, simply drag it between two shapes.
+The structures from the first element specified by the shapeId setting are linked.
+
+It's convenient to use when you're defining the logic for a sequence of long configurations, since creating a separate module for unique logic is inappropriate.
+For example, it's well-suited for processing web requests.
+                    ]]></value>
+        </entry>
+        <entry k="ru">
+            <value><![CDATA[Модуль для исполнения настраиваемой логики, заданную с помощью векторной графики на манер блок-схем.
+Поддерживает 3 типа операций: условный переход (if), запуск управляемого контекста, вывод (печать) данных.
+Для каждого из типов есть своя фигура.
+Подробнее:
+    - условный переход - графическая фигура - ромб.
+        Позволяет исполнять одну из двух веток в зависимости от результатов исполнения условия: если положительное - исполняет левую ветку (ту что левее), иначе правую ветку.
+        Условие, это бинарное логическое выражение, состоящее из двух значений и операции. Результатом исполнения условия будет логическое значение (да/нет).
+        Формат условия - задается в тесте или описании тремя строками: 1 - первое значение, 2 - операция, 3 - второе значение.
+        Операции: eq, ==, ne, !=, lt, <, gt,>, le, <=, ge, >=, contains, startWith, endWith.
+        Про значении написано далее.
+    - запуск контекста - графическая фигура - прямоугольник.
+        Запускает заданный контекст с заданными параметрами. Ответ записывает во внутреннюю переменную, например первый контекст $ec0, второй $ec1...
+        Номер и параметры (значения) задаются в тесте или описании. Формат: в первой строке число - номер контекста, в каждой последующей отдельное значение.
+    - вывод данных - графическая фигура - круг.
+        Выводит указанные значения. После исполнения логики они выводятся как результирующие данные.
+        Формат: в каждой строке отдельное значение.
+
+Значение может быть строкой, числом, булевым значением, или ссылкой на внутреннюю переменную.
+Формат:
+    строка - обрамлена двойными кавычками, "test"
+    число - число, 1, 2.4
+    логическое значение - true, false
+    ссылка - это строка, описывающая доступ к значению внутри какой-то области.
+        есть следующие типы ссылок:
+            входные данные - $src{n}. Пример: получить последнее значение из первого источника - $src0.-1, получение значения поля field1 объекта, который передан в качестве первого значения первого источника - $src0.0.field1.
+            результат выполнения контекста - $ec{n}. Пример: получить последнее значение из первого контекста - $ec0.-1, получение значения поля field1 объекта, который передан в качестве первого значения первого контекста - $ec0.0.field1.
+            параметр - $param. Пример: получить последнее значение - $param.-1, получение значения поля field1 объекта, который передан в качестве первого значения - $param.0.field1.
+            результат - $result. Пример: получить последнее значение - $result.-1, получение значения поля field1 объекта, который передан в качестве первого значения - $result.0.field1.
+
+Связи между элементами. Для этого используется фигура - линия. Для связи просто протяните её между двумя фигурами.
+Связи строятся от первого элемента, заданного настройкой shapeId.
+
+Удобно использовать в случаях, когда прописывать логику черед конфигурации долго, а создавать отдельный модуль для уникальной логики не уместно.
+Например, хорошо подходит для обработки веб запросов.
+                    ]]></value>
+        </entry>
+    </help>
+
+    <icon>iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA8ElEQVR4nO3asQ6CQBAA0bGkpPT/OztjZ6yw82O0w3KNxhaD54kuzCTbcQFfSMyRAzMzs3faAOcPZ0vieiAqTHqANdAWzGwAmsL1AiAAApC4XgAECAEQoClcLwACIACJ6wXg8QMuhd8C0gMcK3wLOJG8dsR+/9U1sy6yv+KfJgACIAALLiac+1/yogGCPywmejABEAAB+MNCAOYNsBu53391zX7EfQ4V7tNlPh8QlabJej4gntMWzvXbAE3h+ncBfvWcgwmAAAiAAAhAWQIgAAJQ77qhBEAABOCLALHU7fC+wkN1E55DWNUGMDMzM2bRDQi11q0XTAYVAAAAAElFTkSuQmCC</icon>
+
+</properties>

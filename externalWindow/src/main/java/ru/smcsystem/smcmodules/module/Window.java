@@ -65,6 +65,48 @@ public class Window implements Module {
         useTreeSelectionEvents = Boolean.valueOf((String) configurationTool.getSetting("useTreeSelectionEvents").orElseThrow(() -> new ModuleException("useTreeSelectionEvents setting")).getValue());
         defaultButton = (String) configurationTool.getSetting("defaultButton").orElseThrow(() -> new ModuleException("defaultButton setting")).getValue();
 
+        String shapeId = configurationTool.getSetting("shapeId").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("shapeId setting"));
+        Shape shape = null;
+        Map<String, byte[]> mapImages = new HashMap<>();
+        if (!shapeId.isBlank()) {
+            configurationTool.loggerTrace("start shape generator");
+            List<Shape> shapes = ModuleUtils.convertFromObjectArray(configurationTool.getContainer().getDecorationShapes(), Shape.class, true, true);
+            shape = shapes.stream().filter(s -> Objects.equals(s.getName(), shapeId)).findFirst().orElse(null);
+            if (shape != null) {
+                List<ShapeElementXml> elements = shapes.stream()
+                        .filter(s -> Objects.equals(s.getParentName(), shapeId))
+                        // .sorted(Comparator.comparing(s -> s.getX() * s.getY()))
+                        .sorted((s1, s2) -> Math.abs(s1.getY() - s2.getY()) < 6 ? s1.getX().compareTo(s2.getX()) : s1.getY().compareTo(s2.getY()))
+                        .map(s -> new ShapeElementXml(s, shapes))
+                        .filter(s -> s.getType() != null)
+                        .collect(Collectors.toList());
+                configurationTool.loggerTrace("count root shapes " + elements.size());
+                shapes.stream()
+                        .filter(e -> e.getImageBytes() != null)
+                        .forEach(e -> mapImages.put(e.getName(), e.getImageBytes()));
+                String bodyChildsHtml = elements.stream()
+                        .map(s -> s.genXml("\t"))
+                        .collect(Collectors.joining("\n"));
+                if (!bodyChildsHtml.isBlank()) {
+                    if (shape.getDescription() != null && !shape.getDescription().isBlank())
+                        bodyChildsHtml = String.format("\t<layout type=\"%s\" />\n%s", shape.getDescription().trim().split("\\s+")[0], bodyChildsHtml);
+                    if (!configuration.isBlank() && configuration.contains("<frame")) {
+                        int indexOf = configuration.indexOf("<frame");
+                        indexOf = configuration.indexOf(">", indexOf);
+                        if (indexOf != -1)
+                            configuration = configuration.substring(0, indexOf + 1);
+                        configuration = configuration + String.format("\n%s\n</frame>", bodyChildsHtml);
+                    } else {
+                        configuration = String.format("<frame xmlns=\"http://www.swixml.org/2007/SwixmlTags\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
+                                "xsi:schemaLocation=\"http://www.swixml.org/2007/SwixmlTags http://www.swixml.org/2007/swixml.xsd\" size=\"640,480\" title=\"[[title]]\" " +
+                                "defaultCloseOperation=\"JFrame.EXIT_ON_CLOSE\" " +
+                                ">\n%s\n</frame>", bodyChildsHtml);
+                    }
+                    configurationTool.loggerTrace(configuration);
+                }
+            }
+        }
+
         String lang = (String) configurationTool.getSetting("lang").orElseThrow(() -> new ModuleException("lang setting")).getValue();
         if (!lang.isBlank()) {
             String[] arrMessages = lang.split(";;");
@@ -86,7 +128,7 @@ public class Window implements Module {
         }
 
         try {
-            mainForm = new MainForm(configuration);
+            mainForm = new MainForm(configuration, mapImages);
             mainForm.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         } catch (Exception e) {
             throw new ModuleException(e.getMessage(), e);

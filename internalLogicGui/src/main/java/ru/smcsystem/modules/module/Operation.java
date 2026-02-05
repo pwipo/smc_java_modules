@@ -105,7 +105,7 @@ public class Operation {
                 .filter(s -> isPointInShape(s.getX(), s.getY(), shape) || isPointInShape(s.getPoint2X(), s.getPoint2Y(), shape))
                 .map(s -> shapes.stream()
                         .filter(s2 -> s2.getType() != ShapeType.line)
-                        .filter(s2 -> !s2.equals(s) && !s2.equals(shape) && !parents.contains(s2))
+                        .filter(s2 -> !s2.equals(s) && !s2.equals(shape) && !parents.contains(s2) && Objects.equals(s2.getParentName(), s.getParentName()))
                         .filter(s2 -> isPointInShape(s.getX(), s.getY(), s2) || isPointInShape(s.getPoint2X(), s.getPoint2Y(), s2))
                         .min(Comparator.comparing(s2 -> s2.getWidth() + s2.getHeight())).orElse(null))
                 .filter(Objects::nonNull)
@@ -332,20 +332,33 @@ public class Operation {
     }
 
     public ObjectElement toObject() {
-        return new ObjectElement(
+        ObjectElement element = new ObjectElement(
                 new ObjectField("name", name),
-                new ObjectField("type", type.name()),
-                new ObjectField("predicateType", predicateType != null ? predicateType.name() : null),
-                new ObjectField("ecId", ecId),
-                new ObjectField("values", new ObjectArray(
-                        values.stream()
-                                .map(o -> o instanceof List ? new ObjectArray((List) o, ObjectType.STRING) : new ObjectArray(List.of(o), ObjectType.VALUE_ANY))
-                                .collect(Collectors.toList()),
-                        ObjectType.OBJECT_ARRAY)),
-                new ObjectField("childs", new ObjectArray(
-                        childs.stream().map(Operation::toObject).collect(Collectors.toList()),
-                        ObjectType.OBJECT_ELEMENT))
+                new ObjectField("type", type.name())
         );
+        switch (type) {
+            case IF:
+                element.getFields().add(new ObjectField("predicateType", predicateType != null ? predicateType.name() : null));
+                break;
+            case CALL:
+                element.getFields().add(new ObjectField("ecId", ObjectType.INTEGER, ecId));
+                break;
+            case RESULT:
+                break;
+        }
+        if (!values.isEmpty()) {
+            element.getFields().add(new ObjectField("values", new ObjectArray(
+                    values.stream()
+                            .map(o -> o instanceof List ? new ObjectArray((List) o, ObjectType.STRING) : new ObjectArray(List.of(o), ObjectType.VALUE_ANY))
+                            .collect(Collectors.toList()),
+                    ObjectType.OBJECT_ARRAY)));
+        }
+        if (!childs.isEmpty()) {
+            element.getFields().add(new ObjectField("childs", new ObjectArray(
+                    childs.stream().map(Operation::toObject).collect(Collectors.toList()),
+                    ObjectType.OBJECT_ELEMENT)));
+        }
+        return element;
     }
 
 }

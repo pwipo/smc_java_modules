@@ -6,4 +6,5 @@ module ru.smcsystem.modules.externalWindow {
     requires org.apache.commons.collections4;
     requires ru.smcsystem.utils;
     requires jdk.dynalink;
+    exports ru.smcsystem.smcmodules.module;
 }

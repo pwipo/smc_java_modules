@@ -5,8 +5,8 @@
     <provider>java</provider>
     <os/>
     <arch/>
-    <ver>1.0.0</ver>
-    <apiVer>1.4.2</apiVer>
+    <ver>1.0.1</ver>
+    <apiVer>1.4.3</apiVer>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.shelfmc.ru</homePage>
@@ -52,7 +52,7 @@ Must not be empty. Used to find a shape with this name and generate logic based 
     </defaultSettings>
 
     <types>
-        <type type="execute" minS="0" maxS="-1" minEC="0" maxEC="-1" minC="0" maxC="0">
+        <type t="execute" minS="0" maxS="-1" minEC="0" maxEC="-1" minC="0" maxC="0">
             <description>
                 <entry k="ru">
                     <value><![CDATA[Контекст исполнения по умолчанию.
@@ -89,8 +89,8 @@ The returned data depends on the logic.
     <useStorage>false</useStorage>
     <threadSafe>true</threadSafe>
     <privateUsage>false</privateUsage>
-    <useVariables>false</useVariables>
-    <useManagement>false</useManagement>
+    <useVariables>true</useVariables>
+    <useManagement>true</useManagement>
     <defaultExecutionContext/>
 
     <description>

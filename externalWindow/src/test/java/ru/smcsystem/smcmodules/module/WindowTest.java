@@ -1,14 +1,16 @@
 package ru.smcsystem.smcmodules.module;
 
 import org.junit.Test;
+import ru.smcsystem.api.dto.IValue;
+import ru.smcsystem.api.dto.ObjectArray;
+import ru.smcsystem.api.dto.ObjectElement;
+import ru.smcsystem.api.dto.ObjectField;
 import ru.smcsystem.api.enumeration.ActionType;
 import ru.smcsystem.api.enumeration.MessageType;
 import ru.smcsystem.test.Process;
 import ru.smcsystem.test.emulate.*;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class WindowTest {
 
@@ -581,6 +583,197 @@ public class WindowTest {
         process.execute(executionContextTool2);
         executionContextTool2.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
         executionContextTool2.getOutput().clear();
+
+        // Thread.sleep(50000);
+        thread.join();
+
+        process.stop();
+    }
+
+    @Test
+    public void processGui() throws InterruptedException {
+        Map<String, IValue> settings = new HashMap<>(Map.of(
+                "mode", new Value("ACTIVE"),
+                "getPressedKeys", new Value("false"),
+                "printElements", new Value("false"),
+                "sleep", new Value(1000),
+                "useButtonEvents", new Value("true"),
+                "useMenuEvents", new Value("true"),
+                "useListSelectionEvents", new Value("true"),
+                "useTreeSelectionEvents", new Value("true"),
+                "defaultButton", new Value(""),
+                "configuration", new Value("")
+        ));
+        settings.put("shapeId", new Value("root"));
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        settings,
+                        null,
+                        null
+                ),
+                new Window()
+        );
+        process.getConfigurationTool().getAllSettings().put("lang", new Value(""));
+        ((Container) process.getConfigurationTool().getContainer()).setShapes(new ObjectArray(
+                new ObjectElement(
+                        new ObjectField("type", "rectangle"),
+                        new ObjectField("name", "root"),
+                        new ObjectField("description", "borderlayout"/*"flowlayout"*/),
+                        new ObjectField("x", 1),
+                        new ObjectField("y", 1),
+                        new ObjectField("width", 100),
+                        new ObjectField("height", 200),
+                        new ObjectField("color", 1),
+                        new ObjectField("strokeWidth", 1)
+                ),
+                new ObjectElement(
+                        new ObjectField("type", "text"),
+                        new ObjectField("name", "text1"),
+                        new ObjectField("parentName", "root"),
+                        new ObjectField("description", "label\nconstraints=\"NORTH\""),
+                        new ObjectField("x", 10),
+                        new ObjectField("y", 10),
+                        new ObjectField("width", 280),
+                        new ObjectField("height", 20),
+                        new ObjectField("color", 167716),
+                        new ObjectField("strokeWidth", 1),
+                        new ObjectField("filled", true),
+                        new ObjectField("text", "hello world"),
+                        new ObjectField("fontSize", 10)
+                ),
+                new ObjectElement(
+                        new ObjectField("type", "rectangle"),
+                        new ObjectField("name", "input1"),
+                        new ObjectField("parentName", "root"),
+                        new ObjectField("description", "textarea\ncol=\"10\" constraints=\"SOUTH\""),
+                        new ObjectField("x", 10),
+                        new ObjectField("y", 40),
+                        new ObjectField("width", 70),
+                        new ObjectField("height", 50),
+                        new ObjectField("color", 1),
+                        new ObjectField("strokeWidth", 1)
+                ),
+                new ObjectElement(
+                        new ObjectField("type", "rectangle"),
+                        new ObjectField("name", "btn"),
+                        new ObjectField("parentName", "root"),
+                        new ObjectField("description", "button\nconstraints=\"EAST\""),
+                        new ObjectField("x", 10),
+                        new ObjectField("y", 100),
+                        new ObjectField("width", 70),
+                        new ObjectField("height", 20),
+                        new ObjectField("color", 103546),
+                        new ObjectField("text", "ok"),
+                        new ObjectField("strokeWidth", 1),
+                        new ObjectField("filled", false)
+                ),
+                new ObjectElement(
+                        new ObjectField("type", "rectangle"),
+                        new ObjectField("name", "panel1"),
+                        new ObjectField("parentName", "root"),
+                        new ObjectField("description", "panel\nconstraints=\"CENTER\""),
+                        new ObjectField("x", 20),
+                        new ObjectField("y", 150),
+                        new ObjectField("width", 80),
+                        new ObjectField("height", 50),
+                        new ObjectField("color", 167716),
+                        new ObjectField("strokeWidth", 2),
+                        new ObjectField("filled", false)
+                ),
+                new ObjectElement(
+                        new ObjectField("type", "rectangle"),
+                        new ObjectField("name", "image1"),
+                        new ObjectField("parentName", "panel1"),
+                        new ObjectField("description", "label\nconstraints=\"CENTER\""),
+                        new ObjectField("x", 1),
+                        new ObjectField("y", 1),
+                        new ObjectField("width", 80),
+                        new ObjectField("height", 50),
+                        new ObjectField("color", 1),
+                        new ObjectField("strokeWidth", 1),
+                        new ObjectField("filled", false),
+                        new ObjectField("imageBytes", Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAXklEQVR4nO2VsQ3AQAgDPR77j0AGcZqPFKXBvD6IRH8SHeYKFwB/xAAcAJgcH9kQnzjOmyTkWs5CNVcu4GOivX4ClS0IWVYyxdL7CFT6Crg7KBf42w/HJiWuvsxvcQKeF6eSI+Oa/gAAAABJRU5ErkJggg=="))
+                )
+        ));
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                null
+                , null
+                , null,
+                List.of(
+                        args -> {
+                            System.out.println(args);
+                            return new Action(
+                                    List.of(
+                                            new Message(new Value(1)),
+                                            new Message(new Value("text1"))
+                                    )
+                                    , ActionType.EXECUTE
+                            );
+                        }
+                )
+                // , null
+        );
+
+        Thread thread = new Thread(() -> {
+            process.execute(executionContextTool);
+            executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+            executionContextTool.getOutput().clear();
+        });
+        thread.start();
+        // process.execute(executionContextTool);
+
+        Thread.sleep(1000);
+
+        ExecutionContextToolImpl executionContextTool2 = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(1)),
+                                                new Message(new Value("input1"))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))), null, null);
+        process.execute(executionContextTool2);
+        executionContextTool2.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool2.getOutput().clear();
+
+        Thread.sleep(5000);
+
+        ExecutionContextToolImpl executionContextTool3 = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(MessageType.DATA, new Date(), new Value(2)),
+                                                new Message(MessageType.DATA, new Date(), new Value("input1")),
+                                                new Message(MessageType.DATA, new Date(), new Value("test1"))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))), null, null);
+        process.execute(executionContextTool3);
+        executionContextTool3.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool3.getOutput().clear();
+
+        Thread.sleep(5000);
+
+        ExecutionContextToolImpl executionContextTool4 = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(MessageType.DATA, new Date(), new Value(0))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))), null, null);
+        process.execute(executionContextTool4);
+        executionContextTool4.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool4.getOutput().clear();
 
         // Thread.sleep(50000);
         thread.join();

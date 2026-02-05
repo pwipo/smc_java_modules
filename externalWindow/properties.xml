@@ -10,25 +10,25 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Window</className>
-    <ver>1.1.2</ver>
-    <apiVer>1.4.0</apiVer>
-    <date>27-01-2025</date>
+    <ver>1.2.0</ver>
+    <apiVer>1.4.3</apiVer>
+    <date>04-02-2026</date>
 
     <defaultSettings>
         <value>
@@ -92,34 +92,34 @@ The program is supplied as is. For problems arising during the operation or inst
             <name>configuration</name>
             <type>STRING</type>
             <value><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-                <frame
-                        xmlns="http://www.swixml.org/2007/SwixmlTags"
-                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                        xsi:schemaLocation="http://www.swixml.org/2007/SwixmlTags http://www.swixml.org/2007/swixml.xsd"
-                        size="640,480" title="[[title]]" defaultCloseOperation="JFrame.EXIT_ON_CLOSE">
+<frame
+        xmlns="http://www.swixml.org/2007/SwixmlTags"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.swixml.org/2007/SwixmlTags http://www.swixml.org/2007/swixml.xsd"
+        size="640,480" title="[[title]]" defaultCloseOperation="JFrame.EXIT_ON_CLOSE">
 
-                    <layout type="borderlayout"/>
+    <layout type="borderlayout"/>
 
-                    <panel constraints="BorderLayout.NORTH">
-                        <labelHeader font="Georgia-BOLD-36" text="[[north]]"/>
-                        <textfield id="northInput" columns="20" Text="[[north]]"/>
-                        <button id="buttonNorth" text="[[button]]"/>
-                    </panel>
+    <panel constraints="BorderLayout.NORTH">
+        <label font="Georgia-BOLD-36" text="[[north]]"/>
+        <textfield id="northInput" columns="20" Text="[[north]]"/>
+        <button id="buttonNorth" text="[[button]]"/>
+    </panel>
 
-                    <panel constraints="BorderLayout.CENTER">
-                        <labelHeader font="Georgia-BOLD-36" text="[[center]]"/>
-                        <textfield id="centerInput" columns="20" Text="[[center]]"/>
-                        <button id="buttonCenter" text="[[button]]"/>
-                    </panel>
+    <panel constraints="BorderLayout.CENTER">
+        <label font="Georgia-BOLD-36" text="[[center]]"/>
+        <textfield id="centerInput" columns="20" Text="[[center]]"/>
+        <button id="buttonCenter" text="[[button]]"/>
+    </panel>
 
-                    <panel constraints="BorderLayout.SOUTH">
-                        <labelHeader font="Georgia-BOLD-36" id="out" text="[[south]]"/>
-                        <textfield id="southInput" columns="20" Text="[[south]]"/>
-                        <button id="buttonSouth" text="[[button]]"/>
-                    </panel>
+    <panel constraints="BorderLayout.SOUTH">
+        <label font="Georgia-BOLD-36" id="out" text="[[south]]"/>
+        <textfield id="southInput" columns="20" Text="[[south]]"/>
+        <button id="buttonSouth" text="[[button]]"/>
+    </panel>
 
-                </frame>]]>
-            </value>
+</frame>
+            ]]></value>
             <subType>XML</subType>
             <description>
                 <entry>
@@ -242,12 +242,12 @@ The program is supplied as is. For problems arising during the operation or inst
         <value>
             <name>lang</name>
             <type>STRING</type>
-            <value>north::en::NORTH::ru::Север;;
+            <value><![CDATA[north::en::NORTH::ru::Север;;
 center::en::CENTER::ru::Центор;;
 south::en::SOUTH::ru::Юг;;
 button::en::BUTTON::ru::Кнопка;;
 title::en::Text::ru::Текст;;
-            </value>
+            ]]></value>
             <description>
                 <entry>
                     <key>ru</key>
@@ -259,11 +259,30 @@ title::en::Text::ru::Текст;;
                 </entry>
             </description>
         </value>
+        <value>
+            <name>shapeId</name>
+            <type>STRING</type>
+            <value></value>
+            <subType>STRING</subType>
+            <description>
+                <entry k="ru">
+                    <value><![CDATA[Идентификатор фигуры (квадрата).
+Если не пусто, то используется для нахождения фигуры с таким именем и генерацией xml на основе найденных дочерних элементов.
+Переписывает configuration.
+                    ]]></value>
+                </entry>
+                <entry k="en">
+                    <value><![CDATA[The shape (square) identifier.
+If not empty, it is used to find a shape with that name and generate XML based on the found child elements.
+Overrides configuration.
+                    ]]></value>
+                </entry>
+            </description>
+        </value>
     </defaultSettings>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minS="0" maxS="-1" minEC="0" maxEC="-1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -274,12 +293,6 @@ title::en::Text::ru::Текст;;
                     <value>Default execution context.</value>
                 </entry>
             </description>
-            <minCountSources>1</minCountSources>
-            <maxCountSources>-1</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>-1</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>0</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>0</maxCountManagedConfigurations>
             <sources>
                 <source>
                     <count>-1</count>
@@ -926,7 +939,11 @@ title::en::Text::ru::Текст;;
         </type>
     </types>
 
+    <useStorage>false</useStorage>
     <threadSafe>true</threadSafe>
+    <privateUsage>false</privateUsage>
+    <useVariables>false</useVariables>
+    <useManagement>true</useManagement>
 
     <description>
         <entry>
@@ -942,7 +959,7 @@ title::en::Text::ru::Текст;;
     <help>
         <entry>
             <key>en</key>
-            <value>The module is a simple configurable graphic window.
+            <value><![CDATA[The module is a simple configurable graphic window.
 The module uses the swixml library.
 For configuration, use the documentation at http://www.swixml.org.
 work in two modes:
@@ -1023,12 +1040,34 @@ work in two modes:
         if launched without contexts but with sources: perceives them as commands and executes them. the command format is described above.
         if it starts without contexts and without sources and the window is already running: closes the window.
 
+The configuration works in two modes:
+    html - uses manually specified XML via the configuration setting.
+    generator - uses an XML generator based on graphic shapes (rectangles) - shapeId setting.
+    For shapes, the value of the description field is used to set all parameters. General format:
+    element_name
+    [attributes, example: key1="value1" key2="value2" key3="value3"]
+    [child_elements, text in swixml format]
+
+    element_name - swixml tag, for example: panel, label, textfield, textarea, button, etc.
+    attributes - swixml tag attributes, single line, for example: text="test" col="10". Inserted as is.
+    child_elements - XML text, can be multi-line. If specified, child elements will not be generated from shapes, but the ones specified here will be used. Use with caution.
+
+    An id attribute is added to all elements, the value of which will be the shape's name.
+    The preferredSize field will be set based on the shape's size; for example, preferredSize="100,100"
+    If the shape has text, it will be inserted as the text value.
+    If the shape is text, a font attribute with the current font and the specified size will be inserted; for example, font="Dialog-0-10".
+    For the panel element:
+        the layout attribute (for example, layout="borderlayout") is converted to <layout type="borderlayout"/>.
+        If the border is different from 1, a border tag is added; for example, border="MatteBorder(2,2,2,2,028f24)"
+    The root element's description may contain a string, for example, borderlayout. If it is present, the first word is converted to a child layout tag: <layout type="borderlayout"/>.
+    If the color is other than black, the foreground attribute is added, for example, foreground="01947a". If the shape is marked as filled, the background attribute is added.
+
 There is an opportunity to internationalize the text. To do this, use the lang setting. In the text, the variable name is surrounded by double quotes: [[message]].
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Модуль представляет собой простое конфигурируемое графическое окно.
+            <value><![CDATA[Модуль представляет собой простое конфигурируемое графическое окно.
 Модуль использует библиотеку swixml.
 По конфигурации используйсте документацию сайта http://www.swixml.org.
 
@@ -1110,8 +1149,30 @@ There is an opportunity to internationalize the text. To do this, use the lang s
         если запускается без контекстов но с источниками: воспринимает их как команды и исполняет их. формат команд описан выше.
         если запускается без контекстов и без источников и окно уже запущено: закрывет окно.
 
+Конфигурация работает в 2 режимах:
+    html - использую вручную заданный xml через настройку configuration.
+    генератор - использует генератор xml на основе графических фигур (прямоугольников) - настройку shapeId.
+        У фигур значение поля описания используется для задания всех параметров. Общий формат:
+        имя_элемента
+        [аттрибуты, пример: ключ1="значение1" ключ2="значение2" ключ3="значение3"]
+        [дочерние_элементы, текст в формате swixml]
+
+        имя_элемента - swixml тег, например: panel, label, textfield, textarea, button и тп.
+        аттрибуты - аттрибуты swixml тега, одна строка, например: text="test" col="10". Вставляются как есть.
+        дочерние_элементы - xml текст, может быть многострочным. Если указан, то дочерние элементы не будут генерироваться из фигур, а будет использоваться, то что указано тут. Использовать с осторожностью.
+
+        Всем элементам добавляется атрибут id, значение которого будет имя фигуры.
+        На основе размера фигур будет установлено поле preferredSize, пример preferredSize="100,100"
+        Если у фигуры есть текст, то он будет вставлен в качестве значения text.
+        Если фигура это текст, то будет вставлен атрибут - font с текущим шрифтом и заданным размером, пример: font="Dialog-0-10".
+        Для элемента panel:
+                атрибут layout (например layout="borderlayout") преобразуется в <layout type="borderlayout"/>.
+                если граница отличается от 1, то добавляется тег border, пример border="MatteBorder(2,2,2,2,028f24)"
+        У корневого элемента в описании может быть указана строка, например borderlayout, если она есть, то первое слово преобразуется в дочерний тег layout: <layout type="borderlayout"/>.
+        Если цвет отличен от черного, то добавляется атрибут foreground, например foreground="01947a". Если фигура отмечена как заполненная (filled), то добавляется атрибут background.
+
 Есть возможность по интернационализации текста. Для этого используется настройка lang. В тексте имя переменной обрамляется двойными кавыйчками: [[message]].
-            </value>
+            ]]></value>
         </entry>
     </help>
 
@@ -1175,6 +1236,6 @@ There is an opportunity to internationalize the text. To do this, use the lang s
             <countManagedConfigurations>0</countManagedConfigurations>
         </example>
     </examples>
-    <icon>iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAAv0lEQVRoge3ZQQqDMBQE0GkRD1Xs+UzPVXoUc4y2my9uUv9PwTjKPAhmEWGGn10AEREh0QN4AMgAPmRrApAsoysRBPZWihSZ7PAtcrixActkXHPrPbwAPJ19Md9182h13lhC/tqH7TmRiGK+zvnhMNiu1t/WJnJplqJO8aacZiIqwkZF2KgIGxVhoyJsVISNirBRETYqwkZF2KgIm1MXyfYdWgYJuts3r54yR3joGSNFeiszP/gwraqnNxER2dwXI5K6ndppw4AAAAAASUVORK5CYII=</icon>
+    <icon><![CDATA[iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAAv0lEQVRoge3ZQQqDMBQE0GkRD1Xs+UzPVXoUc4y2my9uUv9PwTjKPAhmEWGGn10AEREh0QN4AMgAPmRrApAsoysRBPZWihSZ7PAtcrixActkXHPrPbwAPJ19Md9182h13lhC/tqH7TmRiGK+zvnhMNiu1t/WJnJplqJO8aacZiIqwkZF2KgIGxVhoyJsVISNirBRETYqwkZF2KgIm1MXyfYdWgYJuts3r54yR3joGSNFeiszP/gwraqnNxER2dwXI5K6ndppw4AAAAAASUVORK5CYII=]]></icon>
 
 </properties>

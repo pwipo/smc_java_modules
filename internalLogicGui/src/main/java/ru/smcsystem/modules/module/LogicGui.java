@@ -2,6 +2,8 @@ package ru.smcsystem.modules.module;
 
 import ru.smcsystem.api.dto.IMessage;
 import ru.smcsystem.api.dto.IValue;
+import ru.smcsystem.api.dto.ObjectArray;
+import ru.smcsystem.api.dto.ObjectElement;
 import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
@@ -22,16 +24,21 @@ public class LogicGui implements Module {
         List<Shape> shapes = null;
         if (!shapeId.isBlank()) {
             // configurationTool.loggerTrace("start shape generator");
-            shapes = configurationTool.getInfo("decorationShapes").map(ModuleUtils::getObjectArray)
+            /*
+            shapes = shapes = configurationTool.getInfo("decorationShapes").map(ModuleUtils::getObjectArray)
                     .filter(ModuleUtils::isArrayContainObjectElements)
                     .map(a -> ModuleUtils.convertFromObjectArray(a, Shape.class, true, true))
                     .orElse(List.of());
+            */
+            shapes = ModuleUtils.convertFromObjectArray(configurationTool.getContainer().getDecorationShapes(), Shape.class, true, true);
             shape = shapes.stream().filter(s -> Objects.equals(s.getName(), shapeId)).findFirst().orElse(null);
         }
         if (shape == null)
             throw new ModuleException("shape not found");
         operation = new Operation(configurationTool, shape, shapes, new LinkedList<>());
-        configurationTool.loggerTrace(operation.toObject().toString());
+        ObjectElement resultConfig = operation.toObject();
+        configurationTool.loggerTrace(resultConfig.toString());
+        configurationTool.setVariable("config", new ObjectArray(resultConfig));
     }
 
     @Override

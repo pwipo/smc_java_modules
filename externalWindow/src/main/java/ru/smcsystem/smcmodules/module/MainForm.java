@@ -18,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -27,7 +28,7 @@ public class MainForm extends JFrame {
 
     private final SwingEngine<JFrame> engine;
 
-    public MainForm(String configuration) throws Exception {
+    public MainForm(String configuration, Map<String, byte[]> mapImages) throws Exception {
         for (Constructor ct : org.swixml.MacApp.class.getDeclaredConstructors())
             ct.setAccessible(true);
         engine = new SwingEngine<>(this);
@@ -35,6 +36,7 @@ public class MainForm extends JFrame {
             engine.render(sr);
         }
         // setActions(this, actionListener);
+        mapImages.forEach(this::setValue);
     }
 
     public void setActions(Container parent, ActionListener action, ListSelectionListener listSelectionListener, TreeSelectionListener treeSelectionListener) {

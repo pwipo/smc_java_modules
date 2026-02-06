@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Window</className>
-    <ver>1.2.0</ver>
+    <ver>1.2.1</ver>
     <apiVer>1.4.3</apiVer>
     <date>04-02-2026</date>
 
@@ -1057,10 +1057,10 @@ The configuration works in two modes:
     If the shape has text, it will be inserted as the text value.
     If the shape is text, a font attribute with the current font and the specified size will be inserted; for example, font="Dialog-0-10".
     For the panel element:
-        the layout attribute (for example, layout="borderlayout") is converted to <layout type="borderlayout"/>.
+        The layout attribute (e.g., layout="borderlayout") is converted to <layout type="borderlayout"/>. By default, flowlayout is used.
         If the border is different from 1, a border tag is added; for example, border="MatteBorder(2,2,2,2,028f24)"
-    The root element's description may contain a string, for example, borderlayout. If it is present, the first word is converted to a child layout tag: <layout type="borderlayout"/>.
-    If the color is other than black, the foreground attribute is added, for example, foreground="01947a". If the shape is marked as filled, the background attribute is added.
+    The root element's description may contain a string, such as flowlayout. If so, the first word is converted to a child layout tag: <layout type="flowlayout"/>. By default, borderlayout is used.
+    If the color is anything other than black, a foreground attribute is added; for example, foreground="01947a" . If the shape is marked as filled, a background attribute is added.
 
 There is an opportunity to internationalize the text. To do this, use the lang setting. In the text, the variable name is surrounded by double quotes: [[message]].
             ]]></value>
@@ -1166,9 +1166,9 @@ There is an opportunity to internationalize the text. To do this, use the lang s
         Если у фигуры есть текст, то он будет вставлен в качестве значения text.
         Если фигура это текст, то будет вставлен атрибут - font с текущим шрифтом и заданным размером, пример: font="Dialog-0-10".
         Для элемента panel:
-                атрибут layout (например layout="borderlayout") преобразуется в <layout type="borderlayout"/>.
+                атрибут layout (например layout="borderlayout") преобразуется в <layout type="borderlayout"/>. По умолчанию используется flowlayout.
                 если граница отличается от 1, то добавляется тег border, пример border="MatteBorder(2,2,2,2,028f24)"
-        У корневого элемента в описании может быть указана строка, например borderlayout, если она есть, то первое слово преобразуется в дочерний тег layout: <layout type="borderlayout"/>.
+        У корневого элемента в описании может быть указана строка, например flowlayout, если она есть, то первое слово преобразуется в дочерний тег layout: <layout type="flowlayout"/>. По умолчанию используется borderlayout.
         Если цвет отличен от черного, то добавляется атрибут foreground, например foreground="01947a". Если фигура отмечена как заполненная (filled), то добавляется атрибут background.
 
 Есть возможность по интернационализации текста. Для этого используется настройка lang. В тексте имя переменной обрамляется двойными кавыйчками: [[message]].

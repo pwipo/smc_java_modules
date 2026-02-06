@@ -93,10 +93,11 @@ public class ShapeElementXml {
         }
 
         innerHtmlDirect = null;
-        if (Objects.equals(type, "panel") && htmlElementAttrs.containsKey("layout")) {
+        if (Objects.equals(type, "panel")) {
             String layout = htmlElementAttrs.get("layout");
-            if (!layout.isBlank())
-                innerHtmlDirect = String.format("<layout type=\"%s\" />", layout);
+            if (layout == null || !layout.isBlank())
+                layout = "flowlayout";
+            innerHtmlDirect = String.format("<layout type=\"%s\" />", layout);
         }
     }
 

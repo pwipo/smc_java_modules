@@ -623,8 +623,8 @@ public class WindowTest {
                         new ObjectField("description", "borderlayout"/*"flowlayout"*/),
                         new ObjectField("x", 1),
                         new ObjectField("y", 1),
-                        new ObjectField("width", 100),
-                        new ObjectField("height", 200),
+                        new ObjectField("width", 400),
+                        new ObjectField("height", 300),
                         new ObjectField("color", 1),
                         new ObjectField("strokeWidth", 1)
                 ),

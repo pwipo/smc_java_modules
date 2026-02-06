@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Window implements Module {
-
     private MainForm mainForm;
 
     private enum Mode {
@@ -51,6 +50,7 @@ public class Window implements Module {
     private Set<Integer> releasedKeys;
 
     private Consumer<Object> func;
+    private Map<String, byte[]> mapImages;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -67,7 +67,7 @@ public class Window implements Module {
 
         String shapeId = configurationTool.getSetting("shapeId").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("shapeId setting"));
         Shape shape = null;
-        Map<String, byte[]> mapImages = new HashMap<>();
+        mapImages = new HashMap<>();
         if (!shapeId.isBlank()) {
             configurationTool.loggerTrace("start shape generator");
             List<Shape> shapes = ModuleUtils.convertFromObjectArray(configurationTool.getContainer().getDecorationShapes(), Shape.class, true, true);
@@ -88,19 +88,27 @@ public class Window implements Module {
                         .map(s -> s.genXml("\t"))
                         .collect(Collectors.joining("\n"));
                 if (!bodyChildsHtml.isBlank()) {
+                    String layout = "borderlayout";
                     if (shape.getDescription() != null && !shape.getDescription().isBlank())
-                        bodyChildsHtml = String.format("\t<layout type=\"%s\" />\n%s", shape.getDescription().trim().split("\\s+")[0], bodyChildsHtml);
+                        layout = shape.getDescription().trim().split("\\s+")[0];
+                    bodyChildsHtml = String.format("\t<layout type=\"%s\" />\n%s", layout, bodyChildsHtml);
+                    String size = String.format("size=\"%d,%d\"", shape.getWidth(), shape.getHeight());
                     if (!configuration.isBlank() && configuration.contains("<frame")) {
                         int indexOf = configuration.indexOf("<frame");
                         indexOf = configuration.indexOf(">", indexOf);
                         if (indexOf != -1)
                             configuration = configuration.substring(0, indexOf + 1);
+                        if (configuration.contains("size=")) {
+                            configuration = configuration.replaceAll("size=\"\\d+,\\d+\"", size);
+                        } else {
+                            configuration = configuration.trim() + " " + size;
+                        }
                         configuration = configuration + String.format("\n%s\n</frame>", bodyChildsHtml);
                     } else {
                         configuration = String.format("<frame xmlns=\"http://www.swixml.org/2007/SwixmlTags\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-                                "xsi:schemaLocation=\"http://www.swixml.org/2007/SwixmlTags http://www.swixml.org/2007/swixml.xsd\" size=\"640,480\" title=\"[[title]]\" " +
+                                "xsi:schemaLocation=\"http://www.swixml.org/2007/SwixmlTags http://www.swixml.org/2007/swixml.xsd\" %s title=\"[[title]]\" " +
                                 "defaultCloseOperation=\"JFrame.EXIT_ON_CLOSE\" " +
-                                ">\n%s\n</frame>", bodyChildsHtml);
+                                ">\n%s\n</frame>", size, bodyChildsHtml);
                     }
                     configurationTool.loggerTrace(configuration);
                 }
@@ -128,7 +136,7 @@ public class Window implements Module {
         }
 
         try {
-            mainForm = new MainForm(configuration, mapImages);
+            mainForm = new MainForm(configuration);
             mainForm.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         } catch (Exception e) {
             throw new ModuleException(e.getMessage(), e);
@@ -612,6 +620,7 @@ public class Window implements Module {
                 mainForm.requestFocusInWindow();
                 mainForm.toFront();
             });
+            mapImages.forEach(mainForm::setValue);
         }).start();
     }
 
@@ -660,6 +669,7 @@ public class Window implements Module {
             // releasedKeys = null;
         }
         // sleepTime = null;
+        mapImages = null;
     }
 
 }

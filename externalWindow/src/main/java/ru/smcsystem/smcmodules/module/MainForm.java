@@ -28,7 +28,7 @@ public class MainForm extends JFrame {
 
     private final SwingEngine<JFrame> engine;
 
-    public MainForm(String configuration, Map<String, byte[]> mapImages) throws Exception {
+    public MainForm(String configuration) throws Exception {
         for (Constructor ct : org.swixml.MacApp.class.getDeclaredConstructors())
             ct.setAccessible(true);
         engine = new SwingEngine<>(this);
@@ -36,7 +36,6 @@ public class MainForm extends JFrame {
             engine.render(sr);
         }
         // setActions(this, actionListener);
-        mapImages.forEach(this::setValue);
     }
 
     public void setActions(Container parent, ActionListener action, ListSelectionListener listSelectionListener, TreeSelectionListener treeSelectionListener) {
@@ -132,10 +131,13 @@ public class MainForm extends JFrame {
                 ((JRadioButtonEx) component).setSelected(((Number) value).intValue() > 0);
                 // } else if (component instanceof JTreeEx) {
             } else if (component instanceof JLabelEx) {
+                JLabelEx label = (JLabelEx) component;
                 if (value instanceof byte[]) {
-                    ((JLabelEx) component).setIcon(new ImageIcon((byte[]) value));
+                    ImageIcon originalIcon = new ImageIcon((byte[]) value);
+                    Image scaledImage = originalIcon.getImage().getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_SMOOTH);
+                    label.setIcon(new ImageIcon(scaledImage));
                 } else {
-                    ((JLabelEx) component).setText(value.toString());
+                    label.setText(value.toString());
                 }
             } else if (component instanceof JButton) {
                 ((JButton) component).setText(value.toString());

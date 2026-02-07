@@ -154,7 +154,6 @@ public class MainForm extends JFrame {
         if (!(component instanceof JTextAreaEx))
             throw new NoSuchElementException(id);
         JTextAreaEx textArea = (JTextAreaEx) component;
-        ;
 
         // search words
         Highlighter h = textArea.getHighlighter();

@@ -10,52 +10,140 @@
     <copyrightAndLicense>
         <entry>
             <key>en</key>
-            <value>The author and copyright holder is Nikolay V. Ulyanov.
+            <value><![CDATA[The author and copyright holder is Nikolay V. Ulyanov.
 The program is free for use.
 Forbidden: changing the program code, its sale / resale, as well as other actions and rights not explicitly permitted.
 The program is supplied as is. For problems arising during the operation or installation of the program, the author, developer and distributor are not responsible.
-            </value>
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Автором и правообладателем является Ульянов Николай Владимирович.
+            <value><![CDATA[Автором и правообладателем является Ульянов Николай Владимирович.
 Программа бесплатна для использования.
 Запрещено: изменение кода программы, её продажа/перепродажа а так же иные не разрешенные явно действия и права.
 Программа поставляется как есть. За проблемы, возникающие в процессе эксплуатации или установки программы, автор, разработчик и распространитель ответственности не несут.
-            </value>
+            ]]></value>
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.configurationControllerPrintSettings.PrintSettings</className>
-    <ver>1.1.0</ver>
-    <apiVer>1.4.0</apiVer>
-    <date>23-10-2023</date>
+    <ver>1.2.0</ver>
+    <apiVer>1.4.3</apiVer>
+    <date>13-02-2026</date>
 
     <types>
-        <type>
-            <type>default</type>
+        <type t="default" minC="1" maxC="-1">
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Контекст исполнения по умолчанию.</value>
+                    <value>Выводит все настройки всех управляемых конфигураций.</value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Default execution context.</value>
+                    <value>Displays all settings for all managed configurations.</value>
                 </entry>
             </description>
-            <minCountSources>0</minCountSources>
-            <maxCountSources>0</maxCountSources>
-            <minCountManagedExecutionContexts>0</minCountManagedExecutionContexts>
-            <maxCountManagedExecutionContexts>0</maxCountManagedExecutionContexts>
-            <minCountManagedConfigurations>1</minCountManagedConfigurations>
-            <maxCountManagedConfigurations>-1</maxCountManagedConfigurations>
             <sources/>
             <output>
-                <element>
-                    <type>VALUE_ANY</type>
-                    <count>-1</count>
-                    <valueType>STRING</valueType>
-                    <value>settings</value>
+                <element t="VALUE" vt="INTEGER" v="1">
+                    <description>
+                        <entry k="ru" v="Количество конфигураций"/>
+                        <entry k="en" v="Configurations count"/>
+                    </description>
+                </element>
+                <element t="FOR">
+                    <countValueId>-1</countValueId>
+                    <elements>
+                        <element t="VALUE" o="true" vt="STRING" v="cfg1">
+                            <description>
+                                <entry k="ru" v="Имя конфигурации"/>
+                                <entry k="en" v="Configuration name"/>
+                            </description>
+                        </element>
+                        <element t="VALUE" o="true" vt="INTEGER" v="1">
+                            <description>
+                                <entry k="ru" v="Количество настроек"/>
+                                <entry k="en" v="Settings count"/>
+                            </description>
+                        </element>
+                        <element t="VALUE" o="true" vt="STRING" v="s1">
+                            <description>
+                                <entry k="ru" v="Имя настройки"/>
+                                <entry k="en" v="Setting name"/>
+                            </description>
+                        </element>
+                        <element t="VALUE" o="true" vt="STRING" v="cfg1">
+                            <description>
+                                <entry k="ru" v="Значение настройки"/>
+                                <entry k="en" v="Setting value"/>
+                            </description>
+                        </element>
+                    </elements>
+                </element>
+            </output>
+        </type>
+        <type t="setting" minS="1" maxS="1" minC="1" maxC="-1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Выводит значения указанных настроек из всех управляемых конфигураций.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Displays the values of the specified settings from all managed configurations.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="-1" vt="STRING" v="s1">
+                            <description>
+                                <entry k="ru" v="Имя настройки"/>
+                                <entry k="en" v="Setting name"/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE_ANY" c="-1" vt="STRING" v="cfg1">
+                    <description>
+                        <entry k="ru" v="Значение настройки"/>
+                        <entry k="en" v="Setting value"/>
+                    </description>
+                </element>
+            </output>
+        </type>
+        <type t="variable" minS="1" maxS="1" minC="1" maxC="-1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Выводит значения указанных переменных из всех управляемых конфигураций.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Displays the values of the specified variables from all managed configurations.</value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="-1" vt="STRING" v="v1">
+                            <description>
+                                <entry k="ru" v="Имя переменной"/>
+                                <entry k="en" v="Variable name"/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE_ANY" c="-1" vt="STRING" v="value1">
+                    <description>
+                        <entry k="ru" v="Значение настройки"/>
+                        <entry k="en" v="Variable value"/>
+                    </description>
                 </element>
             </output>
         </type>
@@ -75,11 +163,17 @@ The program is supplied as is. For problems arising during the operation or inst
     <help>
         <entry>
             <key>en</key>
-            <value>The module displays all the settings. The data goes in order: The sequence number of the managed configuration, and in order the parameter name, the parameter value.</value>
+            <value><![CDATA[The module displays all settings.
+The data is listed in the following order: the managed configuration number, followed by the parameter name and parameter value.
+It can also display only the values of specified settings or variables.
+            ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value>Модуль выводит все настройки. данные идут в порядке: порядковый номер управляемой конфигурации, и по порядку имя параметра, значение параметра.</value>
+            <value><![CDATA[Модуль выводит все настройки.
+Данные идут в порядке: порядковый номер управляемой конфигурации, и по порядку имя параметра, значение параметра.
+Так же способен выводить только значения указанных настроек или переменных.
+            ]]></value>
         </entry>
     </help>
 

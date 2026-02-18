@@ -33,6 +33,7 @@ public class Dialogs implements Module {
         FILE_SAVE,
         SELECT,
         CHAT,
+        CHAT_PLAIN,
     }
 
     private Type type;
@@ -156,7 +157,10 @@ public class Dialogs implements Module {
                         showSelectDialog(executionContextTool, dummyFrame, title, message);
                         break;
                     case CHAT:
-                        showChatDialog(executionContextTool, title, message, inputLst, "Add", "Clear");
+                        showChatDialog(executionContextTool, title, message, inputLst, "Add", "Clear", true);
+                        break;
+                    case CHAT_PLAIN:
+                        showChatDialog(executionContextTool, title, message, inputLst, "Add", "Clear", false);
                         break;
                 }
             } finally {
@@ -191,10 +195,10 @@ public class Dialogs implements Module {
     }
 
     private void showChatDialog(ExecutionContextTool executionContextTool, String title, String message,
-                                List<String> inputLst, String nameButtonAdd, String nameButtonClear) {
+                                List<String> inputLst, String nameButtonAdd, String nameButtonClear, boolean allowHtml) {
         String inputLabel = inputLst != null && !inputLst.isEmpty() ? inputLst.get(0) : "";
-        List<String> paths = inputLst != null && inputLst.size() > 1 ? inputLst.subList(1,  inputLst.size()) : null;
-        DialogChat dialogChat = new DialogChat(title, message, inputLabel, nameButtonAdd, nameButtonClear, paths,
+        List<String> paths = inputLst != null && inputLst.size() > 1 ? inputLst.subList(1, inputLst.size()) : null;
+        DialogChat dialogChat = new DialogChat(title, message, inputLabel, nameButtonAdd, nameButtonClear, paths, allowHtml,
                 executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0 ?
                         str -> {
                             long threadId = ModuleUtils.executeParallel(executionContextTool, 0, java.util.List.of(str));

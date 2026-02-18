@@ -27,6 +27,7 @@ public class DialogChat {
     private final String inputLabel;
     public final JFrame frame;
     private final List<String> paths;
+    private final boolean allowHtml;
     private JPanel panel;
     private JButton buttonAdd;
     private JButton buttonClear;
@@ -36,11 +37,13 @@ public class DialogChat {
     private JScrollPane scrollPane;
     private GridBagConstraints gbc;
 
-    public DialogChat(String title, String label, String inputLabel, String nameButtonAdd, String nameButtonClear, List<String> paths, Function<String, Optional<List<IMessage>>> func) {
+    public DialogChat(String title, String label, String inputLabel, String nameButtonAdd, String nameButtonClear, List<String> paths, boolean allowHtml,
+                      Function<String, Optional<List<IMessage>>> func) {
         this.func = func;
         this.inputLabel = inputLabel != null ? inputLabel : "";
-        frame = new JFrame(title);
         this.paths = paths;
+        this.allowHtml = allowHtml;
+        frame = new JFrame(title);
         $$$setupUI$$$();
 
         labelHeader.setText(label);
@@ -64,7 +67,7 @@ public class DialogChat {
     }
 
     public static void main(String[] args) {
-        DialogChat dialogChat = new DialogChat("DialogChat", "Chat", "user", "Add", "Clear", null, null);
+        DialogChat dialogChat = new DialogChat("DialogChat", "Chat", "user", "Add", "Clear", null, true, null);
         dialogChat.frame.setVisible(true);
     }
 
@@ -179,15 +182,46 @@ public class DialogChat {
         // textArea.setCaretPosition(textArea.getDocument().getLength());
     }
 
+    private static String escapeHtml(String s) {
+        StringBuilder sb = new StringBuilder();
+        int n = s.length();
+        for (int i = 0; i < n; i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '<':
+                    sb.append("&lt;");
+                    break;
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                case '&':
+                    sb.append("&amp;");
+                    break;
+                case '"':
+                    sb.append("&quot;");
+                    break;
+                case '\'':
+                    sb.append("&#39;");
+                    break; // Using numeric entity for apostrophe
+                default:
+                    sb.append(c);
+                    break;
+            }
+        }
+        return sb.toString();
+    }
+
     private JPanel createPanelValue(String text, boolean isError) {
         text = text.trim();
         // if (!text.toLowerCase().startsWith("<html>"))
         //     text = "<html>" + text;
         // if (!text.toLowerCase().endsWith("</html>"))
         //     text = text + "</html>";
-        text = text.replace("\n", "<br/>");
-        if (isError)
-            text = "<font color='red'>" + text + "</font>";
+        if(allowHtml) {
+            text = text.replace("\n", "<br/>");
+            if (isError)
+                text = "<font color='red'>" + text + "</font>";
+        }
 
         // JTextField f = new JTextField(text);
         // f.setEditable(false);
@@ -195,7 +229,8 @@ public class DialogChat {
         // f.setBorder(null); //remove the border
 
         JTextPane f = new JTextPane();
-        f.setContentType("text/html"); // let the text pane know this is what you want
+        if (allowHtml)
+            f.setContentType("text/html"); // let the text pane know this is what you want
         /*
         if (color != null) {
             StyledDocument doc = f.getStyledDocument();

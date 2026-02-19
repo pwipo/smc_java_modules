@@ -157,14 +157,17 @@ public class Dialogs implements Module {
                         showSelectDialog(executionContextTool, dummyFrame, title, message);
                         break;
                     case CHAT:
+                        dummyFrame.dispose();
                         showChatDialog(executionContextTool, title, message, inputLst, "Add", "Clear", true);
                         break;
                     case CHAT_PLAIN:
+                        dummyFrame.dispose();
                         showChatDialog(executionContextTool, title, message, inputLst, "Add", "Clear", false);
                         break;
                 }
             } finally {
-                dummyFrame.dispose();
+                if (dummyFrame.isDisplayable())
+                    dummyFrame.dispose();
             }
         });
     }

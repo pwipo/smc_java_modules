@@ -13,6 +13,8 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.AbstractProtocol;
+import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
+import org.apache.tomcat.util.http.SameSiteCookies;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import ru.smcsystem.api.dto.*;
@@ -779,6 +781,7 @@ public class Server implements Module {
                         // externalConfigurationTool.loggerTrace("check cors, origin: " + requestOrigin + ", cors list size: " + virtualServerInfo.getCorsAccessList().size());
                         if (virtualServerInfo.getCorsAccessList().stream().anyMatch(p -> p.matcher(requestOrigin).find())) {
                             resp.addHeader("Access-Control-Allow-Origin", requestOrigin);
+                            resp.addHeader("Access-Control-Allow-Credentials", "true");
                         } else {
                             responseObj = new ResponseObj(null, 403, null, "Forbidden".getBytes(), null, null, 1);
                             handleResponse(resp, responseObj, virtualServerInfo);
@@ -876,6 +879,14 @@ public class Server implements Module {
                 }
             }
         };
+
+        // rootCtx.setUseHttpOnly(true);
+        if (protocolLocal == Protocol.HTTPS && virtualServerInfo.getCorsAccessList() != null && !virtualServerInfo.getCorsAccessList().isEmpty()) {
+            // 2. Configure SameSite and other RFC 6265 attributes (for Secure=true)
+            Rfc6265CookieProcessor cookieProcessor = new Rfc6265CookieProcessor();
+            cookieProcessor.setSameSiteCookies(SameSiteCookies.NONE.name()); // Options: Lax, Strict, None
+            rootCtx.setCookieProcessor(cookieProcessor);
+        }
 
         Tomcat.addServlet(rootCtx, servletName, servlet);
 

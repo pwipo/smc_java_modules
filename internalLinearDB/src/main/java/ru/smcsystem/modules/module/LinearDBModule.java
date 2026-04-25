@@ -13,6 +13,7 @@ import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.api.tools.execution.ExecutionContextTool;
 import ru.smcsystem.smc.utils.ModuleUtils;
+import ru.smcsystem.smc.utils.ObjectArrayBytesConverter;
 
 import java.io.*;
 import java.util.*;
@@ -44,8 +45,8 @@ public class LinearDBModule implements Module {
                 new File(configurationTool.getWorkDirectory()),
                 "db",
                 DB_VER,
-                (ver, b) -> ObjectArrayConverter.objectElementFromByteArray(b),
-                (ver, c) -> ObjectArrayConverter.toByteArray(c),
+                (ver, b) -> ObjectArrayBytesConverter.objectElementFromByteArray(b),
+                (ver, c) -> ObjectArrayBytesConverter.toByteArray(c),
                 o -> o.findField(fieldNameId).map(ModuleUtils::getNumber).map(Number::longValue).orElse(null),
                 (o, id) -> o.findField(fieldNameId).ifPresentOrElse(
                         f -> f.setValue(id),

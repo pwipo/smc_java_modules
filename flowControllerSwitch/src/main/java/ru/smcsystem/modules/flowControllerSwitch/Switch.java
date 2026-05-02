@@ -20,6 +20,7 @@ public class Switch implements Module {
     private Integer countPatternsInPack;
     private List<List<Pattern>> patterns;
     private Boolean isNeedReturnErrorFromLast;
+    private Boolean isNeedSendOtherParamsToEC;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -46,6 +47,8 @@ public class Switch implements Module {
         }
         isNeedReturnErrorFromLast = configurationTool.getSetting("isNeedReturnErrorFromLast").map(ModuleUtils::toBoolean)
                 .orElseThrow(() -> new ModuleException("isNeedReturnErrorFromLast setting"));
+        isNeedSendOtherParamsToEC = configurationTool.getSetting("isNeedSendOtherParamsToEC").map(ModuleUtils::toBoolean)
+                .orElseThrow(() -> new ModuleException("isNeedSendOtherParamsToEC setting"));
     }
 
     @Override
@@ -75,21 +78,35 @@ public class Switch implements Module {
                             }
                         }
                     }
-                    exec(executionContextTool, id);
+                    List<Object> params = null;
+                    if (isNeedSendOtherParamsToEC) {
+                        params = messages.stream().map(IValue::getValue).collect(Collectors.toList());
+                        messages.clear();
+
+                    }
+                    exec(executionContextTool, id, params);
                 }
             } else {
-                for (IMessage m : messages) {
-                    if (ModuleUtils.isNumber(m))
-                        exec(executionContextTool, ModuleUtils.getNumber(m).intValue());
+                while (!messages.isEmpty()) {
+                    IMessage m = messages.poll();
+                    if (!ModuleUtils.isNumber(m))
+                        return;
+                    int id = ModuleUtils.getNumber(m).intValue();
+                    List<Object> params = null;
+                    if (isNeedSendOtherParamsToEC) {
+                        params = messages.stream().map(IValue::getValue).collect(Collectors.toList());
+                        messages.clear();
+                    }
+                    exec(executionContextTool, id, params);
                 }
             }
         });
     }
 
-    private void exec(ExecutionContextTool executionContextTool, Integer id) {
+    private void exec(ExecutionContextTool executionContextTool, Integer id, List<Object> params) {
         if (id == null || id >= executionContextTool.getFlowControlTool().countManagedExecutionContexts())
             return;
-        executionContextTool.getFlowControlTool().executeNow(CommandType.EXECUTE, id, null);
+        executionContextTool.getFlowControlTool().executeNow(CommandType.EXECUTE, id, params);
         if (isNeedReturnDataFromLast) {
             List<Object> resultData = null;
             List<Object> resultErrors = null;

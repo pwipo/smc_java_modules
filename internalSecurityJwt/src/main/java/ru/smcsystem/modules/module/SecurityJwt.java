@@ -22,8 +22,13 @@ import java.security.PublicKey;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class SecurityJwt implements Module {
@@ -40,6 +45,12 @@ public class SecurityJwt implements Module {
     private List<String> fieldNames;
     // private Cache<String, Map.Entry<UserDTO, List<RoleDTO>>> cacheRefreshToken;
     private JwtParser parser;
+    private Boolean checkRemoteAddr;
+    private Map<String, Integer> loginFailsMap;
+    private Map<String, Instant> blockingMap;
+    private Integer countLoginFailBeforeBlocking;
+    private Integer blockingTime;
+    private Map<String, Lock> loginLock;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -57,9 +68,18 @@ public class SecurityJwt implements Module {
                 .flatMap(s -> Arrays.stream(s.split(",")))
                 .map(String::trim)
                 .collect(Collectors.toList());
+        checkRemoteAddr = configurationTool.getSetting("checkRemoteAddr").map(ModuleUtils::toBoolean)
+                .orElseThrow(() -> new ModuleException("checkRemoteAddr setting not found"));
 
         File publicKeyFile = new File(configurationTool.getWorkDirectory(), publicKeyStr);
         File privateKeyFile = new File(configurationTool.getWorkDirectory(), privateKeyStr);
+        loginFailsMap = new ConcurrentHashMap<>();
+        blockingMap = new ConcurrentHashMap<>();
+        loginLock = new ConcurrentHashMap<>();
+        countLoginFailBeforeBlocking = configurationTool.getSetting("countLoginFailBeforeBlocking").map(ModuleUtils::toNumber).map(Number::intValue)
+                .orElseThrow(() -> new ModuleException("countLoginFailBeforeBlocking setting not found"));
+        blockingTime = configurationTool.getSetting("blockingTime").map(ModuleUtils::toNumber).map(Number::intValue)
+                .orElseThrow(() -> new ModuleException("blockingTime setting not found"));
 
         try {
             String privateKeyRaw = new String(Files.readAllBytes(privateKeyFile.toPath()));
@@ -149,6 +169,12 @@ public class SecurityJwt implements Module {
         //     cacheRefreshToken.invalidateAll();
         //     cacheRefreshToken = null;
         // }
+        checkRemoteAddr = null;
+        blockingMap = null;
+        loginFailsMap = null;
+        countLoginFailBeforeBlocking = null;
+        blockingTime = null;
+        loginLock = null;
     }
 
     private void genHash(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList) {
@@ -183,6 +209,16 @@ public class SecurityJwt implements Module {
         if (claims == null)
             return;
 
+        String remoteAddr = null;
+        if (messagesList.size() > 1) {
+            LinkedList<IMessage> messagesReq = messagesList.get(1);
+            ObjectArray objectArray = ModuleUtils.getObjectArray(messagesReq.poll());
+            if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
+                ObjectElement objectElement = (ObjectElement) objectArray.get(0);
+                remoteAddr = objectElement.findField("remoteAddr").map(ModuleUtils::toString).orElse(null);
+            }
+        }
+
         Object isATV = claims.get("isAT");
         boolean isAT = isATV instanceof Boolean ? (Boolean) isATV : false;
         if (isAT) {
@@ -190,9 +226,17 @@ public class SecurityJwt implements Module {
             return;
         }
 
+        if (checkRemoteAddr) {
+            String remoteAddrT = claims.get("remoteAddr").toString();
+            if (remoteAddr != null && remoteAddrT != null && !Objects.equals(remoteAddr, remoteAddrT)) {
+                executionContextTool.addError("remoteAddr not valid");
+                return;
+            }
+        }
+
         if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0) {
-            configurationTool.loggerDebug(String.format("additional check for %s", claims.getSubject()));
-            Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 0, List.of(Long.parseLong(claims.getSubject())))
+            configurationTool.loggerTrace(String.format("additional check for %s", claims.getSubject()));
+            Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 0, List.of(Long.parseLong(claims.getSubject()), token))
                     .map(l -> ModuleUtils.toBoolean(l.get(0))).orElse(false);
             if (!additionalCheck) {
                 executionContextTool.addError("additional check fail");
@@ -215,11 +259,29 @@ public class SecurityJwt implements Module {
         if (claims == null)
             return;
 
+        String remoteAddr = null;
+        if (messagesList.size() > 1) {
+            LinkedList<IMessage> messagesReq = messagesList.get(1);
+            ObjectArray objectArray = ModuleUtils.getObjectArray(messagesReq.poll());
+            if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
+                ObjectElement objectElement = (ObjectElement) objectArray.get(0);
+                remoteAddr = objectElement.findField("remoteAddr").map(ModuleUtils::toString).orElse(null);
+            }
+        }
+
         Object isATV = claims.get("isAT");
         boolean isAT = isATV instanceof Boolean ? (Boolean) isATV : false;
         if (!isAT) {
             executionContextTool.addError("requires access token");
             return;
+        }
+
+        if (checkRemoteAddr) {
+            String remoteAddrT = claims.get("remoteAddr").toString();
+            if (remoteAddr != null && remoteAddrT != null && !Objects.equals(remoteAddr, remoteAddrT)) {
+                executionContextTool.addError("remoteAddr not valid");
+                return;
+            }
         }
 
         ObjectElement objectElement = new ObjectElement(
@@ -244,45 +306,92 @@ public class SecurityJwt implements Module {
         LinkedList<IMessage> messages = messagesList.get(0);
         String login = ModuleUtils.toString(messages.poll());
         String password = ModuleUtils.toString(messages.poll());
-
-        try {
-            Thread.sleep(authSleep);
-        } catch (Exception ignore) {
-        }
-
-        UserDTO userDTO = ModuleUtils.executeAndGetElement(executionContextTool, 0, List.of(login))
-                .map((e) -> {
-                    UserDTO userDTOTmp = ModuleUtils.convertFromObjectElement(e, UserDTO.class, true, true);
-                    userDTOTmp.setObjectElement(e);
-                    return userDTOTmp;
-                })
-                .orElse(null);
-        if (userDTO == null) {
-            executionContextTool.addError("user not exists");
-            return;
-        }
-        if (userDTO.getDisabled() != null) {
-            executionContextTool.addError("user is disabled");
-            return;
-        }
-        if (!verifyPassword(password, userDTO.getPassword())) {
-            executionContextTool.addError("password incorrect");
-            return;
-        }
-        List<RoleDTO> roleDTOS = ModuleUtils.executeAndGetObjects(executionContextTool, 1, List.of(userDTO.getId()), RoleDTO.class, true).orElse(List.of());
-
-        if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 2) {
-            configurationTool.loggerDebug(String.format("additional check for %s", userDTO.getLogin()));
-            Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 2, List.of(userDTO.getId()))
-                    .map(l -> ModuleUtils.toBoolean(l.get(0))).orElse(false);
-            if (!additionalCheck) {
-                executionContextTool.addError("additional check fail");
-                return;
+        String remoteAddr = null;
+        if (messagesList.size() > 1) {
+            LinkedList<IMessage> messagesReq = messagesList.get(1);
+            ObjectArray objectArray = ModuleUtils.getObjectArray(messagesReq.poll());
+            if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
+                ObjectElement objectElement = (ObjectElement) objectArray.get(0);
+                remoteAddr = objectElement.findField("remoteAddr").map(ModuleUtils::toString).orElse(null);
             }
         }
 
-        String accessToken = generateToken(userDTO, roleDTOS, accessTokenExpires, true);
-        String refreshToken = generateToken(userDTO, roleDTOS, refreshTokenExpires, false);
+        Instant blockingTo = blockingMap.get(login);
+        if (blockingTo != null) {
+            if (Instant.now().isBefore(blockingTo)) {
+                executionContextTool.addError("user blocking");
+                return;
+            } else {
+                loginFailsMap.put(login, 0);
+                blockingMap.remove(login);
+            }
+        }
+
+        UserDTO userDTO = null;
+        List<RoleDTO> roleDTOS = null;
+        Lock lock = loginLock.computeIfAbsent(login, k -> new ReentrantLock());
+        try {
+            lock.lock();
+            try {
+                Thread.sleep(authSleep);
+            } catch (Exception ignore) {
+            }
+
+            userDTO = ModuleUtils.executeAndGetElement(executionContextTool, 0, List.of(login))
+                    .map((e) -> {
+                        UserDTO userDTOTmp = ModuleUtils.convertFromObjectElement(e, UserDTO.class, true, true);
+                        userDTOTmp.setObjectElement(e);
+                        if (userDTOTmp.getBlocking() != null) {
+                            Instant instant = Instant.ofEpochMilli(userDTOTmp.getBlocking().getTime());
+                            if (instant.isAfter(Instant.now()))
+                                blockingMap.put(login, instant);
+                        }
+                        return userDTOTmp;
+                    })
+                    .orElse(null);
+            if (userDTO == null) {
+                executionContextTool.addError("user not exists");
+                return;
+            }
+            if (userDTO.getDisabled() != null) {
+                executionContextTool.addError("user is disabled");
+                return;
+            }
+            if (blockingMap.containsKey(login)) {
+                executionContextTool.addError("user blocking");
+                return;
+            }
+            if (!verifyPassword(password, userDTO.getPassword())) {
+                executionContextTool.addError("password incorrect");
+                saveFail(configurationTool, executionContextTool, userDTO);
+                return;
+            }
+            roleDTOS = ModuleUtils.executeAndGetObjects(executionContextTool, 1, List.of(userDTO.getId()), RoleDTO.class, true).orElse(List.of());
+
+            if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 2) {
+                configurationTool.loggerTrace(String.format("additional check for %s", userDTO.getLogin()));
+                Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 2, List.of(userDTO.getId()))
+                        .map(l -> ModuleUtils.toBoolean(l.get(0))).orElse(false);
+                if (!additionalCheck) {
+                    executionContextTool.addError("additional check fail");
+                    saveFail(configurationTool, executionContextTool, userDTO);
+                    return;
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+
+        // String accessToken = generateToken(userDTO, roleDTOS, accessTokenExpires, true, null);
+        String refreshToken = generateToken(userDTO, roleDTOS, refreshTokenExpires, remoteAddr);
+        Claims claims = parseToken(refreshToken);
+        String accessToken = regenerateToken(claims, accessTokenExpires, true);
+
+        if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 4) {
+            configurationTool.loggerTrace(String.format("save new refresh token for %s", userDTO.getLogin()));
+            if (ModuleUtils.executeAndGetFirstMessage(executionContextTool, 4, List.of(userDTO.getId(), refreshToken)).isEmpty())
+                configurationTool.loggerWarn("save new refresh fail");
+        }
 
         // cacheRefreshToken.put(refreshToken, Map.entry(userDTO, roleDTOS));
         configurationTool.loggerDebug(String.format("login %s", userDTO.getLogin()));
@@ -290,6 +399,26 @@ public class SecurityJwt implements Module {
         executionContextTool.addMessage(new ObjectArray(new ObjectElement(
                 new ObjectField("accessToken", accessToken),
                 new ObjectField("refreshToken", refreshToken))));
+    }
+
+    private void saveFail(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, UserDTO userDTO) {
+        int loginFails = loginFailsMap.compute(userDTO.getLogin(), (k, v) -> {
+            if (v == null) {
+                v = 1;
+            } else {
+                v++;
+            }
+            return v;
+        });
+        if (loginFails >= countLoginFailBeforeBlocking) {
+            configurationTool.loggerInfo(String.format("blocking user %s", userDTO.getLogin()));
+            Instant blocking = Instant.now().plus(blockingTime, ChronoUnit.SECONDS);
+            blockingMap.put(userDTO.getLogin(), blocking);
+            if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 3) {
+                if (ModuleUtils.executeAndGetFirstMessage(executionContextTool, 3, List.of(userDTO.getId(), blocking.toEpochMilli())).isEmpty())
+                    configurationTool.loggerWarn("blocking user in external storage fail");
+            }
+        }
     }
 
     // private void logout(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList) {
@@ -308,7 +437,7 @@ public class SecurityJwt implements Module {
     //     }
     // }
 
-    private String generateToken(UserDTO userDTO, List<RoleDTO> roleDTOS, int tokenExpires, boolean isAccessToken) {
+    private String generateToken(UserDTO userDTO, List<RoleDTO> roleDTOS, int tokenExpires, String remoteAddr) {
         try {
             /*
             JwtClaimsBuilder builder = Jwt.issuer(issuer)
@@ -329,6 +458,9 @@ public class SecurityJwt implements Module {
             // if (upn != null && !upn.isBlank())
             //     builder.upn(upn);
 
+            if (remoteAddr != null)
+                builder.addClaims(Map.of("remoteAddr", remoteAddr));
+
             Set<String> groups = roleDTOS != null && !roleDTOS.isEmpty() ?
                     roleDTOS.stream().map(RoleDTO::getName).collect(Collectors.toSet()) :
                     null;
@@ -344,7 +476,7 @@ public class SecurityJwt implements Module {
                     null;
             if (claims != null)
                 claims.forEach((k, v) -> builder.claim(k, v.toString()));
-            builder.claim("isAT", isAccessToken);
+            builder.claim("isAT", false);
             // return builder.sign(privateKey);
             return builder
                     .signWith(privateKey) // Sign with the key and algorithm
@@ -364,7 +496,7 @@ public class SecurityJwt implements Module {
                     .setClaims(new DefaultClaims(claims))
                     .setIssuedAt(now)    // When the token was issued
                     .setExpiration(expirationDate);// When the token expires
-            builder.claim("isAT", isAccessToken);
+            builder.claim("isAT", true);
             return builder
                     .signWith(privateKey) // Sign with the key and algorithm
                     .compact(); // Build and serialize to a compact, URL-safe string

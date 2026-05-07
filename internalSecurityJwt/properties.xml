@@ -5,7 +5,7 @@
     <provider>java</provider>
     <os/>
     <arch/>
-    <ver>1.0.1</ver>
+    <ver>1.0.2</ver>
     <apiVer>1.4.2</apiVer>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
@@ -152,11 +152,56 @@ The program is supplied as is. For problems arising during the operation or inst
                 </entry>
             </description>
         </value>
+        <value>
+            <name>checkRemoteAddr</name>
+            <type>BOOLEAN</type>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Определяет, нужно ли сверять ip адрес запроса и тот что указан в токене.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Determines whether the IP address of the request should be compared with the one specified in the token.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>countLoginFailBeforeBlocking</name>
+            <type>INTEGER</type>
+            <value>5</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Количество провалов при логине (не правильный пароль) до блокировки.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Number of login failures (incorrect password) before being blocked.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>blockingTime</name>
+            <type>INTEGER</type>
+            <value>600</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Время блокировки пользователя, в секундах.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>User blocking time, in seconds.</value>
+                </entry>
+            </description>
+        </value>
     </defaultSettings>
 
 
     <types>
-        <type t="login" minS="1" maxS="1" minEC="2" maxEC="3">
+        <type t="login" minS="1" maxS="2" minEC="2" maxEC="5">
             <description>
                 <entry>
                     <key>ru</key>
@@ -164,6 +209,7 @@ The program is supplied as is. For problems arising during the operation or inst
 параметры:
     строка - логин.
     строка - пароль.
+Если есть второй источник, то туда передается объект запроса (формат обекта как указано для модуля HttpServer).
 управляемые контексты исполнения:
     1 - вызывается для получения данных пользователя.
         при вызове передает параметры:
@@ -173,6 +219,7 @@ The program is supplied as is. For problems arising during the operation or inst
             login - строка - имя пользователя.
             password - строка или массив - пароль или его хеш.
             disabled - число (опционально) - время отключения (в миллисекундах).
+            blocking - число (опционально) - время блокиировки (в миллисекундах).
             другие поля.
     2 - вызывается для получения списка ролей.
         при вызове передает параметры:
@@ -184,6 +231,16 @@ The program is supplied as is. For problems arising during the operation or inst
         при вызове передает параметры:
             число - идентификатор пользователя.
         ожидает получить логическое значение. Если true, то проверка прошла успешно.
+    4  - сохранение блокировки пользователя во внешнем хранилище.
+        при вызове передает параметры:
+            число - идентификатор пользователя.
+            число - время окончания блокировки в миллисекундах.
+        ожидает получить любое сообщение.
+    5  - сохранение нового токена обновления во внешнем хранилище.
+        при вызове передает параметры:
+            число - идентификатор пользователя.
+            строке - токен обновления.
+        ожидает получить любое сообщение.
                     ]]></value>
                 </entry>
                 <entry>
@@ -192,6 +249,7 @@ The program is supplied as is. For problems arising during the operation or inst
 Parameters:
     String - login.
     String - password.
+If there is a second source, then the request object is passed there (the object format is as specified for the HttpServer module).
 Managed execution contexts:
     1 - Called to retrieve user data.
         When called, passes the following parameters:
@@ -201,6 +259,7 @@ Managed execution contexts:
             login - string - username.
             password - string or array - password or its hash.
             disabled - number (optional) - disconnection time (in milliseconds).
+            blocking - number (optional) - lock expiration time (in milliseconds).
             other fields.
     2 - Called to retrieve a list of roles.
         When called, passes the following parameters:
@@ -212,6 +271,16 @@ Managed execution contexts:
         When called, passes the following parameters:
             Number - user identifier.
         Expects a Boolean value. If true, the validation was successful.
+    4 - saves the user lock to external storage.
+        When called, passes the following parameters:
+            number - user ID.
+            number - lock expiration time in milliseconds.
+        Waits to receive any message.,
+    5 - Saves a new refresh token to external storage.
+        When called, it passes the following parameters:
+            number - user ID.
+            string - refresh token.
+        Expects to receive any message.
                     ]]></value>
                 </entry>
             </description>
@@ -231,6 +300,17 @@ Managed execution contexts:
                                     <entry k="ru" v="пароль"/>
                                     <entry k="en" v="password"/>
                                 </description>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+                <source o="true">
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY" v="1">
+                            <value><![CDATA[[{"method":"GET", "reqId":"123", "uri":"/data/get1", "remoteAddr":"1.2.3.4", "sessionId":"srghs"}]]]></value>
+                            <description>
+                                <entry k="ru" v="Объект содержит запрос (http). Формат описан в модуле HttpServer."/>
+                                <entry k="en" v="The object contains a request (http). The format is described in the HttpServer module."/>
                             </description>
                         </element>
                     </elements>
@@ -261,7 +341,7 @@ Managed execution contexts:
                     </elements>
                     <output>
                         <element t="VALUE" c="1" vt="OBJECT_ARRAY">
-                            <value><![CDATA[[{"id":1, "login":"user1", "password":"hash_password"}]]]></value>
+                            <value><![CDATA[[{"id":1, "login":"user1", "password":"hash_password", "disabled":null, "blocking":null}]]]></value>
                             <description>
                                 <entry k="ru" v="объект пользователя"/>
                                 <entry k="en" v="user object"/>
@@ -307,6 +387,52 @@ Managed execution contexts:
                     </elements>
                     <output>
                         <element t="VALUE" c="1" vt="BOOLEAN" v="true"/>
+                    </output>
+                </ec>
+                <ec o="true">
+                    <description>
+                        <entry k="ru" v="Сохранение блокировки пользователя во внешнем хранилище"/>
+                        <entry k="en" v="Saves the user lock to external storage"/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Идентификатор пользователя"/>
+                                <entry k="en" v="User id"/>
+                            </description>
+                        </element>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="время окончания блокировки в миллисекундах"/>
+                                <entry k="en" v="lock expiration time in milliseconds"/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE_ANY" vt="BOOLEAN" v="true"/>
+                    </output>
+                </ec>
+                <ec o="true">
+                    <description>
+                        <entry k="ru" v="Сохранение нового токена обновления во внешнем хранилище"/>
+                        <entry k="en" v="Saving a new refresh token to external storage"/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Идентификатор пользователя"/>
+                                <entry k="en" v="User id"/>
+                            </description>
+                        </element>
+                        <element t="VALUE" vt="STRING" v="1">
+                            <description>
+                                <entry k="ru" v="Токен обновления"/>
+                                <entry k="en" v="Refresh token"/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE_ANY" vt="BOOLEAN" v="true"/>
                     </output>
                 </ec>
             </ecs>
@@ -374,7 +500,7 @@ Managed execution contexts:
                 <element t="VALUE" c="1" vt="BOOLEAN" v="true"/>
             </output>
         </type>
-        <type t="parse" minS="1" maxS="1">
+        <type t="parse" minS="1" maxS="2">
             <description>
                 <entry>
                     <key>ru</key>
@@ -397,6 +523,17 @@ Managed execution contexts:
                         </element>
                     </elements>
                 </source>
+                <source o="true">
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY" v="1">
+                            <value><![CDATA[[{"method":"GET", "reqId":"123", "uri":"/data/get1", "remoteAddr":"1.2.3.4", "sessionId":"srghs"}]]]></value>
+                            <description>
+                                <entry k="ru" v="Объект содержит запрос (http). Формат описан в модуле HttpServer."/>
+                                <entry k="en" v="The object contains a request (http). The format is described in the HttpServer module."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
             </sources>
             <output>
                 <element t="VALUE" c="1" vt="OBJECT_ARRAY">
@@ -408,7 +545,7 @@ Managed execution contexts:
                 </element>
             </output>
         </type>
-        <type t="refresh_tokens" minS="1" maxS="1">
+        <type t="refresh_tokens" minS="1" maxS="2" minEC="0" maxEC="1">
             <description>
                 <entry>
                     <key>ru</key>
@@ -431,10 +568,46 @@ Managed execution contexts:
                         </element>
                     </elements>
                 </source>
+                <source o="true">
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY" v="1">
+                            <value><![CDATA[[{"method":"GET", "reqId":"123", "uri":"/data/get1", "remoteAddr":"1.2.3.4", "sessionId":"srghs"}]]]></value>
+                            <description>
+                                <entry k="ru" v="Объект содержит запрос (http). Формат описан в модуле HttpServer."/>
+                                <entry k="en" v="The object contains a request (http). The format is described in the HttpServer module."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
             </sources>
+            <ecs>
+                <ec c="1" o="true">
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="ID пользователя"/>
+                                <entry k="en" v="User ID"/>
+                            </description>
+                        </element>
+                        <element t="VALUE" vt="STRING" v="slk234p;dor">
+                            <description>
+                                <entry k="ru" v="токен обновления"/>
+                                <entry k="en" v="refresh token"/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE" vt="BOOLEAN" v="true"/>
+                    </output>
+                    <description>
+                        <entry k="ru" v="Если есть то используется для дополнительное проверки токена обновления."/>
+                        <entry k="en" v="If present, it is used for additional verification of the refresh token."/>
+                    </description>
+                </ec>
+            </ecs>
             <output>
                 <element t="VALUE" c="1" vt="OBJECT_ARRAY">
-                    <value><![CDATA[[{"accessToken":"3454", "refreshToken":"123"}]]]></value>
+                    <value><![CDATA[[{"accessToken":"3454"}]]]></value>
                     <description>
                         <entry k="ru" v="объект с токенами доступа и обновления"/>
                         <entry k="en" v="object with access and refresh tokens"/>

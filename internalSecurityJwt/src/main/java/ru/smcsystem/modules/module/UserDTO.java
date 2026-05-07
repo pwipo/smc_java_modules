@@ -15,18 +15,21 @@ public class UserDTO {
     private Object password;
     @SmcField(name = "disabled", converter = SmcConverterDate.class)
     private Date disabled;
+    @SmcField(name = "blocking", converter = SmcConverterDate.class)
+    private Date blocking;
     private ObjectElement objectElement;
 
-    public UserDTO(Long id, String login, Object password, Date disabled) {
+    public UserDTO(Long id, String login, Object password, Date disabled, Date blocking) {
         this.id = id;
         this.login = login;
         this.password = password;
         this.disabled = disabled;
+        this.blocking = blocking;
         this.objectElement = null;
     }
 
     public UserDTO() {
-        this(null, null, null, null);
+        this(null, null, null, null, null);
     }
 
     public Long getId() {
@@ -59,6 +62,14 @@ public class UserDTO {
 
     public void setDisabled(Date disabled) {
         this.disabled = disabled;
+    }
+
+    public Date getBlocking() {
+        return blocking;
+    }
+
+    public void setBlocking(Date blocking) {
+        this.blocking = blocking;
     }
 
     public ObjectElement getObjectElement() {

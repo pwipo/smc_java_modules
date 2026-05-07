@@ -197,6 +197,16 @@ The program is supplied as is. For problems arising during the operation or inst
                 </entry>
             </description>
         </value>
+        <value>
+            <name>plainPass</name>
+            <type>STRING</type>
+            <value>{noop}</value>
+            <subType>STRING</subType>
+            <description>
+                <entry k="ru" v="Если пароль (в базе) начинается с этой строки, то считает что пароль не зашифрован. Только если не пусто и записанный пароль является строкой."/>
+                <entry k="en" v="If the password (in the database) begins with this string, the password is considered unencrypted. This applies only if the string is not empty and the recorded password is a string."/>
+            </description>
+        </value>
     </defaultSettings>
 
 
@@ -227,10 +237,10 @@ The program is supplied as is. For problems arising during the operation or inst
         ожидает получить массив объектов с полями:
             id - число - идентификатор.
             name - строка - имя роли.
-    3  - дополнительная проверка.
-        при вызове передает параметры:
-            число - идентификатор пользователя.
-        ожидает получить логическое значение. Если true, то проверка прошла успешно.
+    3  - дополнительная двухфакторная проверка. Вызывается только если TFA_LOGIN_CHECK=true.
+        При вызове передает параметры:
+            ObjectArray - пользователь.
+        Ожидает получить логическое значение. Если true, то проверка прошла успешно.
     4  - сохранение блокировки пользователя во внешнем хранилище.
         при вызове передает параметры:
             число - идентификатор пользователя.
@@ -267,9 +277,9 @@ Managed execution contexts:
         Expects an array of objects with the following fields:
             id - number - identifier.
             name - string - role name.
-    3 - Additional validation.
+    3 - additional two-factor verification. Called only if TFA_LOGIN_CHECK=true.
         When called, passes the following parameters:
-            Number - user identifier.
+            ObjectArray - user.
         Expects a Boolean value. If true, the validation was successful.
     4 - saves the user lock to external storage.
         When called, passes the following parameters:
@@ -374,14 +384,15 @@ Managed execution contexts:
                 </ec>
                 <ec o="true">
                     <description>
-                        <entry k="ru" v="Дополнительная проверка"/>
-                        <entry k="en" v="Additional check"/>
+                        <entry k="ru" v="дополнительная двухфакторная проверка"/>
+                        <entry k="en" v="additional two-factor verification"/>
                     </description>
                     <elements>
-                        <element t="VALUE" vt="LONG" v="1">
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"id":1, "login":"user1", "password":"hash_password", "disabled":null, "blocking":null}]]]></value>
                             <description>
-                                <entry k="ru" v="Идентификатор пользователя."/>
-                                <entry k="en" v="User id."/>
+                                <entry k="ru" v="объект пользователя"/>
+                                <entry k="en" v="user object"/>
                             </description>
                         </element>
                     </elements>
@@ -649,6 +660,6 @@ The SecurityKeyPair module can be used for generation. Note: JWT requires a key 
     </help>
 
     <examples/>
-    <icon/>
+    <icon><![CDATA[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]]></icon>
 
 </properties>

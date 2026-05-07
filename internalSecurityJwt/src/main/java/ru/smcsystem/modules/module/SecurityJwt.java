@@ -51,6 +51,7 @@ public class SecurityJwt implements Module {
     private Integer countLoginFailBeforeBlocking;
     private Integer blockingTime;
     private Map<String, Lock> loginLock;
+    private String plainPass;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -80,6 +81,7 @@ public class SecurityJwt implements Module {
                 .orElseThrow(() -> new ModuleException("countLoginFailBeforeBlocking setting not found"));
         blockingTime = configurationTool.getSetting("blockingTime").map(ModuleUtils::toNumber).map(Number::intValue)
                 .orElseThrow(() -> new ModuleException("blockingTime setting not found"));
+        plainPass = configurationTool.getSetting("plainPass").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("plainPass setting not found"));
 
         try {
             String privateKeyRaw = new String(Files.readAllBytes(privateKeyFile.toPath()));
@@ -175,6 +177,7 @@ public class SecurityJwt implements Module {
         countLoginFailBeforeBlocking = null;
         blockingTime = null;
         loginLock = null;
+        plainPass = null;
     }
 
     private void genHash(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList) {
@@ -368,12 +371,13 @@ public class SecurityJwt implements Module {
             }
             roleDTOS = ModuleUtils.executeAndGetObjects(executionContextTool, 1, List.of(userDTO.getId()), RoleDTO.class, true).orElse(List.of());
 
-            if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 2) {
-                configurationTool.loggerTrace(String.format("additional check for %s", userDTO.getLogin()));
-                Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 2, List.of(userDTO.getId()))
+            if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 2 &&
+                    userDTO.getObjectElement().findFieldIgnoreCase("tfa_login_check").map(ModuleUtils::toBoolean).orElse(false)) {
+                configurationTool.loggerTrace(String.format("tfa check for %s", userDTO.getLogin()));
+                Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 2, List.of(userDTO.getObjectElement()))
                         .map(l -> ModuleUtils.toBoolean(l.get(0))).orElse(false);
                 if (!additionalCheck) {
-                    executionContextTool.addError("additional check fail");
+                    executionContextTool.addError("tfa check fail");
                     saveFail(configurationTool, executionContextTool, userDTO);
                     return;
                 }
@@ -548,10 +552,12 @@ public class SecurityJwt implements Module {
     }
 
     private boolean verifyPassword(String password, Object passHash) {
-        BCrypt.Result result = passHash instanceof byte[] ?
-                BCrypt.verifyer().verify(password.toCharArray(), (byte[]) passHash) :
-                BCrypt.verifyer().verify(password.toCharArray(), passHash.toString());
-        return result.verified;
+        if (passHash instanceof byte[])
+            return BCrypt.verifyer().verify(password.toCharArray(), (byte[]) passHash).verified;
+        String passHashStr = passHash.toString();
+        if (!plainPass.isBlank() && passHashStr.startsWith(plainPass))
+            return true;
+        return BCrypt.verifyer().verify(password.toCharArray(), passHashStr).verified;
     }
 
     private String genPasswordHash(String password) {

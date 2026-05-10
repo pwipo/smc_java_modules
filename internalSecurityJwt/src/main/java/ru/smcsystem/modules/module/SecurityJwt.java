@@ -32,6 +32,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 public class SecurityJwt implements Module {
+    private static final String CLAIM_NAME_GROUPS = "groups";
+    private static final String CLAIM_NAME_IS_AT = "isAT";
+    private static final String CLAIM_NAME_RADDR = "raddr";
     private String issuer;
     private Integer accessTokenExpires;
     private Integer refreshTokenExpires;
@@ -192,7 +195,7 @@ public class SecurityJwt implements Module {
         String role = ModuleUtils.toString(messages.poll());
         boolean result = false;
         if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
-            ObjectArray array = ((ObjectElement) objectArray.get(0)).findField("groups").map(ModuleUtils::getObjectArray).orElse(null);
+            ObjectArray array = ((ObjectElement) objectArray.get(0)).findField(CLAIM_NAME_GROUPS).map(ModuleUtils::getObjectArray).orElse(null);
             if (array != null && array.isSimple()) {
                 for (int i = 0; i < array.size(); i++) {
                     if (Objects.equals(role, array.get(i).toString())) {
@@ -208,32 +211,29 @@ public class SecurityJwt implements Module {
     private void refreshToken(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList) {
         LinkedList<IMessage> messages = messagesList.get(0);
         String token = ModuleUtils.toString(messages.poll());
-        Claims claims = parseToken(token);
+        Claims claims = parseToken(configurationTool, token);
         if (claims == null)
             return;
 
-        String remoteAddr = null;
-        if (messagesList.size() > 1) {
-            LinkedList<IMessage> messagesReq = messagesList.get(1);
-            ObjectArray objectArray = ModuleUtils.getObjectArray(messagesReq.poll());
-            if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
-                ObjectElement objectElement = (ObjectElement) objectArray.get(0);
-                remoteAddr = objectElement.findField("remoteAddr").map(ModuleUtils::toString).orElse(null);
-            }
-        }
-
-        Object isATV = claims.get("isAT");
+        Object isATV = claims.get(CLAIM_NAME_IS_AT);
         boolean isAT = isATV instanceof Boolean ? (Boolean) isATV : false;
         if (isAT) {
             executionContextTool.addError("requires refresh token");
             return;
         }
 
-        if (checkRemoteAddr) {
-            String remoteAddrT = claims.get("remoteAddr").toString();
-            if (remoteAddr != null && remoteAddrT != null && !Objects.equals(remoteAddr, remoteAddrT)) {
-                executionContextTool.addError("remoteAddr not valid");
-                return;
+        if (checkRemoteAddr && messagesList.size() > 1) {
+            LinkedList<IMessage> messagesReq = messagesList.get(1);
+            ObjectArray objectArray = ModuleUtils.getObjectArray(messagesReq.poll());
+            if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
+                ObjectElement objectElement = (ObjectElement) objectArray.get(0);
+                String remoteAddr = objectElement.findField(CLAIM_NAME_RADDR).map(ModuleUtils::toString).orElse(null);
+
+                String remoteAddrT = claims.get(CLAIM_NAME_RADDR).toString();
+                if (remoteAddr != null && !Objects.equals(remoteAddr, remoteAddrT)) {
+                    executionContextTool.addError("remoteAddr not valid");
+                    return;
+                }
             }
         }
 
@@ -258,32 +258,29 @@ public class SecurityJwt implements Module {
     private void parse(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList) throws Exception {
         LinkedList<IMessage> messages = messagesList.get(0);
         String token = ModuleUtils.toString(messages.poll());
-        Claims claims = parseToken(token);
+        Claims claims = parseToken(configurationTool, token);
         if (claims == null)
             return;
 
-        String remoteAddr = null;
-        if (messagesList.size() > 1) {
-            LinkedList<IMessage> messagesReq = messagesList.get(1);
-            ObjectArray objectArray = ModuleUtils.getObjectArray(messagesReq.poll());
-            if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
-                ObjectElement objectElement = (ObjectElement) objectArray.get(0);
-                remoteAddr = objectElement.findField("remoteAddr").map(ModuleUtils::toString).orElse(null);
-            }
-        }
-
-        Object isATV = claims.get("isAT");
+        Object isATV = claims.get(CLAIM_NAME_IS_AT);
         boolean isAT = isATV instanceof Boolean ? (Boolean) isATV : false;
         if (!isAT) {
             executionContextTool.addError("requires access token");
             return;
         }
 
-        if (checkRemoteAddr) {
-            String remoteAddrT = claims.get("remoteAddr").toString();
-            if (remoteAddr != null && remoteAddrT != null && !Objects.equals(remoteAddr, remoteAddrT)) {
-                executionContextTool.addError("remoteAddr not valid");
-                return;
+        if (checkRemoteAddr && messagesList.size() > 1) {
+            LinkedList<IMessage> messagesReq = messagesList.get(1);
+            ObjectArray objectArray = ModuleUtils.getObjectArray(messagesReq.poll());
+            if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
+                ObjectElement objectElement = (ObjectElement) objectArray.get(0);
+                String remoteAddr = objectElement.findField(CLAIM_NAME_RADDR).map(ModuleUtils::toString).orElse(null);
+
+                String remoteAddrT = claims.get(CLAIM_NAME_RADDR).toString();
+                if (remoteAddr != null && !Objects.equals(remoteAddr, remoteAddrT)) {
+                    executionContextTool.addError("remoteAddr not valid");
+                    return;
+                }
             }
         }
 
@@ -291,10 +288,10 @@ public class SecurityJwt implements Module {
                 new ObjectField("id", Long.parseLong(claims.getSubject())),
                 new ObjectField("sub", claims.getSubject()),
                 new ObjectField("exp", claims.getExpiration().getTime()));
-        Object groupsO = claims.get("groups");
+        Object groupsO = claims.get(CLAIM_NAME_GROUPS);
         if (groupsO != null/* && !groupsO.toString().isBlank()*/)
             objectElement.getFields().add(
-                    new ObjectField("groups", new ObjectArray(
+                    new ObjectField(CLAIM_NAME_GROUPS, new ObjectArray(
                             new ArrayList<>((Collection<String>) groupsO)/*Arrays.stream(groupsO.toString().split(",")).collect(Collectors.toList())*/,
                             ObjectType.STRING)));
         fieldNames.forEach(fieldName -> {
@@ -310,12 +307,12 @@ public class SecurityJwt implements Module {
         String login = ModuleUtils.toString(messages.poll());
         String password = ModuleUtils.toString(messages.poll());
         String remoteAddr = null;
-        if (messagesList.size() > 1) {
+        if (checkRemoteAddr && messagesList.size() > 1) {
             LinkedList<IMessage> messagesReq = messagesList.get(1);
             ObjectArray objectArray = ModuleUtils.getObjectArray(messagesReq.poll());
             if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
                 ObjectElement objectElement = (ObjectElement) objectArray.get(0);
-                remoteAddr = objectElement.findField("remoteAddr").map(ModuleUtils::toString).orElse(null);
+                remoteAddr = objectElement.findField(CLAIM_NAME_RADDR).map(ModuleUtils::toString).orElse(null);
             }
         }
 
@@ -388,7 +385,7 @@ public class SecurityJwt implements Module {
 
         // String accessToken = generateToken(userDTO, roleDTOS, accessTokenExpires, true, null);
         String refreshToken = generateToken(userDTO, roleDTOS, refreshTokenExpires, remoteAddr);
-        Claims claims = parseToken(refreshToken);
+        Claims claims = parseToken(configurationTool, refreshToken);
         String accessToken = regenerateToken(claims, accessTokenExpires, true);
 
         if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 4) {
@@ -463,14 +460,14 @@ public class SecurityJwt implements Module {
             //     builder.upn(upn);
 
             if (remoteAddr != null)
-                builder.addClaims(Map.of("remoteAddr", remoteAddr));
+                builder.addClaims(Map.of(CLAIM_NAME_RADDR, remoteAddr));
 
             Set<String> groups = roleDTOS != null && !roleDTOS.isEmpty() ?
                     roleDTOS.stream().map(RoleDTO::getName).collect(Collectors.toSet()) :
                     null;
             if (groups != null && !groups.isEmpty()) {
                 // builder.groups(groups);
-                builder.addClaims(Map.of("groups", groups/*String.join(",", groups)*/));
+                builder.addClaims(Map.of(CLAIM_NAME_GROUPS, groups/*String.join(",", groups)*/));
             }
 
             Map<String, Object> claims = !fieldNames.isEmpty() ?
@@ -480,7 +477,7 @@ public class SecurityJwt implements Module {
                     null;
             if (claims != null)
                 claims.forEach((k, v) -> builder.claim(k, v.toString()));
-            builder.claim("isAT", false);
+            builder.claim(CLAIM_NAME_IS_AT, false);
             // return builder.sign(privateKey);
             return builder
                     .signWith(privateKey) // Sign with the key and algorithm
@@ -500,7 +497,7 @@ public class SecurityJwt implements Module {
                     .setClaims(new DefaultClaims(claims))
                     .setIssuedAt(now)    // When the token was issued
                     .setExpiration(expirationDate);// When the token expires
-            builder.claim("isAT", true);
+            builder.claim(CLAIM_NAME_IS_AT, true);
             return builder
                     .signWith(privateKey) // Sign with the key and algorithm
                     .compact(); // Build and serialize to a compact, URL-safe string
@@ -541,14 +538,18 @@ public class SecurityJwt implements Module {
      * @return The claims (payload) if valid.
      * @throws io.jsonwebtoken.JwtException if the token is invalid or expired.
      */
-    private Claims parseToken(String token) {
+    private Claims parseToken(ConfigurationTool configurationTool, String token) {
         if (token == null || token.isBlank())
             return null;
         if (token.startsWith("Bearer "))
             token = token.substring(7);
-        Jws<Claims> claimsJws = parser.parseClaimsJws(token);
-        // Return the claims payload from the validated token
-        return claimsJws.getBody();
+        try {
+            Jws<Claims> claimsJws = parser.parseClaimsJws(token);
+            return claimsJws.getBody();
+        } catch (Exception e) {
+            configurationTool.loggerTrace("parse error " + e.getMessage());
+            return null;
+        }
     }
 
     private boolean verifyPassword(String password, Object passHash) {

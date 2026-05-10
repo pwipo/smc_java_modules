@@ -5,7 +5,7 @@
     <provider>java</provider>
     <os/>
     <arch/>
-    <ver>1.0.2</ver>
+    <ver>1.0.3</ver>
     <apiVer>1.4.2</apiVer>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
@@ -159,11 +159,11 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Определяет, нужно ли сверять ip адрес запроса и тот что указан в токене.</value>
+                    <value>Определяет, нужно ли сверять ip адрес запроса и тот что указан в токене. Если true, то в токен записывается ip адрес.</value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Determines whether the IP address of the request should be compared with the one specified in the token.</value>
+                    <value>Determines whether the IP address of the request should be compared with the one specified in the token. If true, the IP address is written into the token.</value>
                 </entry>
             </description>
         </value>

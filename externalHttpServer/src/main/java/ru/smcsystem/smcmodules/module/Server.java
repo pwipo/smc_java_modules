@@ -103,6 +103,8 @@ public class Server implements Module {
                 .orElseThrow(() -> new ModuleException("maxFileSizeFull setting"));
         ObjectArray corsAccessListArr = externalConfigurationTool.getSetting("corsAccessList").map(ModuleUtils::toObjectArray)
                 .orElseThrow(() -> new ModuleException("corsAccessList setting"));
+        Boolean permitPreflight = externalConfigurationTool.getSetting("permitPreflight").map(ModuleUtils::toBoolean)
+                .orElseThrow(() -> new ModuleException("permitPreflight setting"));
         reqIdGenerator = new AtomicLong();
         reqIdGenerator.compareAndSet(Long.MAX_VALUE, 0);
         mapResponse = new ConcurrentHashMap<>();
@@ -133,6 +135,7 @@ public class Server implements Module {
                 Integer maxFileSizeFullVar = objectElement.findField("maxFileSizeFull").map(ModuleUtils::getNumber).map(Number::intValue).orElse(maxFileSizeFull);
                 Integer fileResponsePieceSizeVar = objectElement.findField("fileResponsePieceSize").map(ModuleUtils::getNumber).map(Number::intValue).orElse(fileResponsePieceSize);
                 ObjectArray corsAccessListArrVar = objectElement.findField("corsAccessList").map(ModuleUtils::toObjectArray).orElse(corsAccessListArr);
+                Boolean permitPreflightVar = objectElement.findField("permitPreflight").map(ModuleUtils::getString).map(Boolean::parseBoolean).orElse(permitPreflight);
                 URL url = null;
                 try {
                     url = new URL(protocolVar.name().toLowerCase(), hostname, portVar, "");
@@ -154,7 +157,7 @@ public class Server implements Module {
                 externalConfigurationTool.loggerDebug(String.format("add virtualServer=%s, paths=%s", url, paths.stream().map(Map.Entry::getValue).collect(Collectors.joining(","))));
                 VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, urlHeader, url, keyStoreFileNameVar, keyStorePassVar,
                         keyAliasVar, keyPassVar, strAddressVar, paths, requestTimeoutVar, countThreadsVar, backlogVar, sessionTimeoutVar, maxPostSizeVar,
-                        allowMultipartParsingVar, headersArrVar, requestTypeVar, maxFileSizeFullVar, fileResponsePieceSizeVar, corsAccessListArrVar);
+                        allowMultipartParsingVar, headersArrVar, requestTypeVar, maxFileSizeFullVar, fileResponsePieceSizeVar, corsAccessListArrVar, permitPreflightVar);
                 virtualServerInfoMap.put(virtualServerInfo.getUrlHeader(), virtualServerInfo);
             }
         } else {
@@ -166,7 +169,7 @@ public class Server implements Module {
                         .forEach(id -> paths.add(Map.entry(id, availablePathsList.get(id))));
                 VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, hostname, new URL(protocol.name().toLowerCase(), hostname, port, ""),
                         keyStoreFileName, keyStorePass, keyAlias, keyPass, strAddress, paths, requestTimeout, countThreads, backlog, sessionTimeout,
-                        maxPostSize, allowMultipartParsing, headersArr, requestType, maxFileSizeFull, fileResponsePieceSize, corsAccessListArr);
+                        maxPostSize, allowMultipartParsing, headersArr, requestType, maxFileSizeFull, fileResponsePieceSize, corsAccessListArr, permitPreflight);
                 virtualServerInfoMap = Map.of(virtualServerInfo.getUrlHeader(), virtualServerInfo);
             } catch (Exception e) {
                 throw new ModuleException("error", e);
@@ -200,7 +203,7 @@ public class Server implements Module {
                                                String strAddress, List<Map.Entry<Integer, String>> paths, Integer requestTimeout, Integer countThreads,
                                                Integer backlog, Integer sessionTimeout, Integer maxPostSize, Boolean allowMultipartParsing,
                                                ObjectArray headersArr, RequestType requestTypeVar, Integer maxFileSizeFullVar, Integer fileResponsePieceSizeVar,
-                                               ObjectArray corsAccessListArr) {
+                                               ObjectArray corsAccessListArr, Boolean permitPreflight) {
         File keyStore = null;
         if (StringUtils.isNotBlank(keyStoreFileName)) {
             keyStore = new File(externalConfigurationTool.getWorkDirectory(), keyStoreFileName);
@@ -235,7 +238,7 @@ public class Server implements Module {
         }
         return new VirtualServerInfo(urlOrigin, url, keyStore, keyStorePass, keyAlias, keyPass, address, patterns,
                 requestTimeout, countThreads, backlog, sessionTimeout, maxPostSize, allowMultipartParsing,
-                headers, requestTypeVar, maxFileSizeFullVar, fileResponsePieceSizeVar, corsAccessList);
+                headers, requestTypeVar, maxFileSizeFullVar, fileResponsePieceSizeVar, corsAccessList, permitPreflight);
     }
 
     @Override
@@ -591,7 +594,7 @@ public class Server implements Module {
     }
 
     private void fastResponse(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, long reqId, int resultCode, List<String> headers, byte[] content, String path, String mimeType, int startEcId) {
-        ResponseObj responseObj = new ResponseObj(reqId, resultCode, headers, content, path, executionContextTool, startEcId);
+        ResponseObj responseObj = new ResponseObj(reqId, resultCode, headers, content, path, executionContextTool, startEcId, null);
         try {
             Response response = mapResponse.get(reqId);
             HttpServletResponse resp = response != null ? response.getHttpServletResponse() : null;
@@ -772,7 +775,7 @@ public class Server implements Module {
                         }
                     }
                     if (idsForExecute == null) {
-                        responseObj = new ResponseObj(null, 404, null, "Page not found".getBytes(), null, null, 1);
+                        responseObj = new ResponseObj(null, 404, null, "Page not found".getBytes(), null, null, 1, req.getMethod());
                         handleResponse(resp, responseObj, virtualServerInfo);
                         return;
                     }
@@ -783,7 +786,7 @@ public class Server implements Module {
                             resp.addHeader("Access-Control-Allow-Origin", requestOrigin);
                             resp.addHeader("Access-Control-Allow-Credentials", "true");
                         } else {
-                            responseObj = new ResponseObj(null, 403, null, "Forbidden".getBytes(), null, null, 1);
+                            responseObj = new ResponseObj(null, 403, null, "Forbidden".getBytes(), null, null, 1, req.getMethod());
                             handleResponse(resp, responseObj, virtualServerInfo);
                             return;
                         }
@@ -817,15 +820,18 @@ public class Server implements Module {
                         if (responseMain.getResponseObj() != null) {
                             mapFastResponseArrived = true;
                             responseObj = responseMain.getResponseObj();
-                            if (responseObj != null && !externalExecutionContextTool.isNeedStop() &&
-                                    (virtualServerInfo.getRequestTimeout() <= 0 || virtualServerInfo.getRequestTimeout() > System.currentTimeMillis() - startTime))
-                                responseObj.waitWork();
+                            if (responseObj != null) {
+                                responseObj.setMethod(req.getMethod());
+                                if (!externalExecutionContextTool.isNeedStop() &&
+                                        (virtualServerInfo.getRequestTimeout() <= 0 || virtualServerInfo.getRequestTimeout() > System.currentTimeMillis() - startTime))
+                                    responseObj.waitWork();
+                            }
                         } else {
                             List<IMessage> response = externalExecutionContextTool.getFlowControlTool().getMessagesFromExecuted(threadId, idForGetResponse).stream()
                                     .flatMap(a -> a.getMessages().stream()/*.map(IValue::getValue)*/)
                                     .collect(Collectors.toList());
                             if (response.size() < 2) {
-                                responseObj = new ResponseObj(null, 500, null, null, null, null, 1);
+                                responseObj = new ResponseObj(null, 500, null, null, null, null, 1, req.getMethod());
                             } else {
                                 Number codeObject = ModuleUtils.getNumber(response.get(0));
                                 int code = codeObject != null ? codeObject.intValue() : 500;
@@ -838,7 +844,7 @@ public class Server implements Module {
                                 List<String> headers = new ArrayList<>(response.size());
                                 for (int i = 1; i < response.size() - 1; i++)
                                     headers.add(ModuleUtils.toString(response.get(i)));
-                                responseObj = new ResponseObj(null, code, headers, responseBody, null, null, 1);
+                                responseObj = new ResponseObj(null, code, headers, responseBody, null, null, 1, req.getMethod());
                             }
                         }
                     } finally {
@@ -1116,6 +1122,9 @@ public class Server implements Module {
             return 500;
         }
         int code = responseObj.getResultCode();
+        if (code != 200 && virtualServerInfo.getPermitPreflight() && "OPTIONS".equalsIgnoreCase(responseObj.getMethod()))
+            code = 200;
+        resp.setStatus(code);
         responseObj.getHeaders().forEach(headerText -> {
             String[] split = headerText.split("=", 2);
             // h.getResponseHeaders().add(split[0].trim(), split[1].trim());

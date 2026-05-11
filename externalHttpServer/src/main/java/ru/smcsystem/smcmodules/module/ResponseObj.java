@@ -14,9 +14,10 @@ public class ResponseObj {
     private final String path;
     private final ExecutionContextTool executionContextTool;
     private final int startEcId;
+    private String method;
     private volatile boolean work;
 
-    public ResponseObj(Long reqId, int resultCode, List<String> headers, byte[] content, String path, ExecutionContextTool executionContextTool, int startEcId) {
+    public ResponseObj(Long reqId, int resultCode, List<String> headers, byte[] content, String path, ExecutionContextTool executionContextTool, int startEcId, String method) {
         this.reqId = reqId;
         this.resultCode = resultCode;
         this.headers = headers != null ? headers : new ArrayList<>();
@@ -24,6 +25,7 @@ public class ResponseObj {
         this.path = path;
         this.executionContextTool = executionContextTool;
         this.startEcId = startEcId;
+        this.method = method;
         work = true;
     }
 
@@ -86,4 +88,11 @@ public class ResponseObj {
         return executionContextTool != null;
     }
 
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
 }

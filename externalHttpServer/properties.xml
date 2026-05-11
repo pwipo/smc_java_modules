@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.Server</className>
-    <ver>1.4.13</ver>
+    <ver>1.4.14</ver>
     <apiVer>1.4.2</apiVer>
     <date>09-05-2025</date>
 
@@ -277,7 +277,7 @@ The list is separated by :: or newline characters.
 "protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,
 "countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false",
 "headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type"], "maxFileSizeFull": -1, "fileResponsePieceSize": 1048576,
-"corsAccessList":["127\.0\.0\..*"]
+"corsAccessList":["127\.0\.0\..*","permitPreflight":true]
 }]
                     ]]></value>
                 </entry>
@@ -289,7 +289,7 @@ Each object is a separate virtual server. The fields of the object correspond to
 "protocol":"HTTP","hostname":"localhost","port":8080,"keyStoreFileName":"","keyStorePass":"","keyAlias":"","keyPass":"","bindAddress":"","requestTimeout":20000,
 "countThreads":10,"backlog":0,"sessionTimeout":30,"maxPostSize":10485760,"allowMultipartParsing":"false",
 "headers":["Access-Control-Allow-Origin=*","Access-Control-Allow-Headers=Content-Type"], "maxFileSizeFull": -1, "fileResponsePieceSize": 1048576,
-"corsAccessList":["127\.0\.0\..*"]
+"corsAccessList":["127\.0\.0\..*","permitPreflight":true]
 }]
                     ]]></value>
                 </entry>
@@ -461,6 +461,21 @@ If there is a match, the header is added: Access-Control-Allow-Origin: client_ip
 Format: array of strings, each string must contain a full IP or its pattern.
 Examples: ["http://127\.0\.0\.1:3000", "http://example.com", ".*"]
                     ]]></value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>permitPreflight</name>
+            <type>BOOLEAN</type>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Если это так, разрешить (принудительно отправить код 200) все запросы OPTIONS.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>If true, permit (force send code 200) all OPTIONS requests.</value>
                 </entry>
             </description>
         </value>
@@ -782,11 +797,11 @@ The second context is used to get the file size, passes 1 parameter: path, recei
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Остановить сервер.</value>
+                    <value>Остановить сервер (описание смотри у типа default).</value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Stop the server.</value>
+                    <value>Stop the server (see the default type for description).</value>
                 </entry>
             </description>
             <sources/>
@@ -796,11 +811,11 @@ The second context is used to get the file size, passes 1 parameter: path, recei
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Запустить сервер.</value>
+                    <value>Запустить сервер (описание смотри у типа default).</value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Start the server.</value>
+                    <value>Start the server (see the default type for description).</value>
                 </entry>
             </description>
             <sources/>

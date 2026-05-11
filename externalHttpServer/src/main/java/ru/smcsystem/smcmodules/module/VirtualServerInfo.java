@@ -31,11 +31,13 @@ public class VirtualServerInfo {
     private final Integer fileResponsePieceSize;
     private final List<Pattern> corsAccessList;
     private final Host host;
+    private final Boolean permitPreflight;
 
     public VirtualServerInfo(String urlHeader, URL url, File keyStore, String keyStorePass, String keyAlias, String keyPass,
                              InetAddress address, List<Map.Entry<Integer, Pattern>> patterns, Integer requestTimeout, Integer countThreads,
                              Integer backlog, Integer sessionTimeout, Integer maxPostSize, Boolean allowMultipartParsing,
-                             List<String> headers, Server.RequestType requestType, Integer maxFileSizeFull, Integer fileResponsePieceSize, List<Pattern> corsAccessList) {
+                             List<String> headers, Server.RequestType requestType, Integer maxFileSizeFull, Integer fileResponsePieceSize, List<Pattern> corsAccessList,
+                             Boolean permitPreflight) {
         this.urlHeader = urlHeader;
         this.url = url;
         this.keyStore = keyStore;
@@ -55,6 +57,7 @@ public class VirtualServerInfo {
         this.maxFileSizeFull = maxFileSizeFull;
         this.fileResponsePieceSize = fileResponsePieceSize;
         this.corsAccessList = corsAccessList;
+        this.permitPreflight = permitPreflight;
 
         this.host = new StandardHost();
         this.host.setName(url.getHost());
@@ -139,5 +142,9 @@ public class VirtualServerInfo {
 
     public List<Pattern> getCorsAccessList() {
         return corsAccessList;
+    }
+
+    public Boolean getPermitPreflight() {
+        return permitPreflight;
     }
 }

@@ -491,13 +491,13 @@ public class SecurityJwt implements Module {
         try {
             TimeUnit unit = TimeUnit.SECONDS;
             Date now = new Date();
-            Date expirationDate = new Date(now.getTime() + unit.toMillis(tokenExpires));
+            Date expirationDate = isAccessToken || claims.getExpiration() == null ? new Date(now.getTime() + unit.toMillis(tokenExpires)) : claims.getExpiration();
 
             JwtBuilder builder = Jwts.builder()
                     .setClaims(new DefaultClaims(claims))
                     .setIssuedAt(now)    // When the token was issued
                     .setExpiration(expirationDate);// When the token expires
-            builder.claim(CLAIM_NAME_IS_AT, true);
+            builder.claim(CLAIM_NAME_IS_AT, isAccessToken);
             return builder
                     .signWith(privateKey) // Sign with the key and algorithm
                     .compact(); // Build and serialize to a compact, URL-safe string

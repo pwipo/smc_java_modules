@@ -5,7 +5,7 @@
     <provider>java</provider>
     <os/>
     <arch/>
-    <ver>1.0.5</ver>
+    <ver>1.0.6</ver>
     <apiVer>1.4.2</apiVer>
     <author>Nikolay V. Ulyanov</author>
     <contacts>ulianownv@mail.ru</contacts>
@@ -114,6 +114,10 @@ In addition to the specified fields, the indexes include the fields specified in
             <output>
                 <element t="VALUE" c="1" vt="OBJECT_ARRAY">
                     <value><![CDATA[[1,2]]]></value>
+                    <description>
+                        <entry k="ru" v="Идентификаторы (fieldNameId) обработанных объектов."/>
+                        <entry k="en" v="Identifiers (fieldNameId) of processed objects."/>
+                    </description>
                 </element>
             </output>
             <ecs/>
@@ -139,6 +143,10 @@ In addition to the specified fields, the indexes include the fields specified in
             <output>
                 <element t="VALUE" c="1" vt="OBJECT_ARRAY">
                     <value><![CDATA[[1,2]]]></value>
+                    <description>
+                        <entry k="ru" v="Идентификаторы (fieldNameId) обработанных объектов."/>
+                        <entry k="en" v="Identifiers (fieldNameId) of processed objects."/>
+                    </description>
                 </element>
             </output>
             <ecs/>
@@ -176,6 +184,10 @@ Parameters are the same as insert and update.
             <output>
                 <element t="VALUE" c="1" vt="OBJECT_ARRAY">
                     <value><![CDATA[[1,2]]]></value>
+                    <description>
+                        <entry k="ru" v="Идентификаторы (fieldNameId) обработанных объектов."/>
+                        <entry k="en" v="Identifiers (fieldNameId) of processed objects."/>
+                    </description>
                 </element>
             </output>
             <ecs/>

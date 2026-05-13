@@ -237,4 +237,194 @@ public class LinearDBModuleTest {
 
     }
 
+    @Test
+    public void process2() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "fieldNameId", new Value("_ID"),
+                                "fieldNameDate", new Value("CREATED"),
+                                "indexes", new Value("TASK_ID=LONG")
+                        ),
+                        null,
+                        "C:\\tmp\\14"
+                ),
+                new LinearDBModule()
+        );
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(
+                                                        new ObjectElement(new ObjectField("TASK_ID", 1), new ObjectField("value2", 2.), new ObjectField("value3", "v1"))
+                                                )))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "insert", "insert");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement())))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "find", "find");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement())))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "count", "count");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(
+                                                        new ObjectElement(new ObjectField("TASK_ID", Double.valueOf(2.0)), new ObjectField("value2", 2.), new ObjectField("value3", "v1"))
+                                                )))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "insert", "insert");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement())))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "find", "find");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(
+                                                        new ObjectElement(new ObjectField("TASK_ID", 1), new ObjectField("value2", 2.), new ObjectField("value3", "v1"))
+                                                )))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "insert", "insert");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement())))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "find", "find");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement())))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "count", "count");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+    }
+
+    @Test
+    public void process3() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of(
+                                "fieldNameId", new Value("_ID"),
+                                "fieldNameDate", new Value("CREATED"),
+                                "indexes", new Value("TASK_ID=LONG")
+                        ),
+                        null,
+                        "C:\\LinearDB"
+                ),
+                new LinearDBModule()
+        );
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool;
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement())))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "find", "find");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement())))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "count", "count");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("filter", new ObjectElement(
+                                                        new ObjectField("t", "=="), new ObjectField("f", "_ID"), new ObjectField("v", 1)))))))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null, null, null, "find", "find");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+    }
+
 }

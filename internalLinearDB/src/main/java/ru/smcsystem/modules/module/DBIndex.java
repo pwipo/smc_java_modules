@@ -49,8 +49,12 @@ public class DBIndex {
     }
 
     public List<IElement> getIndexElements(ConfigurationTool configurationTool) {
-        if (indexElements != null && indexElementsReady)
+        if (indexElementsReady) {
+            Map<Object, Set<IElement>> mapIds = indexes.get(0);
+            if (indexElements.size() != mapIds.size())
+                indexElements = mapIds.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
             return indexElements;
+        }
 
         configurationTool.loggerDebug("rebuild indexes start");
         //get all elements

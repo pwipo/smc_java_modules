@@ -110,7 +110,7 @@ public class PredicateUtils {
     }
 
     private enum PredicateType {
-        EQUALS(Set.of("eq", "=")),
+        EQUALS(Set.of("eq", "=", "==")),
         NOT_EQUALS(Set.of("ne", "!=")),
         LESS(Set.of("lt", "<")),
         GREATER(Set.of("gt", ">")),

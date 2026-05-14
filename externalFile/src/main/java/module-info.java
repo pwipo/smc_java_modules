@@ -4,4 +4,5 @@ module ru.smcsystem.modules.externalFile {
     requires org.apache.commons.io;
     requires com.ibm.icu;
     requires ru.smcsystem.utils;
+    exports ru.smcsystem.smcmodules.module;
 }

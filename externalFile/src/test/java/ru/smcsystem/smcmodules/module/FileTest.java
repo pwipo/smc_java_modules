@@ -2,8 +2,12 @@ package ru.smcsystem.smcmodules.module;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import ru.smcsystem.api.dto.ObjectArray;
+import ru.smcsystem.api.dto.ObjectElement;
+import ru.smcsystem.api.dto.ObjectField;
 import ru.smcsystem.api.enumeration.ActionType;
 import ru.smcsystem.api.enumeration.MessageType;
+import ru.smcsystem.api.enumeration.ObjectType;
 import ru.smcsystem.api.enumeration.ValueType;
 import ru.smcsystem.test.Process;
 import ru.smcsystem.test.emulate.*;
@@ -478,6 +482,61 @@ public class FileTest {
                 null, null, "ec", "dirInfoObj");
         process.fullLifeCycle(executionContextTool);//.forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
         executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+    }
+
+    @Test
+    public void writeParts() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of("rootFolder", new Value(ValueType.STRING, ""),
+                                "type", new Value(ValueType.STRING, "readText"),
+                                "hashAlgType", new Value(ValueType.STRING, "SHA256"),
+                                "arguments", new Value(ValueType.STRING, ""),
+                                "printAbsolutePath", new Value(ValueType.STRING, "false"),
+                                "useOnlyWorkDirectory", new Value(ValueType.STRING, "true")
+                        ),
+                        null,
+                        "C:\\tmp"
+                ),
+                new File()
+        );
+        process.start();
+
+        byte[] fileContent = "hello world 1 123 456 789 hello world 2 123 456 789 hello world 3 123 456 789".getBytes();
+        int[] position = new int[]{0};
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(List.of(
+                List.of(
+                        new Action(
+                                List.of(
+                                        new Message(new Value("file1.txt")),
+                                        new Message(new Value(new ObjectArray(new ObjectElement(
+                                                new ObjectField("name", "file"),
+                                                new ObjectField("data", ObjectType.BYTES, null),
+                                                new ObjectField("size", fileContent.length)))))
+                                ),
+                                ActionType.EXECUTE
+                        ))),
+                null, null,
+                List.of((lst) -> {
+                    System.out.println(lst);
+                    int partSize = ((Number) lst.get(1)).intValue();
+                    partSize = Math.min(partSize, fileContent.length - position[0]);
+                    if (partSize <= 0)
+                        return new Action(List.of());
+                    byte[] part = new byte[partSize];
+                    System.arraycopy(fileContent, position[0], part, 0, partSize);
+                    position[0] += partSize;
+                    if (position[0] > fileContent.length)
+                        position[0] = fileContent.length;
+                    return new Action(List.of(new Message(new Value(part))));
+                }), "ec", "writeParts");
+        process.execute(executionContextTool);//.forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
+        process.stop();
     }
 
 }

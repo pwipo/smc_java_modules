@@ -180,6 +180,8 @@ public class LinearDBModule implements Module {
                 })
                 .filter(Objects::nonNull)
                 .peek(o -> o.getFields().forEach(f -> {
+                    if (f.getValue() == null)
+                        return;
                     switch (f.getType()) {
                         case BYTE:
                             f.setValue(((Number) f.getValue()).byteValue());

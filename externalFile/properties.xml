@@ -7,9 +7,9 @@
     <contacts>ulianownv@mail.ru</contacts>
     <homePage>http://www.smcsystem.ru</homePage>
     <className>ru.smcsystem.smcmodules.module.File</className>
-    <ver>1.7.2</ver>
-    <apiVer>1.4.0</apiVer>
-    <date>27-07-2025</date>
+    <ver>1.7.3</ver>
+    <apiVer>1.4.3</apiVer>
+    <date>14-05-2026</date>
     <categories>Java, File</categories>
     <copyrightAndLicense>
         <entry>
@@ -5158,6 +5158,105 @@ The fourth parameter is the encoding name, optional. Returns the amount of data 
                         <entry k="en" v="Each object contains information about the file, fields: name, length, lastModified, access (access level: 2-write, 1-read, 0-no access), isFile, hash."/>
                     </description>
                     <value><![CDATA[[{"name":"file.txt", "length":10, "lastModified":123, "access":2, "isFile":true, "hash":"124fd4345"}]]]></value>
+                </element>
+            </output>
+        </type>
+        <type t="writeParts" minS="1" maxS="1" minEC="1" maxEC="1">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Записывает в файл части. Старые данные стираются.
+Удобно использовать в связке с веб сервером, когда приходит большой файл и он разбивается на части.
+Возвращает количество записанных данных и хеш.
+Требует 2-4 параметра - путь до файла, объект с информацией о данных (массив объектов), номер объекта в массиве, максимальный размер итогового файла.
+Требуется контекст, возвращающий часть данных, ему передается номер объекта в массиве и максимальный размер.
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Writes parts to a file. Old data is erased.
+Convenient to use in conjunction with a web server when a large file arrives and is split into parts.
+Returns the amount of written data and a hash.
+Requires 2-4 parameters: file path, an object with data information (an array of objects), the object's number in the array, and maximum size of the resulting file.
+A context is required to return the part of the data; it is passed the object's number in the array and the maximum size.
+                    ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element vt="STRING" v="/test/">
+                            <description>
+                                <entry k="ru" v="Путь до папки, может быть абсолютным или относительным, в этом случае используется рабочая папка."/>
+                                <entry k="en" v="The path to the folder, can be absolute or relative, in this case the working folder is used."/>
+                            </description>
+                        </element>
+                        <element vt="OBJECT_ARRAY">
+                            <value>[{"name":"file", "data":null, "size":1024}]</value>
+                            <description>
+                                <entry k="ru" v="Объект с информацией о данных (массив объектов)"/>
+                                <entry k="en" v="Object with data information (an array of objects)"/>
+                            </description>
+                        </element>
+                        <element vt="STRING" o="true" v="file">
+                            <description>
+                                <entry k="ru" v="Имя части"/>
+                                <entry k="en" v="Part name"/>
+                            </description>
+                        </element>
+                        <element vt="LONG" o="true" v="1024">
+                            <description>
+                                <entry k="ru" v="Максимальный размер итогового файла"/>
+                                <entry k="en" v="Maximum size of the resulting file"/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <ecs>
+                <ec c="1">
+                    <description>
+                        <entry k="ru" v="Возвращающий часть данных. Ему передается номер объекта в массиве и максимальный размер."/>
+                        <entry k="en" v="Return the part of the data. It is passed the object's number in the array and the maximum size."/>
+                    </description>
+                    <elements>
+                        <element vt="INTEGER" v="0">
+                            <description>
+                                <entry k="ru" v="Номер объекта в массиве"/>
+                                <entry k="en" v="The object's number in the array"/>
+                            </description>
+                        </element>
+                        <element vt="LONG" v="1024">
+                            <description>
+                                <entry k="ru" v="Максимальный размер"/>
+                                <entry k="en" v="Maximum size"/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE" vt="BYTES" v="AQIDBAU="/>
+                    </output>
+                </ec>
+            </ecs>
+            <output>
+                <element vt="LONG" v="1024">
+                    <description>
+                        <entry k="ru" v="Размер файла"/>
+                        <entry k="en" v="File size"/>
+                    </description>
+                </element>
+                <element vt="STRING" v="1f568a">
+                    <description>
+                        <entry k="ru" v="Хеш файла"/>
+                        <entry k="en" v="File hash"/>
+                    </description>
+                </element>
+                <element vt="STRING" v="file1.txt">
+                    <description>
+                        <entry k="ru" v="Имя файла"/>
+                        <entry k="en" v="File name"/>
+                    </description>
                 </element>
             </output>
         </type>

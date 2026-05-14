@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -191,11 +192,11 @@ public class File implements Module {
                             create(executionContextTool, rootFolder);
                             break;
                         case writePart:
-                            write(executionContextTool, rootFolder, paramLong, paramStr, false, null, false, false, false);
+                            write(executionContextTool, rootFolder, paramLong, paramStr, false, null, false, false, false, true);
                             break;
                         case write:
                         case writeOrWait:
-                            write(executionContextTool, rootFolder, 0, arguments, true, null, false, type == Type.writeOrWait, false);
+                            write(executionContextTool, rootFolder, 0, arguments, true, null, false, type == Type.writeOrWait, false, true);
                             break;
                         case changeLastModified:
                             changeLastModified(executionContextTool, rootFolder, paramLong);
@@ -239,15 +240,15 @@ public class File implements Module {
                             waitFile(executionContextTool, rootFolder);
                             break;
                         case writeText:
-                            write(executionContextTool, rootFolder, paramLong, paramStr, true, StandardCharsets.UTF_8, false, false, true);
+                            write(executionContextTool, rootFolder, paramLong, paramStr, true, StandardCharsets.UTF_8, false, false, true, true);
                         case writeTextBOM:
-                            write(executionContextTool, rootFolder, paramLong, paramStr, true, StandardCharsets.UTF_8, true, false, true);
+                            write(executionContextTool, rootFolder, paramLong, paramStr, true, StandardCharsets.UTF_8, true, false, true, true);
                             break;
                         case size:
                             size(executionContextTool, rootFolder);
                             break;
                         case writeTextPart:
-                            write(executionContextTool, rootFolder, paramLong, paramStr, false, StandardCharsets.UTF_8, false, false, true);
+                            write(executionContextTool, rootFolder, paramLong, paramStr, false, StandardCharsets.UTF_8, false, false, true, true);
                             break;
                         case readFromZip:
                             readFromZip(configurationTool, executionContextTool, rootFolder, false, paramStr, null, false);
@@ -258,6 +259,8 @@ public class File implements Module {
                         case dirInfoObj:
                         case dirFullInfoObj:
                             dir(configurationTool, executionContextTool, rootFolder, false, false, true, true, type == Type.dirFullInfoObj);
+                            break;
+                        case writeParts:
                             break;
                     }
                 }
@@ -363,7 +366,7 @@ public class File implements Module {
                 java.io.File srcFile = getFile(messages);
                 Object v = messages.poll().getValue();
                 write(executionContextTool, srcFile, !messages.isEmpty() ? ModuleUtils.getNumber(messages.poll()).longValue() : 0, v,
-                        false, null, false, false, false);
+                        false, null, false, false, false, true);
                 break;
             }
             case write:
@@ -371,7 +374,7 @@ public class File implements Module {
                 if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
                 write(executionContextTool, getFile(messages), 0, messages.poll().getValue(),
-                        true, null, false, currentType == Type.writeOrWait, false);
+                        true, null, false, currentType == Type.writeOrWait, false, true);
                 break;
             case changeLastModified:
                 // while (!messages.isEmpty()) {
@@ -455,14 +458,14 @@ public class File implements Module {
                     break;
                 write(executionContextTool, getFile(messages), 0, ModuleUtils.toString(messages.poll()), true,
                         !messages.isEmpty() && ModuleUtils.isString(messages.peek()) ? Charset.forName(ModuleUtils.getString(messages.poll())) : null,
-                        false, false, true);
+                        false, false, true, true);
                 break;
             case writeTextBOM:
                 if (!checkCountMessages(executionContextTool, messages, 2))
                     break;
                 write(executionContextTool, getFile(messages), 0, ModuleUtils.toString(messages.poll()), true,
                         !messages.isEmpty() && ModuleUtils.isString(messages.peek()) ? Charset.forName(ModuleUtils.getString(messages.poll())) : null,
-                        true, false, true);
+                        true, false, true, true);
                 break;
             case size:
                 size(executionContextTool, getFile(messages));
@@ -474,7 +477,7 @@ public class File implements Module {
                 Object v = ModuleUtils.toString(messages.poll());
                 write(executionContextTool, srcFile, !messages.isEmpty() ? ModuleUtils.toNumber(messages.poll()).longValue() : 0, v, false,
                         !messages.isEmpty() && ModuleUtils.isString(messages.peek()) ? Charset.forName(ModuleUtils.getString(messages.poll())) : null,
-                        false, false, true);
+                        false, false, true, true);
                 break;
             }
             case readFromZip:
@@ -492,6 +495,24 @@ public class File implements Module {
                     break;
                 dir(configurationTool, executionContextTool, getFile(messages), false, false, true, true, type == Type.dirFullInfoObj);
                 break;
+            case writeParts: {
+                if (!checkCountMessages(executionContextTool, messages, 2))
+                    break;
+                java.io.File file = getFile(messages);
+                List<PartDTO> partDTOS = ModuleUtils.convertFromObjectArray(ModuleUtils.deserializeToObject(messages), PartDTO.class, true, true);
+                String partName = !messages.isEmpty() ? ModuleUtils.toString(messages.poll()) : null;
+                PartDTO partDTO = partName != null ?
+                        partDTOS.stream().filter(p -> p.getName().equals(partName)).findFirst().orElse(null) :
+                        !partDTOS.isEmpty() ? partDTOS.get(0) : null;
+                int partId = partDTO != null ? partDTOS.indexOf(partDTO) : -1;
+                long maxSize = !messages.isEmpty() ? ModuleUtils.toNumber(messages.poll()).longValue() : 0;
+                if (partDTOS.isEmpty() || partId >= partDTOS.size() || partDTO == null || partId < 0) {
+                    executionContextTool.addError("need part");
+                    break;
+                }
+                writeParts(executionContextTool, file, partDTO, partId, maxSize);
+                break;
+            }
         }
     }
 
@@ -650,11 +671,8 @@ public class File implements Module {
             return;
 
         String hash = null;
-        if (getHash) {
+        if (getHash)
             hash = buildHexStringFromByteArray(createChecksum(file));
-            if (hash == null)
-                return;
-        }
 
         //result = new FileAttr(fileSource.getName() + File.separator + path, fileTmp.lastModified(), fileTmp.length(), hash);
         //System.out.println(Utils.exportFileAttr(result));
@@ -704,18 +722,17 @@ public class File implements Module {
 
     // see this How-to for a faster way to convert
     // a byte array to a HEX string
-    private String buildHexStringFromByteArray(byte b[]) {
-        String result = "";
-        if (b == null)
-            return result;
+    private String buildHexStringFromByteArray(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        if (bytes == null)
+            return result.toString();
 
-        for (int i = 0; i < b.length; i++) {
-            String str = Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
-            //System.out.println(str.length() + " " + str);
-            result += str;
+        for (byte b : bytes) {
+            result.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
+            // result.append(String.format("%02x", b));
         }
 
-        return result;
+        return result.toString();
     }
 
     private void copyFolder(java.io.File src, java.io.File dest, boolean force, List<Pattern> excludePaths) throws IOException {
@@ -834,21 +851,21 @@ public class File implements Module {
         }
     }
 
-    private void write(ExecutionContextTool externalExecutionContextTool, java.io.File srcFile, long offset, Object value, boolean rewrite,
-                       Charset charset, boolean useBom, boolean wait, boolean isText) throws IOException {
+    private boolean write(ExecutionContextTool externalExecutionContextTool, java.io.File srcFile, long offset, Object value, boolean rewriteOrAppend,
+                          Charset charset, boolean useBom, boolean wait, boolean isText, boolean printMessages) throws IOException {
         if (value == null) {
             externalExecutionContextTool.addError("need value");
-            return;
+            return false;
         }
         if (!srcFile.exists()) {
             if (srcFile.getParentFile() != null && !srcFile.getParentFile().exists())
                 srcFile.getParentFile().mkdirs();
-            if (srcFile.createNewFile())
+            if (srcFile.createNewFile() && printMessages)
                 externalExecutionContextTool.addMessage(getAbsolutePath(srcFile));
         }
         if (srcFile.exists() && !srcFile.canWrite()) {
             externalExecutionContextTool.addError("cannot write in file " + srcFile.getAbsolutePath());
-            return;
+            return false;
         }
         boolean isBites = value instanceof byte[];
         if (!isBites && !isText) {
@@ -865,7 +882,7 @@ public class File implements Module {
             value = new String((byte[]) value, charset);
 
         long changeSize = 0;
-        if (rewrite) {
+        if (rewriteOrAppend) {
             if (!isText) {
                 try (FileOutputStream fileOutputStream = new FileOutputStream(srcFile, false)) {
                     byte[] bytes = (byte[]) value;
@@ -933,7 +950,9 @@ public class File implements Module {
                 }
             } while (wait && !needExit && paramLong != null && (startTime + paramLong) < System.currentTimeMillis());
         }
-        externalExecutionContextTool.addMessage(changeSize);
+        if (printMessages)
+            externalExecutionContextTool.addMessage(changeSize);
+        return true;
     }
 
     private void copy(ExecutionContextTool externalExecutionContextTool, java.io.File srcFile, java.io.File dstFile, boolean force, LinkedList<IMessage> messages) throws Exception {
@@ -1291,6 +1310,56 @@ public class File implements Module {
         }
     }
 
+    public void writeParts(ExecutionContextTool executionContextTool, java.io.File srcFile, PartDTO dataPart, int partId, long maxSize) throws NoSuchAlgorithmException,
+            IOException {
+        if (srcFile == null) {
+            executionContextTool.addError("filePath not set");
+            return;
+        }
+        if (dataPart == null || dataPart.getSize() <= 0) {
+            executionContextTool.addError("dataPart is empty");
+            return;
+        }
+        if (maxSize > 0 && dataPart.getSize() > maxSize) {
+            executionContextTool.addError("very big part " + dataPart.getSize());
+            return;
+        }
+
+        MessageDigest digestSha256 = MessageDigest.getInstance("SHA-256");
+        boolean resultWrite = false;
+        if (dataPart.getData() != null) {
+            digestSha256.update(dataPart.getData());
+            resultWrite = write(executionContextTool, srcFile, 0, dataPart.getData(), true, null, false, false, false, false);
+        } else {
+            if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() == 0) {
+                executionContextTool.addError("need 1 managed ec");
+                return;
+            }
+            delete(srcFile, false);
+            int bytePartSize = 1024 * 1024;
+            for (long i = 0; i < dataPart.getSize(); i = i + bytePartSize) {
+                byte[] bytes = ModuleUtils.executeAndGetMessages(executionContextTool, 0, List.of(partId, bytePartSize))
+                        .map(l -> ModuleUtils.getBytes(l.get(0)))
+                        .orElse(null);
+                resultWrite = bytes != null && bytes.length > 0;
+                if (resultWrite) {
+                    digestSha256.update(bytes);
+                    // return ModuleUtils.executeAndGetMessages(executionContextTool, ecIdAppendToFile, List.of(filePath, b));
+                    resultWrite = write(executionContextTool, srcFile, 0, bytes, false, null, false, false, false, false);
+                }
+                if (!resultWrite)
+                    break;
+            }
+        }
+        if (!resultWrite) {
+            executionContextTool.addError("error while write parts to file");
+            return;
+        }
+        executionContextTool.addMessage(dataPart.getSize());
+        executionContextTool.addMessage(buildHexStringFromByteArray(digestSha256.digest()));
+        executionContextTool.addMessage(srcFile.getName());
+    }
+
     private enum HashAlgType {
         MD5("MD5"),
         SHA1("SHA-1"),
@@ -1349,7 +1418,8 @@ public class File implements Module {
         readFromZip,
         readTextFromZip,
         dirInfoObj,
-        dirFullInfoObj
+        dirFullInfoObj,
+        writeParts
     }
 
 }

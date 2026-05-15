@@ -179,30 +179,6 @@ public class LinearDBModule implements Module {
                     }
                 })
                 .filter(Objects::nonNull)
-                .peek(o -> o.getFields().forEach(f -> {
-                    if (f.getValue() == null)
-                        return;
-                    switch (f.getType()) {
-                        case BYTE:
-                            f.setValue(((Number) f.getValue()).byteValue());
-                            break;
-                        case SHORT:
-                            f.setValue(((Number) f.getValue()).shortValue());
-                            break;
-                        case INTEGER:
-                            f.setValue(((Number) f.getValue()).intValue());
-                            break;
-                        case LONG:
-                            f.setValue(((Number) f.getValue()).longValue());
-                            break;
-                        case FLOAT:
-                            f.setValue(((Number) f.getValue()).floatValue());
-                            break;
-                        case DOUBLE:
-                            f.setValue(((Number) f.getValue()).doubleValue());
-                            break;
-                    }
-                }))
                 .collect(Collectors.toList());
         List<ObjectElement> result = db.save(elements);
         try {

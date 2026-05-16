@@ -207,6 +207,16 @@ The program is supplied as is. For problems arising during the operation or inst
                 <entry k="en" v="If the password (in the database) begins with this string, the password is considered unencrypted. This applies only if the string is not empty and the recorded password is a string."/>
             </description>
         </value>
+        <value>
+            <name>tfaCheckFieldName</name>
+            <type>STRING</type>
+            <value>tfa_login_check</value>
+            <subType>STRING</subType>
+            <description>
+                <entry k="ru" v="Имя поля для дополнительной проверки (TFA). Если поле true, то запускает дополнительную проверку."/>
+                <entry k="en" v="The name of the field for additional validation (TFA). If the field is true, it triggers additional validation."/>
+            </description>
+        </value>
     </defaultSettings>
 
 
@@ -216,11 +226,11 @@ The program is supplied as is. For problems arising during the operation or inst
                 <entry>
                     <key>ru</key>
                     <value><![CDATA[Вход (аутентификация). Требует 2-3 управляемых контекста исполнения.
-параметры:
+Параметры:
     строка - логин.
     строка - пароль.
-Если есть второй источник, то туда передается объект запроса (формат обекта как указано для модуля HttpServer).
-управляемые контексты исполнения:
+Если есть второй источник, то туда передается объект запроса (формат объекта как указано для модуля HttpServer).
+Управляемые контексты исполнения:
     1 - вызывается для получения данных пользователя.
         при вызове передает параметры:
             строка - логин.
@@ -230,6 +240,7 @@ The program is supplied as is. For problems arising during the operation or inst
             password - строка или массив - пароль или его хеш.
             disabled - число (опционально) - время отключения (в миллисекундах).
             blocking - число (опционально) - время блокиировки (в миллисекундах).
+            auth_type - число (опционально) - тип аутентификации, типы: 0 - только по логину и паролю (по умолчанию), 1 - только по уникальному полю, 2 - разрешен любой метод.
             другие поля.
     2 - вызывается для получения списка ролей.
         при вызове передает параметры:
@@ -237,7 +248,7 @@ The program is supplied as is. For problems arising during the operation or inst
         ожидает получить массив объектов с полями:
             id - число - идентификатор.
             name - строка - имя роли.
-    3  - дополнительная двухфакторная проверка. Вызывается только если TFA_LOGIN_CHECK=true.
+    3  - дополнительная двухфакторная проверка. Вызывается только если указана поле в настройке tfaCheckFieldName и это true.
         При вызове передает параметры:
             ObjectArray - пользователь.
         Ожидает получить логическое значение. Если true, то проверка прошла успешно.
@@ -270,6 +281,7 @@ Managed execution contexts:
             password - string or array - password or its hash.
             disabled - number (optional) - disconnection time (in milliseconds).
             blocking - number (optional) - lock expiration time (in milliseconds).
+            auth_type - number (optional) - authentication type, types: 0 - only by login and password (default), 1 - only by unique field, 2 - any method allowed.
             other fields.
     2 - Called to retrieve a list of roles.
         When called, passes the following parameters:
@@ -277,7 +289,7 @@ Managed execution contexts:
         Expects an array of objects with the following fields:
             id - number - identifier.
             name - string - role name.
-    3 - additional two-factor verification. Called only if TFA_LOGIN_CHECK=true.
+    3 - Additional two-factor verification. Called only if the field is specified in the tfaCheckFieldName setting and is true.
         When called, passes the following parameters:
             ObjectArray - user.
         Expects a Boolean value. If true, the validation was successful.
@@ -351,7 +363,7 @@ Managed execution contexts:
                     </elements>
                     <output>
                         <element t="VALUE" c="1" vt="OBJECT_ARRAY">
-                            <value><![CDATA[[{"id":1, "login":"user1", "password":"hash_password", "disabled":null, "blocking":null}]]]></value>
+                            <value><![CDATA[[{"id":1, "login":"user1", "password":"hash_password", "disabled":null, "blocking":null, "auth_type":0}]]]></value>
                             <description>
                                 <entry k="ru" v="объект пользователя"/>
                                 <entry k="en" v="user object"/>
@@ -389,7 +401,240 @@ Managed execution contexts:
                     </description>
                     <elements>
                         <element t="VALUE" c="1" vt="OBJECT_ARRAY">
-                            <value><![CDATA[[{"id":1, "login":"user1", "password":"hash_password", "disabled":null, "blocking":null}]]]></value>
+                            <value><![CDATA[[{"id":1, "login":"user1", "password":"hash_password", "disabled":null, "blocking":null, "auth_type":0}]]]></value>
+                            <description>
+                                <entry k="ru" v="объект пользователя"/>
+                                <entry k="en" v="user object"/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="BOOLEAN" v="true"/>
+                    </output>
+                </ec>
+                <ec o="true">
+                    <description>
+                        <entry k="ru" v="Сохранение блокировки пользователя во внешнем хранилище"/>
+                        <entry k="en" v="Saves the user lock to external storage"/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Идентификатор пользователя"/>
+                                <entry k="en" v="User id"/>
+                            </description>
+                        </element>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="время окончания блокировки в миллисекундах"/>
+                                <entry k="en" v="lock expiration time in milliseconds"/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE_ANY" vt="BOOLEAN" v="true"/>
+                    </output>
+                </ec>
+                <ec o="true">
+                    <description>
+                        <entry k="ru" v="Сохранение нового токена обновления во внешнем хранилище"/>
+                        <entry k="en" v="Saving a new refresh token to external storage"/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Идентификатор пользователя"/>
+                                <entry k="en" v="User id"/>
+                            </description>
+                        </element>
+                        <element t="VALUE" vt="STRING" v="1">
+                            <description>
+                                <entry k="ru" v="Токен обновления"/>
+                                <entry k="en" v="Refresh token"/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE_ANY" vt="BOOLEAN" v="true"/>
+                    </output>
+                </ec>
+            </ecs>
+        </type>
+        <type t="login_field" minS="1" maxS="2" minEC="2" maxEC="5">
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Вход по полю (аутентификация).
+Аналогичен типу login, но требует только значения уникального поля.
+Удобно использовать для аутентификации по номеру телефона.
+Параметры:
+    строка - значение уникального поля.
+Если есть второй источник, то туда передается объект запроса (формат объекта как указано для модуля HttpServer).
+Управляемые контексты исполнения:
+    1 - вызывается для получения данных пользователя.
+        при вызове передает параметры:
+            строка - значение уникального поля.
+        ожидает получить объект с полями:
+            id - число - идентификатор.
+            login - строка - имя пользователя.
+            password - строка или массив - пароль или его хеш.
+            disabled - число (опционально) - время отключения (в миллисекундах).
+            blocking - число (опционально) - время блокиировки (в миллисекундах).
+            auth_type - число (опционально) - тип аутентификации, типы: 0 - только по логину и паролю (по умолчанию), 1 - только по уникальному полю, 2 - разрешен любой метод.
+            другие поля.
+    2 - вызывается для получения списка ролей.
+        при вызове передает параметры:
+            число - идентификатор пользователя.
+        ожидает получить массив объектов с полями:
+            id - число - идентификатор.
+            name - строка - имя роли.
+    3  - дополнительная двухфакторная проверка. Вызывается только если указана поле в настройке tfaCheckFieldName и это true.
+        При вызове передает параметры:
+            ObjectArray - пользователь.
+        Ожидает получить логическое значение. Если true, то проверка прошла успешно.
+    4  - сохранение блокировки пользователя во внешнем хранилище.
+        при вызове передает параметры:
+            число - идентификатор пользователя.
+            число - время окончания блокировки в миллисекундах.
+        ожидает получить любое сообщение.
+    5  - сохранение нового токена обновления во внешнем хранилище.
+        при вызове передает параметры:
+            число - идентификатор пользователя.
+            строке - токен обновления.
+        ожидает получить любое сообщение.
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Login by field (authentication).
+Similar to the login type, but requires only the value of a unique field.
+Convenient for phone number authentication.
+Parameters:
+    string - the value of the unique field.
+If there is a second source, the request object is passed to it (the object format is as specified for the HttpServer module).
+Managed execution contexts:
+    1 - called to retrieve user data.
+        When called, the following parameters are passed:
+            string - the value of the unique field.
+        Expects an object with the following fields:
+            id - number - identifier.
+            login - string - username.
+            password - string or array - password or its hash.
+            disabled - number (optional) - disconnection time (in milliseconds).
+            blocking - number (optional) - lock expiration time (in milliseconds).
+            auth_type - number (optional) - authentication type, types: 0 - only by login and password (default), 1 - only by unique field, 2 - any method allowed.
+            other fields.
+    2 - Called to retrieve a list of roles.
+        When called, passes the following parameters:
+            Number - user identifier.
+        Expects an array of objects with the following fields:
+            id - number - identifier.
+            name - string - role name.
+    3 - Additional two-factor verification. Called only if the field is specified in the tfaCheckFieldName setting and is true.
+        When called, passes the following parameters:
+            ObjectArray - user.
+        Expects a Boolean value. If true, the validation was successful.
+    4 - saves the user lock to external storage.
+        When called, passes the following parameters:
+            number - user ID.
+            number - lock expiration time in milliseconds.
+        Waits to receive any message.,
+    5 - Saves a new refresh token to external storage.
+        When called, it passes the following parameters:
+            number - user ID.
+            string - refresh token.
+        Expects to receive any message.
+                    ]]></value>
+                </entry>
+            </description>
+            <sources>
+                <source>
+                    <count>1</count>
+                    <elements>
+                        <element t="VALUE" c="1" vt="STRING" v="1">
+                            <description>
+                                <entry k="ru" v="значение уникального поля"/>
+                                <entry k="en" v="value of the unique field"/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+                <source o="true">
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY" v="1">
+                            <value><![CDATA[[{"method":"GET", "reqId":"123", "uri":"/data/get1", "remoteAddr":"1.2.3.4", "sessionId":"srghs"}]]]></value>
+                            <description>
+                                <entry k="ru" v="Объект содержит запрос (http). Формат описан в модуле HttpServer."/>
+                                <entry k="en" v="The object contains a request (http). The format is described in the HttpServer module."/>
+                            </description>
+                        </element>
+                    </elements>
+                </source>
+            </sources>
+            <output>
+                <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                    <value><![CDATA[[{"accessToken":"3454", "refreshToken":"123"}]]]></value>
+                    <description>
+                        <entry k="ru" v="объект с токенами доступа и обновления"/>
+                        <entry k="en" v="object with access and refresh tokens"/>
+                    </description>
+                </element>
+            </output>
+            <ecs>
+                <ec>
+                    <description>
+                        <entry k="ru" v="Вызывается для получения данных пользователя."/>
+                        <entry k="en" v="Called to retrieve user data."/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Логин пользователя."/>
+                                <entry k="en" v="User login."/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"id":1, "login":"user1", "password":"hash_password", "disabled":null, "blocking":null, "auth_type":0}]]]></value>
+                            <description>
+                                <entry k="ru" v="объект пользователя"/>
+                                <entry k="en" v="user object"/>
+                            </description>
+                        </element>
+                    </output>
+                </ec>
+                <ec>
+                    <description>
+                        <entry k="ru" v="Вызывается для получения списка ролей."/>
+                        <entry k="en" v="Called to get a list of roles."/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" vt="LONG" v="1">
+                            <description>
+                                <entry k="ru" v="Идентификатор пользователя."/>
+                                <entry k="en" v="User id."/>
+                            </description>
+                        </element>
+                    </elements>
+                    <output>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"id":1, "name":"users"}]]]></value>
+                            <description>
+                                <entry k="ru" v="объекты ролей"/>
+                                <entry k="en" v="role objects"/>
+                            </description>
+                        </element>
+                    </output>
+                </ec>
+                <ec o="true">
+                    <description>
+                        <entry k="ru" v="дополнительная двухфакторная проверка"/>
+                        <entry k="en" v="additional two-factor verification"/>
+                    </description>
+                    <elements>
+                        <element t="VALUE" c="1" vt="OBJECT_ARRAY">
+                            <value><![CDATA[[{"id":1, "login":"user1", "password":"hash_password", "disabled":null, "blocking":null, "auth_type":0}]]]></value>
                             <description>
                                 <entry k="ru" v="объект пользователя"/>
                                 <entry k="en" v="user object"/>

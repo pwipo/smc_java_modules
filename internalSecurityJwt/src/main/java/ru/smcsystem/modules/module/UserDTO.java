@@ -3,6 +3,7 @@ package ru.smcsystem.modules.module;
 import ru.smcsystem.api.dto.ObjectElement;
 import ru.smcsystem.smc.utils.SmcField;
 import ru.smcsystem.smc.utils.converter.SmcConverterDate;
+import ru.smcsystem.smc.utils.converter.SmcConverterEnumOrdinal;
 
 import java.util.Date;
 
@@ -17,19 +18,22 @@ public class UserDTO {
     private Date disabled;
     @SmcField(name = "blocking", converter = SmcConverterDate.class)
     private Date blocking;
+    @SmcField(name = "auth_type", converter = SmcConverterEnumOrdinal.class)
+    private UserAuthType authType;
     private ObjectElement objectElement;
 
-    public UserDTO(Long id, String login, Object password, Date disabled, Date blocking) {
+    public UserDTO(Long id, String login, Object password, Date disabled, Date blocking, UserAuthType authType) {
         this.id = id;
         this.login = login;
         this.password = password;
         this.disabled = disabled;
         this.blocking = blocking;
+        this.authType = authType;
         this.objectElement = null;
     }
 
     public UserDTO() {
-        this(null, null, null, null, null);
+        this(null, null, null, null, null, UserAuthType.LOGIN_PASS);
     }
 
     public Long getId() {
@@ -70,6 +74,14 @@ public class UserDTO {
 
     public void setBlocking(Date blocking) {
         this.blocking = blocking;
+    }
+
+    public UserAuthType getAuthType() {
+        return authType;
+    }
+
+    public void setAuthType(UserAuthType authType) {
+        this.authType = authType;
     }
 
     public ObjectElement getObjectElement() {

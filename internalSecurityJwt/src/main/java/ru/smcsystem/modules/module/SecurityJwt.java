@@ -49,12 +49,16 @@ public class SecurityJwt implements Module {
     // private Cache<String, Map.Entry<UserDTO, List<RoleDTO>>> cacheRefreshToken;
     private JwtParser parser;
     private Boolean checkRemoteAddr;
-    private Map<String, Integer> loginFailsMap;
-    private Map<String, Instant> blockingMap;
+    private Map<String/*login*/, Integer> loginFailsMap;
+    private Map<String/*login*/, Instant> loginBlockingMap;
+    private Map<String/*login*/, Lock> loginLock;
+    private Map<String/*login*/, Integer> authFieldFailsMap;
+    private Map<String/*login*/, Instant> authFieldBlockingMap;
+    private Map<String/*login*/, Lock> authFieldLock;
     private Integer countLoginFailBeforeBlocking;
     private Integer blockingTime;
-    private Map<String, Lock> loginLock;
     private String plainPass;
+    private String tfaCheckFieldName;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -77,14 +81,12 @@ public class SecurityJwt implements Module {
 
         File publicKeyFile = new File(configurationTool.getWorkDirectory(), publicKeyStr);
         File privateKeyFile = new File(configurationTool.getWorkDirectory(), privateKeyStr);
-        loginFailsMap = new ConcurrentHashMap<>();
-        blockingMap = new ConcurrentHashMap<>();
-        loginLock = new ConcurrentHashMap<>();
         countLoginFailBeforeBlocking = configurationTool.getSetting("countLoginFailBeforeBlocking").map(ModuleUtils::toNumber).map(Number::intValue)
                 .orElseThrow(() -> new ModuleException("countLoginFailBeforeBlocking setting not found"));
         blockingTime = configurationTool.getSetting("blockingTime").map(ModuleUtils::toNumber).map(Number::intValue)
                 .orElseThrow(() -> new ModuleException("blockingTime setting not found"));
         plainPass = configurationTool.getSetting("plainPass").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("plainPass setting not found"));
+        tfaCheckFieldName = configurationTool.getSetting("tfaCheckFieldName").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("tfaCheckFieldName setting not found"));
 
         try {
             String privateKeyRaw = new String(Files.readAllBytes(privateKeyFile.toPath()));
@@ -122,6 +124,12 @@ public class SecurityJwt implements Module {
         // cacheRefreshToken = CacheBuilder.newBuilder()
         //         .expireAfterAccess(refreshTokenExpires, TimeUnit.SECONDS)
         //         .build();
+        loginFailsMap = new ConcurrentHashMap<>();
+        loginBlockingMap = new ConcurrentHashMap<>();
+        loginLock = new ConcurrentHashMap<>();
+        authFieldFailsMap = new ConcurrentHashMap<>();
+        authFieldBlockingMap = new ConcurrentHashMap<>();
+        authFieldLock = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -153,6 +161,9 @@ public class SecurityJwt implements Module {
                 case GEN_HASH:
                     genHash(configurationTool, executionContextTool, messagesList);
                     break;
+                case LOGIN_FIELD:
+                    loginField(configurationTool, executionContextTool, messagesList);
+                    break;
             }
         });
     }
@@ -175,12 +186,17 @@ public class SecurityJwt implements Module {
         //     cacheRefreshToken = null;
         // }
         checkRemoteAddr = null;
-        blockingMap = null;
-        loginFailsMap = null;
         countLoginFailBeforeBlocking = null;
         blockingTime = null;
-        loginLock = null;
         plainPass = null;
+        tfaCheckFieldName = null;
+
+        loginBlockingMap = null;
+        loginFailsMap = null;
+        loginLock = null;
+        authFieldBlockingMap = null;
+        authFieldFailsMap = null;
+        authFieldLock = null;
     }
 
     private void genHash(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList) {
@@ -222,20 +238,9 @@ public class SecurityJwt implements Module {
             return;
         }
 
-        if (checkRemoteAddr && messagesList.size() > 1) {
-            LinkedList<IMessage> messagesReq = messagesList.get(1);
-            ObjectArray objectArray = ModuleUtils.getObjectArray(messagesReq.poll());
-            if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
-                ObjectElement objectElement = (ObjectElement) objectArray.get(0);
-                String remoteAddr = objectElement.findField(CLAIM_NAME_RADDR).map(ModuleUtils::toString).orElse(null);
-
-                String remoteAddrT = claims.get(CLAIM_NAME_RADDR).toString();
-                if (remoteAddr != null && !Objects.equals(remoteAddr, remoteAddrT)) {
-                    executionContextTool.addError("remoteAddr not valid");
-                    return;
-                }
-            }
-        }
+        Map.Entry<String, Boolean> remoteAddrEntry = getOrCheckRemoteAddr(executionContextTool, messagesList, 1, claims);
+        if (remoteAddrEntry != null && !remoteAddrEntry.getValue())
+            return;
 
         if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0) {
             configurationTool.loggerTrace(String.format("additional check for %s", claims.getSubject()));
@@ -269,20 +274,9 @@ public class SecurityJwt implements Module {
             return;
         }
 
-        if (checkRemoteAddr && messagesList.size() > 1) {
-            LinkedList<IMessage> messagesReq = messagesList.get(1);
-            ObjectArray objectArray = ModuleUtils.getObjectArray(messagesReq.poll());
-            if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
-                ObjectElement objectElement = (ObjectElement) objectArray.get(0);
-                String remoteAddr = objectElement.findField(CLAIM_NAME_RADDR).map(ModuleUtils::toString).orElse(null);
-
-                String remoteAddrT = claims.get(CLAIM_NAME_RADDR).toString();
-                if (remoteAddr != null && !Objects.equals(remoteAddr, remoteAddrT)) {
-                    executionContextTool.addError("remoteAddr not valid");
-                    return;
-                }
-            }
-        }
+        Map.Entry<String, Boolean> remoteAddrEntry = getOrCheckRemoteAddr(executionContextTool, messagesList, 1, claims);
+        if (remoteAddrEntry != null && !remoteAddrEntry.getValue())
+            return;
 
         ObjectElement objectElement = new ObjectElement(
                 new ObjectField("id", Long.parseLong(claims.getSubject())),
@@ -302,33 +296,44 @@ public class SecurityJwt implements Module {
         executionContextTool.addMessage(new ObjectArray(objectElement));
     }
 
-    private void login(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList) {
-        LinkedList<IMessage> messages = messagesList.get(0);
-        String login = ModuleUtils.toString(messages.poll());
-        String password = ModuleUtils.toString(messages.poll());
+    private Map.Entry<String, Boolean> getOrCheckRemoteAddr(ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList, int sourceId, Claims claims) {
         String remoteAddr = null;
-        if (checkRemoteAddr && messagesList.size() > 1) {
-            LinkedList<IMessage> messagesReq = messagesList.get(1);
+        if (checkRemoteAddr && messagesList.size() > sourceId) {
+            LinkedList<IMessage> messagesReq = messagesList.get(sourceId);
             ObjectArray objectArray = ModuleUtils.getObjectArray(messagesReq.poll());
             if (ModuleUtils.isArrayContainObjectElements(objectArray)) {
                 ObjectElement objectElement = (ObjectElement) objectArray.get(0);
                 remoteAddr = objectElement.findField(CLAIM_NAME_RADDR).map(ModuleUtils::toString).orElse(null);
+
+                if (claims != null) {
+                    String remoteAddrT = claims.get(CLAIM_NAME_RADDR).toString();
+                    if (remoteAddr != null && !Objects.equals(remoteAddr, remoteAddrT)) {
+                        executionContextTool.addError("remoteAddr not valid");
+                        return Map.entry(remoteAddr, false);
+                    }
+                }
             }
         }
+        return remoteAddr != null ? Map.entry(remoteAddr, true) : null;
+    }
 
-        Instant blockingTo = blockingMap.get(login);
+    private void login(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList) {
+        LinkedList<IMessage> messages = messagesList.get(0);
+        String login = ModuleUtils.toString(messages.poll());
+        String password = ModuleUtils.toString(messages.poll());
+        Map.Entry<String, Boolean> remoteAddrEntry = getOrCheckRemoteAddr(executionContextTool, messagesList, 1, null);
+        String remoteAddr = remoteAddrEntry != null ? remoteAddrEntry.getKey() : null;
+        Instant blockingTo = loginBlockingMap.get(login);
         if (blockingTo != null) {
             if (Instant.now().isBefore(blockingTo)) {
                 executionContextTool.addError("user blocking");
                 return;
             } else {
-                loginFailsMap.put(login, 0);
-                blockingMap.remove(login);
+                loginFailsMap.remove(login);
+                loginBlockingMap.remove(login);
             }
         }
 
-        UserDTO userDTO = null;
-        List<RoleDTO> roleDTOS = null;
         Lock lock = loginLock.computeIfAbsent(login, k -> new ReentrantLock());
         try {
             lock.lock();
@@ -337,14 +342,14 @@ public class SecurityJwt implements Module {
             } catch (Exception ignore) {
             }
 
-            userDTO = ModuleUtils.executeAndGetElement(executionContextTool, 0, List.of(login))
+            UserDTO userDTO = ModuleUtils.executeAndGetElement(executionContextTool, 0, List.of(login))
                     .map((e) -> {
                         UserDTO userDTOTmp = ModuleUtils.convertFromObjectElement(e, UserDTO.class, true, true);
                         userDTOTmp.setObjectElement(e);
                         if (userDTOTmp.getBlocking() != null) {
                             Instant instant = Instant.ofEpochMilli(userDTOTmp.getBlocking().getTime());
                             if (instant.isAfter(Instant.now()))
-                                blockingMap.put(login, instant);
+                                loginBlockingMap.put(login, instant);
                         }
                         return userDTOTmp;
                     })
@@ -357,30 +362,99 @@ public class SecurityJwt implements Module {
                 executionContextTool.addError("user is disabled");
                 return;
             }
-            if (blockingMap.containsKey(login)) {
+            if (loginBlockingMap.containsKey(login)) {
                 executionContextTool.addError("user blocking");
+                return;
+            }
+            if (!UserAuthType.LOGIN_PASS.equals(userDTO.getAuthType()) && !UserAuthType.ALL.equals(userDTO.getAuthType())) {
+                executionContextTool.addError("auth method not allowed");
                 return;
             }
             if (!verifyPassword(password, userDTO.getPassword())) {
                 executionContextTool.addError("password incorrect");
-                saveFail(configurationTool, executionContextTool, userDTO);
+                saveFail(configurationTool, executionContextTool, userDTO, userDTO.getLogin(), true);
                 return;
             }
-            roleDTOS = ModuleUtils.executeAndGetObjects(executionContextTool, 1, List.of(userDTO.getId()), RoleDTO.class, true).orElse(List.of());
-
-            if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 2 &&
-                    userDTO.getObjectElement().findFieldIgnoreCase("tfa_login_check").map(ModuleUtils::toBoolean).orElse(false)) {
-                configurationTool.loggerTrace(String.format("tfa check for %s", userDTO.getLogin()));
-                Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 2, List.of(userDTO.getObjectElement()))
-                        .map(l -> ModuleUtils.toBoolean(l.get(0))).orElse(false);
-                if (!additionalCheck) {
-                    executionContextTool.addError("tfa check fail");
-                    saveFail(configurationTool, executionContextTool, userDTO);
-                    return;
-                }
-            }
+            loginEnd(configurationTool, executionContextTool, userDTO, remoteAddr, userDTO.getLogin(), false);
         } finally {
             lock.unlock();
+        }
+    }
+
+    private void loginField(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList) {
+        LinkedList<IMessage> messages = messagesList.get(0);
+        String authFieldValue = ModuleUtils.toString(messages.poll());
+        // String password = ModuleUtils.toString(messages.poll());
+        Map.Entry<String, Boolean> remoteAddrEntry = getOrCheckRemoteAddr(executionContextTool, messagesList, 1, null);
+        String remoteAddr = remoteAddrEntry != null ? remoteAddrEntry.getKey() : null;
+
+        Instant blockingTo = authFieldBlockingMap.get(authFieldValue);
+        if (blockingTo != null) {
+            if (Instant.now().isBefore(blockingTo)) {
+                executionContextTool.addError("user blocking");
+                return;
+            } else {
+                authFieldFailsMap.remove(authFieldValue);
+                authFieldBlockingMap.remove(authFieldValue);
+            }
+        }
+
+        Lock lock = authFieldLock.computeIfAbsent(authFieldValue, k -> new ReentrantLock());
+        try {
+            lock.lock();
+            try {
+                Thread.sleep(authSleep);
+            } catch (Exception ignore) {
+            }
+
+            UserDTO userDTO = ModuleUtils.executeAndGetElement(executionContextTool, 0, List.of(authFieldValue))
+                    .map((e) -> {
+                        UserDTO userDTOTmp = ModuleUtils.convertFromObjectElement(e, UserDTO.class, true, true);
+                        userDTOTmp.setObjectElement(e);
+                        if (userDTOTmp.getBlocking() != null) {
+                            Instant instant = Instant.ofEpochMilli(userDTOTmp.getBlocking().getTime());
+                            if (instant.isAfter(Instant.now()))
+                                authFieldBlockingMap.put(authFieldValue, instant);
+                        }
+                        return userDTOTmp;
+                    })
+                    .orElse(null);
+            if (userDTO == null) {
+                executionContextTool.addError("user not exists");
+                return;
+            }
+            if (userDTO.getDisabled() != null) {
+                executionContextTool.addError("user is disabled");
+                return;
+            }
+            if (authFieldBlockingMap.containsKey(authFieldValue)) {
+                executionContextTool.addError("user blocking");
+                return;
+            }
+            if (!UserAuthType.FIELD.equals(userDTO.getAuthType()) && !UserAuthType.ALL.equals(userDTO.getAuthType())) {
+                executionContextTool.addError("auth method not allowed");
+                return;
+            }
+            loginEnd(configurationTool, executionContextTool, userDTO, remoteAddr, authFieldValue, true);
+        } finally {
+            lock.unlock();
+        }
+
+    }
+
+    private void loginEnd(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, UserDTO userDTO, String remoteAddr, String authValue, boolean isLogin) {
+        List<RoleDTO> roleDTOS = ModuleUtils.executeAndGetObjects(executionContextTool, 1, List.of(userDTO.getId()), RoleDTO.class, true).orElse(List.of());
+
+        if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 2 && !tfaCheckFieldName.isBlank() &&
+                userDTO.getObjectElement().findFieldIgnoreCase(tfaCheckFieldName).map(ModuleUtils::toBoolean).orElse(false)) {
+            configurationTool.loggerTrace(String.format("tfa check for %s", userDTO.getLogin()));
+            Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 2, List.of(userDTO.getObjectElement()))
+                    .map(l -> ModuleUtils.toBoolean(l.get(0))).orElse(false);
+            if (!additionalCheck) {
+                executionContextTool.addError("tfa check fail");
+                saveFail(configurationTool, executionContextTool, userDTO, authValue, isLogin);
+                return;
+            }
         }
 
         // String accessToken = generateToken(userDTO, roleDTOS, accessTokenExpires, true, null);
@@ -402,8 +476,8 @@ public class SecurityJwt implements Module {
                 new ObjectField("refreshToken", refreshToken))));
     }
 
-    private void saveFail(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, UserDTO userDTO) {
-        int loginFails = loginFailsMap.compute(userDTO.getLogin(), (k, v) -> {
+    private void saveFail(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, UserDTO userDTO, String authValue, boolean isLogin) {
+        int authFails = (isLogin ? loginFailsMap : authFieldFailsMap).compute(authValue, (k, v) -> {
             if (v == null) {
                 v = 1;
             } else {
@@ -411,10 +485,10 @@ public class SecurityJwt implements Module {
             }
             return v;
         });
-        if (loginFails >= countLoginFailBeforeBlocking) {
+        if (authFails >= countLoginFailBeforeBlocking) {
             configurationTool.loggerInfo(String.format("blocking user %s", userDTO.getLogin()));
             Instant blocking = Instant.now().plus(blockingTime, ChronoUnit.SECONDS);
-            blockingMap.put(userDTO.getLogin(), blocking);
+            (isLogin ? loginBlockingMap : authFieldBlockingMap).put(authValue, blocking);
             if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 3) {
                 if (ModuleUtils.executeAndGetFirstMessage(executionContextTool, 3, List.of(userDTO.getId(), blocking.toEpochMilli())).isEmpty())
                     configurationTool.loggerWarn("blocking user in external storage fail");
@@ -566,7 +640,7 @@ public class SecurityJwt implements Module {
     }
 
     private enum Type {
-        LOGIN/*, LOGOUT*/, PARSE, REFRESH_TOKENS, HAS_ROLE, GEN_HASH
+        LOGIN/*, LOGOUT*/, PARSE, REFRESH_TOKENS, HAS_ROLE, GEN_HASH, LOGIN_FIELD
     }
 
 }

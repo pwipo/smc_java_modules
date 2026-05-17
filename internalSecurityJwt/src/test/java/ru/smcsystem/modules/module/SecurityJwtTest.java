@@ -33,6 +33,7 @@ public class SecurityJwtTest {
         settings.put("blockingTime", new Value(600));
         settings.put("plainPass", new Value("{noop}"));
         settings.put("tfaCheckFieldName", new Value("tfa_login_check"));
+        settings.put("updateEstimationTimeOnRefresh", new Value(false));
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -143,6 +144,7 @@ public class SecurityJwtTest {
         settings.put("blockingTime", new Value(10));
         settings.put("plainPass", new Value("{noop}"));
         settings.put("tfaCheckFieldName", new Value("tfa_login_check"));
+        settings.put("updateEstimationTimeOnRefresh", new Value(false));
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -255,6 +257,7 @@ public class SecurityJwtTest {
         settings.put("blockingTime", new Value(600));
         settings.put("plainPass", new Value("{noop}"));
         settings.put("tfaCheckFieldName", new Value("tfa_login_check"));
+        settings.put("updateEstimationTimeOnRefresh", new Value(false));
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",

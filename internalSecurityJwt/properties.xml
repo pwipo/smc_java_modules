@@ -217,6 +217,21 @@ The program is supplied as is. For problems arising during the operation or inst
                 <entry k="en" v="The name of the field for additional validation (TFA). If the field is true, it triggers additional validation."/>
             </description>
         </value>
+        <value>
+            <name>updateEstimationTimeOnRefresh</name>
+            <type>BOOLEAN</type>
+            <value>false</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Определяет, нужно ли обновлять время истечения срока годности для токена обновления при обновлении. Если true, то обновляет, иначе оставляет текущее значение.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Determines whether the refresh token's expiration time should be updated upon refresh. If true, updates the expiration time; otherwise, leaves the current value.</value>
+                </entry>
+            </description>
+        </value>
     </defaultSettings>
 
 

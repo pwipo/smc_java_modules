@@ -59,6 +59,7 @@ public class SecurityJwt implements Module {
     private Integer blockingTime;
     private String plainPass;
     private String tfaCheckFieldName;
+    private Boolean updateEstimationTimeOnRefresh;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -87,6 +88,8 @@ public class SecurityJwt implements Module {
                 .orElseThrow(() -> new ModuleException("blockingTime setting not found"));
         plainPass = configurationTool.getSetting("plainPass").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("plainPass setting not found"));
         tfaCheckFieldName = configurationTool.getSetting("tfaCheckFieldName").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("tfaCheckFieldName setting not found"));
+        updateEstimationTimeOnRefresh = configurationTool.getSetting("updateEstimationTimeOnRefresh").map(ModuleUtils::toBoolean)
+                .orElseThrow(() -> new ModuleException("updateEstimationTimeOnRefresh setting not found"));
 
         try {
             String privateKeyRaw = new String(Files.readAllBytes(privateKeyFile.toPath()));
@@ -190,6 +193,7 @@ public class SecurityJwt implements Module {
         blockingTime = null;
         plainPass = null;
         tfaCheckFieldName = null;
+        updateEstimationTimeOnRefresh = null;
 
         loginBlockingMap = null;
         loginFailsMap = null;
@@ -448,7 +452,7 @@ public class SecurityJwt implements Module {
         if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 2 && !tfaCheckFieldName.isBlank() &&
                 userDTO.getObjectElement().findFieldIgnoreCase(tfaCheckFieldName).map(ModuleUtils::toBoolean).orElse(false)) {
             configurationTool.loggerTrace(String.format("tfa check for %s", userDTO.getLogin()));
-            Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 2, List.of(userDTO.getObjectElement()))
+            Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 2, List.of(new ObjectArray(userDTO.getObjectElement())))
                     .map(l -> ModuleUtils.toBoolean(l.get(0))).orElse(false);
             if (!additionalCheck) {
                 executionContextTool.addError("tfa check fail");
@@ -565,7 +569,9 @@ public class SecurityJwt implements Module {
         try {
             TimeUnit unit = TimeUnit.SECONDS;
             Date now = new Date();
-            Date expirationDate = isAccessToken || claims.getExpiration() == null ? new Date(now.getTime() + unit.toMillis(tokenExpires)) : claims.getExpiration();
+            Date expirationDate = isAccessToken || claims.getExpiration() == null || updateEstimationTimeOnRefresh ?
+                    new Date(now.getTime() + unit.toMillis(tokenExpires)) :
+                    claims.getExpiration();
 
             JwtBuilder builder = Jwts.builder()
                     .setClaims(new DefaultClaims(claims))

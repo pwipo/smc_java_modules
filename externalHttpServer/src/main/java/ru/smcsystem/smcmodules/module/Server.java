@@ -129,13 +129,13 @@ public class Server implements Module {
                 Integer backlogVar = objectElement.findField("backlog").map(ModuleUtils::getNumber).map(Number::intValue).orElse(backlog);
                 Integer sessionTimeoutVar = objectElement.findField("sessionTimeout").map(ModuleUtils::getNumber).map(Number::intValue).orElse(sessionTimeout);
                 Integer maxPostSizeVar = objectElement.findField("maxPostSize").map(ModuleUtils::getNumber).map(Number::intValue).orElse(maxPostSize);
-                Boolean allowMultipartParsingVar = objectElement.findField("allowMultipartParsing").map(ModuleUtils::getString).map(Boolean::parseBoolean).orElse(allowMultipartParsing);
+                Boolean allowMultipartParsingVar = objectElement.findField("allowMultipartParsing").map(ModuleUtils::toBoolean).orElse(allowMultipartParsing);
                 ObjectArray headersArrVar = objectElement.findField("headers").map(ModuleUtils::toObjectArray).orElse(headersArr);
                 RequestType requestTypeVar = objectElement.findField("requestType").map(ModuleUtils::getString).map(RequestType::valueOf).orElse(requestType);
                 Integer maxFileSizeFullVar = objectElement.findField("maxFileSizeFull").map(ModuleUtils::getNumber).map(Number::intValue).orElse(maxFileSizeFull);
                 Integer fileResponsePieceSizeVar = objectElement.findField("fileResponsePieceSize").map(ModuleUtils::getNumber).map(Number::intValue).orElse(fileResponsePieceSize);
                 ObjectArray corsAccessListArrVar = objectElement.findField("corsAccessList").map(ModuleUtils::toObjectArray).orElse(corsAccessListArr);
-                Boolean permitPreflightVar = objectElement.findField("permitPreflight").map(ModuleUtils::getString).map(Boolean::parseBoolean).orElse(permitPreflight);
+                Boolean permitPreflightVar = objectElement.findField("permitPreflight").map(ModuleUtils::toBoolean).orElse(permitPreflight);
                 URL url = null;
                 try {
                     url = new URL(protocolVar.name().toLowerCase(), hostname, portVar, "");
@@ -774,6 +774,9 @@ public class Server implements Module {
                                     .collect(Collectors.toList());
                         }
                     }
+                    if (virtualServerInfoCur == null)
+                        virtualServerInfoCur = virtualServerInfo;
+
                     if (idsForExecute == null) {
                         responseObj = new ResponseObj(null, 404, null, "Page not found".getBytes(), null, null, 1, req.getMethod());
                         handleResponse(resp, responseObj, virtualServerInfoCur);

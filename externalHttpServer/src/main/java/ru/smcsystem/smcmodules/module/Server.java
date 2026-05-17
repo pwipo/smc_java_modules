@@ -748,15 +748,15 @@ public class Server implements Module {
                 ResponseObj responseObj = null;
                 long reqId = 0;
                 long startTime = System.currentTimeMillis();
+                VirtualServerInfo virtualServerInfoCur = virtualServerInfos.size() > 1 ?
+                        virtualServerInfos.stream()
+                                .filter(s -> s.getHost().getName().equals(req.getServerName()))
+                                .findAny()
+                                .orElse(null) :
+                        virtualServerInfo;
                 try {
                     // req.getSession().setMaxInactiveInterval(requestTimeout);
                     // System.out.println(req.getSession().getMaxInactiveInterval());
-                    VirtualServerInfo virtualServerInfoCur = virtualServerInfos.size() > 1 ?
-                            virtualServerInfos.stream()
-                                    .filter(s -> s.getHost().getName().equals(req.getServerName()))
-                                    .findAny()
-                                    .orElse(null) :
-                            virtualServerInfo;
                     List<Integer> idsForExecute = null;
                     if (virtualServerInfoCur != null) {
                         if (virtualServerInfoCur.getPatterns() != null && !virtualServerInfoCur.getPatterns().isEmpty()) {
@@ -776,35 +776,36 @@ public class Server implements Module {
                     }
                     if (idsForExecute == null) {
                         responseObj = new ResponseObj(null, 404, null, "Page not found".getBytes(), null, null, 1, req.getMethod());
-                        handleResponse(resp, responseObj, virtualServerInfo);
+                        handleResponse(resp, responseObj, virtualServerInfoCur);
                         return;
                     }
                     String requestOrigin = getRequestOrigin(req);
-                    if (virtualServerInfo.getCorsAccessList() != null && !virtualServerInfo.getCorsAccessList().isEmpty() && requestOrigin != null) {
-                        // externalConfigurationTool.loggerTrace("check cors, origin: " + requestOrigin + ", cors list size: " + virtualServerInfo.getCorsAccessList().size());
-                        if (virtualServerInfo.getCorsAccessList().stream().anyMatch(p -> p.matcher(requestOrigin).find())) {
+                    if (virtualServerInfoCur.getCorsAccessList() != null && !virtualServerInfoCur.getCorsAccessList().isEmpty() && requestOrigin != null) {
+                        if (virtualServerInfoCur.getCorsAccessList().stream().anyMatch(p -> p.matcher(requestOrigin).find())) {
                             resp.addHeader("Access-Control-Allow-Origin", requestOrigin);
                             resp.addHeader("Access-Control-Allow-Credentials", "true");
                         } else {
+                            externalConfigurationTool.loggerTrace(String.format("check cors, origin: %s, cors list size: %d, req uri: %s",
+                                    requestOrigin, virtualServerInfoCur.getCorsAccessList().size(), req.getRequestURI()));
                             responseObj = new ResponseObj(null, 403, null, "Forbidden".getBytes(), null, null, 1, req.getMethod());
-                            handleResponse(resp, responseObj, virtualServerInfo);
+                            handleResponse(resp, responseObj, virtualServerInfoCur);
                             return;
                         }
                     }
                     int idForGetResponse = idsForExecute.get(idsForExecute.size() - 1);
 
                     Map<Integer, RequestInputStream> requestInputStreamMap = new HashMap<>();
-                    Map.Entry<Long, List<Object>> requestEntry = createRequest(req, virtualServerInfo.getRequestType(), virtualServerInfo.getMaxFileSizeFull(), requestInputStreamMap);
+                    Map.Entry<Long, List<Object>> requestEntry = createRequest(req, virtualServerInfoCur.getRequestType(), virtualServerInfoCur.getMaxFileSizeFull(), requestInputStreamMap);
                     reqId = requestEntry.getKey();
                     // externalConfigurationTool.loggerTrace("New request " + reqId + " " + req.getRequestURI());
-                    Response responseMain = new Response(reqId, req, resp, virtualServerInfo, requestInputStreamMap);
+                    Response responseMain = new Response(reqId, req, resp, virtualServerInfoCur, requestInputStreamMap);
                     mapResponse.put(reqId, responseMain);
                     long threadId = externalExecutionContextTool.getFlowControlTool().executeParallel(
                             CommandType.EXECUTE,
                             idsForExecute,
                             requestEntry.getValue(),
                             null,
-                            virtualServerInfo.getRequestTimeout());
+                            virtualServerInfoCur.getRequestTimeout());
                     boolean mapFastResponseArrived = false;
                     threadReqMap.put(threadId, requestEntry.getKey());
                     try {
@@ -815,7 +816,7 @@ public class Server implements Module {
                             }
                         } while (externalExecutionContextTool.getFlowControlTool().isThreadActive(threadId) &&
                                 !externalExecutionContextTool.isNeedStop() &&
-                                (virtualServerInfo.getRequestTimeout() <= 0 || virtualServerInfo.getRequestTimeout() > System.currentTimeMillis() - startTime) &&
+                                (virtualServerInfoCur.getRequestTimeout() <= 0 || virtualServerInfoCur.getRequestTimeout() > System.currentTimeMillis() - startTime) &&
                                 (mapResponse.containsKey(reqId) && responseMain.getResponseObj() == null));
                         if (responseMain.getResponseObj() != null) {
                             mapFastResponseArrived = true;
@@ -823,7 +824,7 @@ public class Server implements Module {
                             if (responseObj != null) {
                                 responseObj.setMethod(req.getMethod());
                                 if (!externalExecutionContextTool.isNeedStop() &&
-                                        (virtualServerInfo.getRequestTimeout() <= 0 || virtualServerInfo.getRequestTimeout() > System.currentTimeMillis() - startTime))
+                                        (virtualServerInfoCur.getRequestTimeout() <= 0 || virtualServerInfoCur.getRequestTimeout() > System.currentTimeMillis() - startTime))
                                     responseObj.waitWork();
                             }
                         } else {
@@ -871,7 +872,7 @@ public class Server implements Module {
                         response.getRequestInputStreamMap().forEach((k, v) -> v.close());
                     if (response != null && (responseObj == null || !responseObj.isFastResponse())) {
                         try {
-                            handleResponse(resp, responseObj, virtualServerInfo);
+                            handleResponse(resp, responseObj, virtualServerInfoCur);
                         } catch (ClientAbortException e) {
                             externalConfigurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
                         } catch (IOException e) {

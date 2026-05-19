@@ -379,7 +379,7 @@ public class LinearDBModuleTest {
                                 "indexes", new Value("TASK_ID=LONG")
                         ),
                         null,
-                        "C:\\LinearDB"
+                        "C:\\tmp\\15"
                 ),
                 new LinearDBModule()
         );
@@ -418,7 +418,12 @@ public class LinearDBModuleTest {
                                 new Action(
                                         List.of(
                                                 new Message(new Value(new ObjectArray(new ObjectElement(new ObjectField("filter", new ObjectElement(
-                                                        new ObjectField("t", "=="), new ObjectField("f", "_ID"), new ObjectField("v", 1)))))))
+                                                        new ObjectField("t", "=="), new ObjectField("f", "TASK_ID"), new ObjectField("v", 1.0))),
+                                                        new ObjectField("skip", 2),
+                                                        new ObjectField("limit", 2),
+                                                        new ObjectField("sort", new ObjectElement(
+                                                                new ObjectField("t", "desc"), new ObjectField("f", "CREATED")))
+                                                ))))
                                         ),
                                         ActionType.EXECUTE
                                 ))),

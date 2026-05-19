@@ -17,7 +17,7 @@ public class SortUtils {
             return Comparator.comparing(IElement::getId);
         Comparator<IElement> comparator = Comparator.comparing(e -> (Comparable) MyPredicateUtils.getFieldValue(e, fields, fieldName));
         SortType type = element.findFieldIgnoreCase("t")
-                .flatMap(f -> SortType.parse(ModuleUtils.toString(f).toLowerCase()))
+                .flatMap(f -> SortType.parse(ModuleUtils.toString(f).trim().toLowerCase()))
                 .orElse(SortType.ASC);
         if (type == SortType.DESC)
             comparator = comparator.reversed();
@@ -25,7 +25,7 @@ public class SortUtils {
     }
 
     private enum SortType {
-        DESC(Set.of("desk")),
+        DESC(Set.of("desc")),
         ASC(Set.of("asc"));
 
         private Set<String> names;

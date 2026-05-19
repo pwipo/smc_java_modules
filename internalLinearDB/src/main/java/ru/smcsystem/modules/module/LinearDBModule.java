@@ -242,8 +242,9 @@ public class LinearDBModule implements Module {
         Stream<IElement> stream = PredicateUtils.find(configurationTool, filter, fieldsIndexedNames, dbIndex).stream();
         if (fieldsIndexedNames != null && !fieldsIndexedNames.isEmpty())
             stream = stream.sorted(SortUtils.parse(sort, fieldsIndexedNames));
+        if (skip > 0)
+            stream = stream.skip(skip);
         List<IElement> indexElements = stream
-                .skip(skip)
                 .limit(limit)
                 .collect(Collectors.toList());
         List<ObjectElement> elements = db.get(indexElements);

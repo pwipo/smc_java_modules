@@ -224,11 +224,51 @@ The program is supplied as is. For problems arising during the operation or inst
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Определяет, нужно ли обновлять время истечения срока годности для токена обновления при обновлении. Если true, то обновляет, иначе оставляет текущее значение.</value>
+                    <value><![CDATA[Определяет, нужно ли обновлять время истечения срока годности для токена обновления при обновлении токена доступа.
+Если true, то обновляет, иначе оставляет текущее значение.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Determines whether the refresh token's expiration time should be updated upon refresh. If true, updates the expiration time; otherwise, leaves the current value.</value>
+                    <value><![CDATA[Determines whether the refresh token expiration time should be updated when the access token is refreshed.
+If true, updates the expiration time; otherwise, leaves the current value.
+                    ]]></value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>updateRefreshTokenOnRefresh</name>
+            <type>BOOLEAN</type>
+            <value>true</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value>Определяет, нужно ли обновлять токена обновления при обновлении токена доступа. Если true, то обновляет, иначе оставляет текущий.</value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value>Determines whether the refresh token should be updated when the access token is refreshed. If true, the refresh token is refreshed; otherwise, the current one is retained.</value>
+                </entry>
+            </description>
+        </value>
+        <value>
+            <name>maxCountUserSessions</name>
+            <type>INTEGER</type>
+            <value>1</value>
+            <description>
+                <entry>
+                    <key>ru</key>
+                    <value><![CDATA[Определяет количество рабочих сессий для одного пользователя. Определение происходит методом хранения и учета токенов доступа.
+При каждом логине сохраняется новый токен и, если превышено количество сессий (токенов), удаляется самый старый.
+При обновлении токена доступа происходит проверка, храниться ли токен обновления у нас или нет. Только если храниться, происходит обновление.
+                    ]]></value>
+                </entry>
+                <entry>
+                    <key>en</key>
+                    <value><![CDATA[Determines the number of work sessions for a single user. This is determined by storing and accounting for access tokens.
+A new token is saved for each login, and if the number of sessions (tokens) is exceeded, the oldest one is deleted.
+When refreshing an access token, a check is made to determine whether the refresh token is stored. Only if it is stored is the refresh performed.
+                    ]]></value>
                 </entry>
             </description>
         </value>
@@ -820,11 +860,15 @@ Managed execution contexts:
             <description>
                 <entry>
                     <key>ru</key>
-                    <value>Возвращает новую пару токенов (доступа и обновления) на основе существующего и валидного токена обновления.</value>
+                    <value><![CDATA[Возвращает новую пару токенов (доступа и обновления) на основе существующего и валидного токена обновления.
+Токен обновления возвращается только если включена настройка updateRefreshTokenOnRefresh.
+                    ]]></value>
                 </entry>
                 <entry>
                     <key>en</key>
-                    <value>Returns a new token pair (access and refresh) based on an existing and valid refresh token.</value>
+                    <value><![CDATA[Returns a new token pair (access and refresh) based on an existing and valid refresh token.
+The refresh token is returned only if the updateRefreshTokenOnRefresh setting is enabled.
+                    ]]></value>
                 </entry>
             </description>
             <sources>
@@ -878,7 +922,7 @@ Managed execution contexts:
             </ecs>
             <output>
                 <element t="VALUE" c="1" vt="OBJECT_ARRAY">
-                    <value><![CDATA[[{"accessToken":"3454"}]]]></value>
+                    <value><![CDATA[[{"accessToken":"3454", "refreshToken":"4gfrh"}]]]></value>
                     <description>
                         <entry k="ru" v="объект с токенами доступа и обновления"/>
                         <entry k="en" v="object with access and refresh tokens"/>

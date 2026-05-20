@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -60,6 +61,9 @@ public class SecurityJwt implements Module {
     private String plainPass;
     private String tfaCheckFieldName;
     private Boolean updateEstimationTimeOnRefresh;
+    private Boolean updateRefreshTokenOnRefresh;
+    private Map<Long/*user id*/, List<String>/*refresh tokens*/> refreshTokensMap;
+    private Integer maxCountUserSessions;
 
     @Override
     public void start(ConfigurationTool configurationTool) throws ModuleException {
@@ -90,6 +94,10 @@ public class SecurityJwt implements Module {
         tfaCheckFieldName = configurationTool.getSetting("tfaCheckFieldName").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("tfaCheckFieldName setting not found"));
         updateEstimationTimeOnRefresh = configurationTool.getSetting("updateEstimationTimeOnRefresh").map(ModuleUtils::toBoolean)
                 .orElseThrow(() -> new ModuleException("updateEstimationTimeOnRefresh setting not found"));
+        updateRefreshTokenOnRefresh = configurationTool.getSetting("updateRefreshTokenOnRefresh").map(ModuleUtils::toBoolean)
+                .orElseThrow(() -> new ModuleException("updateRefreshTokenOnRefresh setting not found"));
+        maxCountUserSessions = configurationTool.getSetting("maxCountUserSessions").map(ModuleUtils::toNumber).map(Number::intValue)
+                .orElseThrow(() -> new ModuleException("maxCountUserSessions setting not found"));
 
         try {
             String privateKeyRaw = new String(Files.readAllBytes(privateKeyFile.toPath()));
@@ -133,6 +141,7 @@ public class SecurityJwt implements Module {
         authFieldFailsMap = new ConcurrentHashMap<>();
         authFieldBlockingMap = new ConcurrentHashMap<>();
         authFieldLock = new ConcurrentHashMap<>();
+        refreshTokensMap = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -194,6 +203,8 @@ public class SecurityJwt implements Module {
         plainPass = null;
         tfaCheckFieldName = null;
         updateEstimationTimeOnRefresh = null;
+        updateRefreshTokenOnRefresh = null;
+        maxCountUserSessions = null;
 
         loginBlockingMap = null;
         loginFailsMap = null;
@@ -201,6 +212,7 @@ public class SecurityJwt implements Module {
         authFieldBlockingMap = null;
         authFieldFailsMap = null;
         authFieldLock = null;
+        refreshTokensMap = null;
     }
 
     private void genHash(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList) {
@@ -246,9 +258,16 @@ public class SecurityJwt implements Module {
         if (remoteAddrEntry != null && !remoteAddrEntry.getValue())
             return;
 
+        long userId = Long.parseLong(claims.getSubject());
+        List<String> tokens = refreshTokensMap.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>());
+        if (!tokens.isEmpty() && !tokens.contains(token)) {
+            executionContextTool.addError("wrong token");
+            return;
+        }
+
         if (executionContextTool.getFlowControlTool().countManagedExecutionContexts() > 0) {
             configurationTool.loggerTrace(String.format("additional check for %s", claims.getSubject()));
-            Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 0, List.of(Long.parseLong(claims.getSubject()), token))
+            Boolean additionalCheck = ModuleUtils.executeAndGetMessages(executionContextTool, 0, List.of(userId, token))
                     .map(l -> ModuleUtils.toBoolean(l.get(0))).orElse(false);
             if (!additionalCheck) {
                 executionContextTool.addError("additional check fail");
@@ -257,11 +276,21 @@ public class SecurityJwt implements Module {
         }
 
         String accessToken = regenerateToken(claims, accessTokenExpires, true);
-        String refreshToken = regenerateToken(claims, refreshTokenExpires, false);
+        String refreshToken = updateRefreshTokenOnRefresh ? regenerateToken(claims, refreshTokenExpires, false) : token;
 
-        executionContextTool.addMessage(new ObjectArray(new ObjectElement(
-                new ObjectField("accessToken", accessToken),
-                new ObjectField("refreshToken", refreshToken))));
+        if (updateRefreshTokenOnRefresh) {
+            tokens.remove(token);
+            tokens.add(refreshToken);
+        }
+
+        if (updateRefreshTokenOnRefresh) {
+            executionContextTool.addMessage(new ObjectArray(new ObjectElement(
+                    new ObjectField("accessToken", accessToken),
+                    new ObjectField("refreshToken", refreshToken))));
+        } else {
+            executionContextTool.addMessage(new ObjectArray(new ObjectElement(
+                    new ObjectField("accessToken", accessToken))));
+        }
     }
 
     private void parse(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<LinkedList<IMessage>> messagesList) throws Exception {
@@ -474,6 +503,13 @@ public class SecurityJwt implements Module {
 
         // cacheRefreshToken.put(refreshToken, Map.entry(userDTO, roleDTOS));
         configurationTool.loggerDebug(String.format("login %s", userDTO.getLogin()));
+
+        List<String> tokens = refreshTokensMap.computeIfAbsent(userDTO.getId(), k -> new CopyOnWriteArrayList<>());
+        tokens.add(refreshToken);
+        if (tokens.size() > maxCountUserSessions) {
+            String oldToken = tokens.remove(0);
+            configurationTool.loggerDebug(String.format("maxCountUserSessions exceeded for user=%s, remove old token=%s", userDTO.getLogin(), oldToken));
+        }
 
         executionContextTool.addMessage(new ObjectArray(new ObjectElement(
                 new ObjectField("accessToken", accessToken),

@@ -10,6 +10,7 @@ import ru.smcsystem.smc.utils.ModuleUtils;
 import ru.smcsystem.test.Process;
 import ru.smcsystem.test.emulate.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,8 @@ public class SecurityJwtTest {
         settings.put("plainPass", new Value("{noop}"));
         settings.put("tfaCheckFieldName", new Value("tfa_login_check"));
         settings.put("updateEstimationTimeOnRefresh", new Value(false));
+        settings.put("updateRefreshTokenOnRefresh", new Value(true));
+        settings.put("maxCountUserSessions", new Value(1));
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -98,31 +101,7 @@ public class SecurityJwtTest {
         executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
         executionContextTool.getOutput().clear();
 
-        executionContextTool = new ExecutionContextToolImpl(
-                List.of(
-                        List.of(
-                                new Action(
-                                        List.of(
-                                                new Message(new Value(refreshToken))
-                                        ),
-                                        ActionType.EXECUTE
-                                ))),
-                null,
-                null,
-                List.of(
-                        (l) -> {
-                            System.out.println(l);
-                            return new Action(List.of(
-                                    new Message(new Value(true))
-                            ));
-                        }
-                ), "ec", "refresh_tokens");
-        process.execute(executionContextTool);
-        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
-        objectElement = (ObjectElement) ModuleUtils.getObjectArray(executionContextTool.getOutput().get(1)).get(0);
-        accessToken = objectElement.findField("accessToken").map(ModuleUtils::toString).get();
-        refreshToken = objectElement.findField("refreshToken").map(ModuleUtils::toString).get();
-        executionContextTool.getOutput().clear();
+        executeRefresh(process, refreshToken);
 
         process.stop();
     }
@@ -145,6 +124,8 @@ public class SecurityJwtTest {
         settings.put("plainPass", new Value("{noop}"));
         settings.put("tfaCheckFieldName", new Value("tfa_login_check"));
         settings.put("updateEstimationTimeOnRefresh", new Value(false));
+        settings.put("updateRefreshTokenOnRefresh", new Value(false));
+        settings.put("maxCountUserSessions", new Value(1));
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -240,6 +221,42 @@ public class SecurityJwtTest {
         return ModuleUtils.isArrayContainObjectElements(objectArray) ? (ObjectElement) objectArray.get(0) : null;
     }
 
+    private Map.Entry<String, String> executeRefresh(Process process, String refreshToken) {
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of(
+                                                new Message(new Value(refreshToken))
+                                        ),
+                                        ActionType.EXECUTE
+                                ))),
+                null,
+                null,
+                List.of(
+                        (l) -> {
+                            System.out.println(l);
+                            return new Action(List.of(
+                                    new Message(new Value(true))
+                            ));
+                        }
+                ), "ec", "refresh_tokens");
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+
+        if (executionContextTool.getOutput().size() < 2)
+            return null;
+        ObjectArray objectArray = ModuleUtils.getObjectArray(executionContextTool.getOutput().get(1));
+        if (!ModuleUtils.isArrayContainObjectElements(objectArray))
+            return null;
+        ObjectElement objectElement = (ObjectElement) objectArray.get(0);
+        String accessToken = objectElement.findField("accessToken").map(ModuleUtils::toString).orElse("");
+        String refreshToken2 = objectElement.findField("refreshToken").map(ModuleUtils::toString).orElse("");
+        executionContextTool.getOutput().clear();
+
+        return Map.entry(accessToken, refreshToken2);
+    }
+
     @Test
     public void testLoginField() {
         Map<String, IValue> settings = new HashMap<>(Map.of(
@@ -258,6 +275,8 @@ public class SecurityJwtTest {
         settings.put("plainPass", new Value("{noop}"));
         settings.put("tfaCheckFieldName", new Value("tfa_login_check"));
         settings.put("updateEstimationTimeOnRefresh", new Value(false));
+        settings.put("updateRefreshTokenOnRefresh", new Value(false));
+        settings.put("maxCountUserSessions", new Value(1));
         Process process = new Process(
                 new ConfigurationToolImpl(
                         "test",
@@ -271,6 +290,59 @@ public class SecurityJwtTest {
         process.start();
 
         executeLogin(process, "{noop}pass", "user", "pass", false);
+
+        process.stop();
+    }
+
+    @Test
+    public void testMultipleSessions() throws InterruptedException {
+        Map<String, IValue> settings = new HashMap<>(Map.of(
+                "issuer", new Value("test.com"),
+                "accessTokenExpires", new Value(180),
+                "refreshTokenExpires", new Value(60 * 60 * 2),
+                "publicKey", new Value("public.key.txt"),
+                "privateKey", new Value("private.key.txt"),
+                "bcryptCost", new Value(11),
+                "authSleep", new Value(1000),
+                "fieldNames", new Value("email, tel"),
+                "checkRemoteAddr", new Value(false),
+                "countLoginFailBeforeBlocking", new Value(2)
+        ));
+        settings.put("blockingTime", new Value(10));
+        settings.put("plainPass", new Value("{noop}"));
+        settings.put("tfaCheckFieldName", new Value("tfa_login_check"));
+        settings.put("updateEstimationTimeOnRefresh", new Value(false));
+        settings.put("updateRefreshTokenOnRefresh", new Value(false));
+        settings.put("maxCountUserSessions", new Value(2));
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        settings,
+                        null,
+                        "C:\\tmp\\5"
+                ),
+                new SecurityJwt()
+        );
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool;
+
+        String passHash = "{noop}pass";
+        List<String> tokens = new ArrayList<>();
+        ObjectElement objectElement = executeLogin(process, passHash, "user", "pass", true);
+        objectElement.findField("refreshToken").map(ModuleUtils::toString).ifPresent(tokens::add);
+        objectElement = executeLogin(process, passHash, "user", "pass", true);
+        objectElement.findField("refreshToken").map(ModuleUtils::toString).ifPresent(tokens::add);
+        objectElement = executeLogin(process, passHash, "user", "pass", true);
+        objectElement.findField("refreshToken").map(ModuleUtils::toString).ifPresent(tokens::add);
+        objectElement = executeLogin(process, passHash, "user", "pass", true);
+        objectElement.findField("refreshToken").map(ModuleUtils::toString).ifPresent(tokens::add);
+
+        tokens.forEach(t -> {
+            Map.Entry<String, String> entry = executeRefresh(process, t);
+            System.out.printf("old token=%s new token=%s%n", t, entry != null ? entry.getValue() : "");
+        });
 
         process.stop();
     }

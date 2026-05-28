@@ -601,7 +601,7 @@ public class Server implements Module {
             if (resp != null) {
                 response.setResponseObj(responseObj);
                 try {
-                    resultCode = handleResponse(resp, responseObj, response.getVirtualServerInfo());
+                    resultCode = handleResponse(resp, responseObj, response.getVirtualServerInfo(), false);
                 } catch (ClientAbortException e) {
                     configurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
                 } catch (IOException e) {
@@ -779,7 +779,7 @@ public class Server implements Module {
 
                     if (idsForExecute == null) {
                         responseObj = new ResponseObj(null, 404, null, "Page not found".getBytes(), null, null, 1, req.getMethod());
-                        handleResponse(resp, responseObj, virtualServerInfoCur);
+                        handleResponse(resp, responseObj, virtualServerInfoCur, true);
                         return;
                     }
                     String requestOrigin = getRequestOrigin(req);
@@ -791,7 +791,7 @@ public class Server implements Module {
                             externalConfigurationTool.loggerTrace(String.format("check cors, origin: %s, cors list size: %d, req uri: %s",
                                     requestOrigin, virtualServerInfoCur.getCorsAccessList().size(), req.getRequestURI()));
                             responseObj = new ResponseObj(null, 403, null, "Forbidden".getBytes(), null, null, 1, req.getMethod());
-                            handleResponse(resp, responseObj, virtualServerInfoCur);
+                            handleResponse(resp, responseObj, virtualServerInfoCur, true);
                             return;
                         }
                     }
@@ -875,7 +875,7 @@ public class Server implements Module {
                         response.getRequestInputStreamMap().forEach((k, v) -> v.close());
                     if (response != null && (responseObj == null || !responseObj.isFastResponse())) {
                         try {
-                            handleResponse(resp, responseObj, virtualServerInfoCur);
+                            handleResponse(resp, responseObj, virtualServerInfoCur, false);
                         } catch (ClientAbortException e) {
                             externalConfigurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
                         } catch (IOException e) {
@@ -1120,13 +1120,13 @@ public class Server implements Module {
         return Map.entry(reqId, request);
     }
 
-    private int handleResponse(HttpServletResponse resp, ResponseObj responseObj, VirtualServerInfo virtualServerInfo) throws IOException {
+    private int handleResponse(HttpServletResponse resp, ResponseObj responseObj, VirtualServerInfo virtualServerInfo, boolean force) throws IOException {
         if (responseObj == null) {
             resp.setStatus(500);
             return 500;
         }
         int code = responseObj.getResultCode();
-        if (code != 200 && virtualServerInfo.getPermitPreflight() && "OPTIONS".equalsIgnoreCase(responseObj.getMethod()))
+        if (code != 200 && !force && virtualServerInfo.getPermitPreflight() && "OPTIONS".equalsIgnoreCase(responseObj.getMethod()))
             code = 200;
         resp.setStatus(code);
         responseObj.getHeaders().forEach(headerText -> {

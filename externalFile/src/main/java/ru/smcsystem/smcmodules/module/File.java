@@ -51,6 +51,7 @@ public class File implements Module {
     private Boolean useOnlyWorkDirectory;
     private long tmpLongVariable;
     private String tmpStrVariable;
+    private String rootFolderPath;
 
     @Override
     public void start(ConfigurationTool externalConfigurationTool) throws ModuleException {
@@ -69,6 +70,11 @@ public class File implements Module {
             }
         }
         isFile = rootFolder.exists() ? rootFolder.isFile() : StringUtils.isNotBlank(FilenameUtils.getExtension(rootFolderString));
+        try {
+            rootFolderPath = !isFile ? rootFolder.getCanonicalPath() : null;
+        } catch (IOException ignore) {
+            rootFolderPath = !isFile ? rootFolder.getAbsolutePath() : null;
+        }
         arguments = (String) externalConfigurationTool.getSetting("arguments").orElseThrow(() -> new ModuleException("arguments setting")).getValue();
         printAbsolutePath = Boolean.valueOf((String) externalConfigurationTool.getSetting("printAbsolutePath").orElseThrow(() -> new ModuleException("printAbsolutePath setting")).getValue());
 
@@ -551,8 +557,20 @@ public class File implements Module {
                 java.io.File fileTmp = new java.io.File(fileName);
                 if (fileTmp.isAbsolute() && !useOnlyWorkDirectory)
                     file = fileTmp;
-            } else if (fileName.contains("..") && useOnlyWorkDirectory) {
-                file = rootFolder;
+            }
+            if (useOnlyWorkDirectory) {
+                boolean wrongPath = false;
+                if (rootFolderPath != null) {
+                    try {
+                        wrongPath = !file.getCanonicalPath().startsWith(rootFolderPath);
+                    } catch (IOException ignore) {
+                        wrongPath = !file.getAbsolutePath().startsWith(rootFolderPath);
+                    }
+                } else if (fileName.contains("..")) {
+                    wrongPath = true;
+                }
+                if (wrongPath)
+                    file = rootFolder;
             }
             return file;
         }
@@ -573,6 +591,7 @@ public class File implements Module {
         useOnlyWorkDirectory = null;
         tmpLongVariable = 0;
         tmpStrVariable = null;
+        rootFolderPath = null;
     }
 
     private void dir(ConfigurationTool configurationTool, ExecutionContextTool externalExecutionContextTool, java.io.File folder, boolean getPath, boolean sortDate,

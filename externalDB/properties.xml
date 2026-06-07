@@ -26,9 +26,9 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.DB</className>
-    <ver>1.2.6</ver>
-    <apiVer>1.4.0</apiVer>
-    <date>12-07-2025</date>
+    <ver>1.2.7</ver>
+    <apiVer>1.4.3</apiVer>
+    <date>07-06-2026</date>
 
     <defaultSettings>
         <value>
@@ -2320,6 +2320,8 @@ Each message is executed in its own transaction.
 Если любой контекст вернет ошибку - прекращает вызовы и откатывает транзакцию.
 Допускается вызовы других контекстов, например EXECUTE_IN_EXTERNAL_TRANSACTION.
 В них, если указать в качестве номера транзакции -1, то будет искаться номер транзакции для текущего потока.
+Так же, если вызываются обычные контексты (без внешней транзакции, например EXECUTE_IN_ONE_TRANSACTION или EXECUTE_WITH_PARAMS_IN_ONE_TRANSACTION), то, так же будет использоваться текущая транзакция (текущего потока).
+Вызовы могут быть вложенными.
                     ]]></value>
                 </entry>
                 <entry>
@@ -2329,6 +2331,8 @@ Also saves the current thread in memory. Runs all contexts in order. When called
 If any context returns an error, stops calls and rolls back the transaction.
 Calls to other contexts are allowed, for example EXECUTE_IN_EXTERNAL_TRANSACTION.
 In them, if you specify -1 as the transaction number, the transaction number for the current thread will be searched for.
+Also, if regular contexts are called (without an outer transaction, such as EXECUTE_IN_ONE_TRANSACTION or EXECUTE_WITH_PARAMS_IN_ONE_TRANSACTION), the current transaction (of the current thread) will also be used.
+Calls can be nested.
                     ]]></value>
                 </entry>
             </description>
@@ -2343,20 +2347,16 @@ In them, if you specify -1 as the transaction number, the transaction number for
                             </description>
                         </element>
                     </elements>
-                    <output/>
+                    <output>
+                        <element t="VALUE_ANY" vt="LONG" v="1" o="true"/>
+                    </output>
                 </ec>
             </ecs>
             <output>
-                <element t="VALUE" vt="LONG" v="1">
+                <element t="VALUE_ANY" vt="LONG" v="1" o="true">
                     <description>
-                        <entry k="ru" v="номер транзакции"/>
-                        <entry k="en" v="transaction number"/>
-                    </description>
-                </element>
-                <element t="VALUE" vt="BOOLEAN" v="true">
-                    <description>
-                        <entry k="ru" v="статус, все ли выполнено или нет"/>
-                        <entry k="en" v="status, is everything committed or not"/>
+                        <entry k="ru" v="Возвращает всё то, что вернул последний контекст"/>
+                        <entry k="en" v="Returns everything that the last context returned."/>
                     </description>
                 </element>
             </output>

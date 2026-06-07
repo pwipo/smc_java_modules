@@ -28,10 +28,12 @@ public class DBTest {
                                 "login", new Value(ValueType.STRING, " "),
                                 "password", new Value(ValueType.STRING, " "),
                                 "useAutoConvert", new Value("false"),
-                                "resultFormat", new Value("OBJECT_SERIALIZATION")
+                                "resultFormat", new Value("OBJECT_SERIALIZATION"),
+                                "resultSetColumnNameToUpperCase", new Value("true"),
+                                "queryTimeout", new Value(0)
                         ),
                         null,
-                        "C:\\Users\\user\\Documents\\tmp\\5"
+                        "C:\\tmp\\db3"
                 ),
                 new DB()
         );
@@ -490,8 +492,9 @@ public class DBTest {
                 List.of(
                         new Action(
                                 List.of(
-                                        new Message(MessageType.DATA, new Date(), new Value("select * from IMAGE where id = ANY (?)")),
-                                        new Message(MessageType.DATA, new Date(), new Value(new ObjectArray(List.of(1, 2), ObjectType.LONG)))
+                                        new Message(new Value("select * from IMAGE where id = ANY (?)")),
+                                        // new Message(new Value("select * from IMAGE where id in (?)")),
+                                        new Message(new Value(new ObjectArray(List.of(1, 2), ObjectType.LONG)))
                                 ),
                                 ActionType.EXECUTE
                         ))),
@@ -508,5 +511,150 @@ public class DBTest {
         process.stop();
     }
 
+    @Test
+    public void testRunInTransaction() {
+        Process process = new Process(
+                new ConfigurationToolImpl(
+                        "test",
+                        null,
+                        Map.of("type", new Value(ValueType.STRING, "derbyInMemory"),
+                                "connection_params", new Value(ValueType.STRING, "DB"),
+                                "login", new Value(ValueType.STRING, " "),
+                                "password", new Value(ValueType.STRING, " "),
+                                "useAutoConvert", new Value("true"),
+                                "resultFormat", new Value("OBJECT_WITH_NULL_AND_BOOLEAN"),
+                                "resultSetColumnNameToUpperCase", new Value("true"),
+                                "queryTimeout", new Value(0)
+                        ),
+                        null,
+                        "C:\\tmp\\db2"
+                ),
+                new DB()
+        );
+
+        process.start();
+
+        ExecutionContextToolImpl executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of()
+                                ))),
+                null,
+                null,
+                List.of(
+                        (lst) -> {
+                            ExecutionContextToolImpl executionContextToolInner = new ExecutionContextToolImpl(List.of(
+                                    List.of(
+                                            new Action(List.of(
+                                                    new Message(new Value("INSERT INTO users (login, password, email, version) VALUES ('user2', 'pass', 'user2@test.ru', CURRENT_TIMESTAMP)"))
+                                            )))),
+                                    null,
+                                    null,
+                                    null,
+                                    "default", "execute_in_one_transaction"
+                            );
+                            process.execute(executionContextToolInner);
+                            return new Action(List.of());
+                        },
+                        (lst) -> {
+                            ExecutionContextToolImpl executionContextToolInner = new ExecutionContextToolImpl(List.of(
+                                    List.of(
+                                            new Action(List.of(
+                                                    new Message(new Value("select * from users"))
+                                            )))),
+                                    null,
+                                    null,
+                                    null,
+                                    "default", "execute_in_one_transaction"
+                            );
+                            process.execute(executionContextToolInner);
+                            return new Action(List.of(new Message(new Value(executionContextToolInner.getOutput().get(0).getValue()))));
+                        }
+                ),
+                "default", "run_in_transaction"
+        );
+
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
+        executionContextTool = new ExecutionContextToolImpl(List.of(
+                List.of(
+                        new Action(List.of(
+                                new Message(new Value("select * from users"))
+                        )))),
+                null,
+                null,
+                null,
+                "default", "execute_in_one_transaction"
+        );
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
+        executionContextTool = new ExecutionContextToolImpl(
+                List.of(
+                        List.of(
+                                new Action(
+                                        List.of()
+                                ))),
+                null,
+                null,
+                List.of(
+                        (lst) -> {
+                            ExecutionContextToolImpl executionContextToolInner = new ExecutionContextToolImpl(List.of(
+                                    List.of(
+                                            new Action(List.of(
+                                                    new Message(new Value("INSERT INTO users (login, password, email, version) VALUES ('user3', 'pass', 'user3@test.ru', CURRENT_TIMESTAMP)"))
+                                            )))),
+                                    null,
+                                    null,
+                                    null,
+                                    "default", "execute_in_one_transaction"
+                            );
+                            process.execute(executionContextToolInner);
+                            return new Action(List.of());
+                        },
+                        (lst) -> {
+                            ExecutionContextToolImpl executionContextToolInner = new ExecutionContextToolImpl(List.of(
+                                    List.of(
+                                            new Action(List.of(
+                                                    new Message(new Value("select * from users"))
+                                            )))),
+                                    null,
+                                    null,
+                                    null,
+                                    "default", "execute_in_one_transaction"
+                            );
+                            process.execute(executionContextToolInner);
+                            executionContextToolInner.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+                            return new Action(List.of(new Message(new Value(executionContextToolInner.getOutput().get(0).getValue()))));
+                        },
+                        (lst) -> new Action(List.of(new Message(MessageType.ERROR, new Date(), new Value("rollback"))))
+                ),
+                "default", "run_in_transaction"
+        );
+
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
+        executionContextTool = new ExecutionContextToolImpl(List.of(
+                List.of(
+                        new Action(List.of(
+                                new Message(new Value("select * from users"))
+                        )))),
+                null,
+                null,
+                null,
+                "default", "execute_in_one_transaction"
+        );
+        process.execute(executionContextTool);
+        executionContextTool.getOutput().forEach(m -> System.out.println(m.getMessageType() + " " + m.getValue()));
+        executionContextTool.getOutput().clear();
+
+        process.stop();
+    }
 
 }

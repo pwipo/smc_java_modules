@@ -36,7 +36,8 @@ public class DB implements Module {
     private ResultFormat resultFormat;
     private Boolean resultSetColumnNameToUpperCase;
     private Integer queryTimeout;
-    private Map<Long, Long> threadToConnectionId;
+    private Map<Long/*threadId*/, Long/*connectionId*/> threadToConnectionId;
+    private Set<Long/*threadId*/> workThreadTransactions;
 
     public static String escapeSql(String str) {
         return str != null ? ("'" + StringUtils.replace(str, "'", "''") + "'") : null;
@@ -149,6 +150,7 @@ public class DB implements Module {
         connectionIdGenerator = new AtomicLong(0);
         connections = new ConcurrentHashMap<>();
         threadToConnectionId = new ConcurrentHashMap<>();
+        workThreadTransactions = ConcurrentHashMap.newKeySet();
     }
 
     @Override
@@ -305,31 +307,52 @@ public class DB implements Module {
         jdbc_url = null;
         connections = null;
         threadToConnectionId = null;
+        workThreadTransactions = null;
         if (exception != null)
             throw exception;
     }
 
+    private Optional<Connection> getWorkConnection(ExecutionContextTool externalExecutionContextTool) {
+        if (workThreadTransactions.isEmpty())
+            return Optional.empty();
+        Long threadId = externalExecutionContextTool.getThreadId();
+        return Optional.ofNullable(workThreadTransactions.contains(threadId) ? threadToConnectionId.get(threadId) : null)
+                .map(id -> connections.get(id));
+    }
+
     private void execute(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, List<IMessage> messages, boolean useTransaction, boolean isUpdateReturnKeys) throws Exception {
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(!useTransaction);
-            try {
-                for (IMessage message : messages)
-                    executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(message));
-                if (useTransaction)
-                    connection.commit();
-            } catch (Exception e) {
-                if (useTransaction)
-                    connection.rollback();
-                throw e;
+        Optional<Connection> workConnection = getWorkConnection(externalExecutionContextTool);
+        if (workConnection.isPresent()) {
+            Connection connection = workConnection.get();
+            for (IMessage message : messages)
+                executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(message));
+        } else {
+            try (Connection connection = dataSource.getConnection()) {
+                connection.setAutoCommit(!useTransaction);
+                try {
+                    for (IMessage message : messages)
+                        executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(message));
+                    if (useTransaction)
+                        connection.commit();
+                } catch (Exception e) {
+                    if (useTransaction)
+                        connection.rollback();
+                    throw e;
+                }
             }
         }
     }
 
     private void executePreparedStatement(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, LinkedList<IMessage> messages, boolean isArray, boolean isUpdateReturnKeys) throws Exception {
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(false);
-            executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, connection, true, isArray, isUpdateReturnKeys);
-            connection.commit();
+        Optional<Connection> workConnection = getWorkConnection(externalExecutionContextTool);
+        if (workConnection.isPresent()) {
+            executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, workConnection.get(), true, isArray, isUpdateReturnKeys);
+        } else {
+            try (Connection connection = dataSource.getConnection()) {
+                connection.setAutoCommit(false);
+                executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, connection, true, isArray, isUpdateReturnKeys);
+                connection.commit();
+            }
         }
     }
 
@@ -1157,13 +1180,13 @@ public class DB implements Module {
         Connection connection = dataSource.getConnection();
         connection.setAutoCommit(false);
         connections.put(id, connection);
-        configurationTool.getInfo("threadId").map(ModuleUtils::toNumber).map(Number::longValue).ifPresent(threadId -> threadToConnectionId.put(threadId, id));
+        threadToConnectionId.put(externalExecutionContextTool.getThreadId(), id);
         externalExecutionContextTool.addMessage(id);
     }
 
     private void commitAndStopConnection(ConfigurationTool configurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId) throws Exception {
         Connection connection = connections.remove(transactionId);
-        configurationTool.getInfo("threadId").map(ModuleUtils::toNumber).map(Number::longValue).ifPresent(threadId -> threadToConnectionId.remove(threadId));
+        threadToConnectionId.remove(externalExecutionContextTool.getThreadId());
         if (connection != null) {
             try {
                 connection.commit();
@@ -1181,7 +1204,7 @@ public class DB implements Module {
 
     private void rollbackAndStopConnection(ConfigurationTool configurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId) throws Exception {
         Connection connection = connections.remove(transactionId);
-        configurationTool.getInfo("threadId").map(ModuleUtils::toNumber).map(Number::longValue).ifPresent(threadId -> threadToConnectionId.remove(threadId));
+        threadToConnectionId.remove(externalExecutionContextTool.getThreadId());
         if (connection != null) {
             try {
                 connection.rollback();
@@ -1198,18 +1221,17 @@ public class DB implements Module {
     }
 
     private void executeInTransaction(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId, List<IMessage> messages, boolean isUpdateReturnKeys) {
-        getConnection(externalConfigurationTool, transactionId)
+        getConnection(externalConfigurationTool, externalExecutionContextTool, transactionId)
                 .ifPresent(connection -> {
                     for (IMessage message : messages)
                         executeSql(externalConfigurationTool, externalExecutionContextTool, connection, isUpdateReturnKeys, ModuleUtils.getString(message));
                 });
     }
 
-    private Optional<Connection> getConnection(ConfigurationTool configurationTool, long transactionId) {
+    private Optional<Connection> getConnection(ConfigurationTool configurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId) {
         if (transactionId > -1)
             return Optional.ofNullable(connections.get(transactionId));
-        return configurationTool.getInfo("threadId").map(ModuleUtils::toNumber)
-                .map(n -> threadToConnectionId.get(n.longValue()))
+        return Optional.ofNullable(threadToConnectionId.get(externalExecutionContextTool.getThreadId()))
                 .map(id -> connections.get(id));
     }
 
@@ -1231,7 +1253,7 @@ public class DB implements Module {
     }
 
     private void executePreparedStatementInTransaction(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, long transactionId, LinkedList<IMessage> messages, boolean isArray, boolean isUpdateReturnKeys) throws Exception {
-        Optional<Connection> connection = getConnection(externalConfigurationTool, transactionId);
+        Optional<Connection> connection = getConnection(externalConfigurationTool, externalExecutionContextTool, transactionId);
         if (connection.isPresent())
             executePreparedStatement(externalConfigurationTool, externalExecutionContextTool, messages, connection.get(), false, isArray, isUpdateReturnKeys);
     }
@@ -1301,39 +1323,61 @@ public class DB implements Module {
 
     private void runInTransaction(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool) throws SQLException {
         long id = connectionIdGenerator.incrementAndGet();
-        Long threadId = configurationTool.getInfo("threadId").map(ModuleUtils::toNumber).map(Number::longValue).orElse(null);
+        // Long threadId = configurationTool.getInfo("threadId").map(ModuleUtils::toNumber).map(Number::longValue).orElse(null);
+        Long threadId = executionContextTool.getThreadId();
+        Connection connectionPrev = null;
+        Long connectionIdPrev = null;
+        if (threadToConnectionId.containsKey(threadId)) {
+            connectionIdPrev = threadToConnectionId.get(threadId);
+            connectionPrev = connections.get(connectionIdPrev);
+        }
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
             connections.put(id, connection);
-            if (threadId != null)
-                threadToConnectionId.put(threadId, id);
+            threadToConnectionId.put(threadId, id);
+            workThreadTransactions.add(threadId);
             executionContextTool.addMessage(id);
             try {
-                boolean hasError = false;
+                Optional<IAction> lastAction = Optional.empty();
+                boolean isSuccess = true;
                 for (int i = 0; i < executionContextTool.getFlowControlTool().countManagedExecutionContexts(); i++) {
-                    executionContextTool.getFlowControlTool().executeNow(CommandType.EXECUTE, i, List.of(id));
-                    List<ICommand> commandsFromExecuted = executionContextTool.getFlowControlTool().getCommandsFromExecuted(i);
-                    hasError = commandsFromExecuted != null && !commandsFromExecuted.isEmpty() && ModuleUtils.hasErrors(commandsFromExecuted.get(commandsFromExecuted.size() - 1));
-                    if (hasError)
+                    if (!connections.containsKey(id))
                         break;
+                    executionContextTool.getFlowControlTool().executeNow(CommandType.EXECUTE, i, List.of(id));
+                    lastAction = ModuleUtils.getLastActionExecuteWithMessagesFromCommands(executionContextTool.getFlowControlTool().getCommandsFromExecuted(i));
+                    if (lastAction.stream().anyMatch(ModuleUtils::hasErrors)) {
+                        isSuccess = false;
+                        break;
+                    }
                 }
-                executionContextTool.addMessage(hasError);
-                if (hasError) {
-                    connection.rollback();
-                } else {
+                lastAction.ifPresent(lst -> {
+                    List<Object> valuesData = ModuleUtils.getData(lst).stream().map(IValue::getValue).collect(Collectors.toList());
+                    if (!valuesData.isEmpty())
+                        executionContextTool.addMessage(valuesData);
+                    List<Object> valuesErrors = ModuleUtils.getErrors(lst).stream().map(IValue::getValue).collect(Collectors.toList());
+                    if (!valuesErrors.isEmpty())
+                        executionContextTool.addError(valuesErrors);
+                });
+                if (isSuccess) {
                     connection.commit();
+                } else {
+                    connection.rollback();
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 connection.rollback();
                 throw e;
             }
         } finally {
-            connections.remove(id);
-            if (threadId != null)
+            if (connectionPrev != null && connectionIdPrev != null) {
+                threadToConnectionId.put(threadId, connectionIdPrev);
+                connections.put(connectionIdPrev, connectionPrev);
+            } else {
+                connections.remove(id);
                 threadToConnectionId.remove(threadId);
+                workThreadTransactions.remove(threadId);
+            }
         }
     }
-
 
     private enum Type {
         derbyInMemory("org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:memory:%s;create=true", "jdbc:derby:memory:%s", "values 1"),

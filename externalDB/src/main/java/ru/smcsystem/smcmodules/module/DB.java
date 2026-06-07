@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class DB implements Module {
-
+    private static final String VARIABLE_NAME_SQLFILELASTVER = "sqlFileLastVer";
     private Type type;
     private String connection_params;
     private String login;
@@ -124,27 +124,61 @@ public class DB implements Module {
         }
         */
 
-        File install = new File(externalConfigurationTool.getWorkDirectory(), "install.sql");
-        if (install.exists() && install.isFile()) {
-            try (Connection connection = dataSource.getConnection()) {
-                try {
-                    connection.setAutoCommit(false);
-                    executeSqlScript(connection, install);
-                    connection.commit();
-                } catch (Exception e) {
-                    try {
-                        connection.rollback();
-                    } catch (SQLException e1) {
-                        ModuleException exception = new ModuleException("install.sql: " + e1.getMessage(), e1);
-                        exception.addSuppressed(e);
-                        throw exception;
-                    }
-                    throw new ModuleException("install.sql: " + e.getMessage(), e);
-                }
-            } catch (Exception e) {
-                // throw new ModuleException("error", e);
-                externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+        File[] files = new File(externalConfigurationTool.getWorkDirectory()).listFiles();
+        if (files != null && files.length > 0) {
+            long sqlFileLastVer = externalConfigurationTool.getVariable(VARIABLE_NAME_SQLFILELASTVER).map(ModuleUtils::toNumber).map(Number::longValue).orElse(0L);
+            List<File> sqlFiles = Arrays.stream(files)
+                    .filter(f -> f.isFile() && f.getName().endsWith(".sql") && (
+                            (sqlFileLastVer == 0 && f.getName().equals("install.sql")) || f.getName().toLowerCase().startsWith("update_")))
+                    // .sorted(Comparator.comparingLong(File::lastModified))
+                    .sorted(Comparator.comparing(File::getName))
+                    .collect(Collectors.toList());
+            if (sqlFileLastVer == 0) {
+                sqlFiles.stream().filter(f -> f.getName().equals("install.sql")).findFirst().ifPresent(f -> {
+                    sqlFiles.remove(f);
+                    sqlFiles.add(0, f);
+                });
             }
+            Long sqlFileLastVerNew = sqlFileLastVer > 0 ? sqlFileLastVer : 1;
+            for (File sqlFile : sqlFiles) {
+                String name = sqlFile.getName().toLowerCase();
+                if (name.startsWith("update_")) {
+                    try {
+                        long l = Long.parseLong(name.split("_")[1].split("\\.")[0].trim());
+                        if (l > sqlFileLastVer) {
+                            sqlFileLastVerNew = l;
+                        } else {
+                            continue;
+                        }
+                    } catch (Exception ignore) {
+                        continue;
+                    }
+                }
+                externalConfigurationTool.loggerDebug("Process sql file " + sqlFile.getName());
+                try (Connection connection = dataSource.getConnection()) {
+                    try {
+                        connection.setAutoCommit(false);
+                        executeSqlScript(connection, sqlFile);
+                        connection.commit();
+                    } catch (Exception e) {
+                        try {
+                            connection.rollback();
+                        } catch (SQLException e1) {
+                            ModuleException exception = new ModuleException(sqlFile.getName() + ": " + e1.getMessage(), e1);
+                            exception.addSuppressed(e);
+                            throw exception;
+                        }
+                        throw new ModuleException(sqlFile.getName() + ": " + e.getMessage(), e);
+                    }
+                } catch (Throwable e) {
+                    // throw new ModuleException("error", e);
+                    externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+                }
+            }
+            if (!sqlFileLastVerNew.equals(sqlFileLastVer))
+                externalConfigurationTool.setVariable(VARIABLE_NAME_SQLFILELASTVER, sqlFileLastVerNew);
+        } else {
+            externalConfigurationTool.removeVariable(VARIABLE_NAME_SQLFILELASTVER);
         }
 
         connectionIdGenerator = new AtomicLong(0);

@@ -2364,8 +2364,9 @@ Calls can be nested.
     </types>
 
     <useStorage>true</useStorage>
-
     <threadSafe>true</threadSafe>
+    <useVariables>true</useVariables>
+    <useManagement>false</useManagement>
 
     <description>
         <entry>
@@ -2382,13 +2383,21 @@ Calls can be nested.
         <entry>
             <key>en</key>
             <value><![CDATA[Represents the implementation of the client to the database. while the database itself, in some cases, can also be created.
-If the install.sql file is in the working directory, at startup it tries to execute commands in it in one transaction. in this case, if errors occur, displays a message in the console but allows you to continue to work - does not stop working with an error.
+In some cases, the database itself can also be created, for example, Derby.
+When starting, the module processes SQL files in the working directory: install.sql and update_*.sql. * indicates a number—the file version.
+It stores the version in the sqlFileLastVer variable.
+If sqlFileLastVer is empty or 0, it processes all files sorted by name (install.sql will always be the first file).
+If sqlFileLastVer is greater than 0, it processes only update_*.sql files with a version greater than the specified one.
             ]]></value>
         </entry>
         <entry>
             <key>ru</key>
-            <value><![CDATA[Представляет собой реализацию клиента к бд. при этом сама бд, в некоторых случаях, так же может быть создана.
-Если в рабочей директории есть файл install.sql, при старте пытается исполнить команды в нем в одной транзакции. при этом если возникают ошибки, выводит сообщение в консоль но позволяет работать дальше - не прекращает работу с ошибкой.
+            <value><![CDATA[Представляет собой реализацию клиента к бд.
+При этом, сама бд, в некоторых случаях, так же может быть создана, например Derby.
+При старте модуль обрабатывает sql файлы в рабочей директории: install.sql и update_*.sql. * отмечено число - версия файла.
+Сохраняет версию в переменной sqlFileLastVer.
+Если sqlFileLastVer пусто или 0, то обрабатывает все файлы отсортированные по имени (install.sql всегда будет первым файлом).
+Если sqlFileLastVer больше 0, то обрабатывает только файлы update_*.sql, с версией больше указанной.
             ]]></value>
         </entry>
     </help>

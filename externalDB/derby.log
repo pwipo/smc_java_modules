@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Sun Jun 07 13:26:22 MSK 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-019e-a19e-8a6b-00003bc1dd80 
+Fri Jun 19 09:34:16 MSK 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-019e-de96-5df2-00003befe4b0 
 on database directory memory:C:\Users\pwipo\Documents\dev\java\smc\smcmodules_pub\externalDB\DB with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@3a03464 
 Loaded from file:/C:/Users/pwipo/.m2/repository/org/apache/derby/derby/10.14.2.0/derby-10.14.2.0.jar
 java.vendor=Oracle Corporation
@@ -12,5 +12,5 @@ os.version=10.0
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Sun Jun 07 13:26:38 MSK 2026:
-Shutting down instance a816c00e-019e-a19e-8a6b-00003bc1dd80 on database directory memory:C:\Users\pwipo\Documents\dev\java\smc\smcmodules_pub\externalDB\DB with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@3a03464 
+Fri Jun 19 09:34:56 MSK 2026:
+Shutting down instance a816c00e-019e-de96-5df2-00003befe4b0 on database directory memory:C:\Users\pwipo\Documents\dev\java\smc\smcmodules_pub\externalDB\DB with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@3a03464 

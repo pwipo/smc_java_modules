@@ -124,9 +124,27 @@ public class DB implements Module {
         }
         */
 
+        List<String> tableNames = new LinkedList<>();
+        try (Connection connection = dataSource.getConnection()) {
+            DatabaseMetaData metaData = connection.getMetaData();
+            String[] types = {"TABLE"};             // Filter to return only standard user tables
+            try (ResultSet rs = metaData.getTables(null, null, "%", types)) {
+                while (rs.next()) {
+                    tableNames.add(rs.getString("TABLE_NAME"));
+                }
+            }
+        } catch (Exception e) {
+            throw new ModuleException("error while get tables", e);
+        }
+        externalConfigurationTool.loggerDebug("count tables: " + tableNames.size());
+        externalConfigurationTool.loggerTrace("table names: " + tableNames);
+
         File[] files = new File(externalConfigurationTool.getWorkDirectory()).listFiles();
         if (files != null && files.length > 0) {
-            long sqlFileLastVer = externalConfigurationTool.getVariable(VARIABLE_NAME_SQLFILELASTVER).map(ModuleUtils::toNumber).map(Number::longValue).orElse(0L);
+            long sqlFileLastVer = externalConfigurationTool.getVariable(VARIABLE_NAME_SQLFILELASTVER)
+                    .map(ModuleUtils::toNumber).map(Number::longValue)
+                    .filter(n -> !tableNames.isEmpty()) // check if new db
+                    .orElse(0L);
             List<File> sqlFiles = Arrays.stream(files)
                     .filter(f -> f.isFile() && f.getName().endsWith(".sql") && (
                             (sqlFileLastVer == 0 && f.getName().equals("install.sql")) || f.getName().toLowerCase().startsWith("update_")))
@@ -142,7 +160,7 @@ public class DB implements Module {
             Long sqlFileLastVerNew = sqlFileLastVer > 0 ? sqlFileLastVer : 1;
             for (File sqlFile : sqlFiles) {
                 String name = sqlFile.getName().toLowerCase();
-                if (name.startsWith("update_")) {
+                if (name.startsWith("update_") && sqlFileLastVer>0) {
                     try {
                         long l = Long.parseLong(name.split("_")[1].split("\\.")[0].trim());
                         if (l > sqlFileLastVer) {

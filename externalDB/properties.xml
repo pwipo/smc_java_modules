@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.smcmodules.module.DB</className>
-    <ver>1.2.7</ver>
+    <ver>1.2.8</ver>
     <apiVer>1.4.3</apiVer>
     <date>07-06-2026</date>
 
@@ -2386,7 +2386,7 @@ Calls can be nested.
 In some cases, the database itself can also be created, for example, Derby.
 When starting, the module processes SQL files in the working directory: install.sql and update_*.sql. * indicates a number—the file version.
 It stores the version in the sqlFileLastVer variable.
-If sqlFileLastVer is empty or 0, it processes all files sorted by name (install.sql will always be the first file).
+If sqlFileLastVer is empty or 0, or there are no tables in the database, then it processes all files sorted by name (install.sql will always be the first file).
 If sqlFileLastVer is greater than 0, it processes only update_*.sql files with a version greater than the specified one.
             ]]></value>
         </entry>
@@ -2396,7 +2396,7 @@ If sqlFileLastVer is greater than 0, it processes only update_*.sql files with a
 При этом, сама бд, в некоторых случаях, так же может быть создана, например Derby.
 При старте модуль обрабатывает sql файлы в рабочей директории: install.sql и update_*.sql. * отмечено число - версия файла.
 Сохраняет версию в переменной sqlFileLastVer.
-Если sqlFileLastVer пусто или 0, то обрабатывает все файлы отсортированные по имени (install.sql всегда будет первым файлом).
+Если sqlFileLastVer пусто или 0 или нет таблиц в базе, то обрабатывает все файлы отсортированные по имени (install.sql всегда будет первым файлом).
 Если sqlFileLastVer больше 0, то обрабатывает только файлы update_*.sql, с версией больше указанной.
             ]]></value>
         </entry>

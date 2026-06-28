@@ -17,6 +17,7 @@ import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.apache.tomcat.util.http.SameSiteCookies;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.apache.tomcat.util.net.SSLHostConfig;
 import ru.smcsystem.api.dto.*;
 import ru.smcsystem.api.enumeration.CommandType;
 import ru.smcsystem.api.enumeration.ObjectType;
@@ -65,45 +66,45 @@ public class Server implements Module {
     private MimetypesFileTypeMap mimetypesFileTypeMap;
 
     @Override
-    public void start(ConfigurationTool externalConfigurationTool) throws ModuleException {
-        protocol = externalConfigurationTool.getSetting("protocol").map(ModuleUtils::toString).map(Protocol::valueOf)
+    public void start(ConfigurationTool configurationTool) throws ModuleException {
+        protocol = configurationTool.getSetting("protocol").map(ModuleUtils::toString).map(Protocol::valueOf)
                 .orElseThrow(() -> new ModuleException("protocol setting"));
-        Integer port = externalConfigurationTool.getSetting("port").map(ModuleUtils::toNumber).map(Number::intValue).orElseThrow(() -> new ModuleException("port setting"));
-        Integer requestTimeout = externalConfigurationTool.getSetting("requestTimeout").map(ModuleUtils::toNumber).map(Number::intValue)
+        Integer port = configurationTool.getSetting("port").map(ModuleUtils::toNumber).map(Number::intValue).orElseThrow(() -> new ModuleException("port setting"));
+        Integer requestTimeout = configurationTool.getSetting("requestTimeout").map(ModuleUtils::toNumber).map(Number::intValue)
                 .orElseThrow(() -> new ModuleException("requestTimeout setting"));
-        Integer countThreads = externalConfigurationTool.getSetting("countThreads").map(ModuleUtils::toNumber).map(Number::intValue)
+        Integer countThreads = configurationTool.getSetting("countThreads").map(ModuleUtils::toNumber).map(Number::intValue)
                 .orElseThrow(() -> new ModuleException("countThreads setting"));
-        Integer backlog = externalConfigurationTool.getSetting("backlog").map(ModuleUtils::toNumber).map(Number::intValue)
+        Integer backlog = configurationTool.getSetting("backlog").map(ModuleUtils::toNumber).map(Number::intValue)
                 .orElseThrow(() -> new ModuleException("backlog setting"));
-        String availablePaths = externalConfigurationTool.getSetting("availablePaths").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("availablePaths setting"));
-        String keyStoreFileName = externalConfigurationTool.getSetting("keyStoreFileName").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("keyStoreFileName setting"));
-        String keyStorePass = externalConfigurationTool.getSetting("keyStorePass").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("keyStorePass setting"));
-        String keyAlias = externalConfigurationTool.getSetting("keyAlias").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("keyAlias setting"));
-        String keyPass = externalConfigurationTool.getSetting("keyPass").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("keyPass setting"));
-        Integer sessionTimeout = externalConfigurationTool.getSetting("sessionTimeout").map(ModuleUtils::toNumber).map(Number::intValue)
+        String availablePaths = configurationTool.getSetting("availablePaths").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("availablePaths setting"));
+        String keyStoreFileName = configurationTool.getSetting("keyStoreFileName").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("keyStoreFileName setting"));
+        String keyStorePass = configurationTool.getSetting("keyStorePass").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("keyStorePass setting"));
+        String keyAlias = configurationTool.getSetting("keyAlias").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("keyAlias setting"));
+        String keyPass = configurationTool.getSetting("keyPass").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("keyPass setting"));
+        Integer sessionTimeout = configurationTool.getSetting("sessionTimeout").map(ModuleUtils::toNumber).map(Number::intValue)
                 .orElseThrow(() -> new ModuleException("sessionTimeout setting"));
-        Integer maxPostSize = externalConfigurationTool.getSetting("maxPostSize").map(ModuleUtils::toNumber).map(Number::intValue)
+        Integer maxPostSize = configurationTool.getSetting("maxPostSize").map(ModuleUtils::toNumber).map(Number::intValue)
                 .orElseThrow(() -> new ModuleException("maxPostSize setting"));
-        Boolean allowMultipartParsing = externalConfigurationTool.getSetting("allowMultipartParsing").map(ModuleUtils::toBoolean)
+        Boolean allowMultipartParsing = configurationTool.getSetting("allowMultipartParsing").map(ModuleUtils::toBoolean)
                 .orElseThrow(() -> new ModuleException("allowMultipartParsing setting"));
-        String strAddress = externalConfigurationTool.getSetting("bindAddress").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("bindAddress setting"));
-        Integer fileResponsePieceSize = externalConfigurationTool.getSetting("fileResponsePieceSize").map(ModuleUtils::toNumber).map(Number::intValue)
+        String strAddress = configurationTool.getSetting("bindAddress").map(ModuleUtils::toString).orElseThrow(() -> new ModuleException("bindAddress setting"));
+        Integer fileResponsePieceSize = configurationTool.getSetting("fileResponsePieceSize").map(ModuleUtils::toNumber).map(Number::intValue)
                 .orElseThrow(() -> new ModuleException("fileResponsePieceSize setting"));
-        ObjectArray headersArr = externalConfigurationTool.getSetting("headers").map(ModuleUtils::toObjectArray)
+        ObjectArray headersArr = configurationTool.getSetting("headers").map(ModuleUtils::toObjectArray)
                 .orElseThrow(() -> new ModuleException("headers setting"));
         List<String> availablePathsList = Arrays.stream(availablePaths.split("\n"))
                 .flatMap(s -> Arrays.stream(s.split("::")))
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.toList());
-        ObjectArray virtualServerSettings = externalConfigurationTool.getSetting("virtualServerSettings").map(ModuleUtils::toObjectArray)
+        ObjectArray virtualServerSettings = configurationTool.getSetting("virtualServerSettings").map(ModuleUtils::toObjectArray)
                 .orElseThrow(() -> new ModuleException("virtualServerSettings setting"));
-        requestType = externalConfigurationTool.getSetting("requestType").map(ModuleUtils::toString).map(RequestType::valueOf)
+        requestType = configurationTool.getSetting("requestType").map(ModuleUtils::toString).map(RequestType::valueOf)
                 .orElseThrow(() -> new ModuleException("requestType setting"));
-        Integer maxFileSizeFull = externalConfigurationTool.getSetting("maxFileSizeFull").map(ModuleUtils::toNumber).map(Number::intValue)
+        Integer maxFileSizeFull = configurationTool.getSetting("maxFileSizeFull").map(ModuleUtils::toNumber).map(Number::intValue)
                 .orElseThrow(() -> new ModuleException("maxFileSizeFull setting"));
-        ObjectArray corsAccessListArr = externalConfigurationTool.getSetting("corsAccessList").map(ModuleUtils::toObjectArray)
+        ObjectArray corsAccessListArr = configurationTool.getSetting("corsAccessList").map(ModuleUtils::toObjectArray)
                 .orElseThrow(() -> new ModuleException("corsAccessList setting"));
-        Boolean permitPreflight = externalConfigurationTool.getSetting("permitPreflight").map(ModuleUtils::toBoolean)
+        Boolean permitPreflight = configurationTool.getSetting("permitPreflight").map(ModuleUtils::toBoolean)
                 .orElseThrow(() -> new ModuleException("permitPreflight setting"));
         reqIdGenerator = new AtomicLong();
         reqIdGenerator.compareAndSet(Long.MAX_VALUE, 0);
@@ -154,8 +155,8 @@ public class Server implements Module {
                         paths.add(Map.entry(j, path.substring(urlHeader.length())));
                     }
                 }
-                externalConfigurationTool.loggerDebug(String.format("add virtualServer=%s, paths=%s", url, paths.stream().map(Map.Entry::getValue).collect(Collectors.joining(","))));
-                VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, urlHeader, url, keyStoreFileNameVar, keyStorePassVar,
+                configurationTool.loggerDebug(String.format("add virtualServer=%s, paths=%s", url, paths.stream().map(Map.Entry::getValue).collect(Collectors.joining(","))));
+                VirtualServerInfo virtualServerInfo = buildVirtualInfo(configurationTool, urlHeader, url, keyStoreFileNameVar, keyStorePassVar,
                         keyAliasVar, keyPassVar, strAddressVar, paths, requestTimeoutVar, countThreadsVar, backlogVar, sessionTimeoutVar, maxPostSizeVar,
                         allowMultipartParsingVar, headersArrVar, requestTypeVar, maxFileSizeFullVar, fileResponsePieceSizeVar, corsAccessListArrVar, permitPreflightVar);
                 virtualServerInfoMap.put(virtualServerInfo.getUrlHeader(), virtualServerInfo);
@@ -167,7 +168,7 @@ public class Server implements Module {
                 Stream.iterate(0, n -> n + 1)
                         .limit(availablePathsList.size())
                         .forEach(id -> paths.add(Map.entry(id, availablePathsList.get(id))));
-                VirtualServerInfo virtualServerInfo = buildVirtualInfo(externalConfigurationTool, hostname, new URL(protocol.name().toLowerCase(), hostname, port, ""),
+                VirtualServerInfo virtualServerInfo = buildVirtualInfo(configurationTool, hostname, new URL(protocol.name().toLowerCase(), hostname, port, ""),
                         keyStoreFileName, keyStorePass, keyAlias, keyPass, strAddress, paths, requestTimeout, countThreads, backlog, sessionTimeout,
                         maxPostSize, allowMultipartParsing, headersArr, requestType, maxFileSizeFull, fileResponsePieceSize, corsAccessListArr, permitPreflight);
                 virtualServerInfoMap = Map.of(virtualServerInfo.getUrlHeader(), virtualServerInfo);
@@ -683,7 +684,8 @@ public class Server implements Module {
         reqIdGenerator = null;
     }
 
-    private void addServlet(ConfigurationTool externalConfigurationTool, ExecutionContextTool externalExecutionContextTool, List<VirtualServerInfo> virtualServerInfos, Method createDefaultRealm) throws InvocationTargetException, IllegalAccessException {
+    private void addServlet(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool, List<VirtualServerInfo> virtualServerInfos,
+                            Method createDefaultRealm) throws InvocationTargetException, IllegalAccessException {
         if (virtualServerInfos == null || virtualServerInfos.isEmpty())
             return;
         Connector connector = null;
@@ -705,18 +707,42 @@ public class Server implements Module {
                 connector.setAttribute("clientAuth", "false");
                 connector.setAttribute("sslProtocol", "TLS");
                 connector.setAttribute("SSLEnabled", true);
+
+                if (virtualServerInfos.size() > 1) {
+                    for (VirtualServerInfo info : virtualServerInfos) {
+                        if (info.getKeyStore() == null)
+                            continue;
+                        SSLHostConfig sslHostConfig = new SSLHostConfig();
+                        sslHostConfig.setHostName(info.getUrl().getHost());   // домен сайта (SNI)
+                        sslHostConfig.setCertificateKeystoreFile(info.getKeyStore().getAbsolutePath());
+                        sslHostConfig.setCertificateKeystorePassword(info.getKeyStorePass());
+                        sslHostConfig.setCertificateKeyAlias(info.getKeyAlias());
+                        sslHostConfig.setCertificateKeyPassword(info.getKeyPass());
+                        // sslHostConfig.setCertificateKeystoreType("JKS");
+                        // sslHostConfig.setCertificateFile();
+                        sslHostConfig.setSslProtocol("TLS");
+                        connector.addSslHostConfig(sslHostConfig);
+                    }
+                }
                 break;
             }
             default:
                 throw new ModuleException("wrong protocol");
         }
         connector.setPort(virtualServerInfo.getUrl().getPort());
+        connector.setMaxPostSize(virtualServerInfo.getMaxPostSize());
+
         AbstractProtocol abstractProtocol = (AbstractProtocol) connector.getProtocolHandler();
         abstractProtocol.setMaxThreads(virtualServerInfo.getCountThreads());
         abstractProtocol.setAcceptCount(virtualServerInfo.getBacklog());
         if (virtualServerInfo.getAddress() != null)
             abstractProtocol.setAddress(virtualServerInfo.getAddress());
         abstractProtocol.setConnectionTimeout(virtualServerInfo.getRequestTimeout());
+
+        configurationTool.loggerInfo(
+                String.format("Start adding new virtual server: port=%d, maxPostSize=%d, protocol=%s, maxThreads=%d, acceptCount=%d, connectionTimeout=%d",
+                        connector.getPort(), connector.getMaxPostSize(), connector.getScheme(), abstractProtocol.getMaxThreads(), abstractProtocol.getAcceptCount(),
+                        abstractProtocol.getConnectionTimeout()));
 
         // tomcat.getService().addConnector(connector);
         // tomcat.setBaseDir("");
@@ -735,80 +761,77 @@ public class Server implements Module {
         service.setContainer(engine);
         tomcat.getHost().setAutoDeploy(false);
 
+        virtualServerInfos.forEach(v -> addServletContext(configurationTool, executionContextTool, v, engine, protocolLocal));
+    }
+
+    private void addServletContext(ConfigurationTool configurationTool, ExecutionContextTool executionContextTool,
+                                   VirtualServerInfo virtualServerInfo, Engine engine, Protocol protocolLocal) {
         engine.addChild(virtualServerInfo.getHost());
 
         Context rootCtx = tomcat.addContext(virtualServerInfo.getHost(), "", null);
         rootCtx.setSessionTimeout(virtualServerInfo.getSessionTimeout());
         rootCtx.setBackgroundProcessorDelay(10);
         String servletName = "servlet-" + virtualServerInfo.getUrlHeader();
+        configurationTool.loggerInfo("Start adding servlet " + servletName);
 
-        int countManagedExecutionContexts = externalExecutionContextTool.getFlowControlTool().countManagedExecutionContexts();
+        int countManagedExecutionContexts = executionContextTool.getFlowControlTool().countManagedExecutionContexts();
         HttpServlet servlet = new HttpServlet() {
-            protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+            protected void service(HttpServletRequest req, HttpServletResponse resp) {
                 ResponseObj responseObj = null;
                 long reqId = 0;
                 long startTime = System.currentTimeMillis();
-                VirtualServerInfo virtualServerInfoCur = virtualServerInfos.size() > 1 ?
-                        virtualServerInfos.stream()
-                                .filter(s -> s.getHost().getName().equals(req.getServerName()))
-                                .findAny()
-                                .orElse(null) :
-                        virtualServerInfo;
                 try {
                     // req.getSession().setMaxInactiveInterval(requestTimeout);
                     // System.out.println(req.getSession().getMaxInactiveInterval());
+                    // configurationTool.loggerTrace(String.format("new req: %s, servlet: %s, req uri: %s", req.getSession().getId(), servletName, req.getRequestURI()));
                     List<Integer> idsForExecute = null;
-                    if (virtualServerInfoCur != null) {
-                        if (virtualServerInfoCur.getPatterns() != null && !virtualServerInfoCur.getPatterns().isEmpty()) {
-                            String s = req.getRequestURI();
-                            idsForExecute = virtualServerInfoCur.getPatterns().stream()
-                                    .filter(e -> e.getValue().matcher(s).find())
-                                    .filter(e -> e.getKey() < countManagedExecutionContexts)
-                                    .map(e -> List.of(e.getKey()))
-                                    .findFirst()
-                                    .orElse(null);
-                        } else {
-                            // for compatibility
-                            idsForExecute = Stream.iterate(0, n -> n + 1)
-                                    .limit(countManagedExecutionContexts)
-                                    .collect(Collectors.toList());
-                        }
+                    if (virtualServerInfo.getPatterns() != null && !virtualServerInfo.getPatterns().isEmpty()) {
+                        String s = req.getRequestURI();
+                        idsForExecute = virtualServerInfo.getPatterns().stream()
+                                .filter(e -> e.getValue().matcher(s).find())
+                                .filter(e -> e.getKey() < countManagedExecutionContexts)
+                                .map(e -> List.of(e.getKey()))
+                                .findFirst()
+                                .orElse(null);
+                    } else {
+                        // for compatibility
+                        idsForExecute = Stream.iterate(0, n -> n + 1)
+                                .limit(countManagedExecutionContexts)
+                                .collect(Collectors.toList());
                     }
-                    if (virtualServerInfoCur == null)
-                        virtualServerInfoCur = virtualServerInfo;
 
                     if (idsForExecute == null) {
                         responseObj = new ResponseObj(null, 404, null, "Page not found".getBytes(), null, null, 1, req.getMethod());
-                        handleResponse(resp, responseObj, virtualServerInfoCur, true);
+                        handleResponse(resp, responseObj, virtualServerInfo, true);
                         return;
                     }
                     String requestOrigin = getRequestOrigin(req);
-                    if (virtualServerInfoCur.getCorsAccessList() != null && !virtualServerInfoCur.getCorsAccessList().isEmpty() && requestOrigin != null) {
-                        if (virtualServerInfoCur.getCorsAccessList().stream().anyMatch(p -> p.matcher(requestOrigin).find())) {
+                    if (virtualServerInfo.getCorsAccessList() != null && !virtualServerInfo.getCorsAccessList().isEmpty() && requestOrigin != null) {
+                        if (virtualServerInfo.getCorsAccessList().stream().anyMatch(p -> p.matcher(requestOrigin).find())) {
                             resp.addHeader("Access-Control-Allow-Origin", requestOrigin);
                             resp.addHeader("Access-Control-Allow-Credentials", "true");
                         } else {
-                            externalConfigurationTool.loggerTrace(String.format("check cors, origin: %s, cors list size: %d, req uri: %s",
-                                    requestOrigin, virtualServerInfoCur.getCorsAccessList().size(), req.getRequestURI()));
+                            configurationTool.loggerTrace(String.format("check cors, origin: %s, cors list size: %d, req uri: %s",
+                                    requestOrigin, virtualServerInfo.getCorsAccessList().size(), req.getRequestURI()));
                             responseObj = new ResponseObj(null, 403, null, "Forbidden".getBytes(), null, null, 1, req.getMethod());
-                            handleResponse(resp, responseObj, virtualServerInfoCur, true);
+                            handleResponse(resp, responseObj, virtualServerInfo, true);
                             return;
                         }
                     }
                     int idForGetResponse = idsForExecute.get(idsForExecute.size() - 1);
 
                     Map<Integer, RequestInputStream> requestInputStreamMap = new HashMap<>();
-                    Map.Entry<Long, List<Object>> requestEntry = createRequest(req, virtualServerInfoCur.getRequestType(), virtualServerInfoCur.getMaxFileSizeFull(), requestInputStreamMap);
+                    Map.Entry<Long, List<Object>> requestEntry = createRequest(req, virtualServerInfo.getRequestType(), virtualServerInfo.getMaxFileSizeFull(), requestInputStreamMap);
                     reqId = requestEntry.getKey();
                     // externalConfigurationTool.loggerTrace("New request " + reqId + " " + req.getRequestURI());
-                    Response responseMain = new Response(reqId, req, resp, virtualServerInfoCur, requestInputStreamMap);
+                    Response responseMain = new Response(reqId, req, resp, virtualServerInfo, requestInputStreamMap);
                     mapResponse.put(reqId, responseMain);
-                    long threadId = externalExecutionContextTool.getFlowControlTool().executeParallel(
+                    long threadId = executionContextTool.getFlowControlTool().executeParallel(
                             CommandType.EXECUTE,
                             idsForExecute,
                             requestEntry.getValue(),
                             null,
-                            virtualServerInfoCur.getRequestTimeout());
+                            virtualServerInfo.getRequestTimeout());
                     boolean mapFastResponseArrived = false;
                     threadReqMap.put(threadId, requestEntry.getKey());
                     try {
@@ -817,21 +840,21 @@ public class Server implements Module {
                                 Thread.sleep(50);
                             } catch (InterruptedException ignore) {
                             }
-                        } while (externalExecutionContextTool.getFlowControlTool().isThreadActive(threadId) &&
-                                !externalExecutionContextTool.isNeedStop() &&
-                                (virtualServerInfoCur.getRequestTimeout() <= 0 || virtualServerInfoCur.getRequestTimeout() > System.currentTimeMillis() - startTime) &&
+                        } while (executionContextTool.getFlowControlTool().isThreadActive(threadId) &&
+                                !executionContextTool.isNeedStop() &&
+                                (virtualServerInfo.getRequestTimeout() <= 0 || virtualServerInfo.getRequestTimeout() > System.currentTimeMillis() - startTime) &&
                                 (mapResponse.containsKey(reqId) && responseMain.getResponseObj() == null));
                         if (responseMain.getResponseObj() != null) {
                             mapFastResponseArrived = true;
                             responseObj = responseMain.getResponseObj();
                             if (responseObj != null) {
                                 responseObj.setMethod(req.getMethod());
-                                if (!externalExecutionContextTool.isNeedStop() &&
-                                        (virtualServerInfoCur.getRequestTimeout() <= 0 || virtualServerInfoCur.getRequestTimeout() > System.currentTimeMillis() - startTime))
+                                if (!executionContextTool.isNeedStop() &&
+                                        (virtualServerInfo.getRequestTimeout() <= 0 || virtualServerInfo.getRequestTimeout() > System.currentTimeMillis() - startTime))
                                     responseObj.waitWork();
                             }
                         } else {
-                            List<IMessage> response = externalExecutionContextTool.getFlowControlTool().getMessagesFromExecuted(threadId, idForGetResponse).stream()
+                            List<IMessage> response = executionContextTool.getFlowControlTool().getMessagesFromExecuted(threadId, idForGetResponse).stream()
                                     .flatMap(a -> a.getMessages().stream()/*.map(IValue::getValue)*/)
                                     .collect(Collectors.toList());
                             if (response.size() < 2) {
@@ -856,18 +879,18 @@ public class Server implements Module {
                         if (!mapFastResponseArrived) {
                             // if (externalExecutionContextTool.getFlowControlTool().isThreadActive(threadId))
                             //     externalConfigurationTool.loggerWarn(String.format("Thread %d steel work. Time left=%d, getRequestTimeout=%d, mapResponse contaik key=%s, getResponseObj is null=%s", threadId, System.currentTimeMillis() - startTime, virtualServerInfo.getRequestTimeout(), mapResponse.containsKey(reqId), responseMain.getResponseObj() == null));
-                            externalExecutionContextTool.getFlowControlTool().releaseThread(threadId);
+                            executionContextTool.getFlowControlTool().releaseThread(threadId);
                         } else {
-                            externalExecutionContextTool.getFlowControlTool().releaseThreadCache(threadId);
+                            executionContextTool.getFlowControlTool().releaseThreadCache(threadId);
                         }
                     }
                 } catch (ClientAbortException e) {
-                    externalConfigurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
+                    configurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
                 } catch (IOException e) {
-                    externalConfigurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
+                    configurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
                     // externalConfigurationTool.loggerTrace(ModuleUtils.getStackTraceAsString(e));
                 } catch (Exception e) {
-                    externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+                    configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                     // externalExecutionContextTool.addError(e.getLocalizedMessage());
                 } finally {
                     Response response = mapResponse.remove(reqId);
@@ -875,14 +898,14 @@ public class Server implements Module {
                         response.getRequestInputStreamMap().forEach((k, v) -> v.close());
                     if (response != null && (responseObj == null || !responseObj.isFastResponse())) {
                         try {
-                            handleResponse(resp, responseObj, virtualServerInfoCur, false);
+                            handleResponse(resp, responseObj, virtualServerInfo, false);
                         } catch (ClientAbortException e) {
-                            externalConfigurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
+                            configurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
                         } catch (IOException e) {
-                            externalConfigurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
+                            configurationTool.loggerWarn(ModuleUtils.getErrorMessageOrClassName(e));
                             // externalConfigurationTool.loggerTrace(ModuleUtils.getStackTraceAsString(e));
                         } catch (Exception e) {
-                            externalConfigurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
+                            configurationTool.loggerWarn(ModuleUtils.getStackTraceAsString(e));
                         }
                     }
                     // externalConfigurationTool.loggerTrace("End request " + reqId);
@@ -900,7 +923,6 @@ public class Server implements Module {
 
         Tomcat.addServlet(rootCtx, servletName, servlet);
 
-        connector.setMaxPostSize(virtualServerInfo.getMaxPostSize());
         rootCtx.setAllowCasualMultipartParsing(virtualServerInfo.getAllowMultipartParsing());
 
         rootCtx.addServletMappingDecoded("/*", servletName);

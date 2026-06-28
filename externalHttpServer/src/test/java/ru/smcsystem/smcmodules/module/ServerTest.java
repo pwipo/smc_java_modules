@@ -496,7 +496,7 @@ public class ServerTest {
                 "backlog", new Value(0),
                 // "mode", new Value(ValueType.STRING, "PASSIVE"),
                 "protocol", new Value("VIRTUAL"),
-                "availablePaths", new Value(".*::https://localhost:8081/test::https://service.smcsystem.ru:8082/store"),
+                "availablePaths", new Value("https://localhost:8081/test::https://service.smcsystem.ru:8081/store::.*"),
                 "keyStoreFileName", new Value(""),
                 "keyStorePass", new Value(""),
                 "keyPass", new Value(""),
@@ -537,7 +537,7 @@ public class ServerTest {
                 new ObjectElement(
                         new ObjectField("protocol", "HTTPS")
                         , new ObjectField("hostname", "service.smcsystem.ru")
-                        , new ObjectField("port", 8082)
+                        , new ObjectField("port", 8081)
                         , new ObjectField("keyStoreFileName", "lig2.keystore")
                         , new ObjectField("keyStorePass", "simulator")
                         , new ObjectField("keyPass", "simulator")
@@ -549,6 +549,7 @@ public class ServerTest {
         settings.put("headers", new Value(new ObjectArray(List.of("Access-Control-Allow-Origin=*", "Access-Control-Allow-Methods=POST, GET, PUT, DELETE, OPTIONS", "Access-Control-Allow-Headers=Content-Type"), ObjectType.STRING)));
         settings.put("maxFileSizeFull", new Value(-1));
         settings.put("corsAccessList", new Value(ValueType.OBJECT_ARRAY, new ObjectArray()));
+        settings.put("permitPreflight", new Value(false));
 
         Process process = new Process(
                 new ConfigurationToolImpl(
@@ -556,7 +557,7 @@ public class ServerTest {
                         null,
                         settings,
                         null,
-                        WORK_DIR
+                        "c:\\tmp\\webserver10"
                 ),
                 new Server()
         );
@@ -574,7 +575,7 @@ public class ServerTest {
                             return new Action(
                                     List.of(
                                             new Message(MessageType.DATA, new Date(), new Value(200))
-                                            , new Message(MessageType.DATA, new Date(), new Value("hi".getBytes()))
+                                            , new Message(MessageType.DATA, new Date(), new Value("test".getBytes()))
                                     ),
                                     ActionType.EXECUTE);
                         },
@@ -584,7 +585,7 @@ public class ServerTest {
                             return new Action(
                                     List.of(
                                             new Message(MessageType.DATA, new Date(), new Value(200))
-                                            , new Message(MessageType.DATA, new Date(), new Value("test".getBytes()))
+                                            , new Message(MessageType.DATA, new Date(), new Value("store".getBytes()))
                                     ),
                                     ActionType.EXECUTE);
                         },
@@ -594,11 +595,11 @@ public class ServerTest {
                             return new Action(
                                     List.of(
                                             new Message(MessageType.DATA, new Date(), new Value(200))
-                                            , new Message(MessageType.DATA, new Date(), new Value("store".getBytes()))
+                                            , new Message(MessageType.DATA, new Date(), new Value("hi".getBytes()))
                                     ),
                                     ActionType.EXECUTE);
                         }
-                )
+                ), "ecStart", "start"
         );
 
         Thread thread = new Thread(() -> {
@@ -620,7 +621,7 @@ public class ServerTest {
 
         System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "http://localhost:8080/hello"));
         System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "https://localhost:8081/test"));
-        // System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "https://service.smcsystem.ru:8082/store"));
+        // System.out.println("Response: " + sendingGetRequest(httpClientBuilder, "https://service.smcsystem.ru:8081/store"));
 
         ExecutionContextToolImpl executionContextTool2 = new ExecutionContextToolImpl(null, null, null);
         process.execute(executionContextTool2);

@@ -102,8 +102,9 @@ public class LinearDBModule implements Module {
             } catch (Exception e) {
                 throw new ModuleException("error while rebuildIndex", e);
             }
-            configurationTool.setVariable("indexes", indexesStr);
         }
+        if (indexesStr2 == null || !Objects.equals(indexesStr, indexesStr2))
+            configurationTool.setVariable("indexes", indexesStr);
     }
 
     @Override

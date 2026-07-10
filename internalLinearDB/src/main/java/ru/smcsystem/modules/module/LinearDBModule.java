@@ -334,6 +334,7 @@ public class LinearDBModule implements Module {
                     }
                     return null;
                 })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 

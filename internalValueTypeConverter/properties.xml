@@ -26,7 +26,7 @@ The program is supplied as is. For problems arising during the operation or inst
         </entry>
     </copyrightAndLicense>
     <className>ru.smcsystem.modules.internalValueTypeConverter.ValueTypeConverter</className>
-    <ver>1.2.7</ver>
+    <ver>1.2.8</ver>
     <apiVer>1.4.0</apiVer>
     <date>07-12-2025</date>
 

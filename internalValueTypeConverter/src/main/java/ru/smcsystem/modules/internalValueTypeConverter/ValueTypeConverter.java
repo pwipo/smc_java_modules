@@ -4,19 +4,17 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import ru.smcsystem.api.dto.*;
 import ru.smcsystem.api.enumeration.ObjectType;
-import ru.smcsystem.api.enumeration.ValueType;
 import ru.smcsystem.api.exceptions.ModuleException;
 import ru.smcsystem.api.module.Module;
 import ru.smcsystem.api.tools.ConfigurationTool;
 import ru.smcsystem.api.tools.execution.ExecutionContextTool;
 import ru.smcsystem.smc.utils.ModuleUtils;
+import ru.smcsystem.smc.utils.ObjectArrayJsonConverter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -378,17 +376,18 @@ public class ValueTypeConverter implements Module {
         actions.stream()
                 .map(a -> {
                     LinkedList<IMessage> messages = new LinkedList<>(a.getMessages());
-
                     // Integer columnCount = ((Number) messages.poll().getValue()).intValue();
                     // Integer objectsCount = ((a.getMessages().size() - 1) / 2) / columnCount;
-                    return toJson(ModuleUtils.deserializeToObject(messages), forceArray);
-
+                    ObjectArray objectArray = ModuleUtils.deserializeToObject(messages);
+                    // return toJson(, forceArray).toString();
+                    return ObjectArrayJsonConverter.to(objectArray, forceArray, true, false, 3);
                     // toJson(json, messages, forceArray);
                     // return forceArray ? json : (json.length() == 1 ? json.get(0) : json);
                 })
-                .forEach(jsonObj -> executionContextTool.addMessage(jsonObj.toString()));
+                .forEach(executionContextTool::addMessage);
     }
 
+    /*
     private Object toJson(ObjectArray mainList, boolean forceArray) {
         JSONArray jsonArray = new JSONArray();
         if (mainList == null)
@@ -423,8 +422,7 @@ public class ValueTypeConverter implements Module {
         }
         return forceArray ? jsonArray : (jsonArray.length() == 1 ? jsonArray.get(0) : jsonArray);
     }
-
-
+    */
 
     /*
     private void toJson(JSONArray json, LinkedList<IMessage> messages, boolean forceArray) {
@@ -485,6 +483,7 @@ public class ValueTypeConverter implements Module {
     }
     */
 
+    /*
     private JSONObject toJson(ObjectElement objectElement, boolean forceArray) {
         JSONObject jsonObject = new JSONObject();
         if (objectElement == null)
@@ -522,7 +521,7 @@ public class ValueTypeConverter implements Module {
         });
         return jsonObject;
     }
-
+*/
     // формат: цифра - количество полей в объекте, далее пары - название поля, значение
     private void fromJSONString(ExecutionContextTool executionContextTool, ConfigurationTool configurationTool, List<IAction> actions, boolean withNewFuncs) {
         actions.forEach(a -> a.getMessages().stream()
@@ -531,6 +530,7 @@ public class ValueTypeConverter implements Module {
                 .forEach(s -> {
                     try {
                         String json = s.trim();
+                        /*
                         if (json.startsWith("[")) {
                             JSONArray jsonArray = new JSONArray(json);
                             executionContextTool.addMessage(fromJSONString(jsonArray, withNewFuncs));
@@ -539,12 +539,46 @@ public class ValueTypeConverter implements Module {
                             ObjectElement objectElement = fromJSONString(jsonObject, withNewFuncs);
                             executionContextTool.addMessage(new ObjectArray(List.of(objectElement), ObjectType.OBJECT_ELEMENT));
                         }
+                        */
+                        ObjectArray objectArray = ObjectArrayJsonConverter.from(json, false);
+                        if (!withNewFuncs)
+                            forceDowngradeValues(objectArray);
+                        executionContextTool.addMessage(objectArray);
                     } catch (Exception e) {
                         configurationTool.loggerWarn(StringUtils.defaultString(e.getMessage(), e.getClass().getName()));
                     }
                 }));
     }
 
+    private void forceDowngradeValues(ObjectArray objectArray) {
+        if (objectArray == null || objectArray.size() == 0)
+            return;
+        if (objectArray.getType() == ObjectType.OBJECT_ELEMENT) {
+            for (int i = 0; i < objectArray.size(); i++) {
+                forceDowngradeValues((ObjectElement) objectArray.get(i));
+            }
+        } else if (objectArray.getType() == ObjectType.OBJECT_ARRAY) {
+            for (int i = 0; i < objectArray.size(); i++) {
+                forceDowngradeValues((ObjectArray) objectArray.get(i));
+            }
+        }
+    }
+
+    private void forceDowngradeValues(ObjectElement objectElement) {
+        if (objectElement == null || objectElement.getFields().isEmpty())
+            return;
+        objectElement.getFields().forEach(f -> {
+            if (f.getType() == ObjectType.OBJECT_ELEMENT) {
+                forceDowngradeValues((ObjectElement) f.getValue());
+            } else if (f.getType() == ObjectType.OBJECT_ARRAY) {
+                forceDowngradeValues((ObjectArray) f.getValue());
+            } else if (f.getType() == ObjectType.BOOLEAN) {
+                f.setValue(ObjectType.STRING, f.getValue().toString());
+            }
+        });
+    }
+
+/*
     private ObjectArray fromJSONString(JSONArray jsonArray, boolean withNewFuncs) {
         ObjectArray objectArray = new ObjectArray();
         if (jsonArray.isEmpty())
@@ -622,6 +656,7 @@ public class ValueTypeConverter implements Module {
                 });
         return objectElement;
     }
+    */
 
     /**
      * to directions convertation: from values to string and from string to values

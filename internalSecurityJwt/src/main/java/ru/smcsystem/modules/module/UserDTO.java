@@ -28,7 +28,7 @@ public class UserDTO {
         this.password = password;
         this.disabled = disabled;
         this.blocking = blocking;
-        this.authType = authType;
+        this.authType = authType != null ? authType : UserAuthType.ALL;
         this.objectElement = null;
     }
 
